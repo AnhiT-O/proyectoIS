@@ -66,6 +66,16 @@ pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
 pip install pytest #para pruebas unitarias
+pip install pytest-django #integración de pruebas con django
 pip install sphinx #para documentación automática de código
-#a medida que el proyecto avance se tendran que instalar más dependencias
+#a medida que el proyecto avance se tendrán que instalar más dependencias
+```
+
+## Crear variables de entorno
+- Crea un archivo `.env` en el directorio `proyectoIS/proyecto`
+- Dentro del archivo debe estar:
+```bash
+DEBUG=True #True si se ejecuta en entorno de desarrollo, False si es en entorno de producción
+DB_PASSWORD=password #la contraseña de tu usuario postgres
+#a medida que el proyecto avance se tendrán que añadir más variables de entorno
 ```
