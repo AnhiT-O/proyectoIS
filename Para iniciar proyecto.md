@@ -32,15 +32,25 @@ git config --global user.name "tu nombre de usuario entre comillas"
 ```
 
 ## Configurar PostgreSQL y pgAdmin 4
-- Primero se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL:
+- Al instalar postgreSQL se crea un cluster (instancia) en el puerto 5432 que se puede usar para entorno de producción, se debe crear otro cluster en el puerto 5433 para entorno de desarrollo:
+```bash
+sudo pg_createcluster 17 desarrollo --datadir=/var/lib/postgresql/17/dev --port=5433
+sudo pg_ctlcluster 17 desarrollo start
+sudo systemctl status postgresql@17-main #ver si el cluster de producción corre
+sudo systemctl status postgresql@17-desarrollo #ver si el cluster de desarrollo corre
+```
+- Se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL en ambos clusteres:
 ```bash
 sudo -i -u postgres
-psql
+psql -U postgres -p 5432
+ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
+\q
+psql -U postgres -p 5433
 ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
 \q
 exit
 ```
-- Configurar sistema para que pueda ejecutar comandos de postgreSQL:
+- Configurar sistema para que pgAdmin pueda ejecutar comandos de postgreSQL:
 ```bash
 echo 'export PATH=$PATH:/usr/lib/postgresql/17/bin' >> ~/.bashrc
 source ~/.bashrc
@@ -48,8 +58,8 @@ source ~/.bashrc
 - Abrir pgAdmin y en Archivo seleccionar Preferencias
 - En Miscelaneous y User preferences seleccionar language Spanish
 - En Rutas y Rutas a ejecutables colocar en Binary Path de PostgreSQL 17: `/run/user/1000/doc/6905aebe/bin` y marcar Set as default
-- Crear dos servidores, uno de desarrollo y otro de producción, en Conexión se debe poner como nombre `localhost` y en contraseña la que creaste para el usuario postgres
-- Importar la base de datos del proyecto ubicado en proyectoIS/Base de Datos
+- Crear dos servidores, uno de desarrollo y otro de producción, en Conexión se debe poner como nombre `localhost`, en Puerto `5432` para producción y `5433` para desarrollo, y en contraseña la que creaste para el usuario postgres
+- Importar la base de datos del proyecto ubicado en proyectoIS/Base de Datos en ambos servidores
 
 ## Crear entorno virtual e instalar dependencias
 - Dentro del directorio del proyecto (proyectoIS/proyecto) crear el entorno virtual: 
