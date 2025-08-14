@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'proyecto_db',
+        'NAME': 'bd_casacambios',
         'USER': 'postgres',
         'PASSWORD': 'password',  # cambiar al hacer la bd
         'HOST': 'localhost',
