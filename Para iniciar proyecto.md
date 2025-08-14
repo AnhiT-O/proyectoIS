@@ -62,7 +62,10 @@ source ent/bin/activate
 ```
 - Instalar las dependencias que usará el proyecto:
 ```bash
-pip install django
-pip install psycopg2-binary
+pip install django #framework del proyecto
+pip install psycopg2-binary #conexión con PostgreSQL
+pip install python-dotenv #variables de entorno
+pip install pytest #para pruebas unitarias
+pip install sphinx #para documentación automática de código
 #a medida que el proyecto avance se tendran que instalar más dependencias
 ```
