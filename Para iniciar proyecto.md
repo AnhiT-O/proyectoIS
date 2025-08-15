@@ -68,7 +68,7 @@ python3 -m venv venv
 ```
 - Activar el entorno virtual, **esto se deberá hacer cada vez que se trabajará en el proyecto**:
 ```bash
-source ent/bin/activate
+source venv/bin/activate
 ```
 - Instalar las dependencias que usará el proyecto:
 ```bash
