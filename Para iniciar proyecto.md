@@ -1,6 +1,5 @@
 ## Software necesario para instalar y usar en el proyecto
 - [Visual Studio Code](https://code.visualstudio.com/)
-- [pgAdmin](https://www.pgadmin.org/)
 - [Git](https://git-scm.com/downloads/linux)
 - PostgreSQL:
 ```bash
@@ -19,6 +18,7 @@ sudo apt upgrade
 - Instalar las extensiones necesarias para el proyecto:
   - Spanish Language Pack for Visual Studio Code
   - Python
+  - PostgreSQL
   - Otras que creas necesarias
 
 ## Configurar y enlazar Git con VSC
@@ -30,13 +30,12 @@ git config --global user.email "tu email entre comillas"
 git config --global user.name "tu nombre de usuario entre comillas"
 ```
 
-## Configurar PostgreSQL y pgAdmin 4
+## Configurar y enlazar PostgreSQL con VSC
 - Al instalar postgreSQL se crea un cluster (instancia) en el puerto 5432 que se puede usar para entorno de producción, se debe crear otro cluster en el puerto 5433 para entorno de desarrollo:
 ```bash
 sudo pg_createcluster 17 desarrollo --datadir=/var/lib/postgresql/17/dev --port=5433
 sudo pg_ctlcluster 17 desarrollo start
-sudo systemctl status postgresql@17-main #ver si el cluster de producción corre
-sudo systemctl status postgresql@17-desarrollo #ver si el cluster de desarrollo corre
+pg_lsclusters #ver si ambos clústeres corren
 ```
 - Se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL en ambos clusteres:
 ```bash
@@ -49,16 +48,12 @@ ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
 \q
 exit
 ```
-- Configurar sistema para que pgAdmin pueda ejecutar comandos de postgreSQL:
+- Crear una base de datos para cada cluster:
 ```bash
-echo 'export PATH=$PATH:/usr/lib/postgresql/17/bin' >> ~/.bashrc
-source ~/.bashrc
+sudo -u postgres createdb -p 5432 bd_casacambios
+sudo -u postgres createdb -p 5433 bd_casacambios
 ```
-- Abrir pgAdmin y en Archivo seleccionar Preferencias
-- En Miscelaneous y User preferences seleccionar language Spanish
-- En Rutas y Rutas a ejecutables colocar en Binary Path de PostgreSQL 17: `/run/user/1000/doc/6905aebe/bin` y marcar Set as default
-- Crear dos servidores, uno de desarrollo y otro de producción, en Conexión se debe poner como nombre `localhost`, en Puerto `5432` para producción y `5433` para desarrollo, y en contraseña la que creaste para el usuario postgres
-- Importar la base de datos del proyecto ubicado en proyectoIS/Base de Datos en ambos servidores
+- En Visual Studio Code, en la sección Database se debe conectar a los dos clústeres, uno con nombre 'desarrollo' y otro 'producción'. En ambos servidores el host es `localhost`, username `postgres` con sus respectivas contraseñas, database `bd_casacambios` y los puertos que corresponden a cada cluster. Finalmente darle Connect
 
 ## Crear entorno virtual e instalar dependencias
 - Dentro del directorio del proyecto (proyectoIS/proyecto) crear el entorno virtual: 
@@ -69,7 +64,6 @@ python3 -m venv venv
 ```bash
 source venv/bin/activate
 ```
-Otra opción es seleccionar intérprete de python predeterminado al usar la terminal desde VSC, así no hará falta activar el entorno virtual todo el tiempo
 - Instalar las dependencias que usará el proyecto:
 ```bash
 pip install django #framework del proyecto
@@ -97,4 +91,4 @@ python manage.py makemigrations #si hiciste algún cambio en models, este comand
 python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
-- Se podrá ver los resultados en: http://localhost:8000/
+- Se podrá ver los resultados del proyecto en: http://localhost:8000/
