@@ -19,7 +19,6 @@ sudo apt upgrade
 - Instalar las extensiones necesarias para el proyecto:
   - Spanish Language Pack for Visual Studio Code
   - Python
-  - PostgreSQL
   - Otras que creas necesarias
 
 ## Configurar y enlazar Git con VSC
@@ -70,6 +69,7 @@ python3 -m venv venv
 ```bash
 source venv/bin/activate
 ```
+Otra opción es seleccionar intérprete de python predeterminado al usar la terminal desde VSC, así no hará falta activar el entorno virtual todo el tiempo
 - Instalar las dependencias que usará el proyecto:
 ```bash
 pip install django #framework del proyecto
@@ -89,3 +89,12 @@ DEBUG=True #True si se ejecuta en entorno de desarrollo, False si es en entorno 
 DB_PASSWORD=password #la contraseña de tu usuario postgres
 #a medida que el proyecto avance se tendrán que añadir más variables de entorno
 ```
+
+## Ejecutar proyecto
+- Luego de escribir el código:
+```bash
+python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
+python manage.py migrate #exportará los cambios preparados a la base de datos
+python manage.py runserver #correrá el proyecto
+```
+- Se podrá ver los resultados en: http://localhost:8000/
