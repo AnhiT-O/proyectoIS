@@ -84,6 +84,13 @@ DB_PASSWORD=password #la contraseña de tu usuario postgres
 #a medida que el proyecto avance se tendrán que añadir más variables de entorno
 ```
 
+## Git Flow
+- En VSC crear rama desde 'desarrollo' con el nombre `feature/SCRUM#` reemplazando '#' por el número de historia de usuario a codificar, y publicarlo
+- Desde la nueva rama codificar, commitear y hacer todo lo necesario para la funcionalidad que se esté creando
+- Al culminar la funcionalidad, subir (sincronizar) la rama a GitHub
+- Desde GitHub en la pestaña Pull Request crear el pull request (solicitud de unión), describiendo todo lo que se hizo lo más detallado posible
+- Al estar seguros que todo funciona, realizaremos el merge (mezcla de ramas) desde la rama feature a la rama desarrollo
+
 ## Ejecutar proyecto
 - Luego de escribir el código:
 ```bash
