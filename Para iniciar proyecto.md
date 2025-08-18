@@ -39,23 +39,33 @@ ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
 \q
 exit
 ```
-- Crear una base de datos para cada cluster:
+- Crear una base de datos para cada entorno:
 ```bash
-sudo -u postgres createdb -p 5432 bd_desarrollo
-sudo -u postgres createdb -p 5432 bd_produccion
+sudo -u postgres createdb bd_desarrollo
+sudo -u postgres createdb bd_produccion
 ```
-- En Visual Studio Code, en la sección Database se debe conectar a las dos bases de datos creados, el host es `localhost`, username `postgres` con su contraseña. Finalmente darle Connect
+- En Visual Studio Code, en la sección Database se debe conectar al servidor de base de datos, el host es `localhost`, username `postgres` con su contraseña. Finalmente darle Connect
 
-## Crear entorno virtual e instalar dependencias
-- Dentro del directorio del proyecto (proyectoIS/proyecto) crear el entorno virtual: 
+## Crear entorno virtual e instalar dependencias en cada entorno
+- Tanto en la rama main como en la rama desarrollo crear el entorno virtual dentro del directorio del proyecto (proyectoIS/proyecto): 
 ```bash
 python3 -m venv venv
 ```
-- Activar el entorno virtual, **esto se deberá hacer cada vez que se trabajará en el proyecto**:
+- Activar el entorno virtual, **esto se deberá hacer cada vez que se ejecutará comandos del proyecto**:
 ```bash
 source venv/bin/activate
 ```
-- Instalar las dependencias que usará el proyecto:
+- Con el entorno virtual activado en la rama main, instalar estas dependencias:
+```bash
+pip install django #framework del proyecto
+pip install psycopg2-binary #conexión con PostgreSQL
+pip install python-dotenv #variables de entorno
+pip install gunicorn
+pip install nginx
+#a medida que el proyecto avance se tendrán que instalar más dependencias
+```
+
+- Con el entorno virtual activado en la rama desarrollo, instalar estas dependencias:
 ```bash
 pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
@@ -70,7 +80,6 @@ pip install sphinx #para documentación automática de código
 - Crea un archivo `.env` en el directorio `proyectoIS/proyecto`
 - Dentro del archivo debe estar:
 ```bash
-DEBUG=True #True si se ejecuta en entorno de desarrollo, False si es en entorno de producción
 DB_PASSWORD=password #la contraseña de tu usuario postgres
 #a medida que el proyecto avance se tendrán que añadir más variables de entorno
 ```
@@ -82,7 +91,7 @@ DB_PASSWORD=password #la contraseña de tu usuario postgres
 - Desde GitHub en la pestaña Pull Request crear el pull request (solicitud de unión), describiendo todo lo que se hizo lo más detallado posible
 - Al estar seguros que todo funciona, realizaremos el merge (mezcla de ramas) desde la rama feature a la rama desarrollo
 
-## Ejecutar proyecto
+## Ejecutar proyecto en desarrollo
 - Luego de escribir el código:
 ```bash
 python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
