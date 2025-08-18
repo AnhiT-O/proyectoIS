@@ -31,29 +31,20 @@ git config --global user.name "tu nombre de usuario entre comillas"
 ```
 
 ## Configurar y enlazar PostgreSQL con VSC
-- Al instalar postgreSQL se crea un cluster (instancia) en el puerto 5432 que se puede usar para entorno de producción, se debe crear otro cluster en el puerto 5433 para entorno de desarrollo:
-```bash
-sudo pg_createcluster 17 desarrollo --datadir=/var/lib/postgresql/17/dev --port=5433
-sudo pg_ctlcluster 17 desarrollo start
-pg_lsclusters #ver si ambos clústeres corren
-```
-- Se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL en ambos clusteres:
+- Se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL:
 ```bash
 sudo -i -u postgres
-psql -U postgres -p 5432
-ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
-\q
-psql -U postgres -p 5433
+psql -U postgres
 ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
 \q
 exit
 ```
 - Crear una base de datos para cada cluster:
 ```bash
-sudo -u postgres createdb -p 5432 bd_casacambios
-sudo -u postgres createdb -p 5433 bd_casacambios
+sudo -u postgres createdb -p 5432 bd_desarrollo
+sudo -u postgres createdb -p 5432 bd_produccion
 ```
-- En Visual Studio Code, en la sección Database se debe conectar a los dos clústeres, uno con nombre 'desarrollo' y otro 'producción'. En ambos servidores el host es `localhost`, username `postgres` con sus respectivas contraseñas, database `bd_casacambios` y los puertos que corresponden a cada cluster. Finalmente darle Connect
+- En Visual Studio Code, en la sección Database se debe conectar a las dos bases de datos creados, el host es `localhost`, username `postgres` con su contraseña. Finalmente darle Connect
 
 ## Crear entorno virtual e instalar dependencias
 - Dentro del directorio del proyecto (proyectoIS/proyecto) crear el entorno virtual: 
