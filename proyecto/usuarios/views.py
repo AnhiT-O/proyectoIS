@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -37,7 +37,7 @@ def registro_usuario(request):
             # Enviar email de confirmación
             enviar_email_confirmacion(request, user)
             
-            messages.success(request, 'Registro exitoso. Revisa tu correo electrónico para activar tu cuenta.')
+            #messages.success(request, 'Registro exitoso. Revisa tu correo electrónico para activar tu cuenta.')
             return redirect('usuarios:registro_exitoso')
     else:
         form = RegistroUsuarioForm()
@@ -53,12 +53,43 @@ def enviar_email_confirmacion(request, user):
     )
     
     subject = 'Confirma tu cuenta'
-    message = render_to_string('usuarios/email_confirmacion.html', {
+    
+    # Crear contenido HTML
+    html_content = render_to_string('usuarios/email_confirmacion.html', {
         'user': user,
         'activacion_url': activacion_url,
     })
     
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    # Crear versión de texto plano (fallback)
+    text_content = f"""
+¡Hola {user.first_name}!
+
+Gracias por registrarte en nuestro sistema.
+
+Para activar tu cuenta, por favor visita el siguiente enlace:
+{activacion_url}
+
+Si no solicitaste esta cuenta, puedes ignorar este correo.
+
+Saludos,
+El equipo de desarrollo
+    """.strip()
+    
+    # Crear email con HTML y texto plano
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,  # Contenido de texto plano
+        from_email=from_email,
+        to=[user.email]
+    )
+    
+    # Adjuntar la versión HTML
+    msg.attach_alternative(html_content, "text/html")
+    
+    # Enviar el email
+    msg.send()
 
 def activar_cuenta(request, uidb64, token):
     try:

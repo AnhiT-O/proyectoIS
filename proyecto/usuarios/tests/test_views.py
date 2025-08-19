@@ -52,11 +52,6 @@ class TestRegistroUsuarioView:
         
         # Verificar que se envió email de confirmación
         mock_enviar_email.assert_called_once()
-        
-        # Verificar mensaje de éxito
-        messages = list(get_messages(response.wsgi_request))
-        assert len(messages) == 1
-        assert 'Registro exitoso' in str(messages[0])
 
     @patch('usuarios.views.enviar_email_confirmacion')
     def test_registro_usuario_existente_inactivo_reenvia_email(self, mock_enviar_email):
@@ -120,23 +115,33 @@ class TestEnviarEmailConfirmacion:
             is_active=False
         )
 
-    @patch('usuarios.views.send_mail')
-    def test_enviar_email_confirmacion_exitoso(self, mock_send_mail):
+    @patch('usuarios.views.EmailMultiAlternatives')
+    def test_enviar_email_confirmacion_exitoso(self, mock_email_class):
         """Prueba que se envíe email de confirmación correctamente"""
         from usuarios.views import enviar_email_confirmacion
+        
+        # Crear un mock del objeto EmailMultiAlternatives
+        mock_email_instance = MagicMock()
+        mock_email_class.return_value = mock_email_instance
         
         request = MagicMock()
         request.build_absolute_uri.return_value = 'http://example.com/activate/123/token'
         
         enviar_email_confirmacion(request, self.user)
         
-        # Verificar que se llamó send_mail
-        mock_send_mail.assert_called_once()
-        args, kwargs = mock_send_mail.call_args
+        # Verificar que se creó el objeto EmailMultiAlternatives
+        mock_email_class.assert_called_once()
+        args, kwargs = mock_email_class.call_args
         
         # Verificar argumentos del email
-        assert args[0] == 'Confirma tu cuenta'  # subject
-        assert self.user.email in args[3]  # recipient_list
+        assert kwargs['subject'] == 'Confirma tu cuenta'
+        assert self.user.email in kwargs['to']
+        
+        # Verificar que se adjuntó la versión HTML
+        mock_email_instance.attach_alternative.assert_called_once()
+        
+        # Verificar que se envió el email
+        mock_email_instance.send.assert_called_once()
 
 @pytest.mark.django_db
 class TestActivarCuentaView:
@@ -283,9 +288,13 @@ class TestIntegracionCompleta:
             'password2': 'contraseña123!'
         }
 
-    @patch('usuarios.views.send_mail')
-    def test_flujo_completo_registro_y_activacion(self, mock_send_mail):
+    @patch('usuarios.views.EmailMultiAlternatives')
+    def test_flujo_completo_registro_y_activacion(self, mock_email_class):
         """Prueba el flujo completo desde registro hasta activación"""
+        # Crear un mock del objeto EmailMultiAlternatives
+        mock_email_instance = MagicMock()
+        mock_email_class.return_value = mock_email_instance
+        
         # Paso 1: Registro
         registro_url = reverse('usuarios:registro')
         response = self.client.post(registro_url, self.valid_data)
