@@ -47,15 +47,17 @@ sudo -u postgres createdb bd_produccion
 - En Visual Studio Code, en la sección Database se debe conectar al servidor de base de datos, el host es `localhost`, username `postgres` con su contraseña. Finalmente darle Connect
 
 ## Crear entorno virtual e instalar dependencias en cada entorno
-- Tanto en la rama main como en la rama desarrollo crear el entorno virtual dentro del directorio del proyecto (proyectoIS/proyecto): 
+- Crear dos entornos virtuales dentro del directorio del proyecto(proyectoIS/proyecto): 
 ```bash
-python3 -m venv venv
+python3 -m venv dvenv #entorno de desarrollo
+python3 -m venv pvenv #entorno de producción
 ```
-- Activar el entorno virtual, **esto se deberá hacer cada vez que se ejecutará comandos del proyecto**:
+- Activar el entorno virtual a utilizar, **esto se deberá hacer cada vez que se ejecutará comandos del proyecto desde ese entorno**:
 ```bash
-source venv/bin/activate
+source dvenv/bin/activate #activar este para usar entorno de desarrollo
+source pvenv/bin/activate #activar este para usar entorno de producción
 ```
-- Con el entorno virtual activado en la rama main, instalar estas dependencias:
+- Con el entorno virtual de producción activado, instalar estas dependencias:
 ```bash
 pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
@@ -65,7 +67,7 @@ pip install nginx
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
-- Con el entorno virtual activado en la rama desarrollo, instalar estas dependencias:
+- Con el entorno virtual de desarrollo activado, instalar estas dependencias:
 ```bash
 pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
@@ -75,6 +77,8 @@ pip install pytest-django #integración de pruebas con django
 pip install sphinx #para documentación automática de código
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
+
+- Para desactivar el entorno virtual simplemente se ejecuta el comando `deactivate`
 
 ## Crear variables de entorno
 - Crea un archivo `.env` en el directorio `proyectoIS/proyecto`
