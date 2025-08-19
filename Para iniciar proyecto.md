@@ -4,9 +4,15 @@
 - PostgreSQL:
 ```bash
 sudo apt update
+sudo apt upgrade
 sudo apt install postgresql postgresql-contrib
 ```
-
+- Nginx:
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install nginx
+```
 - Python y su instalador de paquetes (pip) ya vienen instalado con el Ubuntu, pero siempre es importante mantener actualizado todo:
 ```bash
 sudo apt update
@@ -62,7 +68,7 @@ source pvenv/bin/activate #activar este para usar entorno de producción
 pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
-pip install gunicorn
+pip install gunicorn #para despliegue de la página
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
@@ -79,11 +85,19 @@ pip install sphinx #para documentación automática de código
 
 - Para desactivar el entorno virtual simplemente se ejecuta el comando `deactivate`
 
+## Habilitar dirección de correo electrónico para usarlo como confirmador de registros 
+- Para verificar que la confirmación de registros de usuario por correo funcione, se debe establecer tu propio correo como el remitente, estos serían los pasos para hacerlo desde Gmail:
+- Activar verificación en dos pasos en tu correo
+- En la sección Contraseña de aplicaciones crear uno llamado "Django App"
+- La contraseña generada se debe copiar y pegar en una variable de entorno
+
 ## Crear variables de entorno
 - Crea un archivo `.env` en el directorio `proyectoIS/proyecto`
 - Dentro del archivo debe estar:
 ```bash
 DB_PASSWORD=password #la contraseña de tu usuario postgres
+EMAIL_HOST_USER=correo #el correo a usar para envío de confirmación
+EMAIL_HOST_PASSWORD=contraseña_generada #la contraseña generada desde tu gmail
 #a medida que el proyecto avance se tendrán que añadir más variables de entorno
 ```
 
