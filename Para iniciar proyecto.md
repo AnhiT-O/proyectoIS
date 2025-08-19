@@ -63,7 +63,6 @@ pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
 pip install gunicorn
-pip install nginx
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
