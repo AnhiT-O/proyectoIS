@@ -1,8 +1,29 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        max_length=254,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre de usuario'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Contraseña'
+        })
+    )
+    
+    error_messages = {
+        'invalid_login': "Por favor, introduce un nombre de usuario y contraseña correctos. "
+                        "Ten en cuenta que ambos campos distinguen entre mayúsculas y minúsculas.",
+        'inactive': "Esta cuenta está inactiva.",
+    }
 
 class RegistroUsuarioForm(UserCreationForm):
     email = forms.EmailField(

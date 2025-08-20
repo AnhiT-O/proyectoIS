@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -9,8 +10,39 @@ from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
-from .forms import RegistroUsuarioForm
+from .forms import RegistroUsuarioForm, LoginForm
 from .models import Usuario
+
+def login_usuario(request):
+    if request.user.is_authenticated:
+        return redirect('usuarios:perfil')
+    
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
+                    # Redirigir a la página que el usuario intentaba acceder o al perfil
+                    next_page = request.GET.get('next', 'usuarios:perfil')
+                    return redirect(next_page)
+                else:
+                    messages.error(request, 'Tu cuenta no está activada. Revisa tu correo electrónico.')
+            else:
+                messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+    else:
+        form = LoginForm()
+    
+    return render(request, 'usuarios/login.html', {'form': form})
+
+def logout_usuario(request):
+    logout(request)
+    messages.success(request, 'Has cerrado sesión exitosamente.')
+    return redirect('usuarios:login')
 
 def registro_usuario(request):
     if request.method == 'POST':
@@ -93,6 +125,7 @@ def activar_cuenta(request, uidb64, token):
 def registro_exitoso(request):
     return render(request, 'usuarios/registro_exitoso.html')
 
+@login_required
 def perfil(request):
     return render(request, 'usuarios/perfil.html')
 

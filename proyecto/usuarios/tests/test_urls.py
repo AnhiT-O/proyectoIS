@@ -6,6 +6,22 @@ from usuarios import views
 class TestUsuariosUrls():
     """Pruebas para las URLs del módulo usuarios"""
 
+    def test_url_login_resuelve_correctamente(self):
+        """Verifica que la URL de login resuelve a la vista correcta"""
+        url = reverse('usuarios:login')
+        resolver = resolve(url)
+        assert resolver.func == views.login_usuario
+        assert resolver.namespace == 'usuarios'
+        assert resolver.url_name == 'login'
+
+    def test_url_logout_resuelve_correctamente(self):
+        """Verifica que la URL de logout resuelve a la vista correcta"""
+        url = reverse('usuarios:logout')
+        resolver = resolve(url)
+        assert resolver.func == views.logout_usuario
+        assert resolver.namespace == 'usuarios'
+        assert resolver.url_name == 'logout'
+
     def test_url_registro_resuelve_correctamente(self):
         """Verifica que la URL de registro resuelve a la vista correcta"""
         url = reverse('usuarios:registro')
@@ -44,6 +60,8 @@ class TestUsuariosUrls():
 
     def test_urls_generan_rutas_esperadas(self):
         """Verifica que las URLs generan las rutas esperadas"""
+        assert reverse('usuarios:login') == '/usuarios/login/'
+        assert reverse('usuarios:logout') == '/usuarios/logout/'
         assert reverse('usuarios:registro') == '/usuarios/registro/'
         assert reverse('usuarios:registro_exitoso') == '/usuarios/registro-exitoso/'
         assert reverse('usuarios:perfil') == '/usuarios/perfil/'
@@ -63,6 +81,8 @@ class TestUsuariosUrls():
         assert resolver.namespace == 'usuarios'
 
     @pytest.mark.parametrize("url_name,expected_pattern", [
+        ('login', 'login/'),
+        ('logout', 'logout/'),
         ('registro', 'registro/'),
         ('registro_exitoso', 'registro-exitoso/'),
         ('perfil', 'perfil/'),
