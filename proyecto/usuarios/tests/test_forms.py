@@ -2,10 +2,87 @@ import pytest
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from usuarios.forms import RegistroUsuarioForm
+from usuarios.forms import RegistroUsuarioForm, LoginForm
 from usuarios.models import Usuario
 
 User = get_user_model()
+
+@pytest.mark.django_db
+class TestLoginForm:
+    
+    def test_formulario_login_valido(self):
+        """Prueba que el formulario de login sea válido con datos correctos"""
+        # Crear un usuario activo para las pruebas
+        Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+        
+        form_data = {
+            'username': 'testuser',
+            'password': 'TestPass123!'
+        }
+        form = LoginForm(data=form_data)
+        assert form.is_valid(), f"El formulario debería ser válido, errores: {form.errors}"
+    
+    def test_formulario_login_campos_vacios(self):
+        """Prueba que el formulario de login no sea válido con campos vacíos"""
+        form_data = {
+            'username': '',
+            'password': ''
+        }
+        form = LoginForm(data=form_data)
+        assert not form.is_valid()
+        assert 'username' in form.errors
+        assert 'password' in form.errors
+    
+    def test_formulario_login_solo_username(self):
+        """Prueba que el formulario de login no sea válido solo con username"""
+        form_data = {
+            'username': 'testuser',
+            'password': ''
+        }
+        form = LoginForm(data=form_data)
+        assert not form.is_valid()
+        assert 'password' in form.errors
+    
+    def test_formulario_login_solo_password(self):
+        """Prueba que el formulario de login no sea válido solo con password"""
+        form_data = {
+            'username': '',
+            'password': 'TestPass123!'
+        }
+        form = LoginForm(data=form_data)
+        assert not form.is_valid()
+        assert 'username' in form.errors
+    
+    def test_formulario_login_atributos_widget(self):
+        """Prueba que los widgets tengan los atributos CSS correctos"""
+        form = LoginForm()
+        
+        # Verificar atributos del campo username
+        username_widget = form.fields['username'].widget
+        assert 'form-control' in username_widget.attrs.get('class', '')
+        assert username_widget.attrs.get('placeholder') == 'Nombre de usuario'
+        
+        # Verificar atributos del campo password
+        password_widget = form.fields['password'].widget
+        assert 'form-control' in password_widget.attrs.get('class', '')
+        assert password_widget.attrs.get('placeholder') == 'Contraseña'
+    
+    def test_formulario_login_mensajes_error_personalizados(self):
+        """Prueba que los mensajes de error estén personalizados en español"""
+        form = LoginForm()
+        
+        # Verificar mensajes de error personalizados
+        assert 'Por favor, introduce un nombre de usuario y contraseña correctos' in form.error_messages['invalid_login']
+        assert 'Esta cuenta está inactiva' in form.error_messages['inactive']
 
 @pytest.mark.django_db
 class TestRegistroUsuarioForm:

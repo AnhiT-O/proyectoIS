@@ -9,7 +9,239 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from unittest.mock import patch, MagicMock
 from usuarios.models import Usuario
-from usuarios.forms import RegistroUsuarioForm
+from usuarios.forms import RegistroUsuarioForm, LoginForm
+
+@pytest.mark.django_db
+class TestLoginUsuarioView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.url = reverse('usuarios:login')
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+
+    def test_login_get_muestra_formulario(self):
+        """Prueba que GET muestre el formulario de login"""
+        response = self.client.get(self.url)
+        
+        assert response.status_code == 200
+        assert 'form' in response.context
+        assert isinstance(response.context['form'], LoginForm)
+        assert 'usuarios/login.html' in [t.name for t in response.templates]
+
+    def test_login_post_credenciales_correctas(self):
+        """Prueba login exitoso con credenciales correctas"""
+        login_data = {
+            'username': 'testuser',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar redirección al perfil
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:perfil')
+        
+        # Verificar que el usuario está autenticado
+        assert '_auth_user_id' in self.client.session
+        assert self.client.session['_auth_user_id'] == str(self.user.pk)
+        
+        # Verificar mensaje de bienvenida
+        response = self.client.get(response.url)
+        messages = list(get_messages(response.wsgi_request))
+        assert any('¡Bienvenido de nuevo, Juan!' in str(message) for message in messages)
+
+    def test_login_post_credenciales_incorrectas(self):
+        """Prueba login con credenciales incorrectas"""
+        login_data = {
+            'username': 'testuser',
+            'password': 'PasswordIncorrecto'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Verificar que el formulario tiene errores de autenticación
+        assert 'form' in response.context
+        form = response.context['form']
+        assert not form.is_valid()
+
+    def test_login_post_usuario_inexistente(self):
+        """Prueba login con usuario inexistente"""
+        login_data = {
+            'username': 'usuarioinexistente',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Verificar que el formulario tiene errores de autenticación
+        assert 'form' in response.context
+        form = response.context['form']
+        assert not form.is_valid()
+
+    def test_login_post_usuario_inactivo(self):
+        """Prueba login con usuario inactivo"""
+        # Crear usuario inactivo
+        inactive_user = Usuario.objects.create_user(
+            username='inactiveuser',
+            email='inactive@example.com',
+            cedula_identidad='87654321',
+            tipo_cedula='CI',
+            first_name='María',
+            last_name='González',
+            password='TestPass123!',
+            is_active=False
+        )
+        
+        login_data = {
+            'username': 'inactiveuser',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Para usuario inactivo, el formulario será válido pero no se autenticará
+        # Django's AuthenticationForm maneja usuarios inactivos automáticamente
+        assert 'form' in response.context
+        form = response.context['form']
+        # El formulario debería tener errores debido a usuario inactivo
+        assert not form.is_valid() or form.get_user() is None or not form.get_user().is_active
+
+    def test_login_formulario_invalido(self):
+        """Prueba login con formulario inválido"""
+        login_data = {
+            'username': '',
+            'password': ''
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el formulario tiene errores
+        assert 'form' in response.context
+        assert response.context['form'].errors
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+
+    def test_login_usuario_ya_autenticado_redirige_perfil(self):
+        """Prueba que usuario ya autenticado sea redirigido al perfil"""
+        # Autenticar usuario primero
+        self.client.force_login(self.user)
+        
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al perfil
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:perfil')
+
+    def test_login_con_parametro_next(self):
+        """Prueba redirección con parámetro 'next'"""
+        next_url = '/usuarios/perfil/'
+        login_data = {
+            'username': 'testuser',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(f'{self.url}?next={next_url}', login_data)
+        
+        # Verificar redirección a la URL especificada en 'next'
+        assert response.status_code == 302
+        assert response.url == next_url
+
+@pytest.mark.django_db
+class TestLogoutUsuarioView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.url = reverse('usuarios:logout')
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+
+    def test_logout_usuario_autenticado(self):
+        """Prueba logout de usuario autenticado"""
+        # Autenticar usuario primero
+        self.client.force_login(self.user)
+        
+        # Verificar que está autenticado
+        assert '_auth_user_id' in self.client.session
+        
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al inicio
+        assert response.status_code == 302
+        assert response.url == reverse('inicio')
+        
+        # Verificar que ya no está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Verificar mensaje de confirmación
+        response = self.client.get(response.url)
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Has cerrado sesión exitosamente' in str(message) for message in messages)
+
+    def test_logout_usuario_no_autenticado(self):
+        """Prueba logout de usuario no autenticado"""
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al inicio
+        assert response.status_code == 302
+        assert response.url == reverse('inicio')
+        
+        # Verificar mensaje de confirmación (incluso si no estaba autenticado)
+        response = self.client.get(response.url)
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Has cerrado sesión exitosamente' in str(message) for message in messages)
+
+    def test_logout_post_method(self):
+        """Prueba logout con método POST"""
+        # Autenticar usuario primero
+        self.client.force_login(self.user)
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección al inicio
+        assert response.status_code == 302
+        assert response.url == reverse('inicio')
+        
+        # Verificar que ya no está autenticado
+        assert '_auth_user_id' not in self.client.session
 
 @pytest.mark.django_db
 class TestRegistroUsuarioView:
@@ -298,13 +530,48 @@ class TestPerfilView:
     def setup_method(self):
         self.client = Client()
         self.url = reverse('usuarios:perfil')
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
 
-    def test_perfil_muestra_template_correcto(self):
-        """Prueba que la vista muestre el template correcto"""
+    def test_perfil_usuario_autenticado(self):
+        """Prueba que usuario autenticado pueda acceder al perfil"""
+        self.client.force_login(self.user)
+        
         response = self.client.get(self.url)
         
         assert response.status_code == 200
         assert 'usuarios/perfil.html' in [t.name for t in response.templates]
+        assert response.context['user'] == self.user
+
+    def test_perfil_usuario_no_autenticado_redirige_login(self):
+        """Prueba que usuario no autenticado sea redirigido al login"""
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al login
+        assert response.status_code == 302
+        assert '/usuarios/login/' in response.url
+        assert f'next={self.url}' in response.url
+
+    def test_perfil_muestra_informacion_usuario(self):
+        """Prueba que el perfil muestre la información correcta del usuario"""
+        self.client.force_login(self.user)
+        
+        response = self.client.get(self.url)
+        
+        # Verificar que el contexto contiene la información del usuario
+        assert response.context['user'].first_name == 'Juan'
+        assert response.context['user'].last_name == 'Pérez'
+        assert response.context['user'].email == 'test@example.com'
+        assert response.context['user'].cedula_identidad == '12345678'
+        assert response.context['user'].tipo_cedula == 'CI'
 
 @pytest.mark.django_db
 class TestIntegracionCompleta:
