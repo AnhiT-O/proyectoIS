@@ -204,9 +204,9 @@ class TestLogoutUsuarioView:
         
         response = self.client.get(self.url)
         
-        # Verificar redirección al inicio
+        # Verificar redirección al login
         assert response.status_code == 302
-        assert response.url == reverse('inicio')
+        assert response.url == reverse('usuarios:login')
         
         # Verificar que ya no está autenticado
         assert '_auth_user_id' not in self.client.session
@@ -220,9 +220,9 @@ class TestLogoutUsuarioView:
         """Prueba logout de usuario no autenticado"""
         response = self.client.get(self.url)
         
-        # Verificar redirección al inicio
+        # Verificar redirección al login
         assert response.status_code == 302
-        assert response.url == reverse('inicio')
+        assert response.url == reverse('usuarios:login')
         
         # Verificar mensaje de confirmación (incluso si no estaba autenticado)
         response = self.client.get(response.url)
@@ -236,9 +236,9 @@ class TestLogoutUsuarioView:
         
         response = self.client.post(self.url)
         
-        # Verificar redirección al inicio
+        # Verificar redirección al login
         assert response.status_code == 302
-        assert response.url == reverse('inicio')
+        assert response.url == reverse('usuarios:login')
         
         # Verificar que ya no está autenticado
         assert '_auth_user_id' not in self.client.session
