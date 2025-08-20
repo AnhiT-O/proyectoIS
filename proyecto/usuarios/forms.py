@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
@@ -128,3 +128,70 @@ class RegistroUsuarioForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class RecuperarPasswordForm(PasswordResetForm):
+    """Formulario personalizado para recuperación de contraseña"""
+    email = forms.EmailField(
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Correo electrónico',
+            'autofocus': True
+        }),
+        label='Correo electrónico'
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar que el email esté registrado y que el usuario esté activo
+            try:
+                user = Usuario.objects.get(email=email, is_active=True)
+            except Usuario.DoesNotExist:
+                raise ValidationError("No existe una cuenta activa asociada a este correo electrónico.")
+        return email
+
+    def get_users(self, email):
+        """Sobrescribir método para obtener solo usuarios activos"""
+        return Usuario.objects.filter(
+            email__iexact=email,
+            is_active=True
+        )
+
+
+class EstablecerPasswordForm(SetPasswordForm):
+    """Formulario personalizado para establecer nueva contraseña"""
+    new_password1 = forms.CharField(
+        label="Nueva contraseña",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nueva contraseña'
+        }),
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        label="Confirmar nueva contraseña",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirmar nueva contraseña'
+        }),
+        strip=False,
+    )
+
+    def clean_new_password1(self):
+        password1 = self.cleaned_data.get('new_password1')
+
+        if not password1:
+            raise ValidationError("La contraseña es obligatoria.")
+
+        if len(password1) <= 8:
+            raise ValidationError("La contraseña debe tener más de 8 caracteres.")
+
+        if not re.search(r'[^A-Za-z0-9]', password1):
+            raise ValidationError("La contraseña debe contener al menos un caracter especial.")
+
+        if not re.search(r'\d', password1):
+            raise ValidationError("La contraseña debe contener al menos un número.")
+
+        return password1

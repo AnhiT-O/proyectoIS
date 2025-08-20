@@ -572,3 +572,293 @@ class TestPerfilView:
         assert response.context['user'].email == 'test@example.com'
         assert response.context['user'].cedula_identidad == '12345678'
         assert response.context['user'].tipo_cedula == 'CI'
+
+
+@pytest.mark.django_db
+class TestRecuperarPasswordView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.url = reverse('usuarios:recuperar_password')
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+
+    def test_recuperar_password_get_muestra_formulario(self):
+        """Prueba que GET muestre el formulario de recuperación"""
+        response = self.client.get(self.url)
+        
+        assert response.status_code == 200
+        assert 'form' in response.context
+        assert 'usuarios/recuperar_password.html' in [t.name for t in response.templates]
+
+    @patch('usuarios.views.enviar_email_recuperacion')
+    def test_recuperar_password_post_exitoso(self, mock_enviar_email):
+        """Prueba recuperación exitosa con email válido"""
+        data = {'email': self.user.email}
+        
+        response = self.client.post(self.url, data)
+        
+        # Verificar redirección al login
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:login')
+        
+        # Verificar que se envió email de recuperación
+        mock_enviar_email.assert_called_once()
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Se ha enviado un enlace de recuperación' in str(message) for message in messages)
+
+    def test_recuperar_password_email_inexistente(self):
+        """Prueba recuperación con email inexistente"""
+        data = {'email': 'inexistente@example.com'}
+        
+        response = self.client.post(self.url, data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el formulario tiene errores
+        assert 'form' in response.context
+        form = response.context['form']
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa' in str(form.errors['email'])
+
+    def test_recuperar_password_usuario_inactivo(self):
+        """Prueba recuperación con usuario inactivo"""
+        # Crear usuario inactivo
+        inactive_user = Usuario.objects.create_user(
+            username='inactive',
+            email='inactive@example.com',
+            cedula_identidad='87654321',
+            tipo_cedula='CI',
+            first_name='María',
+            last_name='González',
+            password='TestPass123!',
+            is_active=False
+        )
+        
+        data = {'email': inactive_user.email}
+        
+        response = self.client.post(self.url, data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el formulario tiene errores
+        assert 'form' in response.context
+        form = response.context['form']
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa' in str(form.errors['email'])
+
+    def test_recuperar_password_formulario_invalido(self):
+        """Prueba recuperación con formulario inválido"""
+        data = {'email': 'email_invalido'}
+        
+        response = self.client.post(self.url, data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el formulario tiene errores
+        assert 'form' in response.context
+        assert response.context['form'].errors
+
+
+@pytest.mark.django_db
+class TestEnviarEmailRecuperacion:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+
+    @patch('usuarios.views.render_to_string')
+    @patch('usuarios.views.EmailMultiAlternatives')
+    def test_enviar_email_recuperacion_exitoso(self, mock_email_class, mock_render_to_string):
+        """Prueba que se envíe email de recuperación correctamente"""
+        from usuarios.views import enviar_email_recuperacion
+        
+        # Configurar mocks
+        mock_render_to_string.return_value = '<html>Recovery HTML content</html>'
+        mock_email_instance = MagicMock()
+        mock_email_class.return_value = mock_email_instance
+        
+        request = MagicMock()
+        request.build_absolute_uri.return_value = 'http://example.com/reset/123/token'
+        
+        enviar_email_recuperacion(request, self.user)
+        
+        # Verificar que se llamó render_to_string
+        mock_render_to_string.assert_called_once_with('usuarios/email_recuperacion.html', {
+            'user': self.user,
+            'reset_url': 'http://example.com/reset/123/token',
+        })
+        
+        # Verificar que se creó el objeto EmailMultiAlternatives
+        mock_email_class.assert_called_once()
+        args, kwargs = mock_email_class.call_args
+        
+        # Verificar argumentos del email
+        assert kwargs['subject'] == 'Recuperación de contraseña - Casa de Cambios'
+        assert self.user.email in kwargs['to']
+        assert 'Juan' in kwargs['body']
+        assert 'http://example.com/reset/123/token' in kwargs['body']
+        
+        # Verificar que se adjuntó la versión HTML
+        mock_email_instance.attach_alternative.assert_called_once()
+        
+        # Verificar que se envió el email
+        mock_email_instance.send.assert_called_once()
+
+
+@pytest.mark.django_db
+class TestResetPasswordConfirmView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+        self.token = default_token_generator.make_token(self.user)
+        self.uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+
+    def test_reset_password_confirm_get_valido(self):
+        """Prueba que GET con token válido muestre el formulario"""
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': self.token
+        })
+        
+        response = self.client.get(url)
+        
+        assert response.status_code == 200
+        assert 'form' in response.context
+        assert response.context['validlink'] is True
+        assert 'usuarios/reset_password_confirm.html' in [t.name for t in response.templates]
+
+    def test_reset_password_confirm_post_exitoso(self):
+        """Prueba cambio exitoso de contraseña"""
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': self.token
+        })
+        
+        data = {
+            'new_password1': 'NuevaPassword123!',
+            'new_password2': 'NuevaPassword123!'
+        }
+        
+        response = self.client.post(url, data)
+        
+        # Verificar redirección al login
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:login')
+        
+        # Verificar que la contraseña cambió
+        self.user.refresh_from_db()
+        assert self.user.check_password('NuevaPassword123!')
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        assert any('contraseña ha sido cambiada exitosamente' in str(message) for message in messages)
+
+    def test_reset_password_confirm_formulario_invalido(self):
+        """Prueba manejo de formulario inválido"""
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': self.token
+        })
+        
+        data = {
+            'new_password1': '123',  # Contraseña muy corta
+            'new_password2': '123'
+        }
+        
+        response = self.client.post(url, data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el formulario tiene errores
+        assert 'form' in response.context
+        assert response.context['form'].errors
+        
+        # Verificar que la contraseña NO cambió
+        self.user.refresh_from_db()
+        assert self.user.check_password('TestPass123!')
+
+    def test_reset_password_confirm_token_invalido(self):
+        """Prueba con token inválido"""
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': 'token_invalido'
+        })
+        
+        response = self.client.get(url)
+        
+        # Verificar redirección a recuperar password
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:recuperar_password')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('inválido o ha expirado' in str(message) for message in messages)
+
+    def test_reset_password_confirm_uid_invalido(self):
+        """Prueba con UID inválido"""
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': 'uid_invalido',
+            'token': self.token
+        })
+        
+        response = self.client.get(url)
+        
+        # Verificar redirección a recuperar password
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:recuperar_password')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('inválido o ha expirado' in str(message) for message in messages)
+
+    def test_reset_password_confirm_usuario_inexistente(self):
+        """Prueba con usuario inexistente"""
+        fake_uid = urlsafe_base64_encode(force_bytes(99999))
+        url = reverse('usuarios:reset_password_confirm', kwargs={
+            'uidb64': fake_uid,
+            'token': self.token
+        })
+        
+        response = self.client.get(url)
+        
+        # Verificar redirección a recuperar password
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:recuperar_password')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('inválido o ha expirado' in str(message) for message in messages)

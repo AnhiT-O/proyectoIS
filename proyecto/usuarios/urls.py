@@ -10,4 +10,6 @@ urlpatterns = [
     path('registro-exitoso/', views.registro_exitoso, name='registro_exitoso'),
     path('activar/<str:uidb64>/<str:token>/', views.activar_cuenta, name='activar_cuenta'),
     path('perfil/', views.perfil, name='perfil'),
+    path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
+    path('reset-password/<str:uidb64>/<str:token>/', views.reset_password_confirm, name='reset_password_confirm'),
 ]

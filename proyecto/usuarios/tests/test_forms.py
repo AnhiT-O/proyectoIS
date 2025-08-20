@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from usuarios.forms import RegistroUsuarioForm, LoginForm
+from usuarios.forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm
 from usuarios.models import Usuario
 
 User = get_user_model()
@@ -403,3 +403,228 @@ class TestRegistroUsuarioForm:
         user = form.save(commit=False)
         assert user.pk is None, "El usuario no debería tener ID si no se hizo commit"
         assert user.email == 'juan@example.com'
+
+
+@pytest.mark.django_db
+class TestRecuperarPasswordForm:
+    
+    def test_formulario_valido_con_email_activo(self):
+        """Prueba que el formulario sea válido con email de usuario activo"""
+        # Crear usuario activo
+        Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='TestPass123!',
+            is_active=True
+        )
+        
+        form_data = {'email': 'test@example.com'}
+        form = RecuperarPasswordForm(data=form_data)
+        assert form.is_valid(), f"El formulario debería ser válido, errores: {form.errors}"
+    
+    def test_formulario_invalido_email_inexistente(self):
+        """Prueba que el formulario no sea válido con email inexistente"""
+        form_data = {'email': 'inexistente@example.com'}
+        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa asociada a este correo electrónico.' in form.errors['email']
+    
+    def test_formulario_invalido_usuario_inactivo(self):
+        """Prueba que el formulario no sea válido con usuario inactivo"""
+        # Crear usuario inactivo
+        Usuario.objects.create_user(
+            username='inactive',
+            email='inactive@example.com',
+            cedula_identidad='87654321',
+            tipo_cedula='CI',
+            first_name='María',
+            last_name='González',
+            password='TestPass123!',
+            is_active=False
+        )
+        
+        form_data = {'email': 'inactive@example.com'}
+        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa asociada a este correo electrónico.' in form.errors['email']
+    
+    def test_formulario_invalido_email_vacio(self):
+        """Prueba que el formulario no sea válido con email vacío"""
+        form_data = {'email': ''}
+        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+    
+    def test_formulario_invalido_email_formato_incorrecto(self):
+        """Prueba que el formulario no sea válido con formato de email incorrecto"""
+        form_data = {'email': 'email_invalido'}
+        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+    
+    def test_get_users_solo_usuarios_activos(self):
+        """Prueba que get_users retorne solo usuarios activos"""
+        # Crear usuario activo
+        user_activo = Usuario.objects.create_user(
+            username='activo',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            is_active=True
+        )
+        
+        # Crear usuario inactivo con el mismo email (no debería pasar en la realidad)
+        Usuario.objects.create_user(
+            username='inactivo',
+            email='TEST@EXAMPLE.COM',  # Caso diferente para probar insensibilidad
+            cedula_identidad='87654321',
+            tipo_cedula='CI',
+            is_active=False
+        )
+        
+        form = RecuperarPasswordForm()
+        users = list(form.get_users('test@example.com'))
+        
+        assert len(users) == 1
+        assert users[0] == user_activo
+        assert users[0].is_active
+    
+    def test_widget_atributos_css(self):
+        """Prueba que el widget tenga los atributos CSS correctos"""
+        form = RecuperarPasswordForm()
+        
+        email_widget = form.fields['email'].widget
+        assert 'form-control' in email_widget.attrs.get('class', '')
+        assert email_widget.attrs.get('placeholder') == 'Correo electrónico'
+        assert email_widget.attrs.get('autofocus') is True
+
+
+@pytest.mark.django_db
+class TestEstablecerPasswordForm:
+    
+    def setup_method(self):
+        """Configuración para cada test"""
+        self.user = Usuario.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            cedula_identidad='12345678',
+            tipo_cedula='CI',
+            first_name='Juan',
+            last_name='Pérez',
+            password='OldPassword123!',
+            is_active=True
+        )
+    
+    def test_formulario_valido_con_passwords_correctos(self):
+        """Prueba que el formulario sea válido con contraseñas correctas"""
+        form_data = {
+            'new_password1': 'NewPassword123!',
+            'new_password2': 'NewPassword123!'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert form.is_valid(), f"El formulario debería ser válido, errores: {form.errors}"
+    
+    def test_formulario_invalido_password_corto(self):
+        """Prueba que el formulario no sea válido con contraseña corta"""
+        form_data = {
+            'new_password1': 'Pass1!',
+            'new_password2': 'Pass1!'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe tener más de 8 caracteres.' in form.errors['new_password1']
+    
+    def test_formulario_invalido_sin_caracter_especial(self):
+        """Prueba que el formulario no sea válido sin caracter especial"""
+        form_data = {
+            'new_password1': 'NewPassword123',
+            'new_password2': 'NewPassword123'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe contener al menos un caracter especial.' in form.errors['new_password1']
+    
+    def test_formulario_invalido_sin_numero(self):
+        """Prueba que el formulario no sea válido sin número"""
+        form_data = {
+            'new_password1': 'NewPassword!',
+            'new_password2': 'NewPassword!'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe contener al menos un número.' in form.errors['new_password1']
+    
+    def test_formulario_invalido_password_vacio(self):
+        """Prueba que el formulario no sea válido con contraseña vacía"""
+        form_data = {
+            'new_password1': '',
+            'new_password2': ''
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        # Django por defecto usa 'Este campo es obligatorio.' para campos vacíos
+        assert 'Este campo es obligatorio.' in form.errors['new_password1']
+    
+    def test_formulario_invalido_passwords_no_coinciden(self):
+        """Prueba que el formulario no sea válido con contraseñas que no coinciden"""
+        form_data = {
+            'new_password1': 'NewPassword123!',
+            'new_password2': 'DifferentPassword123!'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert not form.is_valid()
+        assert 'new_password2' in form.errors
+        # El error viene del SetPasswordForm base de Django
+        assert form.errors['new_password2']
+    
+    def test_save_cambia_password(self):
+        """Prueba que el método save cambie efectivamente la contraseña"""
+        form_data = {
+            'new_password1': 'NewPassword123!',
+            'new_password2': 'NewPassword123!'
+        }
+        form = EstablecerPasswordForm(user=self.user, data=form_data)
+        assert form.is_valid()
+        
+        # Verificar que la contraseña antigua funciona
+        assert self.user.check_password('OldPassword123!')
+        
+        # Guardar la nueva contraseña
+        form.save()
+        
+        # Verificar que la nueva contraseña funciona
+        assert self.user.check_password('NewPassword123!')
+        
+        # Verificar que la contraseña antigua ya no funciona
+        assert not self.user.check_password('OldPassword123!')
+    
+    def test_widget_atributos_css(self):
+        """Prueba que los widgets tengan los atributos CSS correctos"""
+        form = EstablecerPasswordForm(user=self.user)
+        
+        # Verificar atributos del campo new_password1
+        password1_widget = form.fields['new_password1'].widget
+        assert 'form-control' in password1_widget.attrs.get('class', '')
+        assert password1_widget.attrs.get('placeholder') == 'Nueva contraseña'
+        
+        # Verificar atributos del campo new_password2
+        password2_widget = form.fields['new_password2'].widget
+        assert 'form-control' in password2_widget.attrs.get('class', '')
+        assert password2_widget.attrs.get('placeholder') == 'Confirmar nueva contraseña'
+    
+    def test_labels_en_espanol(self):
+        """Prueba que los labels estén en español"""
+        form = EstablecerPasswordForm(user=self.user)
+        
+        assert form.fields['new_password1'].label == 'Nueva contraseña'
+        assert form.fields['new_password2'].label == 'Confirmar nueva contraseña'
