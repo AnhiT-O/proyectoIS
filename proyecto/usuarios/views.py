@@ -42,7 +42,7 @@ def login_usuario(request):
 def logout_usuario(request):
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
-    return redirect('inicio')
+    return redirect('usuarios:login')
 
 def registro_usuario(request):
     if request.method == 'POST':
