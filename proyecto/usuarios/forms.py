@@ -62,10 +62,12 @@ class RegistroUsuarioForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # Verificar unicidad excluyendo usuarios inactivos con email duplicado
         existing_user = Usuario.objects.filter(email=email).first()
-        if existing_user and existing_user.is_active:
-            raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
+        if existing_user:
+            if existing_user.is_active:
+                raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
+            else:
+                raise ValidationError("Una cuenta con este correo electrónico ya existe, pero no está activada. Revisa su bandeja de entrada")
         return email
 
     def clean_password1(self):

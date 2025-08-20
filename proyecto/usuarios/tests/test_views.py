@@ -51,36 +51,7 @@ class TestRegistroUsuarioView:
         assert not user.is_active  # Usuario inactivo hasta confirmación
         
         # Verificar que se envió email de confirmación
-        mock_enviar_email.assert_called_once()
-
-    @patch('usuarios.views.enviar_email_confirmacion')
-    def test_registro_usuario_existente_inactivo_reenvia_email(self, mock_enviar_email):
-        """Prueba que se reenvíe email a usuario existente inactivo"""
-        # Crear usuario inactivo existente
-        existing_user = Usuario.objects.create_user(
-            username='existing_user',
-            cedula_identidad=self.valid_data['cedula_identidad'],
-            tipo_cedula=self.valid_data['tipo_cedula'],
-            email=self.valid_data['email'],
-            first_name='Juan',
-            last_name='Pérez',
-            password='password123',
-            is_active=False
-        )
-        
-        response = self.client.post(self.url, self.valid_data)
-        
-        # Verificar redirección
-        assert response.status_code == 302
-        assert response.url == reverse('usuarios:registro_exitoso')
-        
-        # Verificar que se reenvió email al usuario existente
-        mock_enviar_email.assert_called_once_with(response.wsgi_request, existing_user)
-        
-        # Verificar mensaje informativo
-        messages = list(get_messages(response.wsgi_request))
-        assert len(messages) == 1
-        assert 'Ya tienes una cuenta pendiente' in str(messages[0])
+        mock_enviar_email.assert_called_once_with(response.wsgi_request, user)
 
     def test_registro_usuario_formulario_invalido(self):
         """Prueba manejo de formulario inválido"""
@@ -115,12 +86,14 @@ class TestEnviarEmailConfirmacion:
             is_active=False
         )
 
+    @patch('usuarios.views.render_to_string')
     @patch('usuarios.views.EmailMultiAlternatives')
-    def test_enviar_email_confirmacion_exitoso(self, mock_email_class):
+    def test_enviar_email_confirmacion_exitoso(self, mock_email_class, mock_render_to_string):
         """Prueba que se envíe email de confirmación correctamente"""
         from usuarios.views import enviar_email_confirmacion
         
-        # Crear un mock del objeto EmailMultiAlternatives
+        # Configurar mocks
+        mock_render_to_string.return_value = '<html>Test HTML content</html>'
         mock_email_instance = MagicMock()
         mock_email_class.return_value = mock_email_instance
         
@@ -129,6 +102,12 @@ class TestEnviarEmailConfirmacion:
         
         enviar_email_confirmacion(request, self.user)
         
+        # Verificar que se llamó render_to_string con los parámetros correctos
+        mock_render_to_string.assert_called_once_with('usuarios/email_confirmacion.html', {
+            'user': self.user,
+            'activacion_url': 'http://example.com/activate/123/token',
+        })
+        
         # Verificar que se creó el objeto EmailMultiAlternatives
         mock_email_class.assert_called_once()
         args, kwargs = mock_email_class.call_args
@@ -136,12 +115,69 @@ class TestEnviarEmailConfirmacion:
         # Verificar argumentos del email
         assert kwargs['subject'] == 'Confirma tu cuenta'
         assert self.user.email in kwargs['to']
+        assert 'Juan' in kwargs['body']  # Verificar que el contenido de texto plano contiene el nombre
+        assert 'http://example.com/activate/123/token' in kwargs['body']  # Verificar URL en texto plano
         
         # Verificar que se adjuntó la versión HTML
-        mock_email_instance.attach_alternative.assert_called_once()
+        mock_email_instance.attach_alternative.assert_called_once_with('<html>Test HTML content</html>', "text/html")
         
         # Verificar que se envió el email
         mock_email_instance.send.assert_called_once()
+
+    def test_contenido_email_texto_plano(self):
+        """Prueba que el contenido del email de texto plano se genere correctamente"""
+        from usuarios.views import enviar_email_confirmacion
+        
+        # Crear un mock para capturar el contenido del email
+        with patch('usuarios.views.EmailMultiAlternatives') as mock_email_class, \
+             patch('usuarios.views.render_to_string') as mock_render_to_string:
+            
+            mock_render_to_string.return_value = '<html>Test HTML</html>'
+            mock_email_instance = MagicMock()
+            mock_email_class.return_value = mock_email_instance
+            
+            request = MagicMock()
+            test_url = 'http://test.com/activate/abc123/token456'
+            request.build_absolute_uri.return_value = test_url
+            
+            enviar_email_confirmacion(request, self.user)
+            
+            # Obtener el contenido del texto plano
+            args, kwargs = mock_email_class.call_args
+            text_content = kwargs['body']
+            
+            # Verificar que el contenido incluye elementos esperados
+            assert f'¡Hola {self.user.first_name}!' in text_content
+            assert 'Gracias por registrarte en nuestro sistema.' in text_content
+            assert test_url in text_content
+            assert 'El equipo de desarrollo' in text_content
+            assert 'Si no solicitaste esta cuenta' in text_content
+
+    @patch('usuarios.views.render_to_string')
+    @patch('usuarios.views.EmailMultiAlternatives')
+    def test_enviar_email_confirmacion_configuracion_email(self, mock_email_class, mock_render_to_string):
+        """Prueba que se use la configuración correcta de email"""
+        from usuarios.views import enviar_email_confirmacion
+        
+        # Configurar mocks
+        mock_render_to_string.return_value = '<html>Test HTML</html>'
+        mock_email_instance = MagicMock()
+        mock_email_class.return_value = mock_email_instance
+        
+        request = MagicMock()
+        request.build_absolute_uri.return_value = 'http://test.com/activate'
+        
+        with patch('usuarios.views.getattr') as mock_getattr:
+            mock_getattr.return_value = 'test@empresa.com'
+            
+            enviar_email_confirmacion(request, self.user)
+            
+            # Verificar que se llamó getattr para obtener EMAIL_HOST_USER
+            mock_getattr.assert_called_once()
+            
+            # Verificar argumentos del email
+            args, kwargs = mock_email_class.call_args
+            assert kwargs['from_email'] == 'test@empresa.com'
 
 @pytest.mark.django_db
 class TestActivarCuentaView:
@@ -288,10 +324,12 @@ class TestIntegracionCompleta:
             'password2': 'contraseña123!'
         }
 
+    @patch('usuarios.views.render_to_string')
     @patch('usuarios.views.EmailMultiAlternatives')
-    def test_flujo_completo_registro_y_activacion(self, mock_email_class):
+    def test_flujo_completo_registro_y_activacion(self, mock_email_class, mock_render_to_string):
         """Prueba el flujo completo desde registro hasta activación"""
-        # Crear un mock del objeto EmailMultiAlternatives
+        # Configurar mocks
+        mock_render_to_string.return_value = '<html>Test HTML content</html>'
         mock_email_instance = MagicMock()
         mock_email_class.return_value = mock_email_instance
         
@@ -304,6 +342,9 @@ class TestIntegracionCompleta:
         # Verificar que se creó el usuario inactivo
         user = Usuario.objects.get(email=self.valid_data['email'])
         assert not user.is_active
+        
+        # Verificar que se envió el email
+        mock_email_instance.send.assert_called_once()
         
         # Paso 2: Simular activación
         token = default_token_generator.make_token(user)

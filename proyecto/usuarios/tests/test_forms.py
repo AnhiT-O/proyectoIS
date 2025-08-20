@@ -155,6 +155,31 @@ class TestRegistroUsuarioForm:
         assert not form.is_valid()
         assert 'Ya existe un usuario registrado con este correo electrónico.' in form.errors['email']
     
+    def test_validacion_email_duplicado_usuario_inactivo(self):
+        """Prueba que no se permita email duplicado con usuario inactivo y muestre mensaje específico"""
+        # Crear usuario inactivo existente
+        Usuario.objects.create_user(
+            username='inactive_user',
+            email='juan@example.com',
+            cedula_identidad='87654321',
+            tipo_cedula='CI',
+            is_active=False
+        )
+        
+        form_data = {
+            'username': 'testuser',
+            'first_name': 'Juan',
+            'last_name': 'Pérez',
+            'email': 'juan@example.com',
+            'tipo_cedula': 'CI',
+            'cedula_identidad': '12345678',
+            'password1': 'TestPass123!',
+            'password2': 'TestPass123!'
+        }
+        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'Una cuenta con este correo electrónico ya existe, pero no está activada. Revisa su bandeja de entrada' in form.errors['email']
+    
     def test_permite_cedula_duplicada_usuario_inactivo(self):
         """Prueba que sí se permita cédula duplicada con usuario inactivo"""
         # Crear usuario inactivo existente

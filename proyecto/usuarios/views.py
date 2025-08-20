@@ -16,28 +16,10 @@ def registro_usuario(request):
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
-            # Verificar si existe un usuario inactivo con los mismos datos
-            cedula = form.cleaned_data['cedula_identidad']
-            email = form.cleaned_data['email']
-            
-            existing_user = Usuario.objects.filter(
-                cedula_identidad=cedula, 
-                email=email, 
-                is_active=False
-            ).first()
-            
-            if existing_user:
-                # Reenviar email de confirmación al usuario existente
-                enviar_email_confirmacion(request, existing_user)
-                messages.info(request, 'Ya tienes una cuenta pendiente de activación. Te hemos reenviado el correo de confirmación.')
-                return redirect('usuarios:registro_exitoso')
-            
             user = form.save()
-            
             # Enviar email de confirmación
             enviar_email_confirmacion(request, user)
             
-            #messages.success(request, 'Registro exitoso. Revisa tu correo electrónico para activar tu cuenta.')
             return redirect('usuarios:registro_exitoso')
     else:
         form = RegistroUsuarioForm()
