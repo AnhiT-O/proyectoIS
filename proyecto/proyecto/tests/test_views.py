@@ -37,10 +37,10 @@ class TestVistaInicio(TestCase):
             "El título 'Casa de Cambios' debería estar presente en la página"
         assert 'Bienvenido' in contenido, \
             "El mensaje de bienvenida debería estar presente en la página"
-        assert 'Registrarse Ahora' in contenido, \
-            "El botón de registro debería estar presente en la página"
-        assert 'Iniciar Sesión' in contenido, \
-            "El enlace de inicio de sesión debería estar presente en la página"
+        assert 'Gestión segura de transacciones' in contenido, \
+            "Las características del sistema deberían estar presentes en la página"
+        assert 'Reportes y estadísticas detalladas' in contenido, \
+            "Las características del sistema deberían estar presentes en la página"
     
     def test_vista_inicio_tipo_respuesta(self):
         """Prueba que la vista de inicio devuelve una respuesta de tipo TemplateResponse"""
@@ -124,10 +124,10 @@ class TestVistaInicioConPytest:
         elementos_esperados = [
             'Casa de Cambios',
             'Bienvenido',
-            'Registrarse Ahora',
-            'Iniciar Sesión',
             'Gestión segura',
-            'Reportes y estadísticas'
+            'Reportes y estadísticas',
+            'Seguridad y privacidad garantizada',
+            'Proceso rápido y confiable'
         ]
         
         for elemento in elementos_esperados:
