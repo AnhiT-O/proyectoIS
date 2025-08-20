@@ -41,7 +41,7 @@ git config --global user.name "tu nombre de usuario entre comillas"
 ```bash
 sudo -i -u postgres
 psql -U postgres
-ALTER USER postgres WITH PASSWORD 'contraseña' #acá poner la contraseña
+ALTER USER postgres WITH PASSWORD 'contraseña'; #acá poner la contraseña
 \q
 exit
 ```
