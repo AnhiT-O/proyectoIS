@@ -10,7 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
-from .forms import RegistroUsuarioForm, LoginForm
+from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm
 from .models import Usuario
 
 def login_usuario(request):
@@ -128,4 +128,108 @@ def registro_exitoso(request):
 @login_required
 def perfil(request):
     return render(request, 'usuarios/perfil.html')
+
+
+def recuperar_password(request):
+    """Vista para solicitar recuperación de contraseña"""
+    if request.method == 'POST':
+        form = RecuperarPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            # Obtener el usuario
+            user = Usuario.objects.get(email=email, is_active=True)
+            
+            # Enviar email de recuperación
+            enviar_email_recuperacion(request, user)
+            
+            messages.success(request, 
+                'Se ha enviado un enlace de recuperación a tu correo electrónico. '
+                'Revisa tu bandeja de entrada y sigue las instrucciones.')
+            return redirect('usuarios:login')
+    else:
+        form = RecuperarPasswordForm()
+    
+    return render(request, 'usuarios/recuperar_password.html', {'form': form})
+
+
+def enviar_email_recuperacion(request, user):
+    """Envía email con enlace para recuperar contraseña"""
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    
+    reset_url = request.build_absolute_uri(
+        reverse('usuarios:reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
+    )
+    
+    subject = 'Recuperación de contraseña - Casa de Cambios'
+    
+    # Crear contenido HTML
+    html_content = render_to_string('usuarios/email_recuperacion.html', {
+        'user': user,
+        'reset_url': reset_url,
+    })
+    
+    # Crear versión de texto plano (fallback)
+    text_content = f"""
+¡Hola {user.first_name}!
+
+Has solicitado recuperar tu contraseña en Casa de Cambios.
+
+Para crear una nueva contraseña, por favor visita el siguiente enlace:
+{reset_url}
+
+Este enlace expirará en 24 horas por seguridad.
+
+Si no solicitaste este cambio, puedes ignorar este correo y tu contraseña permanecerá sin cambios.
+
+Saludos,
+El equipo de Casa de Cambios
+    """.strip()
+    
+    # Crear email con HTML y texto plano
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,  # Contenido de texto plano
+        from_email=from_email,
+        to=[user.email]
+    )
+    
+    # Adjuntar la versión HTML
+    msg.attach_alternative(html_content, "text/html")
+    
+    # Enviar el email
+    msg.send()
+
+
+def reset_password_confirm(request, uidb64, token):
+    """Vista para confirmar y establecer nueva contraseña"""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = EstablecerPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 
+                    '¡Tu contraseña ha sido cambiada exitosamente! '
+                    'Ya puedes iniciar sesión con tu nueva contraseña.')
+                return redirect('usuarios:login')
+        else:
+            form = EstablecerPasswordForm(user)
+        
+        return render(request, 'usuarios/reset_password_confirm.html', {
+            'form': form,
+            'validlink': True
+        })
+    else:
+        messages.error(request, 
+            'El enlace de recuperación es inválido o ha expirado. '
+            'Por favor, solicita un nuevo enlace de recuperación.')
+        return redirect('usuarios:recuperar_password')
 
