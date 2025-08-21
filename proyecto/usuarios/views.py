@@ -233,3 +233,79 @@ def reset_password_confirm(request, uidb64, token):
             'Por favor, solicita un nuevo enlace de recuperación.')
         return redirect('usuarios:recuperar_password')
 
+@login_required
+def administrar_usuarios(request):
+    """Vista para administrar usuarios (solo para administradores)"""
+    # Verificar si el usuario es administrador
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('usuarios:perfil')
+    
+    # Obtener todos los usuarios excepto el actual
+    usuarios = Usuario.objects.exclude(pk=request.user.pk).order_by('first_name', 'last_name')
+    
+    return render(request, 'usuarios/administrar_usuarios.html', {
+        'usuarios': usuarios
+    })
+
+@login_required
+def bloquear_usuario(request, pk):
+    """Vista para bloquear/desbloquear usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        
+        # No permitir bloquear otros administradores
+        if usuario.is_staff:
+            messages.error(request, 'No puedes bloquear a otros administradores.')
+            return redirect('usuarios:administrar_usuarios')
+        
+        # Cambiar estado del usuario
+        usuario.is_active = not usuario.is_active
+        usuario.save()
+        
+        estado = 'desbloqueado' if usuario.is_active else 'bloqueado'
+        messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
+        
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:administrar_usuarios')
+
+@login_required
+def eliminar_usuario(request, pk):
+    """Vista para eliminar usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        
+        # No permitir eliminar administradores
+        if usuario.is_staff:
+            messages.error(request, 'No puedes eliminar a otros administradores.')
+            return redirect('usuarios:administrar_usuarios')
+        
+        nombre_completo = usuario.get_full_name()
+        usuario.delete()
+        messages.success(request, f'El usuario {nombre_completo} ha sido eliminado permanentemente.')
+        
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:administrar_usuarios')
+
