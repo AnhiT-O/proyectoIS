@@ -22,18 +22,33 @@ def login_usuario(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if not user.esta_bloqueado():
+            
+            try:
+                # Primero verificamos si el usuario existe
+                user = Usuario.objects.get(username=username)
+                
+                # Si el usuario está bloqueado, mostramos mensaje específico
+                if user.bloqueado:
+                    messages.error(request, 
+                        'Tu cuenta está bloqueada. Por favor, contacta al administrador '
+                        'para obtener ayuda y resolver esta situación.')
+                    return render(request, 'usuarios/login.html', {
+                        'form': form,
+                        'usuario_bloqueado': True,
+                        'nombre_usuario': user.get_full_name()
+                    })
+                
+                # Si no está bloqueado, intentamos autenticar
+                user = authenticate(username=username, password=password)
+                if user is not None:
                     login(request, user)
                     messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
-                    # Redirigir a la página que el usuario intentaba acceder o al perfil
                     next_page = request.GET.get('next', 'usuarios:perfil')
                     return redirect(next_page)
                 else:
-                    messages.error(request, 'Tu cuenta está bloqueada. Contacta al administrador.')
-            else:
-                messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+                    messages.error(request, 'La contraseña ingresada es incorrecta.')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'No existe un usuario con ese nombre de usuario.')
     else:
         form = LoginForm()
     
