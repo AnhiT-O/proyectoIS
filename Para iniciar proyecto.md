@@ -86,7 +86,7 @@ pip install sphinx #para documentación automática de código
 - Para desactivar el entorno virtual simplemente se ejecuta el comando `deactivate`
 
 ## Habilitar dirección de correo electrónico para usarlo como confirmador de registros 
-- Para verificar que la confirmación de registros de usuario por correo funcione, se debe establecer tu propio correo como el remitente, estos serían los pasos para hacerlo desde Gmail:
+Para verificar que la confirmación de registros de usuario por correo funcione, se debe establecer tu propio correo como el remitente, estos serían los pasos para hacerlo desde Gmail:
 - Activar verificación en dos pasos en tu correo
 - En la sección Contraseña de aplicaciones crear uno llamado "Django App"
 - La contraseña generada se debe copiar y pegar en una variable de entorno
@@ -116,3 +116,87 @@ python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
+
+## Ejecutar proyecto en producción
+- La primera vez debes configurar el proyecto para su ejecución en producción:
+  - Crear un archivo `gunicorn.service` que contenga esto:
+  ```bash
+  [Unit]
+  Description=Gunicorn instance to serve myproject
+  After=network.target
+
+  [Service]
+  User=nombre #poner tu nombre de usuario de tu directorio en 'home'
+  Group=nombre #lo mismo que arriba
+  WorkingDirectory=.../proyectoIS/proyecto #colocar tu directorio del proyecto
+  ExecStart=".../proyectoIS/proyecto/pvenv/bin/gunicorn" --workers 3 --bind "unix:.../proyectoIS/proyecto/proyecto.sock" proyecto.wsgi:application #acá lo mismo
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+  - Mover el archivo en tu carpeta de system:
+  ```bash
+  sudo mv ./gunicorn.service /etc/systemd/system
+  ```
+  
+  - Modificar el archivo `proyecto.conf` de tal forma que quede así:
+  ```bash
+  server {
+    listen 80;
+    server_name localhost;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        root ".../proyectoIS/proyecto"; #tu directorio del proyecto
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass "http://unix:.../proyectoIS/proyecto/proyecto.sock"; #tu directorio del proyecto desde el dos puntos
+    }
+  }
+  ```
+  
+  - Copiar y testear la configuración de nginx:
+  ```bash
+  sudo cp proyecto.conf /etc/nginx/sites-available/
+  sudo ln -s /etc/nginx/sites-available/proyecto.conf /etc/nginx/sites-enabled/
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo nginx -t
+  sudo systemctl daemon-reload #recarga systemd
+  ```
+
+- Para iniciar el proyecto en producción:
+  ```bash
+  python manage.py collectstatic --noinput #colecciona archivos estaticos
+  python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
+  python manage.py migrate #exportará los cambios preparados a la base de datos
+  sudo systemctl start gunicorn #inicia gunicorn
+  sudo systemctl status gunicorn #verifica estado de gunicorn
+  sudo systemctl start nginx #inicia nginx
+  sudo systemctl status nginx #verifica estado de nginx
+  ```
+
+- Para ver logs en caso de errores:
+  ```bash
+  sudo journalctl -u gunicorn #logs de gunicorn
+  sudo tail -f /var/log/nginx/error.log #logs de nginx
+  ```
+
+- Para detener el proyecto en producción:
+  ```bash
+  sudo systemctl stop gunicorn
+  sudo systemctl stop nginx
+  ```
+
+- Para reiniciar después de cambios en el código:
+  ```bash
+  python manage.py collectstatic --noinput
+  python manage.py makemigrations
+  python manage.py migrate
+  sudo systemctl restart gunicorn
+  sudo systemctl restart nginx
+  ```
+
+- Se podrá ver los resultados del proyecto en producción en: http://localhost/
