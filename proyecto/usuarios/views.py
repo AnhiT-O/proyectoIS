@@ -24,14 +24,14 @@ def login_usuario(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                if user.is_active:
+                if not user.esta_bloqueado():
                     login(request, user)
                     messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
                     # Redirigir a la página que el usuario intentaba acceder o al perfil
                     next_page = request.GET.get('next', 'usuarios:perfil')
                     return redirect(next_page)
                 else:
-                    messages.error(request, 'Tu cuenta no está activada. Revisa tu correo electrónico.')
+                    messages.error(request, 'Tu cuenta está bloqueada. Contacta al administrador.')
             else:
                 messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
     else:
@@ -268,11 +268,11 @@ def bloquear_usuario(request, pk):
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
-        # Cambiar estado del usuario
-        usuario.is_active = not usuario.is_active
+        # Cambiar estado de bloqueo del usuario
+        usuario.bloqueado = not usuario.bloqueado
         usuario.save()
         
-        estado = 'desbloqueado' if usuario.is_active else 'bloqueado'
+        estado = 'desbloqueado' if not usuario.bloqueado else 'bloqueado'
         messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
         
     except Usuario.DoesNotExist:

@@ -36,9 +36,17 @@ class Usuario(AbstractUser):
         null=False,
         blank=False
     )
+    bloqueado = models.BooleanField(
+        default=False,
+        help_text='Indica si el usuario está bloqueado en el sistema'
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'tipo_cedula', 'cedula_identidad']
+
+    def esta_bloqueado(self):
+        """Método para verificar si el usuario está bloqueado"""
+        return self.bloqueado
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.username})"
