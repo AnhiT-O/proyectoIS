@@ -13,8 +13,8 @@ def eliminar_grupos_predefinidos(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
     
     # Eliminamos los grupos
-    Group.objects.filter(name='analista cambiario').delete()
     Group.objects.filter(name='administrador').delete()
+    Group.objects.filter(name='analista cambiario').delete()
 
 class Migration(migrations.Migration):
     dependencies = [
