@@ -5,8 +5,8 @@ def crear_grupos_predefinidos(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
     
     # Creamos los grupos si no existen
-    Group.objects.get_or_create(name='analista cambiario')
     Group.objects.get_or_create(name='administrador')
+    Group.objects.get_or_create(name='analista cambiario')
 
 def eliminar_grupos_predefinidos(apps, schema_editor):
     # Obtenemos el modelo Group
