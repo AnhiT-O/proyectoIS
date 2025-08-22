@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ cliente.nombre }} {{ cliente.apellido }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Tipo de Cliente:</strong> {{ cliente.get_tipoCliente_display }}</p>
+                    <p><strong>Tipo de Documento:</strong> {{ cliente.get_tipoDocCliente_display }}</p>
+                    <p><strong>Número de Documento:</strong> {{ cliente.docCliente }}</p>
+                    <p><strong>Correo Electrónico:</strong> {{ cliente.correoElecCliente }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+                    <p><strong>Domicilio:</strong> {{ cliente.direccion }}</p>
+                    <p><strong>Ocupación:</strong> {{ cliente.ocupacion }}</p>
+                    <p><strong>Declaración Jurada:</strong> 
+                        {% if cliente.declaracion_jurada %}
+                            <span class="badge bg-success">Firmada</span>
+                        {% else %}
+                            <span class="badge bg-danger">No Firmada</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a href="{% url 'clientes:cliente_eliminar' cliente.pk %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </a>
+                <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
