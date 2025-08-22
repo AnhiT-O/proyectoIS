@@ -256,11 +256,22 @@ def administrar_usuarios(request):
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('usuarios:perfil')
     
-    # Obtener todos los usuarios excepto el actual
-    usuarios = Usuario.objects.exclude(pk=request.user.pk).order_by('first_name', 'last_name')
+    # Obtener el término de búsqueda
+    busqueda = request.GET.get('busqueda', '').strip()
+    
+    # Iniciar el queryset base excluyendo al usuario actual
+    usuarios = Usuario.objects.exclude(pk=request.user.pk)
+    
+    # Aplicar filtro de búsqueda si existe
+    if busqueda:
+        usuarios = usuarios.filter(username__icontains=busqueda)
+    
+    # Ordenar resultados
+    usuarios = usuarios.order_by('first_name', 'last_name')
     
     return render(request, 'usuarios/administrar_usuarios.html', {
-        'usuarios': usuarios
+        'usuarios': usuarios,
+        'busqueda': busqueda
     })
 
 @login_required
