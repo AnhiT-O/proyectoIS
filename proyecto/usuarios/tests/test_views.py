@@ -2,6 +2,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -59,8 +60,54 @@ class TestLoginUsuarioView:
         messages = list(get_messages(response.wsgi_request))
         assert any('¡Bienvenido de nuevo, Juan!' in str(message) for message in messages)
 
-    def test_login_post_credenciales_incorrectas(self):
-        """Prueba login con credenciales incorrectas"""
+    def test_login_post_usuario_bloqueado(self):
+        """Prueba login con usuario bloqueado"""
+        # Bloquear usuario
+        self.user.bloqueado = True
+        self.user.save()
+        
+        login_data = {
+            'username': 'testuser',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Verificar contexto específico para usuario bloqueado
+        assert response.context.get('usuario_bloqueado') is True
+        assert response.context.get('nombre_usuario') == self.user.get_full_name()
+        
+        # Verificar mensaje específico de cuenta bloqueada
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Tu cuenta está bloqueada' in str(message) for message in messages)
+
+    def test_login_post_usuario_inexistente(self):
+        """Prueba login con usuario inexistente"""
+        login_data = {
+            'username': 'usuarioinexistente',
+            'password': 'TestPass123!'
+        }
+        
+        response = self.client.post(self.url, login_data)
+        
+        # Verificar que no redirige
+        assert response.status_code == 200
+        
+        # Verificar que el usuario NO está autenticado
+        assert '_auth_user_id' not in self.client.session
+        
+        # Verificar mensaje específico de usuario inexistente
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No existe un usuario con ese nombre' in str(message) for message in messages)
+
+    def test_login_post_password_incorrecta(self):
+        """Prueba login con contraseña incorrecta para usuario existente"""
         login_data = {
             'username': 'testuser',
             'password': 'PasswordIncorrecto'
@@ -74,16 +121,15 @@ class TestLoginUsuarioView:
         # Verificar que el usuario NO está autenticado
         assert '_auth_user_id' not in self.client.session
         
-        # Verificar que el formulario tiene errores de autenticación
-        assert 'form' in response.context
-        form = response.context['form']
-        assert not form.is_valid()
+        # Verificar mensaje específico de contraseña incorrecta
+        messages = list(get_messages(response.wsgi_request))
+        assert any('La contraseña ingresada es incorrecta' in str(message) for message in messages)
 
-    def test_login_post_usuario_inexistente(self):
-        """Prueba login con usuario inexistente"""
+    def test_login_post_credenciales_incorrectas(self):
+        """Prueba login con credenciales incorrectas"""
         login_data = {
-            'username': 'usuarioinexistente',
-            'password': 'TestPass123!'
+            'username': 'testuser',
+            'password': 'PasswordIncorrecto'
         }
         
         response = self.client.post(self.url, login_data)
@@ -862,3 +908,368 @@ class TestResetPasswordConfirmView:
         # Verificar mensaje de error
         messages = list(get_messages(response.wsgi_request))
         assert any('inválido o ha expirado' in str(message) for message in messages)
+
+
+@pytest.mark.django_db
+class TestAdministrarUsuariosView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        self.url = reverse('usuarios:administrar_usuarios')
+        
+        # Crear usuario administrador
+        self.admin_user = Usuario.objects.create_user(
+            username='admin',
+            email='admin@example.com',
+            first_name='Admin',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678',
+            password='AdminPass123!',
+            is_staff=True,
+            is_active=True
+        )
+        
+        # Crear usuario normal
+        self.normal_user = Usuario.objects.create_user(
+            username='normal',
+            email='normal@example.com',
+            first_name='Normal',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='87654321',
+            password='NormalPass123!',
+            is_active=True
+        )
+
+    def test_administrar_usuarios_get_como_admin(self):
+        """Prueba que administrador pueda acceder a la vista"""
+        self.client.force_login(self.admin_user)
+        
+        response = self.client.get(self.url)
+        
+        assert response.status_code == 200
+        assert 'usuarios/administrar_usuarios.html' in [t.name for t in response.templates]
+        assert 'usuarios' in response.context
+        
+        # Verificar que se excluye el usuario actual de la lista
+        usuarios_en_context = list(response.context['usuarios'])
+        assert self.normal_user in usuarios_en_context
+        assert self.admin_user not in usuarios_en_context
+
+    def test_administrar_usuarios_get_como_usuario_normal(self):
+        """Prueba que usuario normal no pueda acceder"""
+        self.client.force_login(self.normal_user)
+        
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al perfil
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:perfil')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No tienes permisos' in str(message) for message in messages)
+
+    def test_administrar_usuarios_sin_autenticacion(self):
+        """Prueba que usuario no autenticado sea redirigido al login"""
+        response = self.client.get(self.url)
+        
+        # Verificar redirección al login
+        assert response.status_code == 302
+        assert '/usuarios/login/' in response.url
+
+
+@pytest.mark.django_db
+class TestBloquearUsuarioView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        
+        # Crear usuario administrador
+        self.admin_user = Usuario.objects.create_user(
+            username='admin',
+            email='admin@example.com',
+            first_name='Admin',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678',
+            password='AdminPass123!',
+            is_staff=True,
+            is_active=True
+        )
+        
+        # Crear usuario normal
+        self.normal_user = Usuario.objects.create_user(
+            username='normal',
+            email='normal@example.com',
+            first_name='Normal',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='87654321',
+            password='NormalPass123!',
+            is_active=True,
+            bloqueado=False
+        )
+        
+        # Crear otro usuario administrador
+        self.otro_admin = Usuario.objects.create_user(
+            username='admin2',
+            email='admin2@example.com',
+            first_name='Admin2',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='11223344',
+            password='Admin2Pass123!',
+            is_staff=True,
+            is_active=True
+        )
+        
+        self.url = reverse('usuarios:bloquear_usuario', kwargs={'pk': self.normal_user.pk})
+
+    def test_bloquear_usuario_exitoso(self):
+        """Prueba bloqueo exitoso de usuario"""
+        self.client.force_login(self.admin_user)
+        
+        # Verificar estado inicial
+        assert not self.normal_user.bloqueado
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el usuario fue bloqueado
+        self.normal_user.refresh_from_db()
+        assert self.normal_user.bloqueado
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        assert any('ha sido bloqueado' in str(message) for message in messages)
+
+    def test_desbloquear_usuario_exitoso(self):
+        """Prueba desbloqueo exitoso de usuario"""
+        self.client.force_login(self.admin_user)
+        
+        # Bloquear usuario primero
+        self.normal_user.bloqueado = True
+        self.normal_user.save()
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el usuario fue desbloqueado
+        self.normal_user.refresh_from_db()
+        assert not self.normal_user.bloqueado
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        assert any('ha sido desbloqueado' in str(message) for message in messages)
+
+    def test_bloquear_usuario_sin_permisos(self):
+        """Prueba que usuario sin permisos no pueda bloquear"""
+        self.client.force_login(self.normal_user)
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección al perfil
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:perfil')
+        
+        # Verificar que el usuario NO fue bloqueado
+        self.normal_user.refresh_from_db()
+        assert not self.normal_user.bloqueado
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No tienes permisos' in str(message) for message in messages)
+
+    def test_bloquear_otro_administrador_no_permitido(self):
+        """Prueba que no se pueda bloquear a otro administrador"""
+        self.client.force_login(self.admin_user)
+        
+        url = reverse('usuarios:bloquear_usuario', kwargs={'pk': self.otro_admin.pk})
+        response = self.client.post(url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el administrador NO fue bloqueado
+        self.otro_admin.refresh_from_db()
+        assert not self.otro_admin.bloqueado
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No puedes bloquear a otros administradores' in str(message) for message in messages)
+
+    def test_bloquear_usuario_con_get_no_permitido(self):
+        """Prueba que GET no esté permitido para bloquear"""
+        self.client.force_login(self.admin_user)
+        
+        response = self.client.get(self.url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el usuario NO fue bloqueado
+        self.normal_user.refresh_from_db()
+        assert not self.normal_user.bloqueado
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Método no permitido' in str(message) for message in messages)
+
+    def test_bloquear_usuario_inexistente(self):
+        """Prueba bloquear usuario inexistente"""
+        self.client.force_login(self.admin_user)
+        
+        url = reverse('usuarios:bloquear_usuario', kwargs={'pk': 99999})
+        response = self.client.post(url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Usuario no encontrado' in str(message) for message in messages)
+
+
+@pytest.mark.django_db
+class TestEliminarUsuarioView:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.client = Client()
+        
+        # Crear usuario administrador
+        self.admin_user = Usuario.objects.create_user(
+            username='admin',
+            email='admin@example.com',
+            first_name='Admin',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678',
+            password='AdminPass123!',
+            is_staff=True,
+            is_active=True
+        )
+        
+        # Crear usuario normal
+        self.normal_user = Usuario.objects.create_user(
+            username='normal',
+            email='normal@example.com',
+            first_name='Normal',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='87654321',
+            password='NormalPass123!',
+            is_active=True
+        )
+        
+        # Crear otro usuario administrador
+        self.otro_admin = Usuario.objects.create_user(
+            username='admin2',
+            email='admin2@example.com',
+            first_name='Admin2',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='11223344',
+            password='Admin2Pass123!',
+            is_staff=True,
+            is_active=True
+        )
+        
+        self.url = reverse('usuarios:eliminar_usuario', kwargs={'pk': self.normal_user.pk})
+
+    def test_eliminar_usuario_exitoso(self):
+        """Prueba eliminación exitosa de usuario"""
+        self.client.force_login(self.admin_user)
+        
+        # Verificar que el usuario existe
+        assert Usuario.objects.filter(pk=self.normal_user.pk).exists()
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el usuario fue eliminado
+        assert not Usuario.objects.filter(pk=self.normal_user.pk).exists()
+        
+        # Verificar mensaje de éxito
+        messages = list(get_messages(response.wsgi_request))
+        assert any('ha sido eliminado permanentemente' in str(message) for message in messages)
+
+    def test_eliminar_usuario_sin_permisos(self):
+        """Prueba que usuario sin permisos no pueda eliminar"""
+        self.client.force_login(self.normal_user)
+        
+        response = self.client.post(self.url)
+        
+        # Verificar redirección al perfil
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:perfil')
+        
+        # Verificar que el usuario NO fue eliminado
+        assert Usuario.objects.filter(pk=self.normal_user.pk).exists()
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No tienes permisos' in str(message) for message in messages)
+
+    def test_eliminar_otro_administrador_no_permitido(self):
+        """Prueba que no se pueda eliminar a otro administrador"""
+        self.client.force_login(self.admin_user)
+        
+        url = reverse('usuarios:eliminar_usuario', kwargs={'pk': self.otro_admin.pk})
+        response = self.client.post(url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el administrador NO fue eliminado
+        assert Usuario.objects.filter(pk=self.otro_admin.pk).exists()
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('No puedes eliminar a otros administradores' in str(message) for message in messages)
+
+    def test_eliminar_usuario_con_get_no_permitido(self):
+        """Prueba que GET no esté permitido para eliminar"""
+        self.client.force_login(self.admin_user)
+        
+        response = self.client.get(self.url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar que el usuario NO fue eliminado
+        assert Usuario.objects.filter(pk=self.normal_user.pk).exists()
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Método no permitido' in str(message) for message in messages)
+
+    def test_eliminar_usuario_inexistente(self):
+        """Prueba eliminar usuario inexistente"""
+        self.client.force_login(self.admin_user)
+        
+        url = reverse('usuarios:eliminar_usuario', kwargs={'pk': 99999})
+        response = self.client.post(url)
+        
+        # Verificar redirección
+        assert response.status_code == 302
+        assert response.url == reverse('usuarios:administrar_usuarios')
+        
+        # Verificar mensaje de error
+        messages = list(get_messages(response.wsgi_request))
+        assert any('Usuario no encontrado' in str(message) for message in messages)
