@@ -116,3 +116,4 @@ python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
+ 

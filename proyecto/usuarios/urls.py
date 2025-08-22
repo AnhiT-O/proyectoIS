@@ -12,4 +12,8 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
     path('reset-password/<str:uidb64>/<str:token>/', views.reset_password_confirm, name='reset_password_confirm'),
+    # Rutas para administración de usuarios
+    path('administrar/', views.administrar_usuarios, name='administrar_usuarios'),
+    path('usuario/<int:pk>/bloquear/', views.bloquear_usuario, name='bloquear_usuario'),
+    path('usuario/<int:pk>/eliminar/', views.eliminar_usuario, name='eliminar_usuario'),
 ]

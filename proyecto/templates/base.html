@@ -192,6 +192,11 @@
                 {% if user.is_authenticated %}
                     <div class="user-info">
                         <span class="user-name">¡Hola, {{ user.first_name }}!</span>
+                        {% if user.es_administrador %}
+                            <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
+                                👥 Administrar Usuarios
+                            </a>
+                        {% endif %}
                         <a href="{% url 'usuarios:perfil' %}" class="nav-item">
                             👤 Mi Perfil
                         </a>

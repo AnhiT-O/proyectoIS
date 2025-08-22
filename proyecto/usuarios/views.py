@@ -22,18 +22,33 @@ def login_usuario(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_active:
+            
+            try:
+                # Primero verificamos si el usuario existe
+                user = Usuario.objects.get(username=username)
+                
+                # Si el usuario está bloqueado, mostramos mensaje específico
+                if user.bloqueado:
+                    messages.error(request, 
+                        'Tu cuenta está bloqueada. Por favor, contacta al administrador '
+                        'para obtener ayuda y resolver esta situación.')
+                    return render(request, 'usuarios/login.html', {
+                        'form': form,
+                        'usuario_bloqueado': True,
+                        'nombre_usuario': user.get_full_name()
+                    })
+                
+                # Si no está bloqueado, intentamos autenticar
+                user = authenticate(username=username, password=password)
+                if user is not None:
                     login(request, user)
                     messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
-                    # Redirigir a la página que el usuario intentaba acceder o al perfil
                     next_page = request.GET.get('next', 'usuarios:perfil')
                     return redirect(next_page)
                 else:
-                    messages.error(request, 'Tu cuenta no está activada. Revisa tu correo electrónico.')
-            else:
-                messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+                    messages.error(request, 'La contraseña ingresada es incorrecta.')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'No existe un usuario con ese nombre de usuario.')
     else:
         form = LoginForm()
     
@@ -232,4 +247,80 @@ def reset_password_confirm(request, uidb64, token):
             'El enlace de recuperación es inválido o ha expirado. '
             'Por favor, solicita un nuevo enlace de recuperación.')
         return redirect('usuarios:recuperar_password')
+
+@login_required
+def administrar_usuarios(request):
+    """Vista para administrar usuarios (solo para administradores)"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('usuarios:perfil')
+    
+    # Obtener todos los usuarios excepto el actual
+    usuarios = Usuario.objects.exclude(pk=request.user.pk).order_by('first_name', 'last_name')
+    
+    return render(request, 'usuarios/administrar_usuarios.html', {
+        'usuarios': usuarios
+    })
+
+@login_required
+def bloquear_usuario(request, pk):
+    """Vista para bloquear/desbloquear usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        
+        # No permitir bloquear otros administradores
+        if usuario.es_administrador():
+            messages.error(request, 'No puedes bloquear a otros administradores.')
+            return redirect('usuarios:administrar_usuarios')
+        
+        # Cambiar estado de bloqueo del usuario
+        usuario.bloqueado = not usuario.bloqueado
+        usuario.save()
+        
+        estado = 'desbloqueado' if not usuario.bloqueado else 'bloqueado'
+        messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
+        
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:administrar_usuarios')
+
+@login_required
+def eliminar_usuario(request, pk):
+    """Vista para eliminar usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        
+        # No permitir eliminar administradores
+        if usuario.es_administrador():
+            messages.error(request, 'No puedes eliminar a otros administradores.')
+            return redirect('usuarios:administrar_usuarios')
+        
+        nombre_completo = usuario.get_full_name()
+        usuario.delete()
+        messages.success(request, f'El usuario {nombre_completo} ha sido eliminado permanentemente.')
+        
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:administrar_usuarios')
 
