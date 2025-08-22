@@ -36,8 +36,9 @@ class Cliente(models.Model):
         choices=TIPO_CLIENTE_CHOICES,
         verbose_name='Tipo de Cliente'
     )
-    direccion = models.TextField(verbose_name='Domicilio')
-    ocupacion = models.CharField(max_length=100, verbose_name='Ocupación')
+    direccion = models.TextField(null=True, blank=True, verbose_name='Domicilio')
+    
+    ocupacion = models.CharField(max_length=100, verbose_name='Ocupación', null=True, blank=True)
     declaracion_jurada = models.BooleanField(
         default=False,
         verbose_name='Declaración Jurada Firmada'

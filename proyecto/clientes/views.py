@@ -15,8 +15,8 @@ def requerir_administrador(view_func):
         return view_func(request, *args, **kwargs)
     return check_admin
 
-@login_required
-@requerir_administrador
+#@login_required
+#@requerir_administrador
 def cliente_crear(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -28,20 +28,20 @@ def cliente_crear(request):
         form = ClienteForm()
     return render(request, 'clientes/cliente_form.html', {'form': form})
 
-@login_required
-@requerir_administrador
+#@login_required
+#@requerir_administrador
 def cliente_lista(request):
     clientes = Cliente.objects.all()
     return render(request, 'clientes/cliente_lista.html', {'clientes': clientes})
 
-@login_required
-@requerir_administrador
+#@login_required
+#@requerir_administrador
 def cliente_detalle(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
+    #cliente = get_object_or_404(Cliente, pk=pk)
     return render(request, 'clientes/cliente_detalle.html', {'cliente': cliente})
 
-@login_required
-@requerir_administrador
+#@login_required
+#@requerir_administrador
 def cliente_editar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
@@ -54,8 +54,8 @@ def cliente_editar(request, pk):
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/cliente_form.html', {'form': form, 'cliente': cliente})
 
-@login_required
-@requerir_administrador
+#@login_required
+#@requerir_administrador
 def cliente_eliminar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
