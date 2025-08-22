@@ -1,49 +1,50 @@
 
-
 {% extends 'base.html' %}
 
 {% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente - Casa de Cambios{% endblock %}
 
 {% block extra_css %}
 <style>
-    .main-content {
-        padding: 2rem 1rem;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
     .cliente-container {
+        max-width: 900px;
+        margin: 0 auto;
         background: white;
-        padding: 2.5rem;
         border-radius: 15px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: 0 auto;
+        overflow: hidden;
     }
 
     .cliente-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
         text-align: center;
-        margin-bottom: 2rem;
     }
 
-    .logo {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 0.5rem;
+    .cliente-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
-    .subtitle {
-        color: #666;
-        font-size: 1rem;
+    .cliente-header .subtitle {
+        margin-top: 0.5rem;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .form-content {
+        padding: 2.5rem;
     }
 
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
 
@@ -56,6 +57,7 @@
         margin-bottom: 0.5rem;
         color: #333;
         font-weight: 500;
+        font-size: 0.95rem;
     }
 
     .form-control {
@@ -64,23 +66,62 @@
         border: 2px solid #e1e5e9;
         border-radius: 8px;
         font-size: 1rem;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
         background-color: #fff;
+        font-family: inherit;
     }
 
     .form-control:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
     }
 
-    .form-control.error {
-        border-color: #dc3545;
+    .form-control:hover {
+        border-color: #b8c6ea;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px solid #e1e5e9;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-container:hover {
+        border-color: #b8c6ea;
+        background: #f0f3ff;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #667eea;
+    }
+
+    .checkbox-container label {
+        margin: 0;
+        font-weight: 500;
+        color: #495057;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #dee2e6;
     }
 
     .btn {
-        width: 100%;
-        padding: 0.875rem;
+        flex: 1;
+        padding: 0.875rem 1.5rem;
         border: none;
         border-radius: 8px;
         font-size: 1rem;
@@ -88,9 +129,11 @@
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-block;
         text-align: center;
-        margin-bottom: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
 
     .btn-primary {
@@ -101,6 +144,8 @@
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
     }
 
     .btn-secondary {
@@ -112,118 +157,187 @@
     .btn-secondary:hover {
         background: #667eea;
         color: white;
-    }
-
-    .form-errors {
-        margin-top: 0.5rem;
+        text-decoration: none;
+        transform: translateY(-1px);
     }
 
     .error-message {
         color: #dc3545;
         font-size: 0.875rem;
-        margin-top: 0.25rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .form-control.error {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .alert {
+        margin-bottom: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+        background: #f8d7da;
+        color: #721c24;
     }
 
     @media (max-width: 768px) {
         .cliente-container {
-            padding: 2rem 1.5rem;
             margin: 1rem;
+            border-radius: 12px;
+        }
+        
+        .cliente-header {
+            padding: 1.5rem;
+        }
+
+        .cliente-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .form-content {
+            padding: 2rem 1.5rem;
         }
         
         .form-row {
             grid-template-columns: 1fr;
+            gap: 0;
         }
-        
-        .logo {
-            font-size: 1.75rem;
+
+        .form-actions {
+            flex-direction: column;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente</h2>
-    
-    <form method="post" class="mt-3">
-        {% csrf_token %}
-        
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            Por favor corrija los siguientes errores:
-            {{ form.errors }}
+<div class="cliente-container">
+    <div class="cliente-header">
+        <h2>
+            {% if form.instance.pk %}
+                ✏️ Editar Cliente
+            {% else %}
+                👤 Nuevo Cliente
+            {% endif %}
+        </h2>
+        <div class="subtitle">
+            {% if form.instance.pk %}
+                Modifica la información del cliente en el sistema
+            {% else %}
+                Registra un nuevo cliente en la casa de cambios
+            {% endif %}
         </div>
-        {% endif %}
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
-                {{ form.nombre }}
-                {{ form.nombre.errors }}
+    </div>
+
+    <div class="form-content">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert">
+                ⚠️ Por favor corrige los siguientes errores antes de continuar
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.apellido.id_for_label }}" class="form-label">Apellido</label>
-                {{ form.apellido }}
-                {{ form.apellido.errors }}
+            {% endif %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.nombre.id_for_label }}">👤 Nombre</label>
+                    {{ form.nombre }}
+                    {% for error in form.nombre.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.apellido.id_for_label }}">👤 Apellido</label>
+                    {{ form.apellido }}
+                    {% for error in form.apellido.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.tipoDocCliente.id_for_label }}" class="form-label">Tipo de Documento</label>
-                {{ form.tipoDocCliente }}
-                {{ form.tipoDocCliente.errors }}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.tipoDocCliente.id_for_label }}">📄 Tipo de Documento</label>
+                    {{ form.tipoDocCliente }}
+                    {% for error in form.tipoDocCliente.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.docCliente.id_for_label }}">🔢 Número de Documento</label>
+                    {{ form.docCliente }}
+                    {% for error in form.docCliente.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.docCliente.id_for_label }}" class="form-label">Número de Documento</label>
-                {{ form.docCliente }}
-                {{ form.docCliente.errors }}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.correoElecCliente.id_for_label }}">📧 Correo Electrónico</label>
+                    {{ form.correoElecCliente }}
+                    {% for error in form.correoElecCliente.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">📞 Teléfono</label>
+                    {{ form.telefono }}
+                    {% for error in form.telefono.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.correoElecCliente.id_for_label }}" class="form-label">Correo Electrónico</label>
-                {{ form.correoElecCliente }}
-                {{ form.correoElecCliente.errors }}
+            <div class="form-group">
+                <label for="{{ form.tipoCliente.id_for_label }}">🏷️ Tipo de Cliente</label>
+                {{ form.tipoCliente }}
+                {% for error in form.tipoCliente.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
-                {{ form.telefono }}
-                {{ form.telefono.errors }}
+
+            <div class="form-group">
+                <label for="{{ form.direccion.id_for_label }}">🏠 Domicilio</label>
+                {{ form.direccion }}
+                {% for error in form.direccion.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
             </div>
-        </div>
 
-        <div class="mb-3">
-            <label for="{{ form.tipoCliente.id_for_label }}" class="form-label">Tipo de Cliente</label>
-            {{ form.tipoCliente }}
-            {{ form.tipoCliente.errors }}
-        </div>
+            <div class="form-group">
+                <label for="{{ form.ocupacion.id_for_label }}">💼 Ocupación</label>
+                {{ form.ocupacion }}
+                {% for error in form.ocupacion.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-        <div class="mb-3">
-            <label for="{{ form.direccion.id_for_label }}" class="form-label">Domicilio</label>
-            {{ form.direccion }}
-            {{ form.direccion.errors }}
-        </div>
+            <div class="form-group">
+                <div class="checkbox-container">
+                    {{ form.declaracion_jurada }}
+                    <label for="{{ form.declaracion_jurada.id_for_label }}">
+                        📝 Declaración Jurada Firmada
+                    </label>
+                </div>
+                {% for error in form.declaracion_jurada.errors %}
+                    <span class="error-message">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-        <div class="mb-3">
-            <label for="{{ form.ocupacion.id_for_label }}" class="form-label">Ocupación</label>
-            {{ form.ocupacion }}
-            {{ form.ocupacion.errors }}
-        </div>
-
-        <div class="mb-3 form-check">
-            {{ form.declaracion_jurada }}
-            <label class="form-check-label" for="{{ form.declaracion_jurada.id_for_label }}">
-                Declaración Jurada Firmada
-            </label>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    💾 Guardar Cliente
+                </button>
+                <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
+                    ↩️ Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
 
