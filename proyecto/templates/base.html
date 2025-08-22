@@ -196,6 +196,25 @@
                             <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
                                 👥 Administrar Usuarios
                             </a>
+                            <a href="{% url 'listar_roles' %}" class="nav-item">
+                                🎭 Listar Roles
+                            </a>
+                            <a href="{% url 'crear_rol' %}" class="nav-item">
+                                ➕ Crear Rol
+                                <div class="permission-buttons"></div>
+                                    <button class="btn-add-permission">+ Agregar Permiso</button>
+                                </div>
+                            </a>
+                            <a href="{% url 'editar_roles' %}" class="nav-item">
+                                ✏️ Editar Roles
+                                <div class="permission-buttons">
+                                    <button class="btn-add-permission">+ Agregar Permiso</button>
+                                    <button class="btn-remove-permission">- Eliminar Permiso</button>
+                                </div>
+                            </a>
+                            <a href="{% url 'eliminar_roles' %}" class="nav-item">
+                                🗑️ Eliminar Roles
+                            </a>
                         {% endif %}
                         <a href="{% url 'usuarios:perfil' %}" class="nav-item">
                             👤 Mi Perfil

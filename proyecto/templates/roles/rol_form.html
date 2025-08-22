@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ titulo }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nombre.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.descripcion.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Permisos</label>
+                            <div class="row">
+                                {% for value, text in form.permisos.field.choices %}
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="permisos" value="{{ value }}" 
+                                               class="form-check-input" id="permiso_{{ value }}"
+                                               {% if value|stringformat:"i" in form.permisos.value %}checked{% endif %}>
+                                        <label class="form-check-label" for="permiso_{{ value }}">
+                                            {{ text }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.permisos.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.permisos.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.activo }}
+                                <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                    Activo
+                                </label>
+                            </div>
+                            {% if form.activo.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.activo.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if rol %}Actualizar{% else %}Crear{% endif %} Rol
+                            </button>
+                            <a href="{% url 'listar_roles' %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Confirmar Eliminación</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">¿Está seguro que desea eliminar el rol "{{ rol.nombre }}"?</p>
+                    <p class="text-center text-danger">Esta acción no se puede deshacer.</p>
+
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                            <a href="{% url 'listar_roles' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
