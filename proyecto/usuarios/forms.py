@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
@@ -195,3 +196,35 @@ class EstablecerPasswordForm(SetPasswordForm):
             raise ValidationError("La contraseña debe contener al menos un número.")
 
         return password1
+
+
+class AsignarRolForm(forms.Form):
+    """Formulario para asignar roles a usuarios"""
+    rol = forms.ModelChoiceField(
+        queryset=Group.objects.exclude(name='administrador').order_by('name'),
+        empty_label="Seleccionar rol",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'style': 'width: 100%; padding: 0.5rem;'
+        }),
+        label='Rol'
+    )
+
+    def __init__(self, *args, **kwargs):
+        usuario = kwargs.pop('usuario', None)
+        super().__init__(*args, **kwargs)
+        
+        if usuario:
+            # Excluir roles que el usuario ya tiene
+            roles_actuales = usuario.groups.all()
+            self.fields['rol'].queryset = Group.objects.exclude(
+                name='administrador'
+            ).exclude(
+                id__in=roles_actuales.values_list('id', flat=True)
+            ).order_by('name')
+
+    def clean_rol(self):
+        rol = self.cleaned_data.get('rol')
+        if not rol:
+            raise ValidationError("Debe seleccionar un rol.")
+        return rol

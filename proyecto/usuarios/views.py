@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -10,7 +10,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
-from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm
+from django.contrib.auth.models import Group
+from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm
 from .models import Usuario
 
 def login_usuario(request):
@@ -332,6 +333,78 @@ def eliminar_usuario(request, pk):
         
     except Usuario.DoesNotExist:
         messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:administrar_usuarios')
+
+
+@login_required
+def asignar_rol(request, pk):
+    """Vista para asignar roles a usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    usuario = get_object_or_404(Usuario, pk=pk)
+    
+    # No permitir asignar roles a otros administradores
+    if usuario.es_administrador():
+        messages.error(request, 'No puedes modificar los roles de otros administradores.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    if request.method == 'POST':
+        form = AsignarRolForm(request.POST, usuario=usuario)
+        if form.is_valid():
+            rol = form.cleaned_data['rol']
+            usuario.groups.add(rol)
+            messages.success(request, f'Rol "{rol.name}" asignado exitosamente a {usuario.get_full_name()}.')
+            return redirect('usuarios:administrar_usuarios')
+    else:
+        form = AsignarRolForm(usuario=usuario)
+    
+    # Verificar si hay roles disponibles para asignar
+    if not form.fields['rol'].queryset.exists():
+        messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    return render(request, 'usuarios/asignar_rol.html', {
+        'form': form,
+        'usuario': usuario
+    })
+
+
+@login_required
+def remover_rol(request, pk, rol_id):
+    """Vista para remover roles de usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    usuario = get_object_or_404(Usuario, pk=pk)
+    rol = get_object_or_404(Group, pk=rol_id)
+    
+    # No permitir modificar roles de administradores
+    if usuario.es_administrador():
+        messages.error(request, 'No puedes modificar los roles de otros administradores.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # No permitir remover el rol de administrador
+    if rol.name == 'administrador':
+        messages.error(request, 'No puedes remover el rol de administrador.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # Verificar que el usuario tiene el rol
+    if not usuario.groups.filter(pk=rol_id).exists():
+        messages.error(request, 'El usuario no tiene este rol asignado.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    usuario.groups.remove(rol)
+    messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.get_full_name()}.')
     
     return redirect('usuarios:administrar_usuarios')
 

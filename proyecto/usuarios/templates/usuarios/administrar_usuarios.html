@@ -81,9 +81,65 @@
         color: white;
     }
 
-    .badge-inactive {
-        background-color: #eb82b7;
+    .role-badge {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        margin: 0.1rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .role-admin {
+        background-color: #dc3545;
         color: white;
+    }
+
+    .role-analyst {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .role-operator {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .role-other {
+        background-color: #6f42c1;
+        color: white;
+    }
+
+    .btn-role {
+        background-color: #17a2b8;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        margin-right: 0.25rem;
+    }
+
+    .btn-role:hover {
+        background-color: #138496;
+    }
+
+    .btn-remove-role {
+        background-color: #dc3545;
+        color: white;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+        border-radius: 10px;
+        margin-left: 0.2rem;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-remove-role:hover {
+        background-color: #c82333;
+    }
+
+    .roles-column {
+        max-width: 200px;
+        word-wrap: break-word;
     }
 </style>
 
@@ -132,10 +188,11 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width: 25%">Nombre Completo</th>
-                    <th style="width: 20%">Usuario</th>
-                    <th style="width: 25%">Email</th>
-                    <th style="width: 15%">Estado</th>
+                    <th style="width: 20%">Nombre Completo</th>
+                    <th style="width: 15%">Usuario</th>
+                    <th style="width: 20%">Email</th>
+                    <th style="width: 20%">Roles</th>
+                    <th style="width: 10%">Estado</th>
                     <th style="width: 15%">Acciones</th>
                 </tr>
             </thead>
@@ -145,6 +202,25 @@
                     <td>{{ usuario.get_full_name }}</td>
                     <td>{{ usuario.username }}</td>
                     <td>{{ usuario.email }}</td>
+                    <td class="roles-column">
+                        {% if usuario.groups.exists %}
+                            {% for group in usuario.groups.all %}
+                                <span class="role-badge {% if group.name == 'administrador' %}role-admin{% elif group.name == 'analista cambiario' %}role-analyst{% elif group.name == 'operador' %}role-operator{% else %}role-other{% endif %}">
+                                    {{ group.name|title }}
+                                    {% if group.name != 'administrador' %}
+                                        <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-remove-role" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas remover el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
+                                                    title="Remover rol">×</button>
+                                        </form>
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        {% else %}
+                            <span style="color: #6c757d; font-style: italic;">Sin roles</span>
+                        {% endif %}
+                    </td>
                     <td>
                         <span class="badge-status {% if not usuario.bloqueado %}badge-active{% else %}badge-inactive{% endif %}">
                             {% if not usuario.bloqueado %}Activo{% else %}Bloqueado{% endif %}
@@ -152,6 +228,12 @@
                     </td>
                     <td>
                         <div class="actions-container">
+                            {% if not usuario.es_administrador %}
+                                <a href="{% url 'usuarios:asignar_rol' usuario.pk %}" class="btn-admin btn-role">
+                                    Asignar Rol
+                                </a>
+                            {% endif %}
+                            
                             <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post">
                                 {% csrf_token %}
                                 <button type="submit" class="btn-admin btn-block">
@@ -175,7 +257,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="6" class="text-center">
                         {% if busqueda %}
                             No se encontraron usuarios que coincidan con "{{ busqueda }}".
                         {% else %}
