@@ -100,6 +100,34 @@
     </div>
     {% endif %}
 
+    <!-- Formulario de búsqueda -->
+    <div class="search-container" style="margin-bottom: 2rem;">
+        <form method="get" class="d-flex align-items-center" style="gap: 1rem;">
+            <div class="flex-grow-1" style="max-width: 400px;">
+                <input type="text" 
+                       name="busqueda" 
+                       class="form-control" 
+                       value="{{ busqueda }}" 
+                       placeholder="Buscar por nombre de usuario..."
+                       style="width: 100%; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #ced4da;">
+            </div>
+            <div class="d-flex" style="gap: 0.5rem; margin-top:4px;">
+                <button type="submit" 
+                        class="btn btn-primary"
+                        style="padding: 0.5rem 1.5rem; border-radius: 8px; background: linear-gradient(135deg, #667fea 0%, #764ba2 100%); border: none; color: white;">
+                    Buscar
+                </button>
+                {% if busqueda %}
+                <a href="{% url 'usuarios:administrar_usuarios' %}" 
+                   class="btn btn-secondary"
+                   style="padding: 0.5rem 1.5rem; border-radius: 8px; background: #d1cafa ; border: 1px solid #ced4da; color: #2a2564; text-decoration: none;">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -147,7 +175,13 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">No hay usuarios registrados.</td>
+                    <td colspan="5" class="text-center">
+                        {% if busqueda %}
+                            No se encontraron usuarios que coincidan con "{{ busqueda }}".
+                        {% else %}
+                            No hay usuarios registrados.
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
