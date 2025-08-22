@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .clients-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 1000px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #007bff;
+    }
+
+    .clients-table {
+        width: 100%;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .clients-table th {
+        background-color: #f8f9fa;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .clients-table td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .client-type-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .type-fisica {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .type-juridica {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-remove {
+        background-color: #dc3545;
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .btn-remove:hover {
+        background-color: #c82333;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-assign {
+        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-assign:hover {
+        color: white;
+        text-decoration: none;
+        opacity: 0.9;
+    }
+
+    .no-clients {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+
+    .actions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .client-count {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="clients-container">
+    <h2>Clientes Asignados</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="user-info">
+        <h4>{{ usuario.get_full_name }}</h4>
+        <p class="mb-0">
+            <strong>Usuario:</strong> {{ usuario.username }} | 
+            <strong>Email:</strong> {{ usuario.email }}
+        </p>
+    </div>
+
+    <div class="actions-header">
+        <div>
+            <h5>Lista de Clientes</h5>
+            <div class="client-count">
+                Total: {{ clientes_asignados.count }} cliente{{ clientes_asignados.count|pluralize }}
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-assign">
+                Asignar Más Clientes
+            </a>
+        </div>
+    </div>
+
+    {% if clientes_asignados %}
+        <div class="table-responsive">
+            <table class="clients-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Nombre</th>
+                        <th style="width: 20%">Documento</th>
+                        <th style="width: 25%">Email</th>
+                        <th style="width: 15%">Teléfono</th>
+                        <th style="width: 10%">Tipo</th>
+                        <th style="width: 5%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes_asignados %}
+                    <tr>
+                        <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                        <td>
+                            <strong>{{ cliente.tipoDocCliente }}:</strong><br>
+                            {{ cliente.docCliente }}
+                        </td>
+                        <td>{{ cliente.correoElecCliente }}</td>
+                        <td>{{ cliente.telefono }}</td>
+                        <td>
+                            <span class="client-type-badge {% if cliente.tipoCliente == 'F' %}type-fisica{% else %}type-juridica{% endif %}">
+                                {% if cliente.tipoCliente == 'F' %}Física{% else %}Jurídica{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <form style="display: inline;" method="post" action="{% url 'usuarios:remover_cliente' usuario.pk cliente.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove" 
+                                        onclick="return confirm('¿Estás seguro de que deseas remover el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
+                                        title="Remover cliente">
+                                    ×
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="no-clients">
+            <h5>No hay clientes asignados</h5>
+            <p>Este usuario no tiene clientes asignados actualmente.</p>
+            <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-assign">
+                Asignar Clientes
+            </a>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-back">
+            Volver a Administrar Usuarios
+        </a>
+    </div>
+</div>
+{% endblock %}

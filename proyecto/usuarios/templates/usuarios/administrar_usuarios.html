@@ -137,9 +137,32 @@
         background-color: #c82333;
     }
 
-    .roles-column {
+    .clients-column {
         max-width: 200px;
         word-wrap: break-word;
+    }
+
+    .client-count {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+
+    .btn-clients {
+        background-color: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        margin-right: 0.25rem;
+    }
+
+    .btn-clients:hover {
+        background-color: #218838;
     }
 </style>
 
@@ -188,10 +211,11 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width: 20%">Nombre Completo</th>
-                    <th style="width: 15%">Usuario</th>
-                    <th style="width: 20%">Email</th>
-                    <th style="width: 20%">Roles</th>
+                    <th style="width: 15%">Nombre Completo</th>
+                    <th style="width: 12%">Usuario</th>
+                    <th style="width: 18%">Email</th>
+                    <th style="width: 15%">Roles</th>
+                    <th style="width: 15%">Clientes Asignados</th>
                     <th style="width: 10%">Estado</th>
                     <th style="width: 15%">Acciones</th>
                 </tr>
@@ -219,6 +243,27 @@
                             {% endfor %}
                         {% else %}
                             <span style="color: #6c757d; font-style: italic;">Sin roles</span>
+                        {% endif %}
+                    </td>
+                    <td class="clients-column">
+                        {% if not usuario.es_administrador %}
+                            {% with clientes_count=usuario.clientes_operados.count %}
+                                {% if clientes_count > 0 %}
+                                    <div class="client-count">{{ clientes_count }} cliente{{ clientes_count|pluralize }}</div>
+                                    <br>
+                                    <a href="{% url 'usuarios:ver_clientes_usuario' usuario.pk %}" class="btn-admin btn-clients">
+                                        Ver Clientes
+                                    </a>
+                                {% else %}
+                                    <span style="color: #6c757d; font-style: italic;">Sin clientes</span>
+                                    <br>
+                                    <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-admin btn-clients">
+                                        Asignar
+                                    </a>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <span style="color: #6c757d; font-style: italic;">N/A</span>
                         {% endif %}
                     </td>
                     <td>
@@ -257,7 +302,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">
+                    <td colspan="7" class="text-center">
                         {% if busqueda %}
                             No se encontraron usuarios que coincidan con "{{ busqueda }}".
                         {% else %}

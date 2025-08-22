@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
+from clientes.models import Cliente, UsuarioCliente
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -228,3 +229,35 @@ class AsignarRolForm(forms.Form):
         if not rol:
             raise ValidationError("Debe seleccionar un rol.")
         return rol
+
+
+class AsignarClienteForm(forms.Form):
+    """Formulario para asignar clientes a usuarios"""
+    clientes = forms.ModelMultipleChoiceField(
+        queryset=Cliente.objects.all().order_by('nombre', 'apellido'),
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-check-input'
+        }),
+        label='Clientes disponibles',
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        usuario = kwargs.pop('usuario', None)
+        super().__init__(*args, **kwargs)
+        
+        if usuario:
+            # Excluir clientes que ya están asignados al usuario
+            clientes_asignados = usuario.clientes_operados.all()
+            self.fields['clientes'].queryset = Cliente.objects.exclude(
+                id__in=clientes_asignados.values_list('id', flat=True)
+            ).order_by('nombre', 'apellido')
+            
+            # Personalizar la etiqueta de cada cliente
+            self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} {obj.apellido} ({obj.docCliente})"
+
+    def clean_clientes(self):
+        clientes = self.cleaned_data.get('clientes')
+        if not clientes:
+            raise ValidationError("Debe seleccionar al menos un cliente.")
+        return clientes

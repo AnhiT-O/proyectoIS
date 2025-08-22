@@ -11,8 +11,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import Group
-from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm
+from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
+from clientes.models import Cliente, UsuarioCliente
 
 def login_usuario(request):
     if request.user.is_authenticated:
@@ -407,4 +408,98 @@ def remover_rol(request, pk, rol_id):
     messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.get_full_name()}.')
     
     return redirect('usuarios:administrar_usuarios')
+
+
+@login_required
+def asignar_clientes(request, pk):
+    """Vista para asignar clientes a usuarios"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    usuario = get_object_or_404(Usuario, pk=pk)
+    
+    # No permitir asignar clientes a administradores
+    if usuario.es_administrador():
+        messages.error(request, 'No puedes asignar clientes a otros administradores.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    if request.method == 'POST':
+        form = AsignarClienteForm(request.POST, usuario=usuario)
+        if form.is_valid():
+            clientes = form.cleaned_data['clientes']
+            # Crear las relaciones usuario-cliente
+            for cliente in clientes:
+                UsuarioCliente.objects.get_or_create(
+                    usuario=usuario,
+                    cliente=cliente
+                )
+            
+            if len(clientes) == 1:
+                messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.get_full_name()}.')
+            else:
+                messages.success(request, f'{len(clientes)} clientes asignados exitosamente a {usuario.get_full_name()}.')
+            
+            return redirect('usuarios:administrar_usuarios')
+    else:
+        form = AsignarClienteForm(usuario=usuario)
+    
+    # Verificar si hay clientes disponibles para asignar
+    if not form.fields['clientes'].queryset.exists():
+        messages.info(request, f'{usuario.get_full_name()} ya tiene todos los clientes disponibles asignados.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    return render(request, 'usuarios/asignar_clientes.html', {
+        'form': form,
+        'usuario': usuario
+    })
+
+
+@login_required
+def remover_cliente(request, pk, cliente_id):
+    """Vista para remover la asignación de un cliente a un usuario"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    usuario = get_object_or_404(Usuario, pk=pk)
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+    
+    # No permitir modificar asignaciones de administradores
+    if usuario.es_administrador():
+        messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # Verificar que la relación existe
+    try:
+        relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
+        relacion.delete()
+        messages.success(request, f'Cliente "{cliente}" removido exitosamente de {usuario.get_full_name()}.')
+    except UsuarioCliente.DoesNotExist:
+        messages.error(request, 'La asignación no existe.')
+    
+    return redirect('usuarios:administrar_usuarios')
+
+
+@login_required
+def ver_clientes_usuario(request, pk):
+    """Vista para ver todos los clientes asignados a un usuario"""
+    # Verificar si el usuario es administrador
+    if not request.user.es_administrador():
+        messages.error(request, 'No tienes permisos para realizar esta acción.')
+        return redirect('usuarios:perfil')
+    
+    usuario = get_object_or_404(Usuario, pk=pk)
+    clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
+    
+    return render(request, 'usuarios/ver_clientes_usuario.html', {
+        'usuario': usuario,
+        'clientes_asignados': clientes_asignados
+    })
 
