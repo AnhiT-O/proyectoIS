@@ -36,7 +36,12 @@ class Cliente(models.Model):
         choices=TIPO_CLIENTE_CHOICES,
         verbose_name='Tipo de Cliente'
     )
-    direccion = models.TextField(blank=True, null=True)
+    direccion = models.TextField(verbose_name='Domicilio')
+    ocupacion = models.CharField(max_length=100, verbose_name='Ocupación')
+    declaracion_jurada = models.BooleanField(
+        default=False,
+        verbose_name='Declaración Jurada Firmada'
+    )
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
         through='UsuarioCliente',
