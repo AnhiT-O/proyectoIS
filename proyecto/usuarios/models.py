@@ -36,6 +36,13 @@ class Usuario(AbstractUser):
         null=False,
         blank=False
     )
+    cliente_activo = models.ForeignKey(
+        'clientes.Cliente',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='usuarios_activos'
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'tipo_cedula', 'cedula_identidad']
