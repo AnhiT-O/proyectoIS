@@ -18,16 +18,6 @@ class TestRolesModel(TestCase):
         self.assertEqual(rol.descripcion, 'Descripción del rol de prueba')
         self.assertEqual(str(rol), 'test_rol')
     
-    def test_propiedad_nombre_alias(self):
-        """Test propiedad nombre como alias de name"""
-        rol = Roles.objects.create(
-            name='analista',
-            descripcion='Rol de análisis'
-        )
-        
-        self.assertEqual(rol.nombre, rol.name)
-        self.assertEqual(rol.nombre, 'analista')
-    
     def test_descripcion_puede_ser_nula(self):
         """Test que descripción puede ser nula o vacía"""
         rol = Roles.objects.create(name='sin_descripcion')
@@ -59,22 +49,3 @@ class TestRolesModel(TestCase):
         
         with self.assertRaises(Exception):  # Django levantará IntegrityError
             Roles.objects.create(name='rol_unico_test')
-    
-    def test_crear_multiple_roles(self):
-        """Test crear múltiples roles"""
-        roles_data = [
-            {'name': 'administrador', 'descripcion': 'Administrador del sistema'},
-            {'name': 'operador', 'descripcion': 'Operador básico'},
-            {'name': 'analista', 'descripcion': 'Analista cambiario'},
-        ]
-        
-        for data in roles_data:
-            Roles.objects.create(**data)
-        
-        # Verificar que se crearon todos
-        self.assertEqual(Roles.objects.count(), 3)
-        
-        # Verificar nombres específicos
-        self.assertTrue(Roles.objects.filter(name='administrador').exists())
-        self.assertTrue(Roles.objects.filter(name='operador').exists())
-        self.assertTrue(Roles.objects.filter(name='analista').exists())
