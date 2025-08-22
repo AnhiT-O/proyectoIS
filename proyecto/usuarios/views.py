@@ -252,7 +252,7 @@ def reset_password_confirm(request, uidb64, token):
 def administrar_usuarios(request):
     """Vista para administrar usuarios (solo para administradores)"""
     # Verificar si el usuario es administrador
-    if not request.user.is_staff:
+    if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('usuarios:perfil')
     
@@ -267,7 +267,7 @@ def administrar_usuarios(request):
 def bloquear_usuario(request, pk):
     """Vista para bloquear/desbloquear usuarios"""
     # Verificar si el usuario es administrador
-    if not request.user.is_staff:
+    if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
         return redirect('usuarios:perfil')
     
@@ -279,7 +279,7 @@ def bloquear_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir bloquear otros administradores
-        if usuario.is_staff:
+        if usuario.es_administrador():
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -299,7 +299,7 @@ def bloquear_usuario(request, pk):
 def eliminar_usuario(request, pk):
     """Vista para eliminar usuarios"""
     # Verificar si el usuario es administrador
-    if not request.user.is_staff:
+    if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
         return redirect('usuarios:perfil')
     
@@ -311,7 +311,7 @@ def eliminar_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir eliminar administradores
-        if usuario.is_staff:
+        if usuario.es_administrador():
             messages.error(request, 'No puedes eliminar a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         

@@ -912,6 +912,9 @@ class TestAdministrarUsuariosView:
         self.client = Client()
         self.url = reverse('usuarios:administrar_usuarios')
         
+        # Crear grupo administrador
+        admin_group, created = Group.objects.get_or_create(name='administrador')
+        
         # Crear usuario administrador
         self.admin_user = Usuario.objects.create_user(
             username='admin',
@@ -921,9 +924,9 @@ class TestAdministrarUsuariosView:
             tipo_cedula='CI',
             cedula_identidad='12345678',
             password='AdminPass123!',
-            is_staff=True,
             is_active=True
         )
+        self.admin_user.groups.add(admin_group)
         
         # Crear usuario normal
         self.normal_user = Usuario.objects.create_user(
@@ -981,6 +984,9 @@ class TestBloquearUsuarioView:
     def setup_method(self):
         self.client = Client()
         
+        # Crear grupo administrador
+        admin_group, created = Group.objects.get_or_create(name='administrador')
+        
         # Crear usuario administrador
         self.admin_user = Usuario.objects.create_user(
             username='admin',
@@ -990,9 +996,9 @@ class TestBloquearUsuarioView:
             tipo_cedula='CI',
             cedula_identidad='12345678',
             password='AdminPass123!',
-            is_staff=True,
             is_active=True
         )
+        self.admin_user.groups.add(admin_group)
         
         # Crear usuario normal
         self.normal_user = Usuario.objects.create_user(
@@ -1016,9 +1022,9 @@ class TestBloquearUsuarioView:
             tipo_cedula='CI',
             cedula_identidad='11223344',
             password='Admin2Pass123!',
-            is_staff=True,
             is_active=True
         )
+        self.otro_admin.groups.add(admin_group)
         
         self.url = reverse('usuarios:bloquear_usuario', kwargs={'pk': self.normal_user.pk})
 
@@ -1142,6 +1148,9 @@ class TestEliminarUsuarioView:
     def setup_method(self):
         self.client = Client()
         
+        # Crear grupo administrador
+        admin_group, created = Group.objects.get_or_create(name='administrador')
+        
         # Crear usuario administrador
         self.admin_user = Usuario.objects.create_user(
             username='admin',
@@ -1151,9 +1160,9 @@ class TestEliminarUsuarioView:
             tipo_cedula='CI',
             cedula_identidad='12345678',
             password='AdminPass123!',
-            is_staff=True,
             is_active=True
         )
+        self.admin_user.groups.add(admin_group)
         
         # Crear usuario normal
         self.normal_user = Usuario.objects.create_user(
@@ -1176,9 +1185,9 @@ class TestEliminarUsuarioView:
             tipo_cedula='CI',
             cedula_identidad='11223344',
             password='Admin2Pass123!',
-            is_staff=True,
             is_active=True
         )
+        self.otro_admin.groups.add(admin_group)
         
         self.url = reverse('usuarios:eliminar_usuario', kwargs={'pk': self.normal_user.pk})
 

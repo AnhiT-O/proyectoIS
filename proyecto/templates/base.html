@@ -192,7 +192,7 @@
                 {% if user.is_authenticated %}
                     <div class="user-info">
                         <span class="user-name">¡Hola, {{ user.first_name }}!</span>
-                        {% if user.is_staff %}
+                        {% if user.es_administrador %}
                             <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
                                 👥 Administrar Usuarios
                             </a>
