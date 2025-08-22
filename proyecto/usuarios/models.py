@@ -42,6 +42,7 @@ class Usuario(AbstractUser):
         null=True,
         blank=True,
         related_name='usuarios_activos'
+    ),
     bloqueado = models.BooleanField(
         default=False,
         help_text='Indica si el usuario está bloqueado en el sistema'
