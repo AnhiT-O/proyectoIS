@@ -184,6 +184,26 @@
                     <div class="info-value">{{ user.cedula_identidad }}</div>
                 </div>
                 <div class="info-item">
+                    <div class="info-label">Roles en el Sistema</div>
+                    <div class="info-value">
+                        {% if user.groups.exists %}
+                            {% for group in user.groups.all %}
+                                {% if group.name == 'administrador' %}
+                                    <span class="status-badge" style="background: #dc3545; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Administrador</span>
+                                {% elif group.name == 'analista cambiario' %}
+                                    <span class="status-badge" style="background: #28a745; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Analista Cambiario</span>
+                                {% elif group.name == 'operador' %}
+                                    <span class="status-badge" style="background: #007bff; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Operador</span>
+                                {% else %}
+                                    <span class="status-badge" style="background: #6f42c1; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">{{ group.name|title }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="status-badge" style="background: #6c757d;">Sin roles asignados</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-item">
                     <div class="info-label">Estado de la Cuenta</div>
                     <div class="info-value">
                         {% if user.is_active %}
