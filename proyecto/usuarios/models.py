@@ -36,6 +36,13 @@ class Usuario(AbstractUser):
         null=False,
         blank=False
     )
+    cliente_activo = models.ForeignKey(
+        'clientes.Cliente',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='usuarios_activos'
+    ),
     bloqueado = models.BooleanField(
         default=False,
         help_text='Indica si el usuario está bloqueado en el sistema'
