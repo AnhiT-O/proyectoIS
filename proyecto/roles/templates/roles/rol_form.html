@@ -54,13 +54,28 @@
         overflow-y: auto;
     }
 
-    .permission-item {
+    .permissions-container ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .permissions-container li {
         padding: 0.5rem;
         border-bottom: 1px solid #f8f9fa;
     }
 
-    .permission-item:last-child {
+    .permissions-container li:last-child {
         border-bottom: none;
+    }
+
+    .permissions-container input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+
+    .permissions-container label {
+        margin-bottom: 0;
+        color: #495057;
     }
 
     .btn-submit {
@@ -109,11 +124,11 @@
             {% endif %}
 
             <div class="form-group">
-                <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre del Rol</label>
-                {{ form.nombre }}
-                {% if form.nombre.errors %}
+                <label for="{{ form.name.id_for_label }}" class="form-label">Nombre del Rol</label>
+                {{ form.name }}
+                {% if form.name.errors %}
                 <div class="invalid-feedback d-block">
-                    {% for error in form.nombre.errors %}
+                    {% for error in form.name.errors %}
                     {{ error }}
                     {% endfor %}
                 </div>
@@ -135,38 +150,11 @@
             <div class="form-group">
                 <label class="form-label">Permisos</label>
                 <div class="permissions-container">
-                    {% for value, text in form.permisos.field.choices %}
-                    <div class="permission-item">
-                        <div class="form-check">
-                            <input type="checkbox" name="permisos" value="{{ value }}" 
-                                   class="form-check-input" id="permiso_{{ value }}"
-                                   {% if value|stringformat:"i" in form.permisos.value %}checked{% endif %}>
-                            <label class="form-check-label" for="permiso_{{ value }}">
-                                {{ text }}
-                            </label>
-                        </div>
-                    </div>
-                    {% endfor %}
+                    {{ form.permisos }}
                 </div>
                 {% if form.permisos.errors %}
                 <div class="invalid-feedback d-block">
                     {% for error in form.permisos.errors %}
-                    {{ error }}
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <div class="form-check">
-                    {{ form.activo }}
-                    <label class="form-check-label" for="{{ form.activo.id_for_label }}">
-                        Rol Activo
-                    </label>
-                </div>
-                {% if form.activo.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.activo.errors %}
                     {{ error }}
                     {% endfor %}
                 </div>

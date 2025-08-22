@@ -126,7 +126,7 @@
 <div class="admin-container">
     <div class="admin-header">
         <h2>Administrar Roles</h2>
-        {% if perms.roles.add_rol %}
+        {% if perms.auth.add_group %}
         <a href="{% url 'crear_rol' %}" class="btn-crear">
             <i class="fas fa-plus"></i> Crear Nuevo Rol
         </a>
@@ -149,33 +149,27 @@
                 <tr>
                     <th style="width: 20%">Nombre</th>
                     <th style="width: 35%">Descripción</th>
-                    <th style="width: 15%">Estado</th>
                     <th style="width: 30%">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for rol in roles %}
                 <tr>
-                    <td>{{ rol.nombre }}</td>
-                    <td>{{ rol.descripcion|truncatewords:30 }}</td>
-                    <td>
-                        <span class="badge-status {% if rol.activo %}badge-active{% else %}badge-inactive{% endif %}">
-                            {% if rol.activo %}Activo{% else %}Inactivo{% endif %}
-                        </span>
-                    </td>
+                    <td>{{ rol.name }}</td>
+                    <td>{{ rol.descripcion|default:"Sin descripción" }}</td>
                     <td>
                         <div class="actions-container">
-                            {% if perms.roles.view_rol %}
+                            {% if perms.auth.view_group %}
                             <a href="{% url 'detalle_rol' rol.pk %}" class="btn-admin btn-view" title="Ver detalles">
                                 <i class="fas fa-eye"></i> Ver
                             </a>
                             {% endif %}
-                            {% if perms.roles.change_rol %}
+                            {% if perms.auth.change_group %}
                             <a href="{% url 'editar_rol' rol.pk %}" class="btn-admin btn-edit" title="Editar">
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                             {% endif %}
-                            {% if perms.roles.delete_rol %}
+                            {% if perms.auth.delete_group %}
                             <a href="{% url 'eliminar_rol' rol.pk %}" class="btn-admin btn-delete" title="Eliminar">
                                 <i class="fas fa-trash"></i> Eliminar
                             </a>

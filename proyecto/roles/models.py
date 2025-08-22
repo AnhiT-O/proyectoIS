@@ -1,15 +1,20 @@
 from django.db import models
+from django.contrib.auth.models import Group
 
-class Rol(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
-    descripcion = models.TextField(blank=True)
-    permisos = models.ManyToManyField('auth.Permission')
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    activo = models.BooleanField(default=True)
-
+class Roles(Group):
+    """
+    Modelo que extiende auth.Group para agregar funcionalidad específica de roles
+    """
+    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del rol")
+    
     class Meta:
         verbose_name = 'Rol'
         verbose_name_plural = 'Roles'
-
+    
     def __str__(self):
-        return self.nombre
+        return self.name
+    
+    @property
+    def nombre(self):
+        """Alias para mantener compatibilidad con código existente"""
+        return self.name
