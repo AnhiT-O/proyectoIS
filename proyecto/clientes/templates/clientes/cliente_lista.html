@@ -386,13 +386,13 @@
     <div class="clientes-header">
         <div class="header-content">
             <div class="header-info">
-                <h2>👥 Gestión de Clientes</h2>
+                <h2> Gestión de Clientes</h2>
                 <div class="header-subtitle">
                     Administra todos los clientes de la casa de cambios
                 </div>
             </div>
             <a href="{% url 'clientes:cliente_crear' %}" class="btn-nuevo">
-                ➕ Nuevo Cliente
+            Nuevo Cliente
             </a>
         </div>
     </div>
@@ -400,10 +400,10 @@
     {% if clientes %}
         <div class="stats-bar">
             <div class="stats-info">
-                📊 Total de clientes: <span class="stats-count">{{ clientes|length }}</span>
+                 Total de clientes: <span class="stats-count">{{ clientes|length }}</span>
             </div>
             <div class="search-box">
-                🔍
+                
                 <input type="text" placeholder="Buscar cliente..." id="searchInput">
             </div>
         </div>
@@ -426,7 +426,7 @@
                     <tr>
                         <td>
                             <div class="cliente-name">
-                                👤 {{ cliente.nombre }} {{ cliente.apellido }}
+                                 {{ cliente.nombre }} {{ cliente.apellido }}
                             </div>
                         </td>
                         <td>
@@ -447,29 +447,29 @@
                             </div>
                         </td>
                         <td>
-                            🏠 {{ cliente.direccion|default:"No especificada"|truncatechars:30 }}
+                             {{ cliente.direccion|default:"No especificada"|truncatechars:30 }}
                         </td>
                         <td>
                             {% if cliente.declaracion_jurada %}
                                 <span class="status-badge status-ok">
-                                    ✅ Firmada
+                                    Firmada
                                 </span>
                             {% else %}
                                 <span class="status-badge status-pending">
-                                    ⏳ Pendiente
+                                     Pendiente
                                 </span>
                             {% endif %}
                         </td>
                         <td>
                             <div class="actions-cell">
                                 <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-action btn-ver" title="Ver detalles">
-                                    👁️
+                                    Detalles
                                 </a>
                                 <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-action btn-editar" title="Editar">
-                                    ✏️
+                                    Editar
                                 </a>
                                 <a href="{% url 'clientes:cliente_eliminar' cliente.pk %}" class="btn-action btn-eliminar" title="Eliminar">
-                                    🗑️
+                                    Eliminar
                                 </a>
                             </div>
                         </td>

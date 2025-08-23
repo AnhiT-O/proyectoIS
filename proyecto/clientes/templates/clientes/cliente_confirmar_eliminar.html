@@ -204,7 +204,7 @@
 <div class="confirmar-container">
     <div class="warning-header">
         <div class="header-content">
-            <div class="warning-icon">⚠️</div>
+            <div class="warning-icon"></div>
             <h2 class="warning-title">Confirmar Eliminación</h2>
         </div>
     </div>
@@ -216,7 +216,7 @@
 
         <div class="cliente-info">
             <div class="cliente-name">
-                👤 {{ cliente.nombre }} {{ cliente.apellido }}
+                {{ cliente.nombre }} {{ cliente.apellido }}
             </div>
             <div class="cliente-details">
                 {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }}<br>
@@ -240,10 +240,10 @@
             {% csrf_token %}
             <div class="actions-container">
                 <button type="submit" class="btn btn-danger">
-                    🗑️ Sí, Eliminar Cliente
+                    Eliminar Cliente
                 </button>
                 <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn btn-secondary">
-                    ↩️ Cancelar
+                    Cancelar
                 </a>
             </div>
         </form>
