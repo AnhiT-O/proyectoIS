@@ -43,18 +43,8 @@
     .client-type-badge {
         padding: 0.3rem 0.6rem;
         border-radius: 15px;
-        font-size: 0.75rem;
+        font-size: 1rem;
         font-weight: 500;
-    }
-
-    .type-fisica {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .type-juridica {
-        background-color: #007bff;
-        color: white;
     }
 
     .btn-remove {
@@ -195,7 +185,7 @@
                                 <button type="submit" class="btn-remove" 
                                         onclick="return confirm('¿Estás seguro de que deseas remover el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
                                         title="Remover cliente">
-                                    ×
+                                    Desasignar
                                 </button>
                             </form>
                         </td>
