@@ -15,7 +15,6 @@ urlpatterns = [
     # Rutas para administración de usuarios
     path('administrar/', views.administrar_usuarios, name='administrar_usuarios'),
     path('usuario/<int:pk>/bloquear/', views.bloquear_usuario, name='bloquear_usuario'),
-    path('usuario/<int:pk>/eliminar/', views.eliminar_usuario, name='eliminar_usuario'),
     path('usuario/<int:pk>/asignar-rol/', views.asignar_rol, name='asignar_rol'),
     path('usuario/<int:pk>/remover-rol/<int:rol_id>/', views.remover_rol, name='remover_rol'),
     # Rutas para gestión de clientes-usuarios
