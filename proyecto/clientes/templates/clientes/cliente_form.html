@@ -217,9 +217,9 @@
     <div class="cliente-header">
         <h2>
             {% if form.instance.pk %}
-                ✏️ Editar Cliente
+                Editar Cliente
             {% else %}
-                👤 Nuevo Cliente
+                Nuevo Cliente
             {% endif %}
         </h2>
         <div class="subtitle">
@@ -237,20 +237,20 @@
             
             {% if form.errors %}
             <div class="alert">
-                ⚠️ Por favor corrige los siguientes errores antes de continuar
+                Por favor corrige los siguientes errores antes de continuar
             </div>
             {% endif %}
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="{{ form.nombre.id_for_label }}">👤 Nombre</label>
+                    <label for="{{ form.nombre.id_for_label }}"> Nombre</label>
                     {{ form.nombre }}
                     {% for error in form.nombre.errors %}
                         <span class="error-message">{{ error }}</span>
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.apellido.id_for_label }}">👤 Apellido</label>
+                    <label for="{{ form.apellido.id_for_label }}"> Apellido</label>
                     {{ form.apellido }}
                     {% for error in form.apellido.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -260,14 +260,14 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="{{ form.tipoDocCliente.id_for_label }}">📄 Tipo de Documento</label>
+                    <label for="{{ form.tipoDocCliente.id_for_label }}"> Tipo de Documento</label>
                     {{ form.tipoDocCliente }}
                     {% for error in form.tipoDocCliente.errors %}
                         <span class="error-message">{{ error }}</span>
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.docCliente.id_for_label }}">🔢 Número de Documento</label>
+                    <label for="{{ form.docCliente.id_for_label }}"> Número de Documento</label>
                     {{ form.docCliente }}
                     {% for error in form.docCliente.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -277,14 +277,14 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="{{ form.correoElecCliente.id_for_label }}">📧 Correo Electrónico</label>
+                    <label for="{{ form.correoElecCliente.id_for_label }}"> Correo Electrónico</label>
                     {{ form.correoElecCliente }}
                     {% for error in form.correoElecCliente.errors %}
                         <span class="error-message">{{ error }}</span>
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.telefono.id_for_label }}">📞 Teléfono</label>
+                    <label for="{{ form.telefono.id_for_label }}"> Teléfono</label>
                     {{ form.telefono }}
                     {% for error in form.telefono.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -293,7 +293,7 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.tipoCliente.id_for_label }}">🏷️ Tipo de Cliente</label>
+                <label for="{{ form.tipoCliente.id_for_label }}"> Tipo de Cliente</label>
                 {{ form.tipoCliente }}
                 {% for error in form.tipoCliente.errors %}
                     <span class="error-message">{{ error }}</span>
@@ -301,7 +301,7 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.direccion.id_for_label }}">🏠 Domicilio</label>
+                <label for="{{ form.direccion.id_for_label }}"> Domicilio</label>
                 {{ form.direccion }}
                 {% for error in form.direccion.errors %}
                     <span class="error-message">{{ error }}</span>
@@ -309,7 +309,7 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.ocupacion.id_for_label }}">💼 Ocupación</label>
+                <label for="{{ form.ocupacion.id_for_label }}"> Ocupación</label>
                 {{ form.ocupacion }}
                 {% for error in form.ocupacion.errors %}
                     <span class="error-message">{{ error }}</span>
@@ -320,7 +320,7 @@
                 <div class="checkbox-container">
                     {{ form.declaracion_jurada }}
                     <label for="{{ form.declaracion_jurada.id_for_label }}">
-                        📝 Declaración Jurada Firmada
+                        Declaración Jurada Firmada
                     </label>
                 </div>
                 {% for error in form.declaracion_jurada.errors %}
@@ -330,10 +330,10 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    💾 Guardar Cliente
+                    Guardar Cliente
                 </button>
                 <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
-                    ↩️ Cancelar
+                     Cancelar
                 </a>
             </div>
         </form>

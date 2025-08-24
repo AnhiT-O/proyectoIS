@@ -244,7 +244,7 @@
     <div class="cliente-header">
         <div class="header-content">
             <h1 class="cliente-name">
-                👤 {{ cliente.nombre }} {{ cliente.apellido }}
+                 {{ cliente.nombre }} {{ cliente.apellido }}
             </h1>
             <div class="cliente-type">
                 {{ cliente.get_tipoCliente_display }}
@@ -314,11 +314,11 @@
                     <div class="info-value">
                         {% if cliente.declaracion_jurada %}
                             <span class="status-badge status-success">
-                                ✅ Declaración Firmada
+                                Declaración Firmada
                             </span>
                         {% else %}
                             <span class="status-badge status-danger">
-                                ⚠️ Declaración Pendiente
+                                Declaración Pendiente
                             </span>
                         {% endif %}
                     </div>
@@ -330,10 +330,10 @@
     <div class="actions-section">
         <div class="actions-container">
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn btn-warning">
-                ✏️ Editar Cliente
+                Editar Cliente
             </a>
             <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
-                ↩️ Volver a la Lista
+                Volver a la Lista
             </a>
         </div>
     </div>
