@@ -59,7 +59,7 @@ def login_usuario(request):
 def logout_usuario(request):
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
-    return redirect('usuarios:login')
+    return redirect('inicio')
 
 def registro_usuario(request):
     if request.method == 'POST':
@@ -134,9 +134,23 @@ def activar_cuenta(request, uidb64, token):
         user.save()
         login(request, user)
         messages.success(request, '¡Cuenta activada exitosamente! Bienvenido.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     else:
-        messages.error(request, 'El enlace de activación es inválido o ha expirado.')
+        # Si el usuario existe pero el token es inválido o expiró
+        if user is not None:
+            # Verificar si el usuario no está activo (nunca activó su cuenta)
+            if not user.is_active:
+                # Eliminar el usuario de la base de datos
+                user.delete()
+                messages.error(request, 
+                    'El enlace de activación ha expirado y tu cuenta ha sido eliminada.'
+                    'Por favor, regístrate nuevamente.')
+            else:
+                # Si el usuario ya está activo, solo mostrar error de enlace inválido
+                messages.error(request, 'El enlace de activación ya se usó.')
+        else:
+            messages.error(request, 'El enlace de activación es inválido o ha expirado.')
+        
         return redirect('usuarios:registro')
 
 def registro_exitoso(request):
@@ -178,7 +192,7 @@ def enviar_email_recuperacion(request, user):
         reverse('usuarios:reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
     )
     
-    subject = 'Recuperación de contraseña - Casa de Cambios'
+    subject = 'Recuperación de contraseña - Global Exchange'
     
     # Crear contenido HTML
     html_content = render_to_string('usuarios/email_recuperacion.html', {
@@ -190,7 +204,7 @@ def enviar_email_recuperacion(request, user):
     text_content = f"""
 ¡Hola {user.first_name}!
 
-Has solicitado recuperar tu contraseña en Casa de Cambios.
+Has solicitado recuperar tu contraseña en Global Exchange.
 
 Para crear una nueva contraseña, por favor visita el siguiente enlace:
 {reset_url}
@@ -200,7 +214,7 @@ Este enlace expirará en 24 horas por seguridad.
 Si no solicitaste este cambio, puedes ignorar este correo y tu contraseña permanecerá sin cambios.
 
 Saludos,
-El equipo de Casa de Cambios
+El equipo de Global Exchange
     """.strip()
     
     # Crear email con HTML y texto plano
@@ -256,7 +270,7 @@ def administrar_usuarios(request):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para acceder a esta página.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     
     # Obtener el término de búsqueda
     busqueda = request.GET.get('busqueda', '').strip()
@@ -282,7 +296,7 @@ def bloquear_usuario(request, pk):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
@@ -308,35 +322,6 @@ def bloquear_usuario(request, pk):
     
     return redirect('usuarios:administrar_usuarios')
 
-@login_required
-def eliminar_usuario(request, pk):
-    """Vista para eliminar usuarios"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
-    
-    if request.method != 'POST':
-        messages.error(request, 'Método no permitido.')
-        return redirect('usuarios:administrar_usuarios')
-    
-    try:
-        usuario = Usuario.objects.get(pk=pk)
-        
-        # No permitir eliminar administradores
-        if usuario.es_administrador():
-            messages.error(request, 'No puedes eliminar a otros administradores.')
-            return redirect('usuarios:administrar_usuarios')
-        
-        nombre_completo = usuario.get_full_name()
-        usuario.delete()
-        messages.success(request, f'El usuario {nombre_completo} ha sido eliminado permanentemente.')
-        
-    except Usuario.DoesNotExist:
-        messages.error(request, 'Usuario no encontrado.')
-    
-    return redirect('usuarios:administrar_usuarios')
-
 
 @login_required
 def asignar_rol(request, pk):
@@ -344,7 +329,7 @@ def asignar_rol(request, pk):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     
     usuario = get_object_or_404(Usuario, pk=pk)
     
@@ -380,7 +365,7 @@ def remover_rol(request, pk, rol_id):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
@@ -462,8 +447,8 @@ def remover_cliente(request, pk, cliente_id):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
-    
+        return redirect('inicio')
+
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -493,7 +478,7 @@ def ver_clientes_usuario(request, pk):
     # Verificar si el usuario es administrador
     if not request.user.es_administrador():
         messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
+        return redirect('inicio')
     
     usuario = get_object_or_404(Usuario, pk=pk)
     clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')

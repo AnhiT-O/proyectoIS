@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Casa de Cambios{% endblock %}</title>
+    <title>{% block title %}Global Exchange{% endblock %}</title>
     <style>
         * {
             margin: 0;
@@ -185,13 +185,13 @@
     <nav class="navbar">
         <div class="navbar-content">
             <a href="{% url 'inicio' %}" class="navbar-brand">
-                💰 Casa de Cambios
+                💰 Global Exchange
             </a>
             
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
                     <div class="user-info">
-                        <span class="user-name">¡Hola, {{ user.first_name }}!</span>
+                        <span class="user-name">¡Que bueno verte por acá, {{ user.first_name }}!</span>
                         {% if user.es_administrador %}
                             <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
                                 👥 Administrar Usuarios

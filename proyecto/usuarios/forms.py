@@ -32,11 +32,11 @@ class RegistroUsuarioForm(UserCreationForm):
         widget=forms.EmailInput(attrs={'class': 'form-control'})
     )
     first_name = forms.CharField(
-        max_length=30,
+        max_length=40,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     last_name = forms.CharField(
-        max_length=30,
+        max_length=40,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     tipo_cedula = forms.ChoiceField(
@@ -44,8 +44,7 @@ class RegistroUsuarioForm(UserCreationForm):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     cedula_identidad = forms.CharField(
-        max_length=14,
-        required=False,  # Hacemos el campo opcional en el formulario
+        max_length=11,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
@@ -61,26 +60,18 @@ class RegistroUsuarioForm(UserCreationForm):
 
     def clean_cedula_identidad(self):
         cedula = self.cleaned_data.get('cedula_identidad')
-        tipo_cedula = self.cleaned_data.get('tipo_cedula')
-        
-        if not cedula:
-            raise ValidationError("La cédula es obligatoria.")
         
         if not cedula.isdigit():
             raise ValidationError("La cédula debe contener solo números.")
-        
-        if tipo_cedula == 'CI':
-            if len(cedula) < 4 or len(cedula) > 12:
-                raise ValidationError("La Cédula de Identidad debe tener entre 4 y 12 dígitos.")
-        elif tipo_cedula == 'RUC':
-            if len(cedula) < 5 or len(cedula) > 13:
-                raise ValidationError("El RUC debe tener entre 5 y 13 dígitos.")
 
         # Verificar unicidad excluyendo usuarios inactivos con cédula duplicada
         existing_user = Usuario.objects.filter(cedula_identidad=cedula).first()
-        if existing_user and existing_user.is_active:
-            raise ValidationError("Ya existe un usuario registrado con esta cédula.")
-        
+        if existing_user:
+            if existing_user.is_active:
+                raise ValidationError("Ya existe un usuario registrado con esta cédula.")
+            else:
+                raise ValidationError("Una cuenta con esta cédula ya existe, aunque no está activada.")
+
         return cedula
 
     def clean_email(self):
@@ -90,7 +81,7 @@ class RegistroUsuarioForm(UserCreationForm):
             if existing_user.is_active:
                 raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
             else:
-                raise ValidationError("Una cuenta con este correo electrónico ya existe, pero no está activada. Revisa su bandeja de entrada")
+                raise ValidationError("Una cuenta con este correo electrónico ya existe, pero no está activada. Revisá tu bandeja de entrada")
         return email
 
     def clean_password1(self):
