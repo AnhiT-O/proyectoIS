@@ -332,6 +332,9 @@
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn btn-warning">
                 ✏️ Editar Cliente
             </a>
+            <a href="{% url 'clientes:cliente_eliminar' cliente.pk %}" class="btn btn-danger">
+                🗑️ Eliminar Cliente
+            </a>
             <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
                 ↩️ Volver a la Lista
             </a>

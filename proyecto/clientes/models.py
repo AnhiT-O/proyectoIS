@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from usuarios.models import Usuario
 
 class Cliente(models.Model):
@@ -52,30 +51,6 @@ class Cliente(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def clean(self):
-        """
-        Validaciones del modelo
-        """
-        super().clean()
-        
-        # Validar coherencia entre tipo de cliente y tipo de documento
-        if self.tipoCliente and self.tipoDocCliente:
-            if self.tipoCliente == 'F' and self.tipoDocCliente != 'CI':
-                raise ValidationError({
-                    'tipoDocCliente': 'Las personas físicas deben usar Cédula de Identidad'
-                })
-            elif self.tipoCliente == 'J' and self.tipoDocCliente != 'RUC':
-                raise ValidationError({
-                    'tipoDocCliente': 'Las personas jurídicas deben usar RUC'
-                })
-
-    def save(self, *args, **kwargs):
-        """
-        Sobrescribir save para ejecutar validaciones
-        """
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"

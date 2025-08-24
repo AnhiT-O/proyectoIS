@@ -1,7 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import Group, Permission
-from django.db.models.signals import post_migrate
-from django.dispatch import receiver
+from django.contrib.auth.models import Group
 
 class Roles(Group):
     """
@@ -20,41 +18,3 @@ class Roles(Group):
     def nombre(self):
         """Alias para mantener compatibilidad con código existente"""
         return self.name
-
-
-@receiver(post_migrate)
-def crear_roles_predefinidos(sender, **kwargs):
-    """
-    Crea los roles predefinidos después de ejecutar las migraciones
-    """
-    if sender.name == 'roles':
-        # Definir los roles predefinidos con sus descripciones
-        roles_predefinidos = [
-            {
-                'name': 'operador',
-                'descripcion': 'Rol encargado de realizar operaciones básicas del sistema, incluyendo registro de transacciones y consultas de clientes.'
-            },
-            {
-                'name': 'analista cambiario',
-                'descripcion': 'Rol responsable del análisis de tipos de cambio, generación de reportes financieros y supervisión de operaciones cambiarias.'
-            },
-            {
-                'name': 'administrador',
-                'descripcion': 'Rol con acceso completo al sistema, incluyendo gestión de usuarios, configuración del sistema y supervisión general.'
-            }
-        ]
-        
-        for rol_data in roles_predefinidos:
-            rol, created = Roles.objects.get_or_create(
-                name=rol_data['name'],
-                defaults={'descripcion': rol_data['descripcion']}
-            )
-            
-            # Si es el rol administrador, asignar todos los permisos
-            if rol.name == 'administrador' and created:
-                all_permissions = Permission.objects.all()
-                rol.permissions.set(all_permissions)
-                rol.save()
-                
-            if created:
-                print(f"Rol '{rol.name}' creado exitosamente.")

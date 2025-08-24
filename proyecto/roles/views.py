@@ -64,6 +64,20 @@ def editar_rol(request, pk):
 
 @login_required
 @admin_required
+def eliminar_rol(request, pk):
+    rol = get_object_or_404(Roles, pk=pk)
+    if rol.name == 'administrador':  # Si es el rol admin
+        messages.error(request, 'No se puede eliminar el rol de administrador.')
+        return redirect('listar_roles')
+        
+    if request.method == 'POST':
+        rol.delete()
+        messages.success(request, 'Rol eliminado exitosamente.')
+        return redirect('listar_roles')
+    return render(request, 'roles/confirmar_eliminar.html', {'rol': rol})
+
+@login_required
+@admin_required
 def detalle_rol(request, pk):
     rol = get_object_or_404(Roles, pk=pk)
     return render(request, 'roles/detalle_rol.html', {'rol': rol})
