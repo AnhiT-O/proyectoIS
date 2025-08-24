@@ -139,5 +139,6 @@ MESSAGE_TAGS = {
 
 # Configuración de login/logout
 LOGIN_URL = '/usuarios/login/'
-LOGIN_REDIRECT_URL = '/usuarios/perfil/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+PASSWORD_RESET_TIMEOUT = 3600
