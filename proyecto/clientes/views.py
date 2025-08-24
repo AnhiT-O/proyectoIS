@@ -58,13 +58,3 @@ def cliente_editar(request, pk):
     else:
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/cliente_form.html', {'form': form, 'cliente': cliente})
-
-@login_required
-@requerir_administrador
-def cliente_eliminar(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
-    if request.method == 'POST':
-        cliente.delete()
-        messages.success(request, 'Cliente eliminado exitosamente.')
-        return redirect('clientes:cliente_lista')
-    return render(request, 'clientes/cliente_confirmar_eliminar.html', {'cliente': cliente})
