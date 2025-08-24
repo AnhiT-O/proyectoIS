@@ -290,6 +290,13 @@
                                 </button>
                             </form>
                             
+                            <form action="{% url 'usuarios:eliminar_usuario' usuario.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-admin btn-delete" 
+                                        onclick="return confirm('¿Estás seguro de que deseas eliminar a {{ usuario.get_full_name }}? Esta acción no se puede deshacer.')">
+                                     Eliminar
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

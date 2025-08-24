@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Cliente - Casa de Cambios{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmar-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .warning-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .warning-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .warning-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .content-section {
+        padding: 2.5rem;
+        text-align: center;
+    }
+
+    .cliente-info {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-left: 4px solid #dc3545;
+    }
+
+    .cliente-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .cliente-details {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .warning-message {
+        font-size: 1.1rem;
+        color: #495057;
+        margin: 2rem 0;
+        line-height: 1.6;
+    }
+
+    .consequences {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        color: #856404;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .consequences-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .consequences ul {
+        margin: 0.5rem 0 0 1rem;
+        padding: 0;
+    }
+
+    .consequences li {
+        margin-bottom: 0.25rem;
+    }
+
+    .actions-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .btn {
+        padding: 0.875rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .confirmar-container {
+            margin: 1rem;
+            border-radius: 12px;
+        }
+
+        .warning-header {
+            padding: 1.5rem;
+        }
+
+        .warning-icon {
+            font-size: 2.5rem;
+        }
+
+        .warning-title {
+            font-size: 1.3rem;
+        }
+
+        .content-section {
+            padding: 2rem 1.5rem;
+        }
+
+        .actions-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmar-container">
+    <div class="warning-header">
+        <div class="header-content">
+            <div class="warning-icon">⚠️</div>
+            <h2 class="warning-title">Confirmar Eliminación</h2>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="warning-message">
+            <strong>¿Está completamente seguro que desea eliminar este cliente?</strong>
+        </div>
+
+        <div class="cliente-info">
+            <div class="cliente-name">
+                👤 {{ cliente.nombre }} {{ cliente.apellido }}
+            </div>
+            <div class="cliente-details">
+                {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }}<br>
+                {{ cliente.correoElecCliente }}
+            </div>
+        </div>
+
+        <div class="consequences">
+            <div class="consequences-title">
+                ⚠️ Consecuencias de esta acción:
+            </div>
+            <ul>
+                <li>Se eliminará toda la información personal del cliente</li>
+                <li>Se perderá el historial de transacciones asociadas</li>
+                <li>Esta acción <strong>no se puede deshacer</strong></li>
+                <li>Es recomendable hacer una copia de seguridad antes de proceder</li>
+            </ul>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions-container">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Sí, Eliminar Cliente
+                </button>
+                <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn btn-secondary">
+                    ↩️ Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
