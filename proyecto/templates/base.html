@@ -41,12 +41,15 @@
             font-weight: bold;
             color: #667eea;
             text-decoration: none;
+            margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
         }
 
         .navbar-nav {
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex: 1; /* Toma el espacio disponible */
+            justify-content: flex-end; /* Alinea el contenido hacia la derecha */
         }
 
         .nav-item {
@@ -56,6 +59,12 @@
             border-radius: 6px;
             transition: all 0.3s ease;
             font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: fit-content;
+            flex-shrink: 0;
         }
 
         .nav-item:hover {
@@ -74,12 +83,13 @@
         }
 
         .nav-item.btn-danger {
-            background: #dc3545;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .nav-item.btn-danger:hover {
-            background: #c82333;
+            background: #764ba2;
+            color: #667eea;
             transform: translateY(-1px);
         }
 
@@ -161,6 +171,10 @@
                 gap: 1rem;
             }
 
+            .navbar-brand {
+                margin-right: 0; /* Quita el margen en móviles */
+            }
+
             .navbar-nav {
                 flex-wrap: wrap;
                 justify-content: center;
@@ -170,6 +184,12 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 0.5rem;
+            }
+
+            /* Asegurar que todos los nav-items mantengan su texto en una línea */
+            .nav-item {
+                min-width: 140px;
+                text-align: center;
             }
 
             .main-content {
@@ -191,7 +211,7 @@
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
                     <div class="user-info">
-                        <span class="user-name">¡Que bueno verte por acá, {{ user.first_name }}!</span>
+                        <span class="user-name">Hola, {{ user.first_name }}!</span>
                         {% if user.es_administrador %}
                             <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
                                 👥 Administrar Usuarios
