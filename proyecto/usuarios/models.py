@@ -129,4 +129,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         db_table = 'usuarios'
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
-    
+        permissions = [
+            ("bloqueo", "Puede bloquear o desbloquear usuarios"),
+        ]

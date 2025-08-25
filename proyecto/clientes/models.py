@@ -84,6 +84,10 @@ class Cliente(models.Model):
         db_table = 'clientes'
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
+        permissions = [
+            ("asignacion", "Puede asignar y desasignar clientes a usuarios"),
+            ("gestion", "Puede gestionar clientes (Crear y editar)")
+        ]
 
 class UsuarioCliente(models.Model):
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
