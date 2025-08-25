@@ -12,7 +12,11 @@ class Roles(Group):
     class Meta:
         verbose_name = 'Rol'
         verbose_name_plural = 'Roles'
-    
+        permissions = [
+            ("asignacion", "Puede asignar y desasignar roles"),
+            ("gestion", "Puede gestionar roles (Crear y editar)"),
+        ]
+
     def __str__(self):
         return self.name
     

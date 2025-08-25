@@ -22,8 +22,7 @@ class LoginForm(AuthenticationForm):
     )
     
     error_messages = {
-        'invalid_login': "Por favor, introduce un nombre de usuario y contraseña correctos. "
-                        "Ten en cuenta que ambos campos distinguen entre mayúsculas y minúsculas.",
+        'invalid_login': "El nombre de usuario y contraseña no coinciden. Inténtelo de nuevo.",
         'inactive': "Esta cuenta está inactiva.",
     }
 

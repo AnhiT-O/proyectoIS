@@ -3,10 +3,38 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from .models import Roles
 
+class PermissionCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    """Widget personalizado para mostrar solo la descripción de los permisos"""
+    
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        # Si el valor es un Permission, usar su descripción (name) en lugar del codename
+        if value and hasattr(value, 'instance'):
+            try:
+                permission = Permission.objects.get(pk=value.instance.pk)
+                option['label'] = permission.name  # Usar el nombre/descripción del permiso
+            except Permission.DoesNotExist:
+                pass
+        elif value:
+            try:
+                permission = Permission.objects.get(pk=value)
+                option['label'] = permission.name  # Usar el nombre/descripción del permiso
+            except Permission.DoesNotExist:
+                pass
+        return option
+
 class RolForm(forms.ModelForm):
     permisos = forms.ModelMultipleChoiceField(
-        queryset=Permission.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+        queryset=Permission.objects.exclude(
+            codename__startswith='add_'
+        ).exclude(
+            codename__startswith='change_'
+        ).exclude(
+            codename__startswith='delete_'
+        ).exclude(
+            codename__startswith='view_'
+        ),
+        widget=PermissionCheckboxSelectMultiple,
         required=False,
         label="Permisos"
     )
