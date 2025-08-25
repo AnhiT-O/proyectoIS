@@ -31,9 +31,6 @@ def login_usuario(request):
                 
                 # Si el usuario está bloqueado, mostramos mensaje específico
                 if user.bloqueado:
-                    messages.error(request, 
-                        'Tu cuenta está bloqueada. Por favor, contacta al administrador '
-                        'para obtener ayuda y resolver esta situación.')
                     return render(request, 'usuarios/login.html', {
                         'form': form,
                         'usuario_bloqueado': True,
@@ -433,8 +430,8 @@ def asignar_clientes(request, pk):
     # Verificar si hay clientes disponibles para asignar
     if not form.fields['clientes'].queryset.exists():
         messages.info(request, f'{usuario.get_full_name()} ya tiene todos los clientes disponibles asignados.')
-        return redirect('usuarios:administrar_usuarios')
-    
+        return redirect('usuarios:ver_clientes_usuario', pk=usuario.pk)
+
     return render(request, 'usuarios/asignar_clientes.html', {
         'form': form,
         'usuario': usuario

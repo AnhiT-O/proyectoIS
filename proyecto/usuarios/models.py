@@ -95,6 +95,19 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def obtener_roles(self):
         """Obtiene una lista de nombres de roles a los que pertenece el usuario"""
         return list(self.groups.values_list('name', flat=True))
+    
+    def get_full_name(self):
+        """
+        Retorna el nombre completo del usuario.
+        """
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        else:
+            return self.username
 
     def save(self, *args, **kwargs):
         """Sobrescribe el método save para asignar rol por defecto"""
@@ -116,3 +129,4 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         db_table = 'usuarios'
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
+    
