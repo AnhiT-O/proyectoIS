@@ -402,16 +402,6 @@
         <h2>Administrar Usuarios</h2>
     </div>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <!-- Formulario de búsqueda con nuevo estilo -->
     <div class="search-container">
         <form method="get" class="search-form">
@@ -511,7 +501,8 @@
                             
                             <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-admin btn-block">
+                                <button type="submit" class="btn-admin btn-block"
+                                        onclick="return confirm('¿Estás seguro de que deseas {% if not usuario.bloqueado %}bloquear{% else %}desbloquear{% endif %} al usuario {{ usuario.get_full_name }}?')">
                                     {% if not usuario.bloqueado %}
                                          Bloquear
                                     {% else %}

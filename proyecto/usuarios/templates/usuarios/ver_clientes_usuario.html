@@ -119,16 +119,6 @@
 <div class="clients-container">
     <h2>Clientes Asignados</h2>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <div class="user-info">
         <h4>{{ usuario.get_full_name }}</h4>
         <p class="mb-0">
@@ -183,7 +173,7 @@
                             <form style="display: inline;" method="post" action="{% url 'usuarios:remover_cliente' usuario.pk cliente.pk %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn-remove" 
-                                        onclick="return confirm('¿Estás seguro de que deseas remover el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
+                                        onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
                                         title="Remover cliente">
                                     Desasignar
                                 </button>
