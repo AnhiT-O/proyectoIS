@@ -31,8 +31,8 @@ class Moneda(models.Model):
 
     class Meta:
         verbose_name = 'Moneda'
-        verbose_name_plural = 'Monedas',
-        db_table = 'monedas',
+        verbose_name_plural = 'Monedas'
+        db_table = 'monedas'
         default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
             ("crear", "Puede crear monedas"),
