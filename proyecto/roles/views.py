@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import Permission
 from .models import Roles
@@ -8,24 +8,14 @@ from .forms import RolForm
 from django.urls import reverse
 from functools import wraps
 
-def admin_required(view_func):
-    """Decorator para asegurar que solo los administradores puedan acceder"""
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.es_administrador():
-            raise PermissionDenied("No tienes permisos para acceder a esta página.")
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
-
 @login_required
-@admin_required
+@permission_required('roles.gestion', raise_exception=True)
 def listar_roles(request):
-    # Obtener todos los roles, excluyendo el rol administrador si es necesario
     roles = Roles.objects.exclude(name='administrador')
     return render(request, 'roles/listar_roles.html', {'roles': roles})
 
 @login_required
-@admin_required
+@permission_required('roles.gestion', raise_exception=True)
 def crear_rol(request):
     if request.method == 'POST':
         form = RolForm(request.POST)
@@ -41,10 +31,12 @@ def crear_rol(request):
     })
 
 @login_required
-@admin_required
+@permission_required('roles.gestion', raise_exception=True)
 def editar_rol(request, pk):
     rol = get_object_or_404(Roles, pk=pk)
-    if rol.name == 'administrador':  # Si es el rol admin
+    
+    # Solo administradores pueden editar el rol administrador
+    if rol.name == 'administrador' and not request.user.es_administrador():
         messages.error(request, 'No se puede editar el rol de administrador.')
         return redirect('listar_roles')
         
@@ -63,7 +55,7 @@ def editar_rol(request, pk):
     })
 
 @login_required
-@admin_required
+@permission_required('roles.gestion', raise_exception=True)
 def detalle_rol(request, pk):
     rol = get_object_or_404(Roles, pk=pk)
     return render(request, 'roles/detalle_rol.html', {'rol': rol})

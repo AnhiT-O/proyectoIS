@@ -24,3 +24,6 @@ urlpatterns = [
     path('clientes/', include('clientes.urls')),
     
 ]
+
+# Configuración para manejadores de errores personalizados
+handler403 = 'proyecto.views.custom_permission_denied_view'

@@ -118,6 +118,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -142,3 +147,11 @@ LOGIN_URL = '/usuarios/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 PASSWORD_RESET_TIMEOUT = 3600
+
+# Configuración de permisos personalizados
+# NOTA: Para deshabilitar permisos automáticos, usa default_permissions = [] en cada modelo
+# Silencia warnings sobre permisos faltantes ya que usas permisos personalizados
+SILENCED_SYSTEM_CHECKS = ['auth.W004']
+
+# Manejador personalizado para errores 403
+HANDLER403 = 'proyecto.views.custom_permission_denied_view'

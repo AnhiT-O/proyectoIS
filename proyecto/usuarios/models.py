@@ -129,6 +129,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         db_table = 'usuarios'
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
+        default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
             ("bloqueo", "Puede bloquear o desbloquear usuarios"),
+            ("asignacion_clientes", "Puede asignar clientes a usuarios"),
+            ("asignacion_roles", "Puede asignar roles a usuarios")
         ]

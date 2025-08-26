@@ -116,6 +116,77 @@
             font-weight: 600;
         }
 
+        /* Estilos para el dropdown del panel de administración */
+        .admin-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .admin-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .admin-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            min-width: 280px;
+            padding: 0.5rem 0;
+            margin: 0.125rem 0 0;
+            background-color: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.375rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+            white-space: nowrap;
+        }
+
+        .admin-menu.show {
+            display: block;
+        }
+
+        .admin-section {
+            padding: 0.25rem 0;
+        }
+
+        .admin-section:not(:last-child) {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            margin-bottom: 0.25rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .admin-item {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 1rem;
+            clear: both;
+            font-weight: 400;
+            color: #212529;
+            text-decoration: none;
+            background-color: transparent;
+            border: 0;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+        }
+
+        .admin-item:hover,
+        .admin-item:focus {
+            color: #1e2125;
+            background-color: #e9ecef;
+            text-decoration: none;
+        }
+
+        .admin-header {
+            display: block;
+            padding: 0.5rem 1rem 0.25rem;
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            color: #6c757d;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
         /* Contenido principal */
         .main-content {
             padding: 2rem 1rem;
@@ -212,17 +283,38 @@
                 {% if user.is_authenticated %}
                     <div class="user-inf">
                         <span class="user-name">Hola, {{ user.first_name }}!</span>
-                        {% if user.es_administrador %}
-                            <a href="{% url 'usuarios:administrar_usuarios' %}" class="nav-item">
-                                👥 Administrar Usuarios
-                            </a>
-                            <a href="{% url 'listar_roles' %}" class="nav-item">
-                                🎭 Administrar Roles
-                            </a>
-                            <a href="{% url 'clientes:cliente_lista' %}" class="nav-item">
-                                👤 Administrar Clientes
-                            </a>
+                        
+                        <!-- Panel de Administración basado en permisos -->
+                        {% if perms.usuarios or perms.clientes or perms.roles %}
+                            <div class="admin-dropdown">
+                                <a href="#" class="nav-item admin-toggle" onclick="toggleAdminMenu(event)">
+                                    ⚙️ Panel de Administración
+                                </a>
+                                <div class="admin-menu" id="adminMenu">
+                                    <!-- Gestión de Usuarios -->
+                                    {% if perms.usuarios %}
+                                        <div class="admin-section">
+                                            <a class="admin-item" href="{% url 'usuarios:administrar_usuarios' %}">👥 Gestionar Usuarios</a>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Gestión de Roles -->
+                                    {% if perms.roles %}
+                                        <div class="admin-section">
+                                            <a class="admin-item" href="{% url 'listar_roles' %}">🎭 Gestionar Roles</a>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Gestión de Clientes -->
+                                    {% if perms.clientes %}
+                                        <div class="admin-section">
+                                            <a class="admin-item" href="{% url 'clientes:cliente_lista' %}">👥 Gestionar Clientes</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         {% endif %}
+                        
                         <a href="{% url 'usuarios:perfil' %}" class="nav-item">
                             👤 Mi Perfil
                         </a>
@@ -260,5 +352,36 @@
     </main>
 
     {% block extra_js %}{% endblock %}
+    
+    <!-- JavaScript personalizado para el dropdown del panel de administración -->
+    <script>
+        function toggleAdminMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const menu = document.getElementById('adminMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const adminDropdown = document.querySelector('.admin-dropdown');
+            const menu = document.getElementById('adminMenu');
+            
+            if (adminDropdown && menu && !adminDropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Cerrar el menú al presionar Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const menu = document.getElementById('adminMenu');
+                if (menu) {
+                    menu.classList.remove('show');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -12,9 +12,9 @@ class Roles(Group):
     class Meta:
         verbose_name = 'Rol'
         verbose_name_plural = 'Roles'
+        default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
-            ("asignacion", "Puede asignar y desasignar roles"),
-            ("gestion", "Puede gestionar roles (Crear y editar)"),
+            ("gestion", "Puede gestionar roles (crear y editar)"),
         ]
 
     def __str__(self):
@@ -30,35 +30,29 @@ class Roles(Group):
 def crear_roles_predefinidos(sender, **kwargs):
     """
     Crea los roles predefinidos después de ejecutar las migraciones
+    y actualiza permisos del administrador con cada migración
     """
-    if sender.name == 'roles':
-        # Definir los roles predefinidos con sus descripciones
-        roles_predefinidos = [
-            {
-                'name': 'operador',
-                'descripcion': 'Rol encargado de realizar operaciones básicas del sistema, incluyendo registro de transacciones y consultas de clientes.'
-            },
-            {
-                'name': 'analista cambiario',
-                'descripcion': 'Rol responsable del análisis de tipos de cambio, generación de reportes financieros y supervisión de operaciones cambiarias.'
-            },
-            {
-                'name': 'administrador',
-                'descripcion': 'Rol con acceso completo al sistema, incluyendo gestión de usuarios, configuración del sistema y supervisión general.'
-            }
-        ]
+    # Definir los roles predefinidos con sus descripciones
+    roles_predefinidos = [
+        {
+            'name': 'operador',
+            'descripcion': 'Rol encargado de realizar operaciones básicas del sistema, incluyendo registro de transacciones y consultas de clientes.'
+        },
+        {
+            'name': 'analista cambiario',
+            'descripcion': 'Rol responsable del análisis de tipos de cambio, generación de reportes financieros y supervisión de operaciones cambiarias.'
+        },
+        {
+            'name': 'administrador',
+            'descripcion': 'Rol con acceso completo al sistema, incluyendo gestión de usuarios, configuración del sistema y supervisión general.'
+        }
+    ]
+    
+    for rol_data in roles_predefinidos:
+        rol, created = Roles.objects.get_or_create(
+            name=rol_data['name'],
+            defaults={'descripcion': rol_data['descripcion']}
+        )
         
-        for rol_data in roles_predefinidos:
-            rol, created = Roles.objects.get_or_create(
-                name=rol_data['name'],
-                defaults={'descripcion': rol_data['descripcion']}
-            )
-            
-            # Si es el rol administrador, asignar todos los permisos
-            if rol.name == 'administrador' and created:
-                all_permissions = Permission.objects.all()
-                rol.permissions.set(all_permissions)
-                rol.save()
-                
-            if created:
-                print(f"Rol '{rol.name}' creado exitosamente.")
+        if created:
+            print(f"Rol '{rol.name}' creado exitosamente.")

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -11,9 +11,39 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import Group
+from django.core.exceptions import PermissionDenied
+from functools import wraps
 from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
+
+def tiene_algun_permiso(view_func):
+    """
+    Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+    para administrar usuarios: bloqueo, asignación de roles o asignación de clientes.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        
+        # Permisos requeridos para administrar usuarios
+        permisos_requeridos = [
+            'usuarios.bloqueo',        # Permiso para bloquear usuarios
+            'usuarios.asignacion_roles',        # Permiso para asignar roles
+            'usuarios.asignacion_clientes'      # Permiso para asignar clientes
+        ]
+        
+        # Verificar si el usuario tiene al menos uno de los permisos
+        for permiso in permisos_requeridos:
+            if request.user.has_perm(permiso):
+                return view_func(request, *args, **kwargs)
+        
+        # Si no tiene ningún permiso, denegar acceso
+        raise PermissionDenied("No tienes permisos suficientes para administrar usuarios.")
+    
+    return _wrapped_view
 
 def login_usuario(request):
     if request.user.is_authenticated:
@@ -36,7 +66,13 @@ def login_usuario(request):
                         'usuario_bloqueado': True,
                         'nombre_usuario': user.get_full_name()
                     })
-                
+                if not user.is_active:
+                    return render(request, 'usuarios/login.html', {
+                        'form': form,
+                        'usuario_inactivo': True,
+                        'nombre_usuario': user.get_full_name()
+                    })
+
                 # Si no está bloqueado, intentamos autenticar
                 user = authenticate(username=username, password=password)
                 if user is not None:
@@ -262,13 +298,9 @@ def reset_password_confirm(request, uidb64, token):
         return redirect('usuarios:recuperar_password')
 
 @login_required
+@tiene_algun_permiso
 def administrar_usuarios(request):
-    """Vista para administrar usuarios (solo para administradores)"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para acceder a esta página.')
-        return redirect('inicio')
-    
+    """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
     # Obtener el término de búsqueda
     busqueda = request.GET.get('busqueda', '').strip()
     
@@ -288,13 +320,9 @@ def administrar_usuarios(request):
     })
 
 @login_required
+@permission_required('usuarios.bloqueo', raise_exception=True)
 def bloquear_usuario(request, pk):
     """Vista para bloquear/desbloquear usuarios"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('inicio')
-    
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -302,8 +330,8 @@ def bloquear_usuario(request, pk):
     try:
         usuario = Usuario.objects.get(pk=pk)
         
-        # No permitir bloquear otros administradores
-        if usuario.es_administrador():
+        # No permitir bloquear otros administradores (solo si es administrador)
+        if usuario.es_administrador() and not request.user.es_administrador():
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -321,17 +349,13 @@ def bloquear_usuario(request, pk):
 
 
 @login_required
+@permission_required('usuarios.asignacion_roles', raise_exception=True)
 def asignar_rol(request, pk):
     """Vista para asignar roles a usuarios"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('inicio')
-    
     usuario = get_object_or_404(Usuario, pk=pk)
     
-    # No permitir asignar roles a otros administradores
-    if usuario.es_administrador():
+    # No permitir asignar roles a otros administradores (solo si es administrador)
+    if usuario.es_administrador() and not request.user.es_administrador():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -357,13 +381,9 @@ def asignar_rol(request, pk):
 
 
 @login_required
+@permission_required('usuarios.asignacion_roles', raise_exception=True)
 def remover_rol(request, pk, rol_id):
     """Vista para remover roles de usuarios"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('inicio')
-    
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -371,8 +391,8 @@ def remover_rol(request, pk, rol_id):
     usuario = get_object_or_404(Usuario, pk=pk)
     rol = get_object_or_404(Group, pk=rol_id)
     
-    # No permitir modificar roles de administradores
-    if usuario.es_administrador():
+    # No permitir modificar roles de administradores (solo si es administrador)
+    if usuario.es_administrador() and not request.user.es_administrador():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -393,18 +413,19 @@ def remover_rol(request, pk, rol_id):
 
 
 @login_required
+@permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def asignar_clientes(request, pk):
     """Vista para asignar clientes a usuarios"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('usuarios:perfil')
-    
     usuario = get_object_or_404(Usuario, pk=pk)
     
-    # No permitir asignar clientes a administradores
-    if usuario.es_administrador():
+    # No permitir asignar clientes a administradores (solo si es administrador)
+    if usuario.es_administrador() and not request.user.es_administrador():
         messages.error(request, 'No puedes asignar clientes a otros administradores.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # Verificar si existen clientes creados en el sistema
+    if not Cliente.objects.exists():
+        messages.info(request, 'No hay clientes creados en el sistema. Primero debes crear clientes antes de poder asignarlos.')
         return redirect('usuarios:administrar_usuarios')
     
     if request.method == 'POST':
@@ -439,13 +460,9 @@ def asignar_clientes(request, pk):
 
 
 @login_required
+@permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def remover_cliente(request, pk, cliente_id):
     """Vista para remover la asignación de un cliente a un usuario"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('inicio')
-
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -453,8 +470,8 @@ def remover_cliente(request, pk, cliente_id):
     usuario = get_object_or_404(Usuario, pk=pk)
     cliente = get_object_or_404(Cliente, pk=cliente_id)
     
-    # No permitir modificar asignaciones de administradores
-    if usuario.es_administrador():
+    # No permitir modificar asignaciones de administradores (solo si es administrador)
+    if usuario.es_administrador() and not request.user.es_administrador():
         messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -470,13 +487,9 @@ def remover_cliente(request, pk, cliente_id):
 
 
 @login_required
+@permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def ver_clientes_usuario(request, pk):
     """Vista para ver todos los clientes asignados a un usuario"""
-    # Verificar si el usuario es administrador
-    if not request.user.es_administrador():
-        messages.error(request, 'No tienes permisos para realizar esta acción.')
-        return redirect('inicio')
-    
     usuario = get_object_or_404(Usuario, pk=pk)
     clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
     

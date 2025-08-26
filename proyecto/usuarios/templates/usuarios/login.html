@@ -212,6 +212,29 @@
             </div>
         {% endif %}
 
+        <!-- Mensaje especial para usuarios inactivos -->
+        {% if usuario_inactivo %}
+            <div class="alert alert-warning" style="
+                background-color: #fffbeb;
+                border: 1px solid #fef3c7;
+                color: #92400e;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+            ">
+                <h4 style="
+                    margin: 0 0 0.5rem 0;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                ">
+                    ⚠️ Cuenta Inactiva
+                </h4>
+                <p style="margin: 0; font-size: 0.95rem;">
+                    Hola, {{ nombre_usuario }}. Tu cuenta aún no ha sido activada. Revisa tu correo electrónico para usar el enlace de activación.
+                </p>
+            </div>
+        {% endif %}
+
         <!-- Errores generales del formulario -->
         {% if form.non_field_errors %}
             <div class="form-errors">

@@ -84,9 +84,9 @@ class Cliente(models.Model):
         db_table = 'clientes'
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
+        default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
-            ("asignacion", "Puede asignar y desasignar clientes a usuarios"),
-            ("gestion", "Puede gestionar clientes (Crear y editar)")
+            ("gestion", "Puede gestionar clientes (crear y editar)")
         ]
 
 class UsuarioCliente(models.Model):
@@ -99,6 +99,7 @@ class UsuarioCliente(models.Model):
         unique_together = ['usuario', 'cliente']
         verbose_name = 'Relación Usuario-Cliente'
         verbose_name_plural = 'Relaciones Usuario-Cliente'
+        default_permissions = []  # Deshabilita permisos predeterminados
 
     def __str__(self):
         return f"{self.usuario.email} - {self.cliente.nombre}"
