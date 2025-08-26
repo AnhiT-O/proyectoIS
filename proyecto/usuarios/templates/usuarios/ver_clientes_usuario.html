@@ -174,7 +174,7 @@
                                 {% csrf_token %}
                                 <button type="submit" class="btn-remove" 
                                         onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
-                                        title="Remover cliente">
+                                        title="Desasignar cliente">
                                     Desasignar
                                 </button>
                             </form>
@@ -194,7 +194,7 @@
         </div>
     {% endif %}
 
-    <div style="margin-top: 2rem;">
+    <div style="margin-top: 2rem; display: flex; justify-content: flex-end;"></div>
         <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-back">
             Volver a Administrar Usuarios
         </a>

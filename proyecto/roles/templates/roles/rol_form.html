@@ -1,28 +1,44 @@
+
 {% extends 'base.html' %}
 
-{% block content %}
+{% block title %}{{ titulo }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
 <style>
-    .admin-container {
+    .form-container {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 15px;
         padding: 2rem;
         margin: 2rem auto;
-        max-width: 1000px;
+        max-width: 600px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .form-card {
-        background-color: white;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .form-header h1 {
+        margin: 0;
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .form-header p {
+        color: #6c757d;
+        font-size: 1rem;
+        margin-top: 0.5rem;
     }
 
-    .form-title {
-        color: #2c3e50;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #e9ecef;
+    .form-content {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .form-group {
@@ -30,220 +46,238 @@
     }
 
     .form-label {
-        font-weight: 500;
-        color: #2c3e50;
+        display: block;
         margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-    }
-
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    /* Estilos especiales para el campo de descripción */
-    .descripcion-container {
-        position: relative;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        background-color: #fff;
-        min-height: 120px;
-        padding: 0;
-    }
-
-    .descripcion-container:focus-within {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    .descripcion-label {
-        position: absolute;
-        top: 8px;
-        left: 12px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #6c757d;
-        background-color: #fff;
-        padding: 0 4px;
-        z-index: 1;
-    }
-
-    .descripcion-textarea {
-        width: 100%;
-        min-height: 100px;
-        border: none;
-        outline: none;
-        resize: vertical;
-        padding: 32px 12px 12px 12px;
-        font-family: inherit;
+        color: #333;
+        font-weight: 600;
         font-size: 0.9rem;
-        line-height: 1.4;
-        background-color: transparent;
     }
 
-    .descripcion-textarea::placeholder {
-        color: #adb5bd;
-        font-style: italic;
+    .form-control, .descripcion-textarea {
+        width: 100%;
+        padding: 1.25rem 1.2rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+    .form-control:focus, .descripcion-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: #fff;
+    }
+
+    .form-control.is-invalid, .descripcion-textarea.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+        font-weight: 500;
+    }
+
+    .form-help {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .form-errors {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #dc3545;
+    }
+    .form-errors ul {
+        margin: 0;
+        padding-left: 1.5rem;
     }
 
     .permissions-container {
         border: 1px solid #e9ecef;
-        border-radius: 4px;
+        border-radius: 8px;
         padding: 1rem;
         max-height: 300px;
         overflow-y: auto;
+        background: #f8f9fa;
     }
 
-    .permissions-container ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .permissions-container li {
-        padding: 0.5rem;
-        border-bottom: 1px solid #f8f9fa;
-    }
-
-    .permissions-container li:last-child {
-        border-bottom: none;
-    }
-
-    .permissions-container input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
-
-    .permissions-container label {
-        margin-bottom: 0;
-        color: #495057;
-    }
-
-    .btn-submit {
-        background-color: #007bff;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 4px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: background-color 0.2s;
-    }
-
-    .btn-submit:hover {
-        background-color: #0056b3;
-    }
-
-    .btn-cancel {
-        background-color: #6c757d;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 4px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: background-color 0.2s;
-        text-decoration: none;
-    }
-
-    .btn-cancel:hover {
-        background-color: #5a6268;
-        color: white;
-        text-decoration: none;
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-        .admin-container {
+        .form-container {
             margin: 1rem;
             padding: 1.5rem;
         }
-
-        .form-card {
+        .form-content {
             padding: 1.5rem;
         }
-
-        .descripcion-textarea {
-            min-height: 80px;
-            padding: 28px 8px 8px 8px;
+        .form-actions {
+            flex-direction: column;
         }
-
-        .descripcion-label {
-            left: 8px;
-            top: 6px;
-            font-size: 0.7rem;
+        .btn {
+            text-align: center;
+            justify-content: center;
         }
     }
 </style>
+{% endblock %}
 
-<div class="admin-container">
-    <div class="form-card">
-        <h3 class="form-title">{{ titulo }}</h3>
-        <form method="post">
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {% for error in form.non_field_errors %}
-                {{ error }}
-                {% endfor %}
-            </div>
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>{{ titulo }}</h1>
+        <p>
+            {% if rol %}
+                Modifica los datos del rol {{ rol.name }}
+            {% else %}
+                Crea un nuevo rol para el sistema
             {% endif %}
-
+        </p>
+    </div>
+    <div class="form-content">
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <form method="post" id="rolForm">
+            {% csrf_token %}
             <div class="form-group">
-                <label for="{{ form.name.id_for_label }}" class="form-label">Nombre del Rol</label>
+                <label for="{{ form.name.id_for_label }}" class="form-label required-field">Nombre del rol</label>
                 {{ form.name }}
                 {% if form.name.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.name.errors %}
-                    {{ error }}
-                    {% endfor %}
-                </div>
+                    <div class="invalid-feedback">
+                        {% for error in form.name.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 {% endif %}
+                <div class="form-help">Ingrese el nombre del rol</div>
             </div>
-
             <div class="form-group">
-                <div class="descripcion-container">
-                    <label class="descripcion-label">Descripción</label>
-                    <textarea name="{{ form.descripcion.name }}" 
-                              id="{{ form.descripcion.id_for_label }}" 
-                              class="descripcion-textarea"
-                              placeholder="Describe las responsabilidades y alcance de este rol...">{{ form.descripcion.value|default_if_none:"" }}</textarea>
-                </div>
+                <label for="{{ form.descripcion.id_for_label }}" class="form-label">Descripción</label>
+                <textarea name="{{ form.descripcion.name }}" id="{{ form.descripcion.id_for_label }}" class="descripcion-textarea" rows="8">{{ form.descripcion.value|default_if_none:"" }}</textarea>
                 {% if form.descripcion.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.descripcion.errors %}
-                    {{ error }}
-                    {% endfor %}
-                </div>
+                    <div class="invalid-feedback">
+                        {% for error in form.descripcion.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 {% endif %}
+                <div class="form-help">Breve descripción del rol y sus funciones principales.</div>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Permisos</label>
                 <div class="permissions-container">
                     {{ form.permisos }}
                 </div>
                 {% if form.permisos.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.permisos.errors %}
-                    {{ error }}
-                    {% endfor %}
-                </div>
+                    <div class="invalid-feedback">
+                        {% for error in form.permisos.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 {% endif %}
+                <div class="form-help">Selecciona los permisos que tendrá este rol.</div>
             </div>
-
-            <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn-submit">
-                    {% if rol %}Actualizar{% else %}Crear{% endif %} Rol
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if rol %}Actualizar Rol{% else %}Crear Rol{% endif %}
                 </button>
-                <a href="{% url 'listar_roles' %}" class="btn-cancel">Cancelar</a>
+                <a href="{% url 'listar_roles' %}" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+    const descripcionInput = document.getElementById('{{ form.descripcion.id_for_label }}');
+    const rolForm = document.getElementById('rolForm');
+
+    rolForm.addEventListener('submit', function(e) {
+        let hasErrors = false;
+        if (!nameInput.value.trim()) {
+            hasErrors = true;
+            nameInput.classList.add('is-invalid');
+        } else {
+            nameInput.classList.remove('is-invalid');
+        }
+        if (!descripcionInput.value.trim()) {
+            hasErrors = true;
+            descripcionInput.classList.add('is-invalid');
+        } else {
+            descripcionInput.classList.remove('is-invalid');
+        }
+        if (hasErrors) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 {% endblock %}

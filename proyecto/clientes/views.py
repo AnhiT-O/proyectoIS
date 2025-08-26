@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
+from django.db.models import Q
 from .models import Cliente
 from .forms import ClienteForm
 
@@ -22,8 +23,32 @@ def cliente_crear(request):
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_lista(request):
-    clientes = Cliente.objects.all()
-    return render(request, 'clientes/cliente_lista.html', {'clientes': clientes})
+    # Obtener todos los clientes para verificar si hay alguno
+    todos_los_clientes = Cliente.objects.all()
+    
+    # Obtener clientes para mostrar (con filtros aplicados)
+    clientes = todos_los_clientes
+    
+    # Manejar búsqueda
+    busqueda = request.GET.get('busqueda', '').strip()
+    if busqueda:
+        clientes = clientes.filter(
+            Q(nombre__icontains=busqueda) | 
+            Q(apellido__icontains=busqueda) |
+            Q(docCliente__icontains=busqueda) |
+            Q(correoElecCliente__icontains=busqueda) |
+            Q(telefono__icontains=busqueda)
+        )
+    
+    # Ordenar por nombre
+    clientes = clientes.order_by('nombre', 'apellido')
+    
+    context = {
+        'clientes': clientes,
+        'hay_clientes': todos_los_clientes.exists(),  # Para saber si mostrar la tabla o el mensaje
+        'busqueda': busqueda,
+    }
+    return render(request, 'clientes/cliente_lista.html', context)
 
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
