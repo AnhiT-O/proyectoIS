@@ -450,7 +450,7 @@
                             {% for group in usuario.groups.all %}
                                 <span class="role-badge {% if group.name == 'administrador' %}role-admin{% elif group.name == 'analista cambiario' %}role-analyst{% elif group.name == 'operador' %}role-operator{% else %}role-other{% endif %}">
                                     {{ group.name|title }}
-                                    {% if group.name != 'administrador' %}
+                                    {% if group.name != 'administrador' and perms.usuarios.asignacion_roles %}
                                         <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
                                             {% csrf_token %}
                                             <button type="submit" class="btn-remove-role" 
@@ -471,15 +471,21 @@
                                 {% if clientes_count > 0 %}
                                     <div class="client-count">{{ clientes_count }} cliente{{ clientes_count|pluralize }}</div>
                                     <br>
-                                    <a href="{% url 'usuarios:ver_clientes_usuario' usuario.pk %}" class="btn-admin btn-clients">
-                                        Ver Clientes
-                                    </a>
+                                    {% if perms.usuarios.asignacion_clientes %}
+                                        <a href="{% url 'usuarios:ver_clientes_usuario' usuario.pk %}" class="btn-admin btn-clients">
+                                            Ver Clientes
+                                        </a>
+                                    {% else %}
+                                        <span style="color: #6c757d; font-size: 0.75rem;">{{ clientes_count }} cliente{{ clientes_count|pluralize }}</span>
+                                    {% endif %}
                                 {% else %}
                                     <span style="color: #6c757d; font-style: italic;">Sin clientes</span>
-                                    <br>
-                                    <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-admin btn-clients">
-                                        Asignar
-                                    </a>
+                                    {% if perms.usuarios.asignacion_clientes %}
+                                        <br>
+                                        <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-admin btn-clients">
+                                            Asignar
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
                             {% endwith %}
                         {% else %}
@@ -493,24 +499,29 @@
                     </td>
                     <td>
                         <div class="actions-container">
-                            {% if not usuario.es_administrador %}
+                            {% if not usuario.es_administrador and perms.usuarios.asignacion_roles %}
                                 <a href="{% url 'usuarios:asignar_rol' usuario.pk %}" class="btn-admin btn-role">
                                     Asignar Rol
                                 </a>
                             {% endif %}
                             
-                            <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-admin btn-block"
-                                        onclick="return confirm('¿Estás seguro de que deseas {% if not usuario.bloqueado %}bloquear{% else %}desbloquear{% endif %} al usuario {{ usuario.get_full_name }}?')">
-                                    {% if not usuario.bloqueado %}
-                                         Bloquear
-                                    {% else %}
-                                         Desbloquear
-                                    {% endif %}
-                                </button>
-                            </form>
+                            {% if perms.usuarios.bloqueo %}
+                                <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-admin btn-block"
+                                            onclick="return confirm('¿Estás seguro de que deseas {% if not usuario.bloqueado %}bloquear{% else %}desbloquear{% endif %} al usuario {{ usuario.get_full_name }}?')">
+                                        {% if not usuario.bloqueado %}
+                                             Bloquear
+                                        {% else %}
+                                             Desbloquear
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            {% endif %}
                             
+                            {% if not perms.usuarios.bloqueo and not perms.usuarios.asignacion_roles %}
+                                <span style="color: #6c757d; font-style: italic; font-size: 0.8rem;">Sin permisos</span>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

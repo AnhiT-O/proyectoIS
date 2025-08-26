@@ -314,9 +314,17 @@ def administrar_usuarios(request):
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
+    # Verificar permisos del usuario actual
+    permisos_usuario = {
+        'puede_bloquear': request.user.has_perm('usuarios.bloqueo'),
+        'puede_asignar_roles': request.user.has_perm('usuarios.asignacion_roles'),
+        'puede_asignar_clientes': request.user.has_perm('usuarios.asignacion_clientes'),
+    }
+    
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
-        'busqueda': busqueda
+        'busqueda': busqueda,
+        'permisos_usuario': permisos_usuario
     })
 
 @login_required
