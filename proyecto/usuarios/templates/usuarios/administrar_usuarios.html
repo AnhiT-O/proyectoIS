@@ -503,7 +503,6 @@
                     </td>
 
                     <td class="clients-column">
-                        {% if not usuario.es_administrador %}
                             {% with clientes_count=usuario.clientes_operados.count %}
                                 {% if clientes_count > 0 %}
                                     <div class="client-count">{{ clientes_count }} cliente{{ clientes_count|pluralize }}</div>
@@ -525,9 +524,6 @@
                                     {% endif %}
                                 {% endif %}
                             {% endwith %}
-                        {% else %}
-                            <span style="color: #6c757d; font-style: italic;">N/A</span>
-                        {% endif %}
                     </td>
                     <td>
                         <span class="badge-status {% if not usuario.bloqueado %}badge-active{% else %}badge-inactive{% endif %}">
@@ -536,12 +532,12 @@
                     </td>
                     <td>
                         <div class="actions-container">
-                            {% if not usuario.es_administrador and perms.usuarios.asignacion_roles %}
+                            {% if perms.usuarios.asignacion_roles %}
                                 <a href="{% url 'usuarios:asignar_rol' usuario.pk %}" class="btn-admin btn-role">
                                     Asignar Rol
                                 </a>
                             {% endif %}
-                            
+
                             {% if perms.usuarios.bloqueo %}
                                 <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post" style="display: inline;">
                                     {% csrf_token %}
@@ -560,7 +556,7 @@
                                     {% endif %}
                                 </form>
                             {% endif %}
-                            
+
                             {% if not perms.usuarios.bloqueo and not perms.usuarios.asignacion_roles %}
                                 <span style="color: #6c757d; font-style: italic; font-size: 0.8rem;">Sin permisos</span>
                             {% endif %}

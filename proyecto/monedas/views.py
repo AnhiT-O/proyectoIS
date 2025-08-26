@@ -1,3 +1,4 @@
+from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -6,6 +7,34 @@ from django.http import Http404
 from django.db.models import Q
 from .models import Moneda
 from .forms import MonedaForm
+
+def tiene_algun_permiso(view_func):
+    """
+    Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+    para administrar monedas: creación, edición o activación.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        
+        # Permisos requeridos para administrar monedas
+        permisos_requeridos = [
+            'monedas.crear',        # Permiso para crear monedas
+            'monedas.editar',       # Permiso para editar monedas
+            'monedas.activacion'    # Permiso para activar/desactivar monedas
+        ]
+        
+        # Verificar si el usuario tiene al menos uno de los permisos
+        for permiso in permisos_requeridos:
+            if request.user.has_perm(permiso):
+                return view_func(request, *args, **kwargs)
+        
+        # Si no tiene ningún permiso, denegar acceso
+        raise PermissionDenied("No tienes permisos suficientes para gestionar monedas.")
+
+    return _wrapped_view
 
 @login_required
 @permission_required('monedas.crear', raise_exception=True)
@@ -21,14 +50,10 @@ def moneda_crear(request):
     return render(request, 'monedas/moneda_form.html', {'form': form, 'accion': 'Crear'})
 
 @login_required
-@permission_required('monedas.editar', raise_exception=True)
+@tiene_algun_permiso
 def moneda_lista(request):
     # Manejar cambio de estado si se envía POST
     if request.method == 'POST' and 'cambiar_estado' in request.POST:
-        # Verificar permisos de activación
-        if not request.user.has_perm('monedas.activacion'):
-            messages.error(request, 'No tienes permisos para activar/desactivar monedas.')
-            return redirect('monedas:lista_monedas')
         
         try:
             moneda_id = request.POST.get('moneda_id')

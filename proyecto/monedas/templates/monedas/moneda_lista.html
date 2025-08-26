@@ -528,9 +528,11 @@
             <div class="header-info">
                 <h1>Gestionar Monedas</h1>
             </div>
+            {% if perms.monedas.crear %}
             <a href="{% url 'monedas:crear_monedas' %}" class="btn-nuevo">
                 Nueva Moneda
             </a>
+            {% endif %}
         </div>
     </div>
 
@@ -591,9 +593,11 @@
                 </div>
                 
                                 <div class="moneda-actions">
+                    {% if perms.monedas.editar %}
                     <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-action btn-editar" title="Editar moneda">
                         Editar
                     </a>
+                    {% endif %}
                     {% if perms.monedas.activacion %}
                         {% if moneda.activa %}
                             <form method="post" action="{% url 'monedas:lista_monedas' %}" style="display: inline;">
