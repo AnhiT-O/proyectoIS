@@ -27,7 +27,7 @@ def crear_rol(request):
         form = RolForm()
     return render(request, 'roles/rol_form.html', {
         'form': form,
-        'titulo': 'Crear Nuevo Rol'
+        'titulo': 'Nuevo Rol'
     })
 
 @login_required

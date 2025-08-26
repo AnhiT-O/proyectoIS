@@ -65,34 +65,43 @@
 
     .btn-container {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
         margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 1rem;
     }
 
     .btn-primary {
         background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: 500;
         color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+        transform: translateY(-1px);
     }
 
     .btn-secondary {
         background: #6c757d;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: 500;
         color: white;
-        text-decoration: none;
     }
 
     .btn-secondary:hover {
         background: #5a6268;
-        color: white;
-        text-decoration: none;
+        transform: translateY(-1px);
     }
 
     .no-clients {
@@ -152,14 +161,14 @@
             </div>
 
             <div class="btn-container">
-                <button type="submit" class="btn btn-primary">Asignar Clientes</button>
-                <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Asignar Clientes</button>
+                    <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn btn-secondary">Cancelar</a>
             </div>
         {% else %}
             <div class="no-clients">
                 <h5>No hay clientes disponibles</h5>
                 <p>Todos los clientes ya están asignados a este usuario o no hay clientes registrados en el sistema.</p>
-                <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-secondary">Volver</a>
+                <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn btn-secondary">Volver</a>
             </div>
         {% endif %}
     </form>

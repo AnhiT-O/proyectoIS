@@ -49,12 +49,10 @@ class RolForm(forms.ModelForm):
         # Personalizar los widgets con clases de estilo
         self.fields['name'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Ingrese el nombre del rol'
         })
         
         self.fields['descripcion'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': 'Ingrese una descripción para el rol',
             'rows': '4'
         })
 

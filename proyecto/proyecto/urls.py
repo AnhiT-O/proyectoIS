@@ -22,7 +22,7 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('roles/', include('roles.urls')),
     path('clientes/', include('clientes.urls')),
-    
+    path('monedas/', include('monedas.urls')),
 ]
 
 # Configuración para manejadores de errores personalizados

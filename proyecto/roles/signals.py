@@ -8,9 +8,6 @@ def asignar_permisos_administrador(sender, **kwargs):
     """
     Asigna todos los permisos existentes a un grupo llamado 'Administradores'.
     """
-    # Evita que se ejecute en otras aplicaciones si no es la tuya
-    if sender.name != 'roles':
-        return
 
     # Obtener o crear el grupo
     admin, created = Group.objects.get_or_create(name='administrador')
@@ -20,4 +17,4 @@ def asignar_permisos_administrador(sender, **kwargs):
 
     # Asignar los permisos al grupo
     admin.permissions.set(all_permissions)
-    print("Al grupo 'administrador' se le han asignado todos los permisos.")
+    print(f"Al grupo 'administrador' se le han asignado todos los permisos después de migrar {sender.name}.")
