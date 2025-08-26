@@ -11,7 +11,8 @@ class Roles(Group):
     
     class Meta:
         verbose_name = 'Rol'
-        verbose_name_plural = 'Roles'
+        verbose_name_plural = 'Roles',
+        db_table = 'roles',
         default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
             ("gestion", "Puede gestionar roles (crear y editar)"),
