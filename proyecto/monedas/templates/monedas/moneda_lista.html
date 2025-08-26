@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Administrar Monedas - Global Exchange{% endblock %}
+{% block title %}Gestionar Monedas - Global Exchange{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -241,25 +241,35 @@
 
     .monedas-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+        gap: 3rem;
+        margin-top: 2.5rem;
+        background: linear-gradient(135deg, #eef2fb 0%, #f8f9fa 100%);
+        border-radius: 18px;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 2px 18px rgba(102, 126, 234, 0.07);
+        border: 1.5px solid #e9ecef;
     }
 
     .moneda-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        background: #fff;
+        border-radius: 18px;
+        padding: 2.2rem 1.7rem 1.7rem 1.7rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.13);
         transition: all 0.3s ease;
-        border: 2px solid transparent;
+        border: 1.5px solid #e9ecef;
         position: relative;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        min-height: 270px;
     }
 
     .moneda-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        border-color: rgba(102, 126, 234, 0.2);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 16px 40px rgba(102, 126, 234, 0.18);
+        border-color: rgba(102, 126, 234, 0.25);
     }
 
     .moneda-card.inactiva {
@@ -277,6 +287,8 @@
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1.5px solid #e9ecef;
     }
 
     .moneda-info h3 {
@@ -435,11 +447,11 @@
 
     .moneda-description {
         color: #6c757d;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+        font-size: 1rem;
+        margin-top: 0.7rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 1.2rem;
     }
 
     @media (max-width: 1200px) {
@@ -572,28 +584,46 @@
 
         <div class="monedas-grid" id="monedasGrid">
             {% for moneda in monedas %}
-            <div class="moneda-card {% if not moneda.activa %}inactiva{% endif %}" data-search="{{ moneda.nombre|lower }} {{ moneda.simbolo|lower }}">
-                <div class="moneda-header">
-                    <div class="moneda-info">
-                        <h3>{{ moneda.nombre }}</h3>
-                        <div class="moneda-description">
-                            <span>Código: {{ moneda.simbolo }}</span>
-                        </div>
-                        <div class="status-badge {% if moneda.activa %}status-activa{% else %}status-inactiva{% endif %}">
-                            {% if moneda.activa %}
-                                Activa
-                            {% else %}
-                                Inactiva
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="moneda-simbolo {% if not moneda.activa %}inactiva{% endif %}">
-                        {{ moneda.simbolo }}
-                    </div>
+            <div class="moneda-card {% if not moneda.activa %}inactiva{% endif %}" data-search="{{ moneda.nombre|lower }} {{ moneda.simbolo|lower }}" style="padding:1.2rem 1rem; min-height:unset;">
+                <!-- Cabecera comprimida: nombre a la izquierda, símbolo a la derecha -->
+                <div class="moneda-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e9ecef; margin-bottom:0.7rem; padding-bottom:0.3rem;">
+                    <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#333;">{{ moneda.nombre }}</h3>
+                    <div class="moneda-simbolo {% if not moneda.activa %}inactiva{% endif %}" style="font-size:1.05rem; min-width:50px; text-align:right;">{{ moneda.simbolo }}</div>
                 </div>
-                
-                                <div class="moneda-actions">
-                    {% if perms.monedas.editar %}
+                <!-- Información tipo tabla -->
+                <div style="width:100%; background:#fff; border-radius:10px; box-shadow:0 1px 4px rgba(102,126,234,0.07); overflow:hidden; border:1px solid #e9ecef;">
+                    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:90px">
+                            <col style="width:110px">
+                            <col style="width:auto">
+                        </colgroup>
+                        <thead>
+                            <tr style="background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);">
+                                <th style="padding:0.5rem 0.1rem; font-size:0.85rem; color:#667eea; font-weight:600; border-right:1px solid #e9ecef; text-align:center;">Estado</th>
+                                <th style="padding:0.5rem 0.1rem; font-size:0.85rem; color:#667eea; font-weight:600; border-right:1px solid #e9ecef; text-align:center;">Decimales a mostrar</th>
+                                <th style="padding:0.5rem 0.1rem; font-size:0.85rem; color:#667eea; font-weight:600; text-align:center;">Tasa base</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:0.5rem 0.1rem; border-right:1px solid #e9ecef; text-align:center;">
+                                    <span class="status-badge {% if moneda.activa %}status-activa{% else %}status-inactiva{% endif %}" style="font-size:0.95rem; display:inline-block; margin-top:0;">
+                                        {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
+                                    </span>
+                                </td>
+                                <td style="padding:0.5rem 0.1rem; border-right:1px solid #e9ecef; text-align:center;">
+                                    <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.decimales }}</span>
+                                </td>
+                                <td style="padding:0.5rem 0.1rem; text-align:center;">
+                                    <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.tasa_base }}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="moneda-actions">
+                    {% if perms.monedas.editar or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
                     <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-action btn-editar" title="Editar moneda">
                         Editar
                     </a>

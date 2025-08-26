@@ -28,6 +28,18 @@ class Moneda(models.Model):
         verbose_name='Moneda activa',
         help_text='Determina si la moneda está activa para operaciones'
     )
+    tasa_base = models.IntegerField(
+        default=0,
+        null=False,
+        blank=False,
+        verbose_name='Tasa base',
+        help_text='Tasa de cambio base de la moneda a guaraníes'
+    )
+    decimales = models.IntegerField(
+        default=3,
+        verbose_name='Decimales',
+        help_text='Cantidad de decimales de la moneda para mostrar a usuarios'
+    )
 
     class Meta:
         verbose_name = 'Moneda'
@@ -37,7 +49,9 @@ class Moneda(models.Model):
         permissions = [
             ("crear", "Puede crear monedas"),
             ("editar", "Puede editar monedas"),
-            ("activacion", "Puede activar/desactivar monedas")
+            ("activacion", "Puede activar/desactivar monedas"),
+            ("cambiar_tasa", "Puede cambiar la tasa base de una moneda"),
+            ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda")
         ]
 
     def clean(self):
