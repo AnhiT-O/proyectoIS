@@ -540,7 +540,7 @@
             <div class="header-info">
                 <h1>Gestionar Monedas</h1>
             </div>
-            {% if perms.monedas.crear %}
+            {% if perms.monedas.gestion %}
             <a href="{% url 'monedas:crear_monedas' %}" class="btn-nuevo">
                 Nueva Moneda
             </a>
@@ -623,7 +623,7 @@
                     </table>
                 </div>
                 <div class="moneda-actions">
-                    {% if perms.monedas.editar or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
+                    {% if perms.monedas.gestion or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
                     <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-action btn-editar" title="Editar moneda">
                         Editar
                     </a>

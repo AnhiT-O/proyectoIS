@@ -47,8 +47,7 @@ class Moneda(models.Model):
         db_table = 'monedas'
         default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [
-            ("crear", "Puede crear monedas"),
-            ("editar", "Puede editar monedas"),
+            ("gestion", "Puede gestionar monedas (crear y editar)"),
             ("activacion", "Puede activar/desactivar monedas"),
             ("cambiar_tasa", "Puede cambiar la tasa base de una moneda"),
             ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda")

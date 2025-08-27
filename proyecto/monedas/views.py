@@ -21,8 +21,7 @@ def tiene_algun_permiso(view_func):
         
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
-            'monedas.crear',        # Permiso para crear monedas
-            'monedas.editar',       # Permiso para editar monedas
+            'monedas.gestion',
             'monedas.activacion',    # Permiso para activar/desactivar monedas
             'monedas.cambiar_tasa',  # Permiso para cambiar la tasa base de una moneda
             'monedas.cambiar_decimales'  # Permiso para cambiar el número de decimales de una moneda
@@ -51,7 +50,7 @@ def puede_editar(view_func):
         
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
-            'monedas.editar',       # Permiso para editar monedas
+            'monedas.gestion',       # Permiso para editar monedas
             'monedas.cambiar_tasa',  # Permiso para cambiar la tasa base de una moneda
             'monedas.cambiar_decimales'  # Permiso para cambiar el número de decimales de una moneda
         ]
@@ -67,7 +66,7 @@ def puede_editar(view_func):
     return _wrapped_view
 
 @login_required
-@permission_required('monedas.crear', raise_exception=True)
+@permission_required('monedas.gestion', raise_exception=True)
 def moneda_crear(request):
     if request.method == 'POST':
         form = MonedaForm(request.POST)
@@ -77,7 +76,7 @@ def moneda_crear(request):
             return redirect('monedas:lista_monedas')
     else:
         form = MonedaForm()
-    return render(request, 'monedas/moneda_form.html', {'form': form, 'accion': 'Crear'})
+    return render(request, 'monedas/moneda_crear.html', {'form': form,})
 
 @login_required
 @tiene_algun_permiso
@@ -133,22 +132,21 @@ def moneda_editar(request, pk):
         form = MonedaForm(request.POST, instance=moneda)
     else:
         form = MonedaForm(instance=moneda)
-
+    if not request.user.has_perm('monedas.gestion'):
     # Elimina campos según permisos
-    if not request.user.has_perm('monedas.editar'):
         form.fields.pop('nombre')
         form.fields.pop('simbolo')
-    if not request.user.has_perm('monedas.cambiar_tasa'):
-        form.fields.pop('tasa_base')
-    if not request.user.has_perm('monedas.cambiar_decimales'):
-        form.fields.pop('decimales')
+        if not request.user.has_perm('monedas.cambiar_tasa'):
+            form.fields.pop('tasa_base')
+        if not request.user.has_perm('monedas.cambiar_decimales'):
+            form.fields.pop('decimales')
 
     # Procesa el formulario
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            messages.success(request, f'Moneda \"{moneda.nombre}\" actualizada exitosamente.')
+            messages.success(request, f'Moneda \"{moneda.nombre}\" editada exitosamente.')
             return redirect('monedas:lista_monedas')
         else:
             messages.error(request, 'Error al actualizar la moneda.')
-    return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda, 'accion': 'Editar'})
+    return render(request, 'monedas/moneda_editar.html', {'form': form, 'moneda': moneda,})
