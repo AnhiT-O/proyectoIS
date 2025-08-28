@@ -325,12 +325,12 @@
                         <a href="{% url 'usuarios:perfil' %}" class="nav-item">
                             👤 Mi Perfil
                         </a>
-                        <a href="{% url 'usuarios:logout' %}" class="nav-item btn-danger">
+                        <a href="{% url 'logout' %}" class="nav-item btn-danger">
                              Cerrar Sesión
                         </a>
                     </div>
                 {% else %}
-                    <a href="{% url 'usuarios:login' %}" class="nav-item btn-secondary">
+                    <a href="{% url 'login' %}" class="nav-item btn-secondary">
                         Iniciar Sesión
                     </a>
                     <a href="{% url 'usuarios:registro' %}" class="nav-item btn-primary">

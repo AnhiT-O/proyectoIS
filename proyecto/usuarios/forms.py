@@ -1,30 +1,10 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
-from clientes.models import Cliente, UsuarioCliente
-
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        max_length=254,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Nombre de usuario'
-        })
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Contraseña'
-        })
-    )
-    
-    error_messages = {
-        'invalid_login': "El nombre de usuario y contraseña no coinciden. Inténtelo de nuevo.",
-        'inactive': "Esta cuenta está inactiva.",
-    }
+from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
     email = forms.EmailField(

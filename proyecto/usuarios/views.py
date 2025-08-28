@@ -13,7 +13,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from functools import wraps
-from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
+from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
 
@@ -44,55 +44,6 @@ def tiene_algun_permiso(view_func):
         raise PermissionDenied("No tienes permisos suficientes para administrar usuarios.")
     
     return _wrapped_view
-
-def login_usuario(request):
-    if request.user.is_authenticated:
-        return redirect('usuarios:perfil')
-    
-    if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            
-            try:
-                # Primero verificamos si el usuario existe
-                user = Usuario.objects.get(username=username)
-                
-                # Si el usuario está bloqueado, mostramos mensaje específico
-                if user.bloqueado:
-                    return render(request, 'usuarios/login.html', {
-                        'form': form,
-                        'usuario_bloqueado': True,
-                        'nombre_usuario': user.get_full_name()
-                    })
-                if not user.is_active:
-                    return render(request, 'usuarios/login.html', {
-                        'form': form,
-                        'usuario_inactivo': True,
-                        'nombre_usuario': user.get_full_name()
-                    })
-
-                # Si no está bloqueado, intentamos autenticar
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    login(request, user)
-                    messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
-                    next_page = request.GET.get('next', 'usuarios:perfil')
-                    return redirect(next_page)
-                else:
-                    messages.error(request, 'La contraseña ingresada es incorrecta.')
-            except Usuario.DoesNotExist:
-                messages.error(request, 'No existe un usuario con ese nombre de usuario.')
-    else:
-        form = LoginForm()
-    
-    return render(request, 'usuarios/login.html', {'form': form})
-
-def logout_usuario(request):
-    logout(request)
-    messages.success(request, 'Has cerrado sesión exitosamente.')
-    return redirect('inicio')
 
 def registro_usuario(request):
     if request.method == 'POST':
