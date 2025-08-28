@@ -161,7 +161,7 @@
         <p class="subtitle">Inicia sesión en tu cuenta</p>
     </div>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
         
         <div class="form-group">
@@ -187,53 +187,6 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Mensaje especial para usuarios bloqueados -->
-        {% if usuario_bloqueado %}
-            <div class="alert alert-danger" style="
-                background-color: #fef2f2;
-                border: 1px solid #fee2e2;
-                color: #991b1b;
-                padding: 1rem;
-                border-radius: 8px;
-                margin-bottom: 1.5rem;
-            ">
-                <h4 style="
-                    margin: 0 0 0.5rem 0;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                ">
-                    🔒 Cuenta Bloqueada
-                </h4>
-                <p style="margin: 0; font-size: 0.95rem;">
-                    Lo sentimos, {{ nombre_usuario }}. Tu cuenta ha sido bloqueada temporalmente.
-                    Por favor, contacta al administrador del sistema para obtener ayuda y resolver esta situación.
-                </p>
-            </div>
-        {% endif %}
-
-        <!-- Mensaje especial para usuarios inactivos -->
-        {% if usuario_inactivo %}
-            <div class="alert alert-warning" style="
-                background-color: #fffbeb;
-                border: 1px solid #fef3c7;
-                color: #92400e;
-                padding: 1rem;
-                border-radius: 8px;
-                margin-bottom: 1.5rem;
-            ">
-                <h4 style="
-                    margin: 0 0 0.5rem 0;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                ">
-                    ⚠️ Cuenta Inactiva
-                </h4>
-                <p style="margin: 0; font-size: 0.95rem;">
-                    Hola, {{ nombre_usuario }}. Tu cuenta aún no ha sido activada. Revisa tu correo electrónico para usar el enlace de activación.
-                </p>
-            </div>
-        {% endif %}
 
         <!-- Errores generales del formulario -->
         {% if form.non_field_errors %}
