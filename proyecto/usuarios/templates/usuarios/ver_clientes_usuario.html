@@ -88,6 +88,12 @@
         font-size: 0.9rem;
     }
 
+    .cliente-label {
+        font-weight: 600;
+        color: #666;
+        margin-right: 0.5rem;
+    }
+
     .cliente-tipo {
         text-align: right;
     }
@@ -181,10 +187,10 @@
                             {{ cliente.nombre }} {{ cliente.apellido }}
                         </div>
                         <div class="cliente-detalle">
-                            Email: {{ cliente.correoElecCliente }}
+                            <span class="cliente-label">Email:</span>{{ cliente.correoElecCliente }}
                         </div>
                         <div class="cliente-detalle">
-                            Teléfono: {{ cliente.telefono }}
+                            <span class="cliente-label">Teléfono:</span>{{ cliente.telefono }}
                         </div>
                     </div>
                     
@@ -194,12 +200,12 @@
                         </div>
                         {% if cliente.direccion %}
                         <div class="cliente-detalle">
-                            Dirección: {{ cliente.direccion|truncatechars:50 }}
+                            <span class="cliente-label">Dirección:</span>{{ cliente.direccion|truncatechars:50 }}
                         </div>
                         {% endif %}
                         {% if cliente.ocupacion %}
                         <div class="cliente-detalle">
-                            Ocupación: {{ cliente.ocupacion }}
+                            <span class="cliente-label">Ocupación:</span>{{ cliente.ocupacion }}
                         </div>
                         {% endif %}
                     </div>
