@@ -189,6 +189,16 @@
             </a>
         </div>
 
+         <div class="quick-actions">
+            <a href="{% url 'usuarios:ver_clientes_usuario' %}" class="btn-primary">
+                👥 Mis Clientes
+            </a>
+            
+            <a href="#" class="btn-secondary" onclick="alert('Funcionalidad en desarrollo'); return false;">
+                📊 Ver Reportes
+            </a>
+        </div>
+
     {% else %}
         <!-- Contenido para usuarios no autenticados -->
         <div class="logo">💰 Global Exchange</div>
