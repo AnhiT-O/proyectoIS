@@ -60,16 +60,16 @@ def registro_usuario(request):
     return render(request, 'usuarios/registro.html', {'form': form})
 
 def enviar_email_confirmacion(request, user):
+    # token de activación
     token = default_token_generator.make_token(user)
+    # identificador del usuario a activar
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    
+    # generación de enlace de activación
     activacion_url = request.build_absolute_uri(
         reverse('usuarios:activar_cuenta', kwargs={'uidb64': uid, 'token': token})
     )
     
-    subject = 'Confirma tu cuenta'
-    
-    # Crear contenido HTML
+    # transforma el HTML en formato de correo
     html_content = render_to_string('usuarios/email_confirmacion.html', {
         'user': user,
         'activacion_url': activacion_url,
@@ -90,13 +90,10 @@ Saludos,
 El equipo de desarrollo
     """.strip()
     
-    # Crear email con HTML y texto plano
-    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
-    
     msg = EmailMultiAlternatives(
-        subject=subject,
+        subject='Confirma tu cuenta',
         body=text_content,  # Contenido de texto plano
-        from_email=from_email,
+        from_email='',
         to=[user.email]
     )
     
@@ -115,6 +112,8 @@ def activar_cuenta(request, uidb64, token):
     
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
+        operador_role = Group.objects.get(name='operador')
+        user.groups.add(operador_role)
         user.save()
         login(request, user)
         messages.success(request, '¡Cuenta activada exitosamente! Bienvenido.')
@@ -133,8 +132,8 @@ def activar_cuenta(request, uidb64, token):
                 # Si el usuario ya está activo, solo mostrar error de enlace inválido
                 messages.error(request, 'El enlace de activación ya se usó.')
         else:
-            messages.error(request, 'El enlace de activación es inválido o ha expirado.')
-        
+            messages.error(request, 'Hubo un error inesperado. Contacta a soporte.')
+
         return redirect('usuarios:registro')
 
 def registro_exitoso(request):

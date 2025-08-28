@@ -7,24 +7,47 @@ from .models import Usuario
 from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El nombre de usuario es obligatorio.",
+            'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
+            'unique': "Ya existe un usuario registrado con este nombre de usuario."
+        }
+    )
     email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'invalid': "Introduce un correo electrónico válido.",
+            'required': "El correo electrónico es obligatorio.",
+            'unique': "Ya existe un usuario registrado con este correo electrónico."
+        }
     )
     first_name = forms.CharField(
-        max_length=40,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El nombre es obligatorio.",
+            'max_length': "El nombre no puede tener más de 40 caracteres."
+        }
     )
     last_name = forms.CharField(
-        max_length=40,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El apellido es obligatorio.",
+            'max_length': "El apellido no puede tener más de 40 caracteres."
+        }
     )
     tipo_cedula = forms.ChoiceField(
         choices=Usuario.TIPO_CEDULA_CHOICES,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     cedula_identidad = forms.CharField(
-        max_length=11,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "La cédula de identidad es obligatoria.",
+            'max_length': "La cédula de identidad no puede tener más de 11 caracteres.",
+            'unique': "Ya existe un usuario registrado con esta cédula."
+        }
     )
 
     class Meta:
@@ -33,35 +56,16 @@ class RegistroUsuarioForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
     def clean_cedula_identidad(self):
         cedula = self.cleaned_data.get('cedula_identidad')
-        
         if not cedula.isdigit():
-            raise ValidationError("La cédula debe contener solo números.")
-
-        # Verificar unicidad excluyendo usuarios inactivos con cédula duplicada
-        existing_user = Usuario.objects.filter(cedula_identidad=cedula).first()
-        if existing_user:
-            if existing_user.is_active:
-                raise ValidationError("Ya existe un usuario registrado con esta cédula.")
-            else:
-                raise ValidationError("Una cuenta con esta cédula ya existe, aunque no está activada.")
-
+            raise ValidationError("La cédula de identidad debe ser numérica.")
+        if len(cedula) < 4:
+            raise ValidationError("La cédula de identidad debe tener al menos 4 dígitos.")
         return cedula
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        existing_user = Usuario.objects.filter(email=email).first()
-        if existing_user:
-            if existing_user.is_active:
-                raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
-            else:
-                raise ValidationError("Una cuenta con este correo electrónico ya existe, pero no está activada. Revisá tu bandeja de entrada")
-        return email
 
     def clean_password1(self):
         password1 = self.cleaned_data.get('password1')
@@ -96,7 +100,6 @@ class RegistroUsuarioForm(UserCreationForm):
         user.last_name = self.cleaned_data['last_name']
         user.tipo_cedula = self.cleaned_data['tipo_cedula']
         user.cedula_identidad = self.cleaned_data['cedula_identidad']
-        user.is_active = False  # Usuario inactivo hasta confirmar email
         if commit:
             user.save()
         return user
