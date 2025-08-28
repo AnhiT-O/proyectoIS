@@ -507,7 +507,7 @@ def ver_clientes_usuario(request, pk):
     })
 
 @login_required
-def ver_clientes_usuario(request):
+def ver_clientes_asociados(request):
     """Vista para que un usuario vea los clientes con los que está asociado"""
     # Obtener los clientes asociados al usuario actual
     clientes = request.user.clientes_operados.all()
@@ -516,6 +516,6 @@ def ver_clientes_usuario(request):
         'clientes': clientes,
         'total_clientes': clientes.count(),
     }
-    
-    return render(request, 'usuarios/ver_clientes_usuario.html', context)
+
+    return render(request, 'usuarios/ver_clientes_asociados.html', context)
 
