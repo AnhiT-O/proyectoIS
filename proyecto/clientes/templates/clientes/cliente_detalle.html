@@ -325,6 +325,24 @@
                 </div>
             </div>
         </div>
+
+        <!-- Categoría del Cliente -->
+        <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-item">
+                <span class="info-icon">🏷️</span>
+                <div class="info-content">
+                    <div class="info-label">Categoría</div>
+                    <div class="info-value">
+                        <span class="badge 
+                            {% if cliente.categoria == 'vip' %}bg-warning text-dark
+                            {% elif cliente.categoria == 'corporativo' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ cliente.get_categoria_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="actions-section">
@@ -332,6 +350,11 @@
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn btn-warning">
                 Editar Cliente
             </a>
+            {% if user.is_staff %}
+            <a href="{% url 'clientes:cambiar_categoria' cliente.pk %}" class="btn btn-primary">
+                <i class="fas fa-star"></i> Cambiar Categoría
+            </a>
+            {% endif %}
             <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
                 Volver a la Lista
             </a>

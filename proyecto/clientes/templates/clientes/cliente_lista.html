@@ -332,6 +332,18 @@
         transform: scale(1.05);
     }
 
+    .btn-categoria {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-categoria:hover {
+        background: #5a6fd8;
+        color: white;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -585,6 +597,12 @@
                                 <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-action btn-editar" title="Editar">
                                     Editar
                                 </a>
+                                
+                                <a href="{% url 'clientes:cambiar_categoria' cliente.pk %}" class="btn-action btn-categoria" title="Cambiar Categoría">
+                                    Categoría
+                                </a>
+                                
+                                
                             </div>
                         </td>
                     </tr>
