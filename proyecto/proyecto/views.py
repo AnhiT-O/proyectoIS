@@ -29,7 +29,7 @@ def login_usuario(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
+                messages.success(request, f'¡Bienvenido, {user.first_name}!')
                 next_page = request.GET.get('next', 'inicio')
                 return redirect(next_page)
     else:

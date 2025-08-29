@@ -8,7 +8,10 @@ from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'autofocus': True
+        }),
         error_messages={
             'required': "El nombre de usuario es obligatorio.",
             'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
@@ -110,7 +113,6 @@ class RecuperarPasswordForm(PasswordResetForm):
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Correo electrónico',
             'autofocus': True
         }),
         error_messages={
@@ -135,7 +137,8 @@ class EstablecerPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Nueva contraseña'
+            'placeholder': 'Nueva contraseña',
+            'autofocus': True
         }),
         strip=False,
     )

@@ -16,6 +16,7 @@ from functools import wraps
 from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
+from django.db.models import Q
 
 def tiene_algun_permiso(view_func):
     """
@@ -30,7 +31,7 @@ def tiene_algun_permiso(view_func):
         
         # Permisos requeridos para administrar usuarios
         permisos_requeridos = [
-            'usuarios.bloqueo',        # Permiso para bloquear usuarios
+            'usuarios.bloqueo',                 # Permiso para bloquear usuarios
             'usuarios.asignacion_roles',        # Permiso para asignar roles
             'usuarios.asignacion_clientes'      # Permiso para asignar clientes
         ]
@@ -41,7 +42,7 @@ def tiene_algun_permiso(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para administrar usuarios.")
+        raise PermissionDenied()
     
     return _wrapped_view
 
@@ -259,22 +260,18 @@ def administrar_usuarios(request):
     
     # Aplicar filtro de búsqueda si existe
     if busqueda:
-        usuarios = usuarios.filter(username__icontains=busqueda)
+        usuarios = usuarios.filter(
+            Q(first_name__icontains=busqueda) |
+            Q(last_name__icontains=busqueda) |
+            Q(username__icontains=busqueda)
+        )
     
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
-    # Verificar permisos del usuario actual
-    permisos_usuario = {
-        'puede_bloquear': request.user.has_perm('usuarios.bloqueo'),
-        'puede_asignar_roles': request.user.has_perm('usuarios.asignacion_roles'),
-        'puede_asignar_clientes': request.user.has_perm('usuarios.asignacion_clientes'),
-    }
-    
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
-        'busqueda': busqueda,
-        'permisos_usuario': permisos_usuario
+        'busqueda': busqueda
     })
 
 @login_required

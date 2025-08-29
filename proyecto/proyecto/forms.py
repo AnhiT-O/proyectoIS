@@ -5,10 +5,10 @@ from usuarios.models import Usuario
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         max_length=30,
-        widget=forms.TextInput(attrs={'class': 'form-control','placeholder': 'Nombre de usuario'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': True})
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder': 'Contraseña'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
     
     error_messages = {
