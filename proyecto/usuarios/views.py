@@ -89,11 +89,13 @@ Si no solicitaste esta cuenta, puedes ignorar este correo.
 Saludos,
 El equipo de desarrollo
     """.strip()
+
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
     
     msg = EmailMultiAlternatives(
         subject='Confirma tu cuenta',
         body=text_content,  # Contenido de texto plano
-        from_email='',
+        from_email=from_email,
         to=[user.email]
     )
     
@@ -151,7 +153,7 @@ def recuperar_password(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             # Obtener el usuario
-            user = Usuario.objects.get(email=email, is_active=True)
+            user = Usuario.objects.get(email=email)
             
             # Enviar email de recuperación
             enviar_email_recuperacion(request, user)
@@ -159,7 +161,7 @@ def recuperar_password(request):
             messages.success(request, 
                 'Se ha enviado un enlace de recuperación a tu correo electrónico. '
                 'Revisa tu bandeja de entrada y sigue las instrucciones.')
-            return redirect('usuarios:login')
+            return redirect('login')
     else:
         form = RecuperarPasswordForm()
     
@@ -174,8 +176,6 @@ def enviar_email_recuperacion(request, user):
     reset_url = request.build_absolute_uri(
         reverse('usuarios:reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
     )
-    
-    subject = 'Recuperación de contraseña - Global Exchange'
     
     # Crear contenido HTML
     html_content = render_to_string('usuarios/email_recuperacion.html', {
@@ -192,7 +192,7 @@ Has solicitado recuperar tu contraseña en Global Exchange.
 Para crear una nueva contraseña, por favor visita el siguiente enlace:
 {reset_url}
 
-Este enlace expirará en 24 horas por seguridad.
+Este enlace expirará en una hora por seguridad.
 
 Si no solicitaste este cambio, puedes ignorar este correo y tu contraseña permanecerá sin cambios.
 
@@ -204,7 +204,7 @@ El equipo de Global Exchange
     from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
     
     msg = EmailMultiAlternatives(
-        subject=subject,
+        subject='Recuperación de contraseña - Global Exchange',
         body=text_content,  # Contenido de texto plano
         from_email=from_email,
         to=[user.email]
@@ -233,7 +233,7 @@ def reset_password_confirm(request, uidb64, token):
                 messages.success(request, 
                     '¡Tu contraseña ha sido cambiada exitosamente! '
                     'Ya puedes iniciar sesión con tu nueva contraseña.')
-                return redirect('usuarios:login')
+                return redirect('login')
         else:
             form = EstablecerPasswordForm(user)
         

@@ -8,7 +8,7 @@ from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
         error_messages={
             'required': "El nombre de usuario es obligatorio.",
             'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
@@ -108,13 +108,15 @@ class RegistroUsuarioForm(UserCreationForm):
 class RecuperarPasswordForm(PasswordResetForm):
     """Formulario personalizado para recuperación de contraseña"""
     email = forms.EmailField(
-        max_length=254,
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
             'placeholder': 'Correo electrónico',
             'autofocus': True
         }),
-        label='Correo electrónico'
+        error_messages={
+            'required': "El correo electrónico es obligatorio.",
+            'invalid': "Ingrese un correo electrónico válido."
+        }
     )
 
     def clean_email(self):
@@ -127,18 +129,10 @@ class RecuperarPasswordForm(PasswordResetForm):
                 raise ValidationError("No existe una cuenta activa asociada a este correo electrónico.")
         return email
 
-    def get_users(self, email):
-        """Sobrescribir método para obtener solo usuarios activos"""
-        return Usuario.objects.filter(
-            email__iexact=email,
-            is_active=True
-        )
-
 
 class EstablecerPasswordForm(SetPasswordForm):
     """Formulario personalizado para establecer nueva contraseña"""
     new_password1 = forms.CharField(
-        label="Nueva contraseña",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Nueva contraseña'
@@ -146,7 +140,6 @@ class EstablecerPasswordForm(SetPasswordForm):
         strip=False,
     )
     new_password2 = forms.CharField(
-        label="Confirmar nueva contraseña",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Confirmar nueva contraseña'
