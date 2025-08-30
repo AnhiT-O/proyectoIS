@@ -28,6 +28,11 @@ def cliente_lista(request):
     # Obtener clientes para mostrar (con filtros aplicados)
     clientes = todos_los_clientes
     
+    # Manejar filtro por segmento
+    segmento_filtro = request.GET.get('segmento', '').strip()
+    if segmento_filtro and segmento_filtro in ['vip', 'corporativo', 'minorista']:
+        clientes = clientes.filter(segmento=segmento_filtro)
+    
     # Manejar búsqueda
     busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
@@ -42,10 +47,19 @@ def cliente_lista(request):
     # Ordenar por nombre
     clientes = clientes.order_by('nombre', 'apellido')
     
+    # Estadísticas por segmento para mostrar en filtros
+    stats_segmentos = {
+        'vip': todos_los_clientes.filter(segmento='vip').count(),
+        'corporativo': todos_los_clientes.filter(segmento='corporativo').count(),
+        'minorista': todos_los_clientes.filter(segmento='minorista').count(),
+    }
+    
     context = {
         'clientes': clientes,
-        'hay_clientes': todos_los_clientes.exists(),  # Para saber si mostrar la tabla o el mensaje
+        'hay_clientes': todos_los_clientes.exists(),
         'busqueda': busqueda,
+        'segmento_filtro': segmento_filtro,
+        'stats_segmentos': stats_segmentos,
     }
     return render(request, 'clientes/cliente_lista.html', context)
 

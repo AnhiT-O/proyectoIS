@@ -411,6 +411,86 @@
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
+    /* Estilos para filtros de segmento */
+    .filtros-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .filtros-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .filtros-title {
+        font-weight: 600;
+        color: #495057;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .filtros-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .filtro-item {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        position: relative;
+    }
+
+    .filtro-item:hover {
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .filtro-item.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .filtro-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+
+    .btn-limpiar-filtros {
+        background: #e9ecef;
+        color: #495057;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-limpiar-filtros:hover {
+        background: #dee2e6;
+        color: #495057;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
     @media (max-width: 1200px) {
         .clientes-container {
             margin: 1rem;
@@ -502,6 +582,38 @@
     </div>
 
     {% if hay_clientes %}
+        <!-- Filtros por segmento (solo para administradores) -->
+        
+        <div class="filtros-container">
+            <div class="filtros-header">
+                <h3 class="filtros-title"> Filtrar por Segmento</h3>
+                {% if segmento_filtro %}
+                <a href="{% url 'clientes:cliente_lista' %}{% if busqueda %}?busqueda={{ busqueda }}{% endif %}" class="btn-limpiar-filtros">
+                    Limpiar Filtros
+                </a>
+                {% endif %}
+            </div>
+            <div class="filtros-grid">
+                
+                <a href="{% url 'clientes:cliente_lista' %}?segmento=vip{% if busqueda %}&busqueda={{ busqueda }}{% endif %}" 
+                   class="filtro-item {% if segmento_filtro == 'vip' %}active{% endif %}">
+                    <span class="filtro-label"> VIP</span>
+                </a>
+                
+                <a href="{% url 'clientes:cliente_lista' %}?segmento=corporativo{% if busqueda %}&busqueda={{ busqueda }}{% endif %}" 
+                   class="filtro-item {% if segmento_filtro == 'corporativo' %}active{% endif %}">
+                    <span class="filtro-label"> Corporativo</span>
+                </a>
+                
+                <a href="{% url 'clientes:cliente_lista' %}?segmento=minorista{% if busqueda %}&busqueda={{ busqueda }}{% endif %}" 
+                   class="filtro-item {% if segmento_filtro == 'minorista' %}active{% endif %}">
+                    <span class="filtro-label"> Minorista</span>
+                   
+                </a>
+            </div>
+        </div>
+        
+
         <!-- Formulario de búsqueda con nuevo estilo -->
         <div class="search-container">
             <form method="get" class="search-form">
@@ -546,6 +658,9 @@
                         <th>Documento</th>
                         <th>Contacto</th>
                         <th>Dirección</th>
+                        
+                        <th>Segmento</th>
+                        
                         <th>Declaración</th>
                         <th>Acciones</th>
                     </tr>
@@ -578,6 +693,16 @@
                         <td>
                             {{ cliente.direccion|default:"No especificada"|truncatechars:30 }}
                         </td>
+                        
+                        <td>
+                            <span class="badge 
+                                {% if cliente.segmento == 'vip' %}bg-warning text-dark
+                                {% elif cliente.segmento == 'corporativo' %}bg-info text-white
+                                {% else %}bg-secondary text-white{% endif %}">
+                                {{ cliente.get_segmento_display }}
+                            </span>
+                        </td>
+            
                         <td>
                             {% if cliente.declaracion_jurada %}
                                 <span class="status-badge status-ok">
