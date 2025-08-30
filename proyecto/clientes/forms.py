@@ -78,3 +78,11 @@ class ClienteForm(forms.ModelForm):
                 )
         
         return cleaned_data
+
+class CambiarSegmentoForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['segmento']
+        widgets = {
+            'segmento': forms.Select(attrs={'class': 'form-control'})
+        }

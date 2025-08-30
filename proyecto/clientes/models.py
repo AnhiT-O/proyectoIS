@@ -11,6 +11,11 @@ class Cliente(models.Model):
         ('CI', 'Cédula de Identidad'),
         ('RUC', 'Registro Único de Contribuyente'),
     ]
+    SEGMENTO_CHOICES = [
+        ('minorista', 'Minorista'),
+        ('corporativo', 'Corporativo'),
+        ('vip', 'VIP'),
+    ]
     
     nombre = models.CharField(max_length=100, verbose_name='Nombre')
     apellido = models.CharField(max_length=100, verbose_name='Apellido')
@@ -43,6 +48,12 @@ class Cliente(models.Model):
     declaracion_jurada = models.BooleanField(
         default=False,
         verbose_name='Declaración Jurada Firmada'
+    )
+    segmento = models.CharField(
+        max_length=20,
+        choices=SEGMENTO_CHOICES,
+        default='minorista',
+        verbose_name='Segmento'
     )
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
