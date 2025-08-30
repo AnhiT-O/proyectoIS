@@ -79,10 +79,10 @@ class ClienteForm(forms.ModelForm):
         
         return cleaned_data
 
-class CambiarCategoriaForm(forms.ModelForm):
+class CambiarSegmentoForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ['categoria']
+        fields = ['segmento']
         widgets = {
-            'categoria': forms.Select(attrs={'class': 'form-control'})
+            'segmento': forms.Select(attrs={'class': 'form-control'})
         }

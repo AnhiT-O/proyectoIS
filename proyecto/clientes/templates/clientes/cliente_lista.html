@@ -332,12 +332,12 @@
         transform: scale(1.05);
     }
 
-    .btn-categoria {
+    .btn-segmento {
         background: #667eea;
         color: white;
     }
 
-    .btn-categoria:hover {
+    .btn-segmento:hover {
         background: #5a6fd8;
         color: white;
         text-decoration: none;
@@ -597,9 +597,9 @@
                                 <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-action btn-editar" title="Editar">
                                     Editar
                                 </a>
-                                
-                                <a href="{% url 'clientes:cambiar_categoria' cliente.pk %}" class="btn-action btn-categoria" title="Cambiar Categoría">
-                                    Categoría
+
+                                <a href="{% url 'clientes:cambiar_segmento' cliente.pk %}" class="btn-action btn-segmento" title="Cambiar Segmento">
+                                    Segmento
                                 </a>
                                 
                                 

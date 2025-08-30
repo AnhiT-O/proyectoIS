@@ -334,10 +334,10 @@
                     <div class="info-label">Categoría</div>
                     <div class="info-value">
                         <span class="badge 
-                            {% if cliente.categoria == 'vip' %}bg-warning text-dark
-                            {% elif cliente.categoria == 'corporativo' %}bg-info
+                            {% if cliente.segmento == 'vip' %}bg-warning text-dark
+                            {% elif cliente.segmento == 'corporativo' %}bg-info
                             {% else %}bg-secondary{% endif %}">
-                            {{ cliente.get_categoria_display }}
+                            {{ cliente.get_segmento_display }}
                         </span>
                     </div>
                 </div>
@@ -351,8 +351,8 @@
                 Editar Cliente
             </a>
             {% if user.is_staff %}
-            <a href="{% url 'clientes:cambiar_categoria' cliente.pk %}" class="btn btn-primary">
-                <i class="fas fa-star"></i> Cambiar Categoría
+            <a href="{% url 'clientes:cambiar_segmento' cliente.pk %}" class="btn btn-primary">
+                <i class="fas fa-star"></i> Cambiar Segmento
             </a>
             {% endif %}
             <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">

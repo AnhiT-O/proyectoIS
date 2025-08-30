@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.db.models import Q
 from .models import Cliente
-from .forms import ClienteForm, CambiarCategoriaForm
+from .forms import ClienteForm, CambiarSegmentoForm
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_crear(request):
@@ -71,21 +71,21 @@ def cliente_editar(request, pk):
 
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
-def cambiar_categoria(request, pk):
+def cambiar_segmento(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     
     if request.method == 'POST':
-        form = CambiarCategoriaForm(request.POST, instance=cliente)
+        form = CambiarSegmentoForm(request.POST, instance=cliente)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Categoría del cliente {cliente.nombre} actualizada exitosamente.')
+            messages.success(request, f'Segmento del cliente {cliente.nombre} actualizado exitosamente.')
             return redirect('clientes:cliente_lista')
     else:
-        form = CambiarCategoriaForm(instance=cliente)
+        form = CambiarSegmentoForm(instance=cliente)
     
     context = {
         'form': form,
         'cliente': cliente,
-        'titulo': f'Cambiar Categoría - {cliente.nombre}'
+        'titulo': f'Cambiar Segmento - {cliente.nombre}'
     }
-    return render(request, 'clientes/cambiar_categoria.html', context)
+    return render(request, 'clientes/cambiar_segmento.html', context)

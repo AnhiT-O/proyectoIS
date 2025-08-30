@@ -11,7 +11,7 @@ class Cliente(models.Model):
         ('CI', 'Cédula de Identidad'),
         ('RUC', 'Registro Único de Contribuyente'),
     ]
-    CATEGORIA_CHOICES = [
+    SEGMENTO_CHOICES = [
         ('minorista', 'Minorista'),
         ('corporativo', 'Corporativo'),
         ('vip', 'VIP'),
@@ -49,11 +49,11 @@ class Cliente(models.Model):
         default=False,
         verbose_name='Declaración Jurada Firmada'
     )
-    categoria = models.CharField(
+    segmento = models.CharField(
         max_length=20,
-        choices=CATEGORIA_CHOICES,
+        choices=SEGMENTO_CHOICES,
         default='minorista',
-        verbose_name='Categoría'
+        verbose_name='Segmento'
     )
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',

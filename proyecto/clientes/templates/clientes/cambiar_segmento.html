@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <style>
-    .categoria-container {
+    .segmento-container {
         max-width: 800px;
         margin: 2rem auto;
         background: white;
@@ -13,7 +13,7 @@
         overflow: hidden;
     }
 
-    .categoria-header {
+    .segmento-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 2.5rem 2rem;
@@ -21,7 +21,7 @@
         overflow: hidden;
     }
 
-    .categoria-header::before {
+    .segmento-header::before {
         content: '';
         position: absolute;
         top: -50%;
@@ -37,7 +37,7 @@
         z-index: 2;
     }
 
-    .categoria-title {
+    .segmento-title {
         font-size: 1.8rem;
         font-weight: 700;
         margin: 0 0 0.5rem 0;
@@ -46,7 +46,7 @@
         gap: 0.75rem;
     }
 
-    .categoria-subtitle {
+    .segmento-subtitle {
         font-size: 1rem;
         opacity: 0.9;
         font-weight: 400;
@@ -103,7 +103,7 @@
         font-weight: 500;
     }
 
-    .categoria-badge {
+    .segmento-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
@@ -227,16 +227,16 @@
     }
 
     @media (max-width: 768px) {
-        .categoria-container {
+        .segmento-container {
             margin: 1rem;
             border-radius: 12px;
         }
 
-        .categoria-header {
+        .segmento-header {
             padding: 2rem 1.5rem;
         }
 
-        .categoria-title {
+        .segmento-title {
             font-size: 1.5rem;
         }
 
@@ -263,13 +263,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="categoria-container">
-    <div class="categoria-header">
+<div class="segmento-container">
+    <div class="segmento-header">
         <div class="header-content">
-            <h1 class="categoria-title">
+            <h1 class="segmento-title">
                 🏷️ Cambiar Categoría de Cliente
             </h1>
-            <div class="categoria-subtitle">
+            <div class="segmento-subtitle">
                 Gestión de categorías para segmentación de clientes
             </div>
         </div>
@@ -305,11 +305,11 @@
                     <div class="info-content">
                         <div class="info-label">Categoría Actual</div>
                         <div class="info-value">
-                            <span class="categoria-badge 
-                                {% if cliente.categoria == 'vip' %}badge-vip
-                                {% elif cliente.categoria == 'corporativo' %}badge-corporativo
+                            <span class="segmento-badge 
+                                {% if cliente.segmento == 'vip' %}badge-vip
+                                {% elif cliente.segmento == 'corporativo' %}badge-corporativo
                                 {% else %}badge-minorista{% endif %}">
-                                {{ cliente.get_categoria_display }}
+                                {{ cliente.get_segmento_display }}
                             </span>
                         </div>
                     </div>
@@ -322,13 +322,13 @@
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                <label for="{{ form.segmento.id_for_label }}" class="form-label">
                     Nueva Categoría
                 </label>
-                {{ form.categoria }}
-                {% if form.categoria.errors %}
+                {{ form.segmento }}
+                {% if form.segmento.errors %}
                     <div class="form-error">
-                        {% for error in form.categoria.errors %}
+                        {% for error in form.segmento.errors %}
                             {{ error }}
                         {% endfor %}
                     </div>
@@ -341,10 +341,10 @@
             <div class="actions-section">
                 <div class="actions-container">
                     <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
-                        ← Volver a la Lista
+                        Volver a la Lista
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        💾 Guardar Cambios
+                        Guardar Cambios
                     </button>
                 </div>
             </div>
