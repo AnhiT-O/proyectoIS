@@ -17,6 +17,12 @@ class Cliente(models.Model):
         ('vip', 'VIP'),
     ]
     
+    BENEFICIOS_SEGMENTO = {
+        'minorista': 0,
+        'corporativo': 5,
+        'vip': 10,
+    }
+    
     nombre = models.CharField(max_length=100, verbose_name='Nombre')
     apellido = models.CharField(max_length=100, verbose_name='Apellido')
     tipoDocCliente = models.CharField(
@@ -55,6 +61,9 @@ class Cliente(models.Model):
         default='minorista',
         verbose_name='Segmento'
     )
+    beneficio_segmento = models.FloatField(
+        default=0
+    )
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
         through='UsuarioCliente',
@@ -85,6 +94,9 @@ class Cliente(models.Model):
         """
         Sobrescribir save para ejecutar validaciones
         """
+        # Actualizar el beneficio según el segmento
+        self.beneficio_segmento = self.BENEFICIOS_SEGMENTO.get(self.segmento, 0) / 100
+        
         self.full_clean()
         super().save(*args, **kwargs)
 
