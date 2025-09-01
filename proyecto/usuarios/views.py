@@ -286,7 +286,7 @@ def bloquear_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir bloquear otros administradores (solo si es administrador)
-        if usuario.es_administrador() and not request.user.es_administrador():
+        if usuario.groups.get(name='administrador') and not request.user.groups.get(name='administrador'):
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -307,13 +307,17 @@ def bloquear_usuario(request, pk):
 @permission_required('usuarios.asignacion_roles', raise_exception=True)
 def asignar_rol(request, pk):
     """Vista para asignar roles a usuarios"""
-    usuario = get_object_or_404(Usuario, pk=pk)
-    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
+
     # No permitir asignar roles a otros administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
+    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
-    
+
     if request.method == 'POST':
         form = AsignarRolForm(request.POST, usuario=usuario)
         if form.is_valid():
@@ -323,12 +327,11 @@ def asignar_rol(request, pk):
             return redirect('usuarios:administrar_usuarios')
     else:
         form = AsignarRolForm(usuario=usuario)
-    
-    # Verificar si hay roles disponibles para asignar
-    if not form.fields['rol'].queryset.exists():
-        messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
-        return redirect('usuarios:administrar_usuarios')
-    
+        # Verificar si hay roles disponibles para asignar
+        if not form.fields['rol'].queryset.exists():
+            messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
+            return redirect('usuarios:administrar_usuarios')
+
     return render(request, 'usuarios/asignar_rol.html', {
         'form': form,
         'usuario': usuario
@@ -343,22 +346,15 @@ def remover_rol(request, pk, rol_id):
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
     
-    usuario = get_object_or_404(Usuario, pk=pk)
-    rol = get_object_or_404(Group, pk=rol_id)
-    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        rol = Group.objects.get(pk=rol_id)
+    except:
+        messages.error(request, 'Usuario o rol no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     # No permitir modificar roles de administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
+    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
-        return redirect('usuarios:administrar_usuarios')
-    
-    # No permitir remover el rol de administrador
-    if rol.name == 'administrador':
-        messages.error(request, 'No puedes remover el rol de administrador.')
-        return redirect('usuarios:administrar_usuarios')
-    
-    # Verificar que el usuario tiene el rol
-    if not usuario.groups.filter(pk=rol_id).exists():
-        messages.error(request, 'El usuario no tiene este rol asignado.')
         return redirect('usuarios:administrar_usuarios')
     
     usuario.groups.remove(rol)
@@ -371,16 +367,20 @@ def remover_rol(request, pk, rol_id):
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def asignar_clientes(request, pk):
     """Vista para asignar clientes a usuarios"""
-    usuario = get_object_or_404(Usuario, pk=pk)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     
     # No permitir asignar clientes a administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
-        messages.error(request, 'No puedes asignar clientes a otros administradores.')
+    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
+        messages.error(request, 'No puedes asignar clientes a administradores.')
         return redirect('usuarios:administrar_usuarios')
     
     # Verificar si existen clientes creados en el sistema
     if not Cliente.objects.exists():
-        messages.info(request, 'No hay clientes creados en el sistema. Primero debes crear clientes antes de poder asignarlos.')
+        messages.info(request, 'No hay clientes creados en el sistema. Primero se deben crear clientes antes de poder asignarlos.')
         return redirect('usuarios:administrar_usuarios')
     
     if request.method == 'POST':
@@ -413,7 +413,6 @@ def asignar_clientes(request, pk):
         'usuario': usuario
     })
 
-
 @login_required
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def remover_cliente(request, pk, cliente_id):
@@ -422,11 +421,15 @@ def remover_cliente(request, pk, cliente_id):
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
     
-    usuario = get_object_or_404(Usuario, pk=pk)
-    cliente = get_object_or_404(Cliente, pk=cliente_id)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        cliente = Cliente.objects.get(pk=cliente_id)
+    except:
+        messages.error(request, 'Usuario o cliente no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     
     # No permitir modificar asignaciones de administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
+    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
         messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -445,7 +448,11 @@ def remover_cliente(request, pk, cliente_id):
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def ver_clientes_usuario(request, pk):
     """Vista para ver todos los clientes asignados a un usuario"""
-    usuario = get_object_or_404(Usuario, pk=pk)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
     
     return render(request, 'usuarios/ver_clientes_usuario.html', {

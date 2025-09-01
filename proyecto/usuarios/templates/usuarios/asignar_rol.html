@@ -167,11 +167,11 @@
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
         
         <div class="form-group">
-            <label for="{{ form.rol.id_for_label }}" class="form-label">{{ form.rol.label }}</label>
+            <label for="{{ form.rol.id_for_label }}" class="form-label">Rol</label>
             {{ form.rol }}
             {% if form.rol.errors %}
                 <div class="text-danger">
