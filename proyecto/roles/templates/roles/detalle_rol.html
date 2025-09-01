@@ -140,11 +140,11 @@
 
     <div class="actions-section" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             {% if perms.auth.change_group %}
-            <a href="{% url 'editar_rol' rol.pk %}" class="btn btn-warning">
+            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn btn-warning">
                  Editar Rol
             </a>
             {% endif %}
-            <a href="{% url 'listar_roles' %}" class="btn btn-secondary">
+            <a href="{% url 'roles:listar_roles' %}" class="btn btn-secondary">
                 Volver a la Lista
             </a>
         </div>

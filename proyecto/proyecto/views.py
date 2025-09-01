@@ -4,7 +4,6 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 
 from .forms import LoginForm
-from usuarios.models import Usuario
 
 def inicio(request):
     """Vista para la página de inicio"""

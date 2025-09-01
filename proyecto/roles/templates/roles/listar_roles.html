@@ -232,7 +232,7 @@
 <div class="admin-container">
     <div class="admin-header">
         <h2>Gestionar Roles</h2>
-        <a href="{% url 'crear_rol' %}" class="btn-crear">
+        <a href="{% url 'roles:crear_rol' %}" class="btn-crear">
             <i class="fas fa-plus"></i> Nuevo Rol
         </a>
     </div>
@@ -263,10 +263,10 @@
                     <td>{{ rol.descripcion|default:"Sin descripción" }}</td>
                     <td>
                         <div class="actions-container">
-                            <a href="{% url 'detalle_rol' rol.pk %}" class="btn-admin btn-view" title="Ver detalles">
+                            <a href="{% url 'roles:detalle_rol' rol.pk %}" class="btn-admin btn-view" title="Ver detalles">
                                 <i class="fas fa-eye"></i> Detalles
                             </a>
-                            <a href="{% url 'editar_rol' rol.pk %}" class="btn-admin btn-edit" title="Editar">
+                            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-admin btn-edit" title="Editar">
                                 <i class="fas fa-edit"></i> Editar
                             </a>
                         </div>

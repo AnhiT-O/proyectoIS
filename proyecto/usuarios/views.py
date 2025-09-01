@@ -285,7 +285,7 @@ def bloquear_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir bloquear otros administradores (solo si es administrador)
-        if usuario.groups.get(name='administrador') and not request.user.groups.get(name='administrador'):
+        if usuario.groups.get(name='Administrador') and not request.user.groups.get(name='Administrador'):
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -313,7 +313,7 @@ def asignar_rol(request, pk):
         return redirect('usuarios:administrar_usuarios')
 
     # No permitir asignar roles a otros administradores (solo si es administrador)
-    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
 
@@ -352,7 +352,7 @@ def remover_rol(request, pk, rol_id):
         messages.error(request, 'Usuario o rol no encontrado.')
         return redirect('usuarios:administrar_usuarios')
     # No permitir modificar roles de administradores (solo si es administrador)
-    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -373,7 +373,7 @@ def asignar_clientes(request, pk):
         return redirect('usuarios:administrar_usuarios')
     
     # No permitir asignar clientes a administradores (solo si es administrador)
-    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes asignar clientes a administradores.')
         return redirect('usuarios:administrar_usuarios')
     
@@ -428,7 +428,7 @@ def remover_cliente(request, pk, cliente_id):
         return redirect('usuarios:administrar_usuarios')
     
     # No permitir modificar asignaciones de administradores (solo si es administrador)
-    if usuario.groups.filter(name='administrador').exists() and not request.user.groups.filter(name='administrador').exists():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     

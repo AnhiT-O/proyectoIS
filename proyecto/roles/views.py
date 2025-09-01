@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from .models import Roles
@@ -18,7 +18,7 @@ def crear_rol(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Rol creado exitosamente.')
-            return redirect('listar_roles')
+            return redirect('roles:listar_roles')
     else:
         form = RolForm()
     return render(request, 'roles/rol_form.html', {
@@ -33,14 +33,14 @@ def editar_rol(request, pk):
         rol = Roles.objects.get(pk=pk)
     except Roles.DoesNotExist:
         messages.error(request, 'Rol no encontrado.')
-        return redirect('listar_roles')
+        return redirect('roles:listar_roles')
         
     if request.method == 'POST':
         form = RolForm(request.POST, instance=rol)
         if form.is_valid():
             form.save()
             messages.success(request, 'Rol actualizado exitosamente.')
-            return redirect('listar_roles')
+            return redirect('roles:listar_roles')
     else:
         form = RolForm(instance=rol)
     return render(request, 'roles/rol_form.html', {
@@ -56,5 +56,5 @@ def detalle_rol(request, pk):
         rol = Roles.objects.get(pk=pk)
     except Roles.DoesNotExist:
         messages.error(request, 'Rol no encontrado.')
-        return redirect('listar_roles')
+        return redirect('roles:listar_roles')
     return render(request, 'roles/detalle_rol.html', {'rol': rol})

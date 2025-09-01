@@ -171,7 +171,7 @@ class EstablecerPasswordForm(SetPasswordForm):
 class AsignarRolForm(forms.Form):
     """Formulario para asignar roles a usuarios"""
     rol = forms.ModelChoiceField(
-        queryset=Group.objects.exclude(name='administrador').order_by('name'),
+        queryset=Group.objects.exclude(name='Administrador').order_by('name'),
         empty_label="Seleccionar rol",
         widget=forms.Select(attrs={
             'class': 'form-control',
@@ -190,7 +190,7 @@ class AsignarRolForm(forms.Form):
             # Excluir roles que el usuario ya tiene
             roles_actuales = usuario.groups.all()
             self.fields['rol'].queryset = Group.objects.exclude(
-                name='administrador'
+                name='Administrador'
             ).exclude(
                 id__in=roles_actuales.values_list('id', flat=True)
             ).order_by('name')
