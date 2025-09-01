@@ -33,10 +33,9 @@ class RolForm(forms.ModelForm):
             codename__startswith='delete_'
         ).exclude(
             codename__startswith='view_'
-        ),
+        ), # excluye permisos predeterminados de Django
         widget=PermissionCheckboxSelectMultiple,
-        required=False,
-        label="Permisos"
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
