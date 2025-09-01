@@ -24,6 +24,26 @@ class PermissionCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
         return option
 
 class RolForm(forms.ModelForm):
+
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }),
+        error_messages={
+            'required': 'Debes ingresar un nombre.',
+            'max_length': 'El nombre no puede exceder los 100 caracteres.',
+        }
+    )
+
+    descripcion = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4
+        })
+    )
+
     permisos = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.exclude(
             codename__startswith='add_'
@@ -35,7 +55,10 @@ class RolForm(forms.ModelForm):
             codename__startswith='view_'
         ), # excluye permisos predeterminados de Django
         widget=PermissionCheckboxSelectMultiple,
-        required=False
+        required=True,
+        error_messages={
+            'required': 'Selecciona por lo menos un permiso.',
+        }
     )
 
     def __init__(self, *args, **kwargs):
@@ -44,16 +67,6 @@ class RolForm(forms.ModelForm):
         # Si estamos editando un rol existente, establecer los permisos actuales
         if self.instance.pk:
             self.fields['permisos'].initial = self.instance.permissions.all()
-        
-        # Personalizar los widgets con clases de estilo
-        self.fields['name'].widget.attrs.update({
-            'class': 'form-control',
-        })
-        
-        self.fields['descripcion'].widget.attrs.update({
-            'class': 'form-control',
-            'rows': '4'
-        })
 
     def save(self, commit=True):
         rol = super().save(commit=commit)

@@ -3,43 +3,20 @@ from django.forms import ValidationError
 
 class Moneda(models.Model):
     nombre = models.CharField(
-        max_length=100,
+        max_length=30,
         unique=True,
         blank=False,
-        null=False,
-        error_messages={
-            'unique': 'Ya existe una moneda con este nombre.'
-        },
-        verbose_name='Nombre de la moneda'
+        null=False
     )
     simbolo = models.CharField(
         max_length=3,
         unique=True,
         blank=False,
-        null=False,
-        error_messages={
-            'unique': 'Ya existe una moneda con este símbolo.',
-            'max_length': 'El símbolo de la moneda no puede tener más de 3 caracteres.'
-        },
-        verbose_name='Símbolo de la moneda'
+        null=False
     )
-    activa = models.BooleanField(
-        default=True,
-        verbose_name='Moneda activa',
-        help_text='Determina si la moneda está activa para operaciones'
-    )
-    tasa_base = models.IntegerField(
-        default=0,
-        null=False,
-        blank=False,
-        verbose_name='Tasa base',
-        help_text='Tasa de cambio base de la moneda a guaraníes'
-    )
-    decimales = models.IntegerField(
-        default=3,
-        verbose_name='Decimales',
-        help_text='Cantidad de decimales de la moneda para mostrar a usuarios'
-    )
+    activa = models.BooleanField(default=True)
+    tasa_base = models.IntegerField(default=0)
+    decimales = models.SmallIntegerField(default=3)
 
     class Meta:
         verbose_name = 'Moneda'

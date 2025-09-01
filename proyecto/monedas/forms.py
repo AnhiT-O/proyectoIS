@@ -3,33 +3,61 @@ from django.core.exceptions import ValidationError
 from .models import Moneda
 
 class MonedaForm(forms.ModelForm):
+
+    nombre = forms.CharField(
+        error_messages={
+            'required': 'Debes ingresar un nombre.',
+            'max_length': 'El nombre no puede exceder los 30 caracteres.',
+            'unique': 'Ya existe una moneda con este nombre.'
+        },
+        widget=forms.TextInput(attrs={
+            'class': 'form-control'
+        })
+    )
+    simbolo = forms.CharField(
+        max_length=3,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'maxlength': '3',
+            'style': 'text-transform: uppercase;'
+        }),
+        error_messages={
+            'required': 'Debes ingresar un símbolo.',
+            'max_length': 'El símbolo no puede exceder las 3 letras.',
+            'unique': 'Ya existe una moneda con este símbolo.'
+        }
+    )
+    tasa_base = forms.IntegerField(
+        required=False,
+        error_messages={
+            'min_value': 'La tasa base debe ser un número positivo.'
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'type': 'number'
+        })
+    )
+    decimales = forms.IntegerField(
+        required=False,
+        error_messages={
+            'min_value': 'El número de decimales debe ser al menos 0.'
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'step': '1',
+            'type': 'number'
+        })
+    )
+
     class Meta:
         model = Moneda
         fields = ['nombre', 'simbolo', 'tasa_base', 'decimales']
-        widgets = {
-            'nombre': forms.TextInput(attrs={
-                'class': 'form-control',
-            }),
-            'simbolo': forms.TextInput(attrs={
-                'class': 'form-control',
-                'maxlength': '3',
-                'style': 'text-transform: uppercase;'
-            }),
-            'tasa_base': forms.TextInput(attrs={
-                'class': 'form-control',
-            }),
-            'decimales': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'max': '10',
-                'step': '1',
-                'type': 'number',
-            })
-        }
 
     def clean_simbolo(self):
         """
-        Valida que el símbolo contenga solo letras mayúsculas.
+        Convierte el símbolo a mayúsculas.
         """
         simbolo = self.cleaned_data.get('simbolo')
         if simbolo:

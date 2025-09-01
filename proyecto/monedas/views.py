@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
 from django.db.models import Q
 from .models import Moneda
 from .forms import MonedaForm
@@ -33,7 +32,7 @@ def tiene_algun_permiso(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para gestionar monedas.")
+        raise PermissionDenied()
 
     return _wrapped_view
 
@@ -61,7 +60,7 @@ def puede_editar(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para gestionar monedas.")
+        raise PermissionDenied()
 
     return _wrapped_view
 

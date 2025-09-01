@@ -205,7 +205,7 @@
                 </ul>
             </div>
         {% endif %}
-        <form method="post" id="rolForm">
+        <form method="post" id="rolForm" novalidate>
             {% csrf_token %}
             <div class="form-group">
                 <label for="{{ form.name.id_for_label }}" class="form-label required-field">Nombre del rol</label>
@@ -254,30 +254,4 @@
         </form>
     </div>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
-    const descripcionInput = document.getElementById('{{ form.descripcion.id_for_label }}');
-    const rolForm = document.getElementById('rolForm');
-
-    rolForm.addEventListener('submit', function(e) {
-        let hasErrors = false;
-        if (!nameInput.value.trim()) {
-            hasErrors = true;
-            nameInput.classList.add('is-invalid');
-        } else {
-            nameInput.classList.remove('is-invalid');
-        }
-        if (!descripcionInput.value.trim()) {
-            hasErrors = true;
-            descripcionInput.classList.add('is-invalid');
-        } else {
-            descripcionInput.classList.remove('is-invalid');
-        }
-        if (hasErrors) {
-            e.preventDefault();
-        }
-    });
-});
-</script>
 {% endblock %}

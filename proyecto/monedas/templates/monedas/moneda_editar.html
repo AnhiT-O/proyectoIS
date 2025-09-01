@@ -149,12 +149,6 @@
         transform: translateY(-1px);
     }
 
-    .required-field::after {
-        content: ' *';
-        color: #dc3545;
-        font-weight: bold;
-    }
-
     .moneda-preview h4 {
         color: #667eea;
         margin: 0 0 1rem 0;
@@ -242,11 +236,11 @@
                 </ul>
             </div>
         {% endif %}
-        <form method="post" id="monedaForm">
+        <form method="post" id="monedaForm" novalidate>
             {% csrf_token %}
             {% if perms.monedas.gestion %}
             <div class="form-group">
-                <label for="{{ form.nombre.id_for_label }}" class="form-label required-field">
+                <label for="{{ form.nombre.id_for_label }}" class="form-label">
                     Nombre de la Moneda
                 </label>
                 {{ form.nombre }}
@@ -262,7 +256,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="{{ form.simbolo.id_for_label }}" class="form-label required-field">
+                <label for="{{ form.simbolo.id_for_label }}" class="form-label">
                     Símbolo de la Moneda
                 </label>
                 {{ form.simbolo }}
@@ -280,7 +274,7 @@
             {% endif %}
             {% if perms.monedas.cambiar_tasa or perms.monedas.gestion %}
             <div class="form-group">
-                <label for="{{ form.tasa_base.id_for_label }}" class="form-label required-field">
+                <label for="{{ form.tasa_base.id_for_label }}" class="form-label">
                     Tasa base
                 </label>
                 {{ form.tasa_base }}
@@ -298,7 +292,7 @@
             {% endif %}
             {% if perms.monedas.cambiar_decimales or perms.monedas.gestion %}
             <div class="form-group">
-                <label for="{{ form.decimales.id_for_label }}" class="form-label required-field">
+                <label for="{{ form.decimales.id_for_label }}" class="form-label">
                     Decimales
                 </label>
                 {{ form.decimales }}
@@ -325,33 +319,4 @@
         </form>
     </div>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const nombreInput = document.getElementById('{{ form.nombre.id_for_label }}');
-    const simboloInput = document.getElementById('{{ form.simbolo.id_for_label }}');
-    // ...misma lógica JS para validación y preview si se requiere...
-    simboloInput.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
-    nombreInput.addEventListener('input', function() {});
-    document.getElementById('monedaForm').addEventListener('submit', function(e) {
-        let hasErrors = false;
-        if (!nombreInput.value.trim()) {
-            hasErrors = true;
-            nombreInput.classList.add('is-invalid');
-        } else {
-            nombreInput.classList.remove('is-invalid');
-        }
-        if (!simboloInput.value.trim()) {
-            hasErrors = true;
-            simboloInput.classList.add('is-invalid');
-        } else {
-            simboloInput.classList.remove('is-invalid');
-        }
-        if (hasErrors) {
-            e.preventDefault();
-        }
-    });
-});
-</script>
 {% endblock %}
