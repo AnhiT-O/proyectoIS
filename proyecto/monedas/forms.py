@@ -68,3 +68,11 @@ class MonedaForm(forms.ModelForm):
             if not simbolo.isalpha():
                 raise ValidationError('El símbolo debe contener solo letras.')
         return simbolo
+    
+    def clean_tasa_base(self):
+        value = self.cleaned_data.get('tasa_base')
+        return value if value is not None else 0
+
+    def clean_decimales(self):
+        value = self.cleaned_data.get('decimales')
+        return value if value is not None else 3

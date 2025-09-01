@@ -217,7 +217,7 @@
                 </ul>
             </div>
         {% endif %}
-        <form method="post">
+        <form method="post" novalidate>
             {% csrf_token %}
             <div class="form-group">
                 <label for="{{ form.nombre.id_for_label }}" class="form-label required-field">Nombre</label>

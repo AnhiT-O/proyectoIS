@@ -12,38 +12,25 @@ class Cliente(models.Model):
         ('RUC', 'Registro Único de Contribuyente'),
     ]
     
-    nombre = models.CharField(max_length=100, verbose_name='Nombre')
-    apellido = models.CharField(max_length=100, verbose_name='Apellido')
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
     tipoDocCliente = models.CharField(
         max_length=3,
-        choices=TIPO_DOCUMENTO_CHOICES,
-        verbose_name='Tipo de Documento'
+        choices=TIPO_DOCUMENTO_CHOICES
     )
     docCliente = models.CharField(
         max_length=20,
-        unique=True,
-        verbose_name='Número de Documento'
+        unique=True
     )
-    correoElecCliente = models.EmailField(
-        unique=True,
-        verbose_name='Correo Electrónico'
-    )
-    telefono = models.CharField(
-        max_length=20,
-        verbose_name='Teléfono'
-    )
+    correoElecCliente = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20)
     tipoCliente = models.CharField(
         max_length=1,
-        choices=TIPO_CLIENTE_CHOICES,
-        verbose_name='Tipo de Cliente'
+        choices=TIPO_CLIENTE_CHOICES
     )
-    direccion = models.TextField(null=True, blank=True, verbose_name='Domicilio')
-    
-    ocupacion = models.CharField(max_length=100, verbose_name='Ocupación', null=True, blank=True)
-    declaracion_jurada = models.BooleanField(
-        default=False,
-        verbose_name='Declaración Jurada Firmada'
-    )
+    direccion = models.TextField(max_length=100)
+    ocupacion = models.CharField(max_length=30)
+    declaracion_jurada = models.BooleanField(default=False)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
         through='UsuarioCliente',
@@ -61,11 +48,7 @@ class Cliente(models.Model):
         
         # Validar coherencia entre tipo de cliente y tipo de documento
         if self.tipoCliente and self.tipoDocCliente:
-            if self.tipoCliente == 'F' and self.tipoDocCliente != 'CI':
-                raise ValidationError({
-                    'tipoDocCliente': 'Las personas físicas deben usar Cédula de Identidad'
-                })
-            elif self.tipoCliente == 'J' and self.tipoDocCliente != 'RUC':
+            if self.tipoCliente == 'J' and self.tipoDocCliente != 'RUC':
                 raise ValidationError({
                     'tipoDocCliente': 'Las personas jurídicas deben usar RUC'
                 })
