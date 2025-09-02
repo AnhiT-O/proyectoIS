@@ -4,7 +4,10 @@ from django.core.exceptions import PermissionDenied
 
 def inicio(request):
     """Vista para la página de inicio"""
-    return render(request, 'inicio.html')
+    context = {}
+    if request.user.is_authenticated:
+        context['user_groups'] = [g.name for g in request.user.groups.all()]
+    return render(request, 'inicio.html', context)
 
 def custom_permission_denied_view(request, exception):
     """

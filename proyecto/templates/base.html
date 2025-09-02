@@ -285,7 +285,7 @@
                         <span class="user-name">Hola, {{ user.first_name }}!</span>
                         
                         <!-- Panel de Administración basado en permisos -->
-                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas %}
+                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas or perms.tasa.ver_tasa %}
                             <div class="admin-dropdown">
                                 <a href="#" class="nav-item admin-toggle" onclick="toggleAdminMenu(event)">
                                     ⚙️ Panel de Administración
@@ -316,6 +316,13 @@
                                     {% if perms.monedas %}
                                         <div class="admin-section">
                                             <a class="admin-item" href="{% url 'monedas:lista_monedas' %}">💱 Gestionar Monedas</a>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Gestión de Tasas de Cambio -->
+                                    {% if perms.tasa.ver_tasa %}
+                                        <div class="admin-section">
+                                            <a class="admin-item" href="{% url 'tasa:lista_tasas' %}">💹 Gestionar Tasas de Cambio</a>
                                         </div>
                                     {% endif %}
                                 </div>
