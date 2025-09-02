@@ -23,12 +23,19 @@ def lista_tasas(request):
             messages.success(request, f'La tasa de cambio para {tasa.moneda.nombre} ha sido {estado} exitosamente.')
             return redirect('tasa:lista_tasas')
     
+    # Lógica de búsqueda
+    query = request.GET.get('q')
+    
     # Si es analista cambiario, solo mostrar tasas activas
     if request.user.groups.filter(name='analista cambiario').exists():
         tasas = TasaCambio.objects.select_related('moneda', 'ultimo_editor').filter(activa=True)
     else:
         # Para administradores, mostrar todas las tasas
         tasas = TasaCambio.objects.select_related('moneda', 'ultimo_editor').all()
+    if query:
+        tasas = TasaCambio.objects.select_related('moneda', 'ultimo_editor').filter(
+            moneda__nombre__icontains=query
+        )
     return render(request, 'tasa/lista_tasas.html', {'tasas': tasas})
 
 @permission_required('tasa.crear_tasa')

@@ -359,16 +359,19 @@
         </div>
     </div>
     {% else %}
-    <div class="no-tasas">
-        <div class="no-tasas-icon">💱</div>
-        <h3>No hay tasas de cambio registradas</h3>
-        <p>Aún no se han registrado tasas de cambio en el sistema. Comienza agregando la primera tasa para empezar a gestionar las operaciones de cambio de moneda.</p>
-        {% if perms.tasa.crear_tasa %}
-        <a href="{% url 'tasa:crear_tasa' %}" class="btn btn-primary mt-3">
-            <i class="fas fa-plus"></i> Crear Nueva Tasa
-        </a>
+        {% if request.GET.q %}
+        <div class="no-results-search">
+            <div class="no-results-icon">🔎</div>
+            <h3>No se encontraron resultados para "{{ request.GET.q }}"</h3>
+            <p>     Intente de nuevo .</p>
+            
+        </div>
+        {% else %}
+        <div class="no-tasas">
+            <div class="no-tasas-icon">💱</div>
+            <h3>No hay tasas de cambio registradas</h3>
+            <p>Aún no se han registrado tasas de cambio en el sistema. Comienza agregando la primera tasa para empezar a gestionar las operaciones de cambio de moneda.</p>
+        </div>
         {% endif %}
-    </div>
     {% endif %}
-</div>
 {% endblock %}
