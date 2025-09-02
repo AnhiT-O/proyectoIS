@@ -68,9 +68,10 @@ class TasaCambio(models.Model):
 
     def clean(self):
         super().clean()
-        # Verificar que la moneda sea diferente a Guaraní
-        if self.moneda.simbolo == 'PYG':
-            raise ValidationError('La moneda no puede ser Guaraní (PYG).')
+        # Validar que no exista otra tasa de cambio para la misma moneda.
+        # Se excluye la instancia actual para permitir actualizaciones.
+        if TasaCambio.objects.filter(moneda=self.moneda).exclude(pk=self.pk).exists():
+            raise ValidationError('Ya existe una tasa de cambio registrada para esta moneda.')
         
         if self.precio_base <= 0:
             raise ValidationError('El precio base debe ser mayor que cero.')
