@@ -1,0 +1,214 @@
+/* Estilos generales del contenedor */
+.admin-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 1300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header {
+    margin-bottom: 2rem;
+}
+
+.admin-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Barra de búsqueda */
+.search-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-input-container {
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    height: 44px;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Botones */
+.btn-search {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-search:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-clear {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-clear:hover {
+    background: #dee2e6;
+    color: #212529;
+    text-decoration: none;
+}
+
+/* Tabla personalizada */
+.table-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.no-tasas {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.no-tasas-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #6c757d;
+}
+
+.no-tasas h3 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.no-tasas p {
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.custom-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.th-style {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Formulario */
+.form-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.info-box {
+    background: #e7f5ff;
+    border-left: 4px solid #339af0;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 4px;
+}
+
+.info-title {
+    color: #1864ab;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.info-list {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.info-list li {
+    margin-bottom: 0.5rem;
+}
+
+.form-section {
+    padding: 1rem 0;
+}
+
+.custom-form .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.custom-form .form-control {
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.custom-form .text-danger {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
