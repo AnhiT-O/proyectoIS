@@ -65,10 +65,13 @@ def editar_tasa(request, tasa_id):
     if request.method == 'POST':
         form = TasaCambioForm(request.POST, instance=tasa)
         if form.is_valid():
-            tasa = form.save(commit=False)
-            tasa.ultimo_editor = request.user
-            tasa.save()
-            messages.success(request, 'Tasa de cambio actualizada exitosamente.')
+            if form.has_changed():
+                tasa = form.save(commit=False)
+                tasa.ultimo_editor = request.user
+                tasa.save()
+                messages.success(request, 'Tasa de cambio actualizada exitosamente.')
+            else:
+                messages.info(request, 'No se detectaron cambios en la tasa de cambio.')
             return redirect('tasa:lista_tasas')
     else:
         form = TasaCambioForm(instance=tasa)
