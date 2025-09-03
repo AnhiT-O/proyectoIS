@@ -1,42 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Gestionar Monedas - Global Exchange{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'gestion.css' %}">
-<style>
-    .no-monedas {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #6c757d;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .no-monedas-icon {
-        font-size: 4rem;
-        margin-bottom: 1.5rem;
-        opacity: 0.5;
-    }
-
-    .no-monedas h3 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        color: #495057;
-    }
-
-    .no-monedas p {
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.5;
-    }
-
-</style>
 {% endblock %}
 
 {% block content %}
@@ -89,30 +58,30 @@
                 <div class="moneda-simbolo">{{ moneda.simbolo }}</div>
             </div>
             <!-- Información tipo tabla -->
-            <table class="gestion-tabla" style="word-break: inherit">
-                <thead>
-                    <tr>
-                        <th style="width: 80px">Estado</th>
-                        <th style="width: 90px">Decimales a mostrar</th>
-                        <th style="width: 120px">Tasa base</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-inactivo{% endif %}" style="font-size:0.95rem; display:inline-block; margin-top:0;">
-                                {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
-                            </span>
-                        </td>
-                        <td style="text-align: center;">
-                            <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.decimales }}</span>
-                        </td>
-                        <td style="text-align: center;">
-                            <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.tasa_base }}</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                <table class="gestion-tabla">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Estado</th>
+                            <th style="width: 35%;">Decimales a mostrar</th>
+                            <th style="width: 40%;">Tasa base</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-inactivo{% endif %}">
+                                    {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.decimales }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             <div class="zona-acciones" style="justify-content: flex-end">
                 {% if perms.monedas.gestion or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
                 <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-editar" title="Editar moneda">
@@ -144,15 +113,9 @@
         </div>
         {% empty %}
             {% if busqueda %}
-                <div class="no-monedas">
-                    <div class="no-monedas-icon">🔍</div>
-                    <h3>No se encontraron monedas</h3>
-                </div>
+                <h3>No se encontraron monedas</h3>
             {% else %}
-                <div class="no-monedas">
-                    <div class="no-monedas-icon">💰</div>
-                    <h3>No hay monedas registradas</h3>
-                </div>
+                <h3>No hay monedas registradas</h3>
             {% endif %}
         {% endfor %}
     </div>

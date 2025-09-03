@@ -250,6 +250,30 @@ def reset_password_confirm(request, uidb64, token):
 
 @login_required
 @tiene_algun_permiso
+def usuario_detalle(request, pk):
+    """Vista para mostrar detalles de un usuario"""
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # Obtener información adicional del usuario
+    roles = usuario.groups.all()
+    clientes_asignados = usuario.clientes_operados.all()
+    
+    context = {
+        'usuario': usuario,
+        'roles': roles,
+        'clientes_asignados': clientes_asignados,
+        'total_clientes': clientes_asignados.count(),
+    }
+    
+    return render(request, 'usuarios/usuario_detalle.html', context)
+
+
+@login_required
+@tiene_algun_permiso
 def administrar_usuarios(request):
     """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
     # Obtener el término de búsqueda

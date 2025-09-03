@@ -7,7 +7,7 @@ from .forms import RolForm
 @login_required
 @permission_required('roles.gestion', raise_exception=True)
 def listar_roles(request):
-    roles = Roles.objects.exclude(name='administrador')
+    roles = Roles.objects.exclude(name='Administrador')
     return render(request, 'roles/listar_roles.html', {'roles': roles})
 
 @login_required
