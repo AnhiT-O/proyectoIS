@@ -50,9 +50,10 @@ def crear_roles_predefinidos(sender, **kwargs):
     ]
     
     for rol_data in roles_predefinidos:
-        rol = Roles.objects.get_or_create(
+        rol, created = Roles.objects.get_or_create(
             name=rol_data['name'],
             defaults={'descripcion': rol_data['descripcion']}
         )
-        
-        print(f"Rol '{rol.name}' creado exitosamente.")
+
+        if created:
+            print(f"Rol '{rol.name}' creado exitosamente.")

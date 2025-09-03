@@ -66,49 +66,6 @@
         font-style: italic;
     }
 
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        min-width: 140px;
-        justify-content: center;
-    }
-
-    .btn-warning {
-        background: #ffc107;
-        color: #212529;
-    }
-
-    .btn-warning:hover {
-        background: #e0a800;
-        color: #212529;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: #667eea;
-        border: 2px solid #667eea;
-    }
-
-    .btn-secondary:hover {
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-        transform: translateY(-1px);
-    }
-
     .actions-section {
         border-top: 1px solid #e9ecef;
         padding-top: 1.5rem;
@@ -140,11 +97,11 @@
 
     <div class="actions-section" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             {% if perms.auth.change_group %}
-            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn btn-warning">
+            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-primario">
                  Editar Rol
             </a>
             {% endif %}
-            <a href="{% url 'roles:listar_roles' %}" class="btn btn-secondary">
+            <a href="{% url 'roles:listar_roles' %}" class="btn-secundario">
                 Volver a la Lista
             </a>
         </div>

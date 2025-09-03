@@ -15,6 +15,7 @@ from functools import wraps
 from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
+from roles.models import Roles
 from django.db.models import Q
 
 def tiene_algun_permiso(view_func):
@@ -52,8 +53,8 @@ def registro_usuario(request):
             user = form.save()
             # Enviar email de confirmación
             enviar_email_confirmacion(request, user)
-            
-            return redirect('usuarios:registro_exitoso')
+            messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
+            return redirect('login')
     else:
         form = RegistroUsuarioForm()
     
@@ -114,7 +115,7 @@ def activar_cuenta(request, uidb64, token):
     
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
-        operador_role = Group.objects.get(name='operador')
+        operador_role = Group.objects.get(name='Operador')
         user.groups.add(operador_role)
         user.save()
         login(request, user)
@@ -268,9 +269,17 @@ def administrar_usuarios(request):
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
+    # Calcular estadísticas
+    total_usuarios = usuarios.count()
+    usuarios_activos = usuarios.filter(bloqueado=False).count()
+    usuarios_bloqueados = usuarios.filter(bloqueado=True).count()
+    
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
-        'busqueda': busqueda
+        'busqueda': busqueda,
+        'total_usuarios': total_usuarios,
+        'usuarios_activos': usuarios_activos,
+        'usuarios_bloqueados': usuarios_bloqueados
     })
 
 @login_required
@@ -285,7 +294,7 @@ def bloquear_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir bloquear otros administradores (solo si es administrador)
-        if usuario.groups.get(name='Administrador') and not request.user.groups.get(name='Administrador'):
+        if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -320,9 +329,13 @@ def asignar_rol(request, pk):
     if request.method == 'POST':
         form = AsignarRolForm(request.POST, usuario=usuario)
         if form.is_valid():
-            rol = form.cleaned_data['rol']
-            usuario.groups.add(rol)
-            messages.success(request, f'Rol "{rol.name}" asignado exitosamente a {usuario.get_full_name()}.')
+            roles = form.cleaned_data['rol']
+            for rol in roles:
+                usuario.groups.add(rol)
+            if len(roles) == 1:
+                messages.success(request, f'Rol "{list(roles)[0]}" asignado exitosamente a {usuario.get_full_name()}.')
+            else:
+                messages.success(request, f'{len(roles)} roles asignados exitosamente a {usuario.get_full_name()}.')
             return redirect('usuarios:administrar_usuarios')
     else:
         form = AsignarRolForm(usuario=usuario)
@@ -333,7 +346,10 @@ def asignar_rol(request, pk):
 
     return render(request, 'usuarios/asignar_rol.html', {
         'form': form,
-        'usuario': usuario
+        'usuario': usuario,
+        'roles_disponibles': Roles.objects.exclude(name='Administrador').exclude(
+            id__in=usuario.groups.all().values_list('id', flat=True)
+        ).order_by('name')
     })
 
 

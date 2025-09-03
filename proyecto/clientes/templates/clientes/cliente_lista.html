@@ -1,637 +1,110 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Administrar Clientes - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<style>
-    .clientes-container {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 2rem auto;
-        max-width: 1300px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .clientes-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-    }
-
-    .header-info h1 {
-        margin: 0;
-        color: #333;
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-
-    .btn-nuevo {
-        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        font-weight: 600;
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-nuevo:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        color: white;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .stats-bar {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 1.5rem 2rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .stats-info {
-        color: #495057;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .stats-count {
-        background: #667eea;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    /* Estilos de búsqueda como en administrar_usuarios.html */
-    .search-container {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 1.5rem 2rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .search-form {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .search-input-container {
-        flex: 1;
-        max-width: 400px;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        background: white;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        height: 44px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-    }
-
-    .search-input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .search-buttons {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .btn-search {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
-        border: none;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: 44px;
-        min-width: 80px;
-    }
-
-    .btn-search:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-clear {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        background: #e9ecef;
-        border: 1px solid #ced4da;
-        color: #495057;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: 44px;
-        min-width: 80px;
-        box-sizing: border-box;
-    }
-
-    .btn-clear:hover {
-        background: #dee2e6;
-        color: #495057;
-        text-decoration: none;
-        transform: translateY(-1px);
-    }
-
-    /* Mantener la antigua search-box para compatibilidad */
-    .search-box {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: white;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        min-width: 250px;
-    }
-
-    .search-box input {
-        border: none;
-        outline: none;
-        flex: 1;
-        font-size: 0.9rem;
-    }
-
-    .search-box:focus-within {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .table-container {
-        padding: 0;
-        overflow-x: auto;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .custom-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 0;
-        font-size: 0.95rem;
-    }
-
-    .custom-table th {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: #495057;
-        font-weight: 600;
-        padding: 1.25rem 1rem;
-        text-align: left;
-        border-bottom: 2px solid #dee2e6;
-        font-size: 0.9rem;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .custom-table td {
-        padding: 1.25rem 1rem;
-        border-bottom: 1px solid #f1f3f4;
-        color: #495057;
-        vertical-align: middle;
-    }
-
-    .custom-table tbody tr {
-        transition: all 0.3s ease;
-        background: white;
-    }
-
-    .custom-table tbody tr:hover {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
-        transform: scale(1.01);
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
-    }
-
-    .cliente-name {
-        font-weight: 600;
-        color: #333;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .cliente-type {
-        display: inline-block;
-        padding: 0.35rem 0.75rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .type-personal {
-        background: #e3f2fd;
-        color: #1565c0;
-    }
-
-    .type-empresarial {
-        background: #f3e5f5;
-        color: #7b1fa2;
-    }
-
-    .actions-cell {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-action {
-        padding: 0.5rem 0.75rem;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.8rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-
-    .btn-ver {
-        background: #17a2b8;
-        color: white;
-    }
-
-    .btn-ver:hover {
-        background: #138496;
-        color: white;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .btn-editar {
-        background: #ffc107;
-        color: #212529;
-    }
-
-    .btn-editar:hover {
-        background: #e0a800;
-        color: #212529;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .btn-eliminar {
-        background: #dc3545;
-        color: white;
-    }
-
-    .btn-eliminar:hover {
-        background: #c82333;
-        color: white;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.25rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .status-ok {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .no-clientes {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #6c757d;
-    }
-
-    .no-clientes-icon {
-        font-size: 4rem;
-        margin-bottom: 1.5rem;
-        opacity: 0.5;
-    }
-
-    .no-clientes h3 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        color: #495057;
-    }
-
-    .no-clientes p {
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.5;
-    }
-
-    .btn-crear-primero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-crear-primero:hover {
-        color: white;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    @media (max-width: 1200px) {
-        .clientes-container {
-            margin: 1rem;
-            border-radius: 12px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .clientes-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .header-content {
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-        }
-
-        .header-info h1 {
-            font-size: 1.6rem;
-        }
-
-        .stats-bar {
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1.5rem;
-        }
-
-        .search-container {
-            padding: 1rem;
-        }
-
-        .search-form {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 1rem;
-        }
-
-        .search-input-container {
-            max-width: none;
-        }
-
-        .search-buttons {
-            justify-content: center;
-        }
-
-        .search-box {
-            min-width: auto;
-            width: 100%;
-        }
-
-        .custom-table {
-            font-size: 0.8rem;
-        }
-
-        .custom-table th,
-        .custom-table td {
-            padding: 0.75rem 0.5rem;
-        }
-
-        .actions-cell {
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .btn-action {
-            font-size: 0.7rem;
-            padding: 0.4rem 0.6rem;
-        }
-
-        .no-clientes {
-            padding: 3rem 1.5rem;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'gestion.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="clientes-container">
-    <div class="clientes-header">
-        <div class="header-content">
-            <div class="header-info">
-                <h1>Gestionar Clientes</h1>
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Gestionar Clientes</h2>
+        <a href="{% url 'clientes:cliente_crear' %}" class="btn-primario">
+            Nuevo Cliente
+        </a>
+    </div>
+    <!-- Formulario de búsqueda con nuevo estilo -->
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-busqueda">
+                <input type="text" 
+                        name="busqueda" 
+                        class="texto-busqueda" 
+                        value="{{ busqueda }}" 
+                        placeholder="Buscar cliente por nombre, apellido o documento">
             </div>
-            <a href="{% url 'clientes:cliente_crear' %}" class="btn-nuevo">
-                Nuevo Cliente
-            </a>
+            <div class="botones-busqueda">
+                <button type="submit" class="btn-buscar">
+                    Buscar
+                </button>
+                {% if busqueda %}
+                <a href="{% url 'clientes:cliente_lista' %}" class="btn-limpiar">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            Total de clientes: <span class="conteo">{{ clientes|length }}</span>
+            {% if busqueda %}
+                <span style="margin-left: 1rem; color: #6c757d;">
+                    ({{ clientes|length }} resultado{{ clientes|length|pluralize }} para "{{ busqueda }}")
+                </span>
+            {% endif %}
         </div>
     </div>
 
-    {% if hay_clientes %}
-        <!-- Formulario de búsqueda con nuevo estilo -->
-        <div class="search-container">
-            <form method="get" class="search-form">
-                <div class="search-input-container">
-                    <input type="text" 
-                           name="busqueda" 
-                           class="search-input" 
-                           value="{{ busqueda }}" 
-                           placeholder="Buscar cliente..."
-                           id="searchInput">
-                </div>
-                <div class="search-buttons">
-                    <button type="submit" class="btn-search">
-                        Buscar
-                    </button>
-                    {% if busqueda %}
-                    <a href="{% url 'clientes:cliente_lista' %}" class="btn-clear">
-                        Limpiar
-                    </a>
-                    {% endif %}
-                </div>
-            </form>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stats-info">
-                Total de clientes: <span class="stats-count">{{ clientes|length }}</span>
-                {% if busqueda %}
-                    <span style="margin-left: 1rem; color: #6c757d;">
-                        ({{ clientes|length }} resultado{{ clientes|length|pluralize }} para "{{ busqueda }}")
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th style="width: 25%">Cliente</th>
+                <th style="width: 15%">Tipo</th>
+                <th style="width: 18%">Documento</th>
+                <th style="width: 26%">Contacto</th>
+                <th style="width: 16%">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>
+                    {{ cliente.nombre }} {{ cliente.apellido }}
+                </td>
+                <td>
+                    <span class="{% if cliente.tipoCliente == 'Personal' %}cliente-persona{% else %}cliente-juridico{% endif %}">
+                        {{ cliente.get_tipoCliente_display }}
                     </span>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table class="custom-table" id="clientesTable">
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Tipo</th>
-                        <th>Documento</th>
-                        <th>Contacto</th>
-                        <th>Dirección</th>
-                        <th>Declaración</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cliente in clientes %}
-                    <tr>
-                        <td>
-                            <div class="cliente-name">
-                                {{ cliente.nombre }} {{ cliente.apellido }}
-                            </div>
-                        </td>
-                        <td>
-                            <span class="cliente-type {% if cliente.tipoCliente == 'Personal' %}type-personal{% else %}type-empresarial{% endif %}">
-                                {{ cliente.get_tipoCliente_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <div>
-                                <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
-                                <small>{{ cliente.docCliente }}</small>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                📧 {{ cliente.correoElecCliente|truncatechars:20 }}<br>
-                                📞 {{ cliente.telefono }}
-                            </div>
-                        </td>
-                        <td>
-                            {{ cliente.direccion|default:"No especificada"|truncatechars:30 }}
-                        </td>
-                        <td>
-                            {% if cliente.declaracion_jurada %}
-                                <span class="status-badge status-ok">
-                                    Firmada
-                                </span>
-                            {% else %}
-                                <span class="status-badge status-pending">
-                                    Pendiente
-                                </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="actions-cell">
-                                <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-action btn-ver" title="Ver detalles">
-                                    Detalles
-                                </a>
-                                <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-action btn-editar" title="Editar">
-                                    Editar
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding: 2rem; text-align: center; color: #6c757d; font-style: italic;">
-                            {% if busqueda %}
-                                No se encontraron clientes que coincidan con "{{ busqueda }}".
-                            {% else %}
-                                No hay clientes registrados.
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="no-clientes">
-            <div class="no-clientes-icon">👥</div>
-            <h3>No hay clientes registrados</h3>
-            <p>Aún no se han registrado clientes en el sistema. Comienza agregando el primer cliente para empezar a gestionar las operaciones de cambio.</p>
-        </div>
-    {% endif %}
+                </td>
+                <td>
+                    <div>
+                        <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
+                        <small>{{ cliente.docCliente }}</small>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        📧 {{ cliente.correoElecCliente|truncatechars:30 }}<br>
+                        📞 {{ cliente.telefono }}
+                    </div>
+                </td>
+                <td>
+                    <div class="zona-acciones">
+                        <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-ver" title="Ver detalles">
+                            Detalles
+                        </a>
+                        <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-editar" title="Editar">
+                            Editar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    {% if busqueda %}
+                        No se encontraron clientes que coincidan con "{{ busqueda }}".
+                    {% else %}
+                        No hay clientes registrados.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const table = document.getElementById('clientesTable');
-    
-    if (searchInput && table) {
-        // Búsqueda en tiempo real
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-            
-            for (let row of rows) {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
-    }
-});
-</script>
 {% endblock %}

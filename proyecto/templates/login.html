@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Iniciar Sesión - Global Exchange{% endblock %}
 
@@ -7,182 +8,38 @@
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    .main-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        padding: 1rem;
-    }
-
-    .login-container {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 450px;
-    }
-
-    .login-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .logo {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 0.5rem;
-    }
-
-    .subtitle {
-        color: #666;
-        font-size: 1rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #333;
-        font-weight: 500;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-        background-color: #fff;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-control.error {
-        border-color: #dc3545;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 0.875rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: #667eea;
-        border: 2px solid #667eea;
-        margin-top: 1rem;
-    }
-
-    .btn-secondary:hover {
-        background: #667eea;
-        color: white;
-    }
-
-    .form-errors {
-        margin-top: 0.5rem;
-    }
-
-    .error-message {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    .links-section {
-        text-align: center;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #eee;
-    }
-
-    .link {
-        color: #667eea;
-        text-decoration: none;
-        font-size: 0.9rem;
-    }
-
-    .link:hover {
-        text-decoration: underline;
-    }
-
-    .divider {
-        margin: 1rem 0;
-        color: #999;
-    }
-
-    @media (max-width: 768px) {
-        .login-container {
-            padding: 2rem 1.5rem;
-            margin: 1rem;
-        }
-        
-        .logo {
-            font-size: 1.75rem;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'formularios.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-header">
+<div class="contenido">
+    <div class="form-cabecera">
         <div class="logo">💰 Global Exchange</div>
-        <p class="subtitle">Inicia sesión en tu cuenta</p>
+        <p class="subtitulo">Inicia sesión en tu cuenta</p>
     </div>
 
     <form method="post" novalidate>
         {% csrf_token %}
         
-        <div class="form-group">
+        <div class="form-campo">
             <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
             {{ form.username }}
             {% if form.username.errors %}
-                <div class="form-errors">
+                <div class="form-errores">
                     {% for error in form.username.errors %}
-                        <div class="error-message">{{ error }}</div>
+                        <div class="mensaje-error">{{ error }}</div>
                     {% endfor %}
                 </div>
             {% endif %}
         </div>
 
-        <div class="form-group">
+        <div class="form-campo">
             <label for="{{ form.password.id_for_label }}">Contraseña</label>
             {{ form.password }}
             {% if form.password.errors %}
-                <div class="form-errors">
+                <div class="form-errores">
                     {% for error in form.password.errors %}
-                        <div class="error-message">{{ error }}</div>
+                        <div class="mensaje-error">{{ error }}</div>
                     {% endfor %}
                 </div>
             {% endif %}
@@ -190,33 +47,33 @@
 
         <!-- Errores generales del formulario -->
         {% if form.non_field_errors %}
-            <div class="form-errors">
+            <div class="form-errores">
                 {% for error in form.non_field_errors %}
-                    <div class="error-message">{{ error }}</div>
+                    <div class="mensaje-error">{{ error }}</div>
                 {% endfor %}
             </div>
         {% endif %}
-
-        <button type="submit" class="btn btn-primary">
-            Iniciar Sesión
-        </button>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Iniciar Sesión
+            </button>
+            <a href="{% url 'inicio' %}" class="btn-atras">
+                Volver al Inicio
+            </a>
+        </div>
     </form>
 
-    <div class="links-section">
+    <div class="zona-enlaces">
         <p>
-            <a href="{% url 'usuarios:recuperar_password' %}" class="link">
-                ¿Olvidaste tu contraseña?
-            </a>
+            ¿Olvidaste tu contraseña?
+            <a href="{% url 'usuarios:recuperar_password' %}" class="enlace">Recupéralo aquí</a>
         </p>
-        <div class="divider">•</div>
+    </div>
+    <div class="zona-enlaces">
         <p>
             ¿No tienes una cuenta? 
-            <a href="{% url 'usuarios:registro' %}" class="link">Regístrate aquí</a>
+            <a href="{% url 'usuarios:registro' %}" class="enlace">Regístrate aquí</a>
         </p>
-        <div class="divider">o</div>
-        <a href="{% url 'inicio' %}" class="btn btn-secondary">
-            Volver al Inicio
-        </a>
     </div>
 </div>
 {% endblock %}

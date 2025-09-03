@@ -75,7 +75,7 @@ def moneda_crear(request):
             return redirect('monedas:lista_monedas')
     else:
         form = MonedaForm()
-    return render(request, 'monedas/moneda_crear.html', {'form': form,})
+    return render(request, 'monedas/moneda_form.html', {'form': form,})
 
 @login_required
 @tiene_algun_permiso
@@ -97,7 +97,8 @@ def moneda_lista(request):
             messages.error(request, 'Error al cambiar el estado de la moneda.')
     
     # Obtener todas las monedas
-    monedas = Moneda.objects.all()
+    todas_las_monedas = Moneda.objects.all()
+    monedas = todas_las_monedas
     
     # Manejar búsqueda
     busqueda = request.GET.get('busqueda', '').strip()
@@ -114,11 +115,15 @@ def moneda_lista(request):
     monedas_activas = monedas.filter(activa=True).count()
     monedas_inactivas = monedas.filter(activa=False).count()
     
+    # Total de monedas en el sistema (sin filtrar)
+    total_monedas_sistema = todas_las_monedas.count()
+    
     context = {
         'monedas': monedas,
         'monedas_activas': monedas_activas,
         'monedas_inactivas': monedas_inactivas,
         'busqueda': busqueda,
+        'total_monedas_sistema': total_monedas_sistema,
     }
     return render(request, 'monedas/moneda_lista.html', context)
 
@@ -148,4 +153,4 @@ def moneda_editar(request, pk):
             return redirect('monedas:lista_monedas')
         else:
             messages.error(request, 'Error al actualizar la moneda.')
-    return render(request, 'monedas/moneda_editar.html', {'form': form, 'moneda': moneda,})
+    return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})

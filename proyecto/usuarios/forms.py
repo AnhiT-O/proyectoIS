@@ -170,15 +170,14 @@ class EstablecerPasswordForm(SetPasswordForm):
 
 class AsignarRolForm(forms.Form):
     """Formulario para asignar roles a usuarios"""
-    rol = forms.ModelChoiceField(
+    rol = forms.ModelMultipleChoiceField(
         queryset=Group.objects.exclude(name='Administrador').order_by('name'),
-        empty_label="Seleccionar rol",
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'style': 'width: 100%; padding: 0.5rem;'
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-check-input'
         }),
+        label='Roles disponibles',
         error_messages={
-            'required': "Debes seleccionar un rol."
+            'required': "Debes seleccionar al menos un rol."
         }
     )
 
