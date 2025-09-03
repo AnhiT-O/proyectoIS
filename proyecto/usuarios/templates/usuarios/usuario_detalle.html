@@ -103,12 +103,28 @@
                             <div class="lista-clientes">
                                 {% for cliente in clientes_asignados %}
                                     <div class="cliente">
-                                        <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>
-                                        <br>
-                                        <small style="color: #6c757d;">
-                                            {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }} 
-                                            | {{ cliente.correoElecCliente }}
-                                        </small>
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div style="flex: 1;">
+                                                <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>
+                                                <br>
+                                                <small style="color: #6c757d;">
+                                                    {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }} 
+                                                    | {{ cliente.correoElecCliente }}
+                                                </small>
+                                            </div>
+                                            {% if perms.usuarios.asignacion_clientes %}
+                                                <form method="post" action="{% url 'usuarios:remover_cliente' usuario.pk cliente.pk %}" style="margin: 0;">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="next" value="{% url 'usuarios:usuario_detalle' usuario.pk %}">
+                                                    <button type="submit" class="btn-desactivar" 
+                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
+                                                            title="Desasignar cliente"
+                                                            style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+                                                        Desasignar
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 {% endfor %}
                             </div>
@@ -130,11 +146,7 @@
             {% endif %}
             
             {% if perms.usuarios.asignacion_clientes %}
-                {% if clientes_asignados.exists %}
-                    <a href="{% url 'usuarios:ver_clientes_usuario' usuario.pk %}" class="btn-primario">
-                        Ver Clientes
-                    </a>
-                {% else %}
+                {% if es_operador %}
                     <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-primario">
                         Asignar Clientes
                     </a>

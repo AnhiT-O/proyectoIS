@@ -209,6 +209,12 @@
     border-bottom: none;
 }
 
+.cliente:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
 .zona-acciones {
     background: #f8f9fa;
     padding: 2rem;

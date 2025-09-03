@@ -267,6 +267,7 @@ def usuario_detalle(request, pk):
         'roles': roles,
         'clientes_asignados': clientes_asignados,
         'total_clientes': clientes_asignados.count(),
+        'es_operador': any(rol.name == 'Operador' for rol in roles)
     }
     
     return render(request, 'usuarios/usuario_detalle.html', context)
@@ -445,15 +446,14 @@ def asignar_clientes(request, pk):
                 messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.get_full_name()}.')
             else:
                 messages.success(request, f'{len(clientes)} clientes asignados exitosamente a {usuario.get_full_name()}.')
-            
-            return redirect('usuarios:administrar_usuarios')
+            return redirect('usuarios:usuario_detalle', pk=usuario.pk)
     else:
         form = AsignarClienteForm(usuario=usuario)
     
     # Verificar si hay clientes disponibles para asignar
     if not form.fields['clientes'].queryset.exists():
         messages.info(request, f'{usuario.get_full_name()} ya tiene todos los clientes disponibles asignados.')
-        return redirect('usuarios:ver_clientes_usuario', pk=usuario.pk)
+        return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
     return render(request, 'usuarios/asignar_clientes.html', {
         'form': form,
@@ -475,20 +475,15 @@ def remover_cliente(request, pk, cliente_id):
         messages.error(request, 'Usuario o cliente no encontrado.')
         return redirect('usuarios:administrar_usuarios')
     
-    # No permitir modificar asignaciones de administradores (solo si es administrador)
-    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
-        messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
-        return redirect('usuarios:administrar_usuarios')
-    
     # Verificar que la relación existe
     try:
         relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
         relacion.delete()
-        messages.success(request, f'Cliente "{cliente}" removido exitosamente de {usuario.get_full_name()}.')
+        messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.get_full_name()}.')
     except UsuarioCliente.DoesNotExist:
         messages.error(request, 'La asignación no existe.')
-    
-    return redirect('usuarios:administrar_usuarios')
+
+    return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
 
 @login_required

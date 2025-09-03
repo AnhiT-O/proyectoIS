@@ -55,10 +55,7 @@ class RolForm(forms.ModelForm):
             codename__startswith='view_'
         ), # excluye permisos predeterminados de Django
         widget=PermissionCheckboxSelectMultiple,
-        required=True,
-        error_messages={
-            'required': 'Selecciona por lo menos un permiso.',
-        }
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
