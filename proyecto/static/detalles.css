@@ -1,0 +1,246 @@
+.cuerpo {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}  
+
+.contenido {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.detalle-cabecera {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.detalle-cabecera::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.detalle-nombre {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detalle-tipo {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+.zona-detalle {
+    padding: 2.5rem;
+}
+
+.seccion-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.info-columna {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.info-columna:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.info-celda {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.info-celda:last-child {
+    margin-bottom: 0;
+}
+
+.info-icono {
+    font-size: 1.2rem;
+    color: #667eea;
+    margin-top: 0.1rem;
+    min-width: 20px;
+}
+
+.info-contenido {
+    flex: 1;
+}
+
+.info-titulo {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-valor {
+    color: #333;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.etiqueta-activo {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.etiqueta-bloqueado {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.zona-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rol-admin {
+    background: #dc3545;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.rol-analista {
+    background: #28a745;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.rol-operador {
+    background: #007bff;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.rol-otro {
+    background: #6c757d;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.lista-clientes {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background: white;
+}
+
+.cliente {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f8f9fa;
+    font-size: 0.9rem;
+}
+
+.cliente:last-child {
+    border-bottom: none;
+}
+
+.zona-acciones {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.acciones-contenido {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.lista-permisos {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 1rem;
+    border-left: 4px solid #007bff;
+}
+
+.permiso {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.permiso:before {
+    content: "🔐";
+    margin-right: 0.5rem;
+}
+
+.sin-permisos {
+    color: #6c757d;
+    font-style: italic;
+}

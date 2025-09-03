@@ -1,247 +1,89 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ cliente.nombre }} {{ cliente.apellido }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<style>
-    .cliente-detalle-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .cliente-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2.5rem 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cliente-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-    }
-
-    .header-content {
-        position: relative;
-        z-index: 2;
-    }
-
-    .cliente-name {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .cliente-type {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 400;
-    }
-
-    .info-section {
-        padding: 2.5rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .info-card {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-    }
-
-    .info-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .info-item {
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .info-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .info-icon {
-        font-size: 1.2rem;
-        color: #667eea;
-        margin-top: 0.1rem;
-        min-width: 20px;
-    }
-
-    .info-content {
-        flex: 1;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-value {
-        color: #333;
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 25px;
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-
-    .status-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .status-danger {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .actions-section {
-        background: #f8f9fa;
-        padding: 2rem;
-        border-top: 1px solid #dee2e6;
-    }
-
-    .actions-container {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: #667eea;
-        border: 2px solid #667eea;
-    }
-
-    .btn-secondary:hover {
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-        transform: translateY(-1px);
-    }
-</style>
+<link rel="stylesheet" href="{% static 'detalles.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="cliente-detalle-container">
-    <div class="cliente-header">
-        <div class="header-content">
-            <h1 class="cliente-name">
-                 {{ cliente.nombre }} {{ cliente.apellido }}
-            </h1>
-            <div class="cliente-type">
-                {{ cliente.get_tipoCliente_display }}
-            </div>
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h1 class="detalle-nombre">
+                {{ cliente.nombre }} {{ cliente.apellido }}
+        </h1>
+        <div class="detalle-tipo">
+            {{ cliente.get_tipoCliente_display }}
         </div>
     </div>
 
-    <div class="info-section">
-        <div class="info-grid">
+    <div class="zona-detalle">
+        <div class="seccion-info">
             <!-- Información Personal -->
-            <div class="info-card">
-                <div class="info-item">
-                    <span class="info-icon">📄</span>
-                    <div class="info-content">
-                        <div class="info-label">Tipo de Documento</div>
-                        <div class="info-value">{{ cliente.get_tipoDocCliente_display }}</div>
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📄</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Tipo de Documento</div>
+                        <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
                     </div>
                 </div>
-                <div class="info-item">
-                    <span class="info-icon">🔢</span>
-                    <div class="info-content">
-                        <div class="info-label">Número de Documento</div>
-                        <div class="info-value">{{ cliente.docCliente }}</div>
+                <div class="info-celda">
+                    <span class="info-icono">🔢</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Número de Documento</div>
+                        <div class="info-valor">{{ cliente.docCliente }}</div>
                     </div>
                 </div>
-                <div class="info-item">
-                    <span class="info-icon">💼</span>
-                    <div class="info-content">
-                        <div class="info-label">Ocupación</div>
-                        <div class="info-value">{{ cliente.ocupacion|default:"No especificada" }}</div>
+                <div class="info-celda">
+                    <span class="info-icono">💼</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Ocupación</div>
+                        <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
                     </div>
                 </div>
             </div>
 
             <!-- Información de Contacto -->
-            <div class="info-card">
-                <div class="info-item">
-                    <span class="info-icon">📧</span>
-                    <div class="info-content">
-                        <div class="info-label">Correo Electrónico</div>
-                        <div class="info-value">{{ cliente.correoElecCliente }}</div>
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📧</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Correo Electrónico</div>
+                        <div class="info-valor">{{ cliente.correoElecCliente }}</div>
                     </div>
                 </div>
-                <div class="info-item">
-                    <span class="info-icon">📞</span>
-                    <div class="info-content">
-                        <div class="info-label">Teléfono</div>
-                        <div class="info-value">{{ cliente.telefono }}</div>
+                <div class="info-celda">
+                    <span class="info-icono">📞</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Teléfono</div>
+                        <div class="info-valor">{{ cliente.telefono }}</div>
                     </div>
                 </div>
-                <div class="info-item">
-                    <span class="info-icon">🏠</span>
-                    <div class="info-content">
-                        <div class="info-label">Domicilio</div>
-                        <div class="info-value">{{ cliente.direccion|default:"No especificado" }}</div>
+                <div class="info-celda">
+                    <span class="info-icono">🏠</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Domicilio</div>
+                        <div class="info-valor">{{ cliente.direccion|default:"No especificado" }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Estado de Declaración Jurada -->
-        <div class="info-card" style="grid-column: 1 / -1;">
-            <div class="info-item">
-                <span class="info-icon">📝</span>
-                <div class="info-content">
-                    <div class="info-label">Estado de Declaración Jurada</div>
-                    <div class="info-value">
+        <div class="info-columna" style="grid-column: 1 / -1;">
+            <div class="info-celda">
+                <span class="info-icono">📝</span>
+                <div class="info-contenido">
+                    <div class="info-titulo">Estado de Declaración Jurada</div>
+                    <div class="info-valor">
                         {% if cliente.declaracion_jurada %}
-                            <span class="status-badge status-success">
+                            <span class="etiqueta-activo">
                                 Declaración Firmada
                             </span>
                         {% else %}
-                            <span class="status-badge status-danger">
+                            <span class="etiqueta-bloqueado">
                                 Declaración Pendiente
                             </span>
                         {% endif %}
@@ -251,8 +93,8 @@
         </div>
     </div>
 
-    <div class="actions-section">
-        <div class="actions-container">
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">
                 Editar Cliente
             </a>

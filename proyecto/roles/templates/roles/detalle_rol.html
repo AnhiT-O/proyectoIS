@@ -1,101 +1,42 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle {{ rol.name }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'detalles.css' %}">
+{% endblock %}
 
 {% block content %}
-<style>
-    .admin-container {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 2rem auto;
-        max-width: 1000px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .detail-card {
-        background-color: white;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .detail-title {
-        color: #2c3e50;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #e9ecef;
-    }
-
-    .detail-section {
-        margin-bottom: 2rem;
-    }
-
-    .detail-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        font-size: 1rem;
-    }
-
-    .detail-value {
-        color: #495057;
-        margin-bottom: 1.5rem;
-        padding: 0.5rem 0;
-        font-size: 1rem;
-    }
-
-    .permissions-list {
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        padding: 1rem;
-        border-left: 4px solid #007bff;
-    }
-
-    .permission-item {
-        color: #495057;
-        margin-bottom: 0.5rem;
-        padding: 0.25rem 0;
-    }
-
-    .permission-item:before {
-        content: "🔐";
-        margin-right: 0.5rem;
-    }
-
-    .no-permissions {
-        color: #6c757d;
-        font-style: italic;
-    }
-
-    .actions-section {
-        border-top: 1px solid #e9ecef;
-        padding-top: 1.5rem;
-        margin-top: 2rem;
-        text-align: right;
-    }
-</style>
-
-<div class="admin-container">
-    <div class="detail-card">
-        <h3 class="detail-title">Detalles del Rol</h3>
-        
-        <div class="detail-section">
-            <div class="detail-label">Nombre del Rol:</div>
-            <div class="detail-value">{{ rol.name }}</div>
-            
-            <div class="detail-label">Descripción:</div>
-            <div class="detail-value">{{ rol.descripcion|default:"Sin descripción" }}</div>
-            
-            <div class="detail-label">Permisos Asignados:</div>
-            <div class="permissions-list">
-                {% for permiso in rol.permissions.all %}
-                    <div class="permission-item">{{ permiso.name }}</div>
-                {% empty %}
-                    <div class="no-permissions">No hay permisos asignados a este rol</div>
-                {% endfor %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h3 class="detalle-nombre"> {{ rol.name }}</h3>
+    </div>
+    <div class="zona-detalle">
+        <div class="info-columna">
+            <div class="info-celda">
+                <div class="info-contenido">
+                    <div class="info-titulo">Descripción:</div>
+                    <div class="info-valor">{{ rol.descripcion|default:"Sin descripción" }}</div>
+                </div>
+            </div>
+            <div class="info-celda">
+                <div class="info-contenido">
+                    <div class="info-titulo">Permisos Asignados:</div>
+                    <div class="lista-permisos">
+                        {% for permiso in rol.permissions.all %}
+                            <div class="permiso">{{ permiso.name }}</div>
+                        {% empty %}
+                            <div class="sin-permisos">No hay permisos asignados a este rol</div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-    <div class="actions-section" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+    <div class="zona-acciones">
+        <div class="actions-section">
             {% if perms.auth.change_group %}
             <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-primario">
                  Editar Rol
