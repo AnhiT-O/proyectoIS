@@ -396,9 +396,17 @@ def remover_rol(request, pk, rol_id):
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
+    # Si el rol a remover es 'Operador', desasociar todos los clientes del usuario
+    if rol.name == 'Operador':
+        clientes_asociados = usuario.clientes_operados.all()
+        for cliente in clientes_asociados:
+            try:
+                relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
+                relacion.delete()
+            except UsuarioCliente.DoesNotExist:
+                pass
     usuario.groups.remove(rol)
     messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.get_full_name()}.')
-    
     return redirect('usuarios:administrar_usuarios')
 
 
@@ -412,9 +420,9 @@ def asignar_clientes(request, pk):
         messages.error(request, 'Usuario no encontrado.')
         return redirect('usuarios:administrar_usuarios')
     
-    # No permitir asignar clientes a administradores (solo si es administrador)
-    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
-        messages.error(request, 'No puedes asignar clientes a administradores.')
+    # Solo permitir asignar clientes a usuarios con rol 'Operador'
+    if not usuario.groups.filter(name='Operador').exists():
+        messages.error(request, 'Solo puedes asignar clientes a usuarios con rol Operador.')
         return redirect('usuarios:administrar_usuarios')
     
     # Verificar si existen clientes creados en el sistema
