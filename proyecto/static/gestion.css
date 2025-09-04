@@ -324,8 +324,8 @@
 
 .zona-monedas{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 3rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
     margin-top: 2.5rem;
     background: linear-gradient(135deg, #eef2fb 0%, #f8f9fa 100%);
     border-radius: 18px;
@@ -337,7 +337,7 @@
 .tarjeta-moneda {
     background: #fff;
     border-radius: 18px;
-    padding: 1.2rem 1rem;
+    padding: 1.5rem 1.2rem;
     box-shadow: 0 8px 32px rgba(102, 126, 234, 0.13);
     transition: all 0.3s ease;
     border: 1.5px solid #e9ecef;
@@ -347,6 +347,7 @@
     flex-direction: column;
     gap: 1.2rem;
     min-height: unset;
+    width: 100%;
 }
 
 .tarjeta-moneda:hover {
@@ -387,21 +388,21 @@
 .tarjeta-moneda .gestion-tabla {
     table-layout: fixed;
     width: 100%;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin: 0;
 }
 
 .tarjeta-moneda .gestion-tabla th {
-    padding: 0.6rem 0.3rem;
+    padding: 0.8rem 0.5rem;
     white-space: normal;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     line-height: 1.2;
 }
 
 .tarjeta-moneda .gestion-tabla td {
-    padding: 0.6rem 0.3rem;
+    padding: 0.8rem 0.5rem;
     white-space: normal;
     text-align: center;
     vertical-align: middle;

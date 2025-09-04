@@ -38,6 +38,28 @@ class MonedaForm(forms.ModelForm):
             'type': 'number'
         })
     )
+    comision_compra = forms.IntegerField(
+        required=False,
+        error_messages={
+            'min_value': 'La comisión de compra debe ser un número positivo.'
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'type': 'number'
+        })
+    )
+    comision_venta = forms.IntegerField(
+        required=False,
+        error_messages={
+            'min_value': 'La comisión de venta debe ser un número positivo.'
+        },
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'type': 'number'
+        })
+    )
     decimales = forms.IntegerField(
         required=False,
         error_messages={

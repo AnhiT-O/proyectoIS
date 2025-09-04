@@ -62,8 +62,10 @@
                     <thead>
                         <tr>
                             <th style="width: 25%;">Estado</th>
-                            <th style="width: 35%;">Decimales a mostrar</th>
-                            <th style="width: 40%;">Tasa base</th>
+                            <th style="width: 30%;">Decimales a mostrar</th>
+                            <th style="width: 30%;">Tasa base</th>
+                            <th style="width: 30%;">Comisión de compra</th>
+                            <th style="width: 30%;">Comisión de venta</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,6 +80,12 @@
                             </td>
                             <td>
                                 <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
                             </td>
                         </tr>
                     </tbody>

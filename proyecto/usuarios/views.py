@@ -277,13 +277,11 @@ def usuario_detalle(request, pk):
 @tiene_algun_permiso
 def administrar_usuarios(request):
     """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
-    # Obtener el término de búsqueda
-    busqueda = request.GET.get('busqueda', '').strip()
-    
     # Iniciar el queryset base excluyendo al usuario actual
     usuarios = Usuario.objects.exclude(pk=request.user.pk)
     
     # Aplicar filtro de búsqueda si existe
+    busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
         usuarios = usuarios.filter(
             Q(first_name__icontains=busqueda) |
@@ -291,20 +289,39 @@ def administrar_usuarios(request):
             Q(username__icontains=busqueda)
         )
     
+    # Manejar filtro por roles
+    roles_filtro = request.GET.get('roles', '').strip()
+    if roles_filtro:
+        usuarios = usuarios.filter(groups__name=roles_filtro)
+    
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
-    # Calcular estadísticas
+    # Obtener todos los roles disponibles para el filtro
+    roles_disponibles = Group.objects.all().order_by('name')
+    
+    # Crear lista de roles con sus estadísticas para el template
+    roles_con_stats = []
+    for rol in roles_disponibles:
+        count = Usuario.objects.exclude(pk=request.user.pk).filter(groups=rol).count()
+        roles_con_stats.append({
+            'name': rol.name,
+            'count': count
+        })
+    
+    # Calcular estadísticas generales
     total_usuarios = usuarios.count()
     usuarios_activos = usuarios.filter(bloqueado=False).count()
     usuarios_bloqueados = usuarios.filter(bloqueado=True).count()
     
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
+        'roles_filtro': roles_filtro,
         'busqueda': busqueda,
         'total_usuarios': total_usuarios,
         'usuarios_activos': usuarios_activos,
-        'usuarios_bloqueados': usuarios_bloqueados
+        'usuarios_bloqueados': usuarios_bloqueados,
+        'roles_con_stats': roles_con_stats
     })
 
 @login_required

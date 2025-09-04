@@ -22,11 +22,21 @@
                        value="{{ busqueda }}" 
                        placeholder="Buscar por nombre, apellido o nombre de usuario">
             </div>
+            <div class="campo-filtro">
+                <select name="roles" class="select-filtro">
+                    <option value="">Todos los roles</option>
+                    {% for rol in roles_con_stats %}
+                        <option value="{{ rol.name }}" {% if roles_filtro == rol.name %}selected{% endif %}>
+                            {{ rol.name }} ({{ rol.count }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="botones-busqueda">
                 <button type="submit" class="btn-buscar">
                     Buscar
                 </button>
-                {% if busqueda %}
+                {% if busqueda or roles_filtro %}
                 <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-limpiar">
                     Limpiar
                 </a>
@@ -122,8 +132,8 @@
                 {% empty %}
                 <tr>
                     <td colspan="7" class="text-center">
-                        {% if busqueda %}
-                            No se encontraron usuarios que coincidan con "{{ busqueda }}".
+                        {% if busqueda or roles_filtro %}
+                            No se encontraron otros usuarios que coincidan con los filtros aplicados.
                         {% else %}
                             No hay otros usuarios registrados.
                         {% endif %}
