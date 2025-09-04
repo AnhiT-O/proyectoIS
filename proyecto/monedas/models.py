@@ -16,6 +16,8 @@ class Moneda(models.Model):
     )
     activa = models.BooleanField(default=True)
     tasa_base = models.IntegerField(default=0)
+    comision_compra = models.IntegerField(default=0)
+    comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
 
     class Meta:
@@ -27,7 +29,8 @@ class Moneda(models.Model):
             ("gestion", "Puede gestionar monedas (crear y editar)"),
             ("activacion", "Puede activar/desactivar monedas"),
             ("cambiar_tasa", "Puede cambiar la tasa base de una moneda"),
-            ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda")
+            ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda"),    
+            ("cambiar_comisiones", "Puede cambiar las comisiones de compra y venta de una moneda")
         ]
 
     def clean(self):

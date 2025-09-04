@@ -118,9 +118,10 @@ python manage.py runserver #correrá el proyecto
 - **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
 
 ```bash
-sudo mv ./backup_datos /var/lib/postgresql/backup_datos.sql
+sudo cp backup_datos.sql /var/lib/postgresql/backup_datos.sql # para copiar el archivo al directorio donde 'postgres' tiene permiso de usarlo para su base de datos, esto solo hacelo una vez
 sudo -i -u postgres
-psql -d bd_produccion < backup_datos.sql
+psql -d bd_desarrollo < backup_datos.sql
+exit
 ```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
 
@@ -204,14 +205,6 @@ python manage.py makemigrations
 python manage.py migrate
 sudo systemctl restart gunicorn
 sudo systemctl restart nginx
-```
-
-- **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
-
-```bash
-sudo mv ./backup_datos /var/lib/postgresql/backup_datos.sql
-sudo -i -u postgres
-psql -d bd_produccion < backup_datos.sql
 ```
 - Se podrá ver los resultados del proyecto en producción en: http://localhost/
 

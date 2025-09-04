@@ -51,7 +51,8 @@ def puede_editar(view_func):
         permisos_requeridos = [
             'monedas.gestion',       # Permiso para editar monedas
             'monedas.cambiar_tasa',  # Permiso para cambiar la tasa base de una moneda
-            'monedas.cambiar_decimales'  # Permiso para cambiar el número de decimales de una moneda
+            'monedas.cambiar_decimales', # Permiso para cambiar el número de decimales de una moneda
+            'monedas.cambiar_comisiones'  # Permiso para cambiar las comisiones de una moneda
         ]
         
         # Verificar si el usuario tiene al menos uno de los permisos
@@ -144,6 +145,9 @@ def moneda_editar(request, pk):
             form.fields.pop('tasa_base')
         if not request.user.has_perm('monedas.cambiar_decimales'):
             form.fields.pop('decimales')
+        if not request.user.has_perm('monedas.cambiar_comisiones'):
+            form.fields.pop('comision_compra')
+            form.fields.pop('comision_venta')
 
     # Procesa el formulario
     if request.method == 'POST':

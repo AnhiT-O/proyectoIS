@@ -277,13 +277,11 @@ def usuario_detalle(request, pk):
 @tiene_algun_permiso
 def administrar_usuarios(request):
     """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
-    # Obtener el término de búsqueda
-    busqueda = request.GET.get('busqueda', '').strip()
-    
     # Iniciar el queryset base excluyendo al usuario actual
     usuarios = Usuario.objects.exclude(pk=request.user.pk)
     
     # Aplicar filtro de búsqueda si existe
+    busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
         usuarios = usuarios.filter(
             Q(first_name__icontains=busqueda) |
@@ -291,20 +289,39 @@ def administrar_usuarios(request):
             Q(username__icontains=busqueda)
         )
     
+    # Manejar filtro por roles
+    roles_filtro = request.GET.get('roles', '').strip()
+    if roles_filtro:
+        usuarios = usuarios.filter(groups__name=roles_filtro)
+    
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
-    # Calcular estadísticas
+    # Obtener todos los roles disponibles para el filtro
+    roles_disponibles = Group.objects.all().order_by('name')
+    
+    # Crear lista de roles con sus estadísticas para el template
+    roles_con_stats = []
+    for rol in roles_disponibles:
+        count = Usuario.objects.exclude(pk=request.user.pk).filter(groups=rol).count()
+        roles_con_stats.append({
+            'name': rol.name,
+            'count': count
+        })
+    
+    # Calcular estadísticas generales
     total_usuarios = usuarios.count()
     usuarios_activos = usuarios.filter(bloqueado=False).count()
     usuarios_bloqueados = usuarios.filter(bloqueado=True).count()
     
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
+        'roles_filtro': roles_filtro,
         'busqueda': busqueda,
         'total_usuarios': total_usuarios,
         'usuarios_activos': usuarios_activos,
-        'usuarios_bloqueados': usuarios_bloqueados
+        'usuarios_bloqueados': usuarios_bloqueados,
+        'roles_con_stats': roles_con_stats
     })
 
 @login_required
@@ -485,23 +502,6 @@ def remover_cliente(request, pk, cliente_id):
 
     return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
-
-@login_required
-@permission_required('usuarios.asignacion_clientes', raise_exception=True)
-def ver_clientes_usuario(request, pk):
-    """Vista para ver todos los clientes asignados a un usuario"""
-    try:
-        usuario = Usuario.objects.get(pk=pk)
-    except Usuario.DoesNotExist:
-        messages.error(request, 'Usuario no encontrado.')
-        return redirect('usuarios:administrar_usuarios')
-    clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
-    
-    return render(request, 'usuarios/ver_clientes_usuario.html', {
-        'usuario': usuario,
-        'clientes_asignados': clientes_asignados
-    })
-
 @login_required
 def ver_clientes_asociados(request):
     """Vista para que un usuario vea los clientes con los que está asociado"""
@@ -511,7 +511,30 @@ def ver_clientes_asociados(request):
     context = {
         'clientes': clientes,
         'total_clientes': clientes.count(),
+        'cliente_activo': request.user.cliente_activo,
     }
 
     return render(request, 'usuarios/ver_clientes_asociados.html', context)
+
+@login_required
+def seleccionar_cliente_activo(request, cliente_id):
+    """Vista para seleccionar un cliente como activo"""
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:mis_clientes')
+    
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=cliente_id)
+        
+        # Asignar el cliente como activo
+        request.user.cliente_activo = cliente
+        request.user.save()
+        
+        messages.success(request, f'Cliente "{cliente.nombre} {cliente.apellido}" seleccionado como cliente activo.')
+        
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+    
+    return redirect('inicio')
 

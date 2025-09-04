@@ -145,6 +145,55 @@
         color: white;
     }
 
+    .btn-seleccionar {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        margin-top: 0.5rem;
+    }
+
+    .btn-seleccionar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+
+    .btn-activo {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        cursor: not-allowed;
+    }
+
+    .btn-activo:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .cliente-activo-badge {
+        background: #d4edda;
+        color: #155724;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .cliente-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr 200px;
+        gap: 1rem;
+        align-items: center;
+    }
+
     @media (max-width: 768px) {
         .clientes-container {
             padding: 1.5rem;
@@ -170,6 +219,15 @@
         <p class="subtitle">
             Clientes con los que estás autorizado a operar
         </p>
+        {% if cliente_activo %}
+        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+            <strong>Cliente Activo:</strong> {{ cliente_activo.nombre }} {{ cliente_activo.apellido }}
+        </div>
+        {% else %}
+        <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+            <strong>Nota:</strong> No tienes ningún cliente seleccionado para operar
+        </div>
+        {% endif %}
     </div>
 
     <div class="stats-bar">
@@ -229,6 +287,21 @@
                         <div class="cliente-detalle" style="margin-top: 0.5rem;">
                              Sin Declaración Jurada
                         </div>
+                        {% endif %}
+
+                        <!-- Botón para seleccionar cliente activo -->
+                        {% if cliente == cliente_activo %}
+                            <div class="cliente-activo-badge">
+                                ✓ Cliente Activo
+                            </div>
+                        {% else %}
+                            <form method="post" action="{% url 'usuarios:seleccionar_cliente_activo' cliente.id %}" style="margin-top: 0.5rem;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-seleccionar" 
+                                        onclick="return confirm('¿Confirmas que quieres seleccionar a {{ cliente.nombre }} {{ cliente.apellido }} como tu cliente activo?')">
+                                    Seleccionar como Activo
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>

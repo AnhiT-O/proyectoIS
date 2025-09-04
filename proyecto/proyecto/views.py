@@ -2,15 +2,13 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
+from clientes.models import Cliente
 
 from .forms import LoginForm
 
 def inicio(request):
     """Vista para la página de inicio"""
-    context = {}
-    if request.user.is_authenticated:
-        context['user_groups'] = [g.name for g in request.user.groups.all()]
-    return render(request, 'inicio.html', context)
+    return render(request, 'inicio.html')
 
 def custom_permission_denied_view(request, exception):
     """

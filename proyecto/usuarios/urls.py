@@ -17,5 +17,7 @@ urlpatterns = [
     path('usuario/<int:pk>/desasignar-rol/<int:rol_id>/', views.remover_rol, name='remover_rol'),
     # Rutas para gestión de clientes-usuarios
     path('usuario/<int:pk>/asignar-clientes/', views.asignar_clientes, name='asignar_clientes'),
-    path('usuario/<int:pk>/desasignar-cliente/<int:cliente_id>/', views.remover_cliente, name='remover_cliente')
+    path('usuario/<int:pk>/desasignar-cliente/<int:cliente_id>/', views.remover_cliente, name='remover_cliente'),
+    path('mis-clientes/', views.ver_clientes_asociados, name='mis_clientes'),
+    path('seleccionar-cliente-activo/<int:cliente_id>/', views.seleccionar_cliente_activo, name='seleccionar_cliente_activo'),
 ]

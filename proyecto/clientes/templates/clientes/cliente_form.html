@@ -127,16 +127,30 @@
             </div>
         </div>
 
-        <div class="form-campo">
-            <label for="{{ form.direccion.id_for_label }}">Domicilio</label>
-            {{ form.direccion }}
-            {% if form.direccion.errors %}
-                <div class="form-errores">
-                    {% for error in form.direccion.errors %}
-                        <div class="mensaje-error">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.segmento.id_for_label }}">Segmento</label>
+                {{ form.segmento }}
+                {% if form.segmento.errors %}
+                    <div class="form-errores">
+                        {% for error in form.segmento.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                {{ form.direccion }}
+                {% if form.direccion.errors %}
+                    <div class="form-errores">
+                        {% for error in form.direccion.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
         <div class="zona-declaracion">

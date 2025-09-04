@@ -42,11 +42,17 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .campo-busqueda {
     flex: 1;
     max-width: 400px;
+    min-width: 250px;
+}
+
+.campo-filtro {
+    min-width: 200px;
 }
 
 .texto-busqueda {
@@ -64,6 +70,25 @@
 }
 
 .texto-busqueda:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select-filtro {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    height: 44px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.select-filtro:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -162,76 +187,6 @@
     align-items: center;
 }
 
-.etiqueta-activo {
-    background-color: #28a745;
-    font-size: 0.8rem;
-    padding: 0.3rem 0.5rem;
-    color: white;
-    justify-content: center;
-    border-radius: 30px;
-}
-
-.etiqueta-inactivo {
-    background-color: #d6558b;
-    font-size: 0.8rem;
-    padding: 0.3rem 0.5rem;
-    color: white;
-    justify-content: center;
-    border-radius: 30px;
-}
-
-.rol-admin {
-    background-color: #dc3545;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3rem 0.6rem;
-    margin: 0.1rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    justify-content: center;
-}
-
-.rol-analista {
-    background-color: #78e7e2;
-    color: rgb(0, 0, 0);
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3rem 0.6rem;
-    margin: 0.1rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    justify-content: center;
-}
-
-.rol-operador {
-    background-color: #007bff;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3rem 0.6rem;
-    margin: 0.1rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    justify-content: center;
-}
-
-.rol-otro {
-    background-color: #6f42c1;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.3rem 0.6rem;
-    margin: 0.1rem;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    justify-content: center;
-}
-
 .cantidad-clientes {
     display: inline-block;
     padding: 0.3rem 0.6rem;
@@ -299,8 +254,8 @@
 
 .zona-monedas{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 3rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
     margin-top: 2.5rem;
     background: linear-gradient(135deg, #eef2fb 0%, #f8f9fa 100%);
     border-radius: 18px;
@@ -312,7 +267,7 @@
 .tarjeta-moneda {
     background: #fff;
     border-radius: 18px;
-    padding: 1.2rem 1rem;
+    padding: 1.5rem 1.2rem;
     box-shadow: 0 8px 32px rgba(102, 126, 234, 0.13);
     transition: all 0.3s ease;
     border: 1.5px solid #e9ecef;
@@ -322,6 +277,7 @@
     flex-direction: column;
     gap: 1.2rem;
     min-height: unset;
+    width: 100%;
 }
 
 .tarjeta-moneda:hover {
@@ -362,21 +318,21 @@
 .tarjeta-moneda .gestion-tabla {
     table-layout: fixed;
     width: 100%;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin: 0;
 }
 
 .tarjeta-moneda .gestion-tabla th {
-    padding: 0.6rem 0.3rem;
+    padding: 0.8rem 0.5rem;
     white-space: normal;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     line-height: 1.2;
 }
 
 .tarjeta-moneda .gestion-tabla td {
-    padding: 0.6rem 0.3rem;
+    padding: 0.8rem 0.5rem;
     white-space: normal;
     text-align: center;
     vertical-align: middle;

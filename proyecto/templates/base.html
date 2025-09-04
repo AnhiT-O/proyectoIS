@@ -67,6 +67,13 @@
                             </div>
                         {% endif %}
                         
+                        <!-- Mostrar Ver Clientes solo si el usuario tiene clientes asociados -->
+                        {% if user.clientes_operados.exists %}
+                            <a href="{% url 'usuarios:mis_clientes' %}" class="btn-admin">
+                                👥 Ver Clientes
+                            </a>
+                        {% endif %}
+                        
                         <a href="{% url 'usuarios:perfil' %}" class="btn-secundario">
                             👤 Mi Perfil
                         </a>

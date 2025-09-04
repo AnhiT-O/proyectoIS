@@ -69,6 +69,31 @@
             </div>
         {% endif %}
 
+        {% if not form.instance.pk or perms.monedas.cambiar_comisiones or perms.monedas.gestion %}
+            <div class="form-campo">
+                <label for="{{ form.comision_compra.id_for_label }}">Comisión de compra</label>
+                {{ form.comision_compra }}
+                {% if form.comision_compra.errors %}
+                    <div class="form-errores">
+                        {% for error in form.comision_compra.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.comision_venta.id_for_label }}">Comisión de venta</label>
+                {{ form.comision_venta }}
+                {% if form.comision_venta.errors %}
+                    <div class="form-errores">
+                        {% for error in form.comision_venta.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
         {% if not form.instance.pk or perms.monedas.cambiar_decimales or perms.monedas.gestion %}
             <div class="form-campo">
                 <label for="{{ form.decimales.id_for_label }}">Decimales</label>

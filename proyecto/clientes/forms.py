@@ -1,6 +1,5 @@
 from django import forms
 from django.core.exceptions import ValidationError
-import re
 from .models import Cliente
 
 class ClienteForm(forms.ModelForm):
@@ -70,6 +69,13 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    segmento = forms.ChoiceField(
+        choices=Cliente.SEGMENTO_CHOICES,
+        error_messages={
+            'required': 'Debes seleccionar un segmento.'
+        },
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     declaracion_jurada = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
@@ -87,6 +93,7 @@ class ClienteForm(forms.ModelForm):
             'tipoCliente',
             'direccion',
             'ocupacion',
+            'segmento',
             'declaracion_jurada'
         ]
 
@@ -114,11 +121,3 @@ class ClienteForm(forms.ModelForm):
                 raise ValidationError('El documento debe contener solo números')
         
         return doc_cliente
-    
-class CambiarSegmentoForm(forms.ModelForm):
-    class Meta:
-        model = Cliente
-        fields = ['segmento']
-        widgets = {
-            'segmento': forms.Select(attrs={'class': 'form-control'})
-        }
