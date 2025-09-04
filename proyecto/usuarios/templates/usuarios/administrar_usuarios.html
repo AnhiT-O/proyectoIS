@@ -75,7 +75,7 @@
                             <div style="display: flex; flex-direction: column; gap: 0.25rem;">
                                 {% for group in usuario.groups.all %}
                                     <div>
-                                        <span class="etiqueta-rol {% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
+                                        <span class="{% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
                                             {{ group.name|title }}
                                             {% if perms.usuarios.asignacion_roles %}
                                                 <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
@@ -94,7 +94,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <span class="{% if not usuario.bloqueado %}etiqueta-activo{% else %}etiqueta-inactivo{% endif %}">
+                        <span class="{% if not usuario.bloqueado %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
                             {% if not usuario.bloqueado %}Activo{% else %}Bloqueado{% endif %}
                         </span>
                     </td>

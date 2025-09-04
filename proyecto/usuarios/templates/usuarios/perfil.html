@@ -45,13 +45,13 @@
                         {% if user.groups.exists %}
                             {% for group in user.groups.all %}
                                 {% if group.name == 'Administrador' %}
-                                    <span class="status-badge" style="background: #dc3545; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Administrador</span>
+                                    <span class="rol-admin">Administrador</span>
                                 {% elif group.name == 'Analista cambiario' %}
-                                    <span class="status-badge" style="background: #28a745; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Analista Cambiario</span>
+                                    <span class="rol-analista">Analista Cambiario</span>
                                 {% elif group.name == 'Operador' %}
-                                    <span class="status-badge" style="background: #007bff; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">Operador</span>
+                                    <span class="rol-operador">Operador</span>
                                 {% else %}
-                                    <span class="status-badge" style="background: #6f42c1; margin-right: 0.5rem; margin-bottom: 0.25rem; display: inline-block;">{{ group.name|title }}</span>
+                                    <span class="rol-otro">{{ group.name|title }}</span>
                                 {% endif %}
                             {% endfor %}
                         {% else %}

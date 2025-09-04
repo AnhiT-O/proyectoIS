@@ -92,13 +92,3 @@
     flex-wrap: wrap;
     justify-content: center;
 }
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: #28a745;
-    color: white;
-}

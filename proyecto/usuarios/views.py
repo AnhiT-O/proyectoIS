@@ -511,7 +511,30 @@ def ver_clientes_asociados(request):
     context = {
         'clientes': clientes,
         'total_clientes': clientes.count(),
+        'cliente_activo': request.user.cliente_activo,
     }
 
     return render(request, 'usuarios/ver_clientes_asociados.html', context)
+
+@login_required
+def seleccionar_cliente_activo(request, cliente_id):
+    """Vista para seleccionar un cliente como activo"""
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:mis_clientes')
+    
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=cliente_id)
+        
+        # Asignar el cliente como activo
+        request.user.cliente_activo = cliente
+        request.user.save()
+        
+        messages.success(request, f'Cliente "{cliente.nombre} {cliente.apellido}" seleccionado como cliente activo.')
+        
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+    
+    return redirect('inicio')
 
