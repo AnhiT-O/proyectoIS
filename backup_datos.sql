@@ -52,9 +52,9 @@ COPY public.clientes (id, nombre, apellido, "tipoDocCliente", "docCliente", "cor
 --
 
 COPY public.monedas (id, nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales) FROM stdin;
-2	Euro	EUR	t	8000	0	0	3
-3	Peso argentino	ARG	t	10	0	0	5
-1	Dólar estadounidense	USD	t	7400	0	0	3
+2	Euro	EUR	t	8000	250 300 3
+3	Peso argentino	ARG	t	10  150 250 5
+1	Dólar estadounidense	USD	t	7400	200 300 3
 \.
 
 
