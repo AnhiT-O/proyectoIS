@@ -56,13 +56,6 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
-
-                                    <!-- Gestión de Tasas de Cambio -->
-                                    {% if perms.tasa.ver_tasa %}
-                                        <div class="admin-section">
-                                            <a class="admin-item" href="{% url 'tasa:lista_tasas' %}">💹 Gestionar Tasas de Cambio</a>
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}

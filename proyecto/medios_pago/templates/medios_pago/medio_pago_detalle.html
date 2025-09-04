@@ -1,0 +1,550 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ medio_pago.nombre }} - Detalles - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 1000px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .detalle-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-info h1 {
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-left: 1rem;
+    }
+
+    .status-activo {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-inactivo {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-warning:hover {
+        background: #e0a800;
+        color: #212529;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #218838;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 2px solid #e9ecef;
+        color: #495057;
+    }
+
+    .btn-outline:hover {
+        background: #e9ecef;
+        color: #495057;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .detalle-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f1f3f4;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        min-width: 120px;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: #495057;
+        font-weight: 500;
+        text-align: right;
+        flex: 1;
+    }
+
+    .tipo-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tipo-efectivo {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .tipo-tarjeta_credito {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .tipo-transferencia {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .tipo-billetera_electronica {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .tipo-cheque {
+        background: #fce4ec;
+        color: #ad1457;
+    }
+
+    .configuracion-especifica {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+        border: 1px solid #e3f2fd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .configuracion-title {
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .config-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(21, 101, 192, 0.1);
+    }
+
+    .config-item:last-child {
+        border-bottom: none;
+    }
+
+    .config-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .config-value {
+        font-weight: 600;
+        color: #1565c0;
+    }
+
+    .no-config {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .navigation-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .detalle-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .detalle-header {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .header-info h1 {
+            font-size: 1.5rem;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            margin: 0.5rem 0 0 0;
+            justify-content: center;
+        }
+
+        .header-actions {
+            justify-content: center;
+        }
+
+        .detalle-cards {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            min-width: auto;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+
+        .config-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .navigation-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-container">
+    <div class="detalle-header">
+        <div class="header-info">
+            <h1>
+                💳 {{ medio_pago.nombre }}
+                <span class="status-indicator {% if medio_pago.activo %}status-activo{% else %}status-inactivo{% endif %}">
+                    {% if medio_pago.activo %}
+                        ✓ Activo
+                    {% else %}
+                        ✗ Inactivo
+                    {% endif %}
+                </span>
+            </h1>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'medios_pago:medio_pago_editar' medio_pago.pk %}" class="btn btn-warning">
+                ✏️ Editar
+            </a>
+            {% if perms.medios_pago.activacion %}
+                {% if medio_pago.activo %}
+                    <form method="post" action="{% url 'medios_pago:medio_pago_cambiar_estado' medio_pago.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary" onclick="return confirm('¿Está seguro de desactivar este medio de pago?')">
+                            🔒 Desactivar
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'medios_pago:medio_pago_cambiar_estado' medio_pago.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            🔓 Activar
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+            <a href="{% url 'medios_pago:medio_pago_eliminar' medio_pago.pk %}" class="btn btn-danger">
+                🗑️ Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="detalle-cards">
+        <!-- Información General -->
+        <div class="detalle-card">
+            <div class="card-header">
+                📋 Información General
+            </div>
+            <div class="info-item">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{ medio_pago.nombre }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo:</span>
+                <span class="info-value">
+                    <span class="tipo-badge tipo-{{ medio_pago.tipo }}">
+                        {{ medio_pago.get_tipo_display }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Estado:</span>
+                <span class="info-value">
+                    {% if medio_pago.activo %}
+                        <span style="color: #28a745; font-weight: 600;">✓ Activo</span>
+                    {% else %}
+                        <span style="color: #dc3545; font-weight: 600;">✗ Inactivo</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Fecha de Creación:</span>
+                <span class="info-value">{{ medio_pago.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Última Actualización:</span>
+                <span class="info-value">{{ medio_pago.updated_at|date:"d/m/Y H:i" }}</span>
+            </div>
+        </div>
+
+        <!-- Configuración Específica -->
+        <div class="detalle-card">
+            <div class="card-header">
+                ⚙️ Configuración Específica
+            </div>
+            
+            {% if medio_pago.tipo == 'transferencia' %}
+                <div class="configuracion-especifica">
+                    <div class="configuracion-title">
+                        🏦 Configuración de Transferencia
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Moneda:</span>
+                        <span class="config-value">{{ medio_pago.get_moneda_transferencia_display }}</span>
+                    </div>
+                </div>
+            
+            {% elif medio_pago.tipo == 'billetera_electronica' %}
+                <div class="configuracion-especifica">
+                    <div class="configuracion-title">
+                        📱 Configuración de Billetera Electrónica
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Tipo de Billetera:</span>
+                        <span class="config-value">{{ medio_pago.get_tipo_billetera_display }}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Número:</span>
+                        <span class="config-value">{{ medio_pago.numero_billetera }}</span>
+                    </div>
+                </div>
+            
+            {% elif medio_pago.tipo == 'tarjeta_credito' %}
+                <div class="configuracion-especifica">
+                    <div class="configuracion-title">
+                        💳 Configuración de Tarjeta de Crédito
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Cuenta de Destino:</span>
+                        <span class="config-value">{{ medio_pago.get_cuenta_destino_display }}</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Número de Cuenta:</span>
+                        <span class="config-value">{{ medio_pago.numero_cuenta }}</span>
+                    </div>
+                </div>
+            
+            {% elif medio_pago.tipo == 'cheque' %}
+                <div class="configuracion-especifica">
+                    <div class="configuracion-title">
+                        📄 Configuración de Cheque
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Solo Compra Extranjera:</span>
+                        <span class="config-value">
+                            {% if medio_pago.solo_compra_extranjera %}
+                                ✓ Sí
+                            {% else %}
+                                ✗ No
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Moneda del Cheque:</span>
+                        <span class="config-value">{{ medio_pago.get_moneda_cheque_display }}</span>
+                    </div>
+                </div>
+            
+            {% elif medio_pago.tipo == 'efectivo' %}
+                <div class="configuracion-especifica">
+                    <div class="configuracion-title">
+                        💵 Configuración de Efectivo
+                    </div>
+                    <div class="no-config">
+                        El efectivo no requiere configuración específica.
+                        <br><small>Se procesa a través de tausers.</small>
+                    </div>
+                </div>
+            
+            {% endif %}
+
+            <!-- Propiedades adicionales -->
+            <div style="margin-top: 1.5rem;">
+                <div class="info-item">
+                    <span class="info-label">Permite Moneda Extranjera:</span>
+                    <span class="info-value">
+                        {% if medio_pago.permite_moneda_extranjera %}
+                            <span style="color: #28a745;">✓ Sí</span>
+                        {% else %}
+                            <span style="color: #dc3545;">✗ No</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Requiere Tauser:</span>
+                    <span class="info-value">
+                        {% if medio_pago.requiere_tauser %}
+                            <span style="color: #ffc107;">⚠️ Sí</span>
+                        {% else %}
+                            <span style="color: #28a745;">✓ No</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation-actions">
+        <a href="{% url 'medios_pago:medio_pago_lista' %}" class="btn btn-outline">
+            ← Volver al Listado
+        </a>
+        <a href="{% url 'medios_pago:medio_pago_editar' medio_pago.pk %}" class="btn btn-primary">
+            ✏️ Editar Medio de Pago
+        </a>
+    </div>
+</div>
+{% endblock %}
