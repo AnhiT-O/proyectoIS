@@ -538,3 +538,20 @@ def seleccionar_cliente_activo(request, cliente_id):
     
     return redirect('inicio')
 
+@login_required
+def detalle_cliente(request, cliente_id):
+    """Vista para mostrar los detalles de un cliente específico"""
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=cliente_id)
+        
+        context = {
+            'cliente': cliente
+        }
+        
+        return render(request, 'usuarios/detalle_cliente.html', context)
+        
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+
