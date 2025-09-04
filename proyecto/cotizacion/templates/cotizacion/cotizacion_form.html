@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Cotización{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'formularios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contenedor">
+    <h1 class="titulo">Nueva Cotización</h1>
+    
+    <form method="post" class="formulario">
+        {% csrf_token %}
+        
+        <div class="campo">
+            <label for="{{ form.id_moneda.id_for_label }}">Moneda:</label>
+            {{ form.id_moneda }}
+        </div>
+        
+        {% if form.errors %}
+        <div class="errores">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="botones">
+            <button type="submit" class="boton">Crear Cotización</button>
+            <a href="{% url 'cotizacion:cotizacion_lista' %}" class="boton secundario">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

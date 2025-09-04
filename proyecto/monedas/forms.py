@@ -75,7 +75,7 @@ class MonedaForm(forms.ModelForm):
 
     class Meta:
         model = Moneda
-        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales']
+        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta']
 
     def clean_simbolo(self):
         """

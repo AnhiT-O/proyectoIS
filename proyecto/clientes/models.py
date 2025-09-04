@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from usuarios.models import Usuario
+from django.conf import settings
 
 class SegmentacionCliente(models.Model):
     porcentaje_beneficio = models.DecimalField(max_digits=5, decimal_places=2)
