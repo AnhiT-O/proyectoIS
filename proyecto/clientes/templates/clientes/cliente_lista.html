@@ -25,11 +25,25 @@
                         value="{{ busqueda }}" 
                         placeholder="Buscar cliente por nombre, apellido o documento">
             </div>
+            <div class="campo-filtro">
+                <select name="segmento" class="select-filtro">
+                    <option value="">Todos los segmentos</option>
+                    <option value="vip" {% if segmento_filtro == 'vip' %}selected{% endif %}>
+                        VIP ({{ stats_segmentos.vip }})
+                    </option>
+                    <option value="corporativo" {% if segmento_filtro == 'corporativo' %}selected{% endif %}>
+                        Corporativo ({{ stats_segmentos.corporativo }})
+                    </option>
+                    <option value="minorista" {% if segmento_filtro == 'minorista' %}selected{% endif %}>
+                        Minorista ({{ stats_segmentos.minorista }})
+                    </option>
+                </select>
+            </div>
             <div class="botones-busqueda">
                 <button type="submit" class="btn-buscar">
                     Buscar
                 </button>
-                {% if busqueda %}
+                {% if busqueda or segmento_filtro %}
                 <a href="{% url 'clientes:cliente_lista' %}" class="btn-limpiar">
                     Limpiar
                 </a>
@@ -41,9 +55,11 @@
     <div class="zona-conteo">
         <div class="conteo-info">
             Total de clientes: <span class="conteo">{{ clientes|length }}</span>
-            {% if busqueda %}
+            {% if busqueda or segmento_filtro %}
                 <span style="margin-left: 1rem; color: #6c757d;">
-                    ({{ clientes|length }} resultado{{ clientes|length|pluralize }} para "{{ busqueda }}")
+                    ({{ clientes|length }} resultado{{ clientes|length|pluralize }}
+                    {% if busqueda %}para "{{ busqueda }}"{% endif %}
+                    {% if segmento_filtro %}en segmento {{ segmento_filtro|title }}{% endif %})
                 </span>
             {% endif %}
         </div>
@@ -54,8 +70,8 @@
             <thead>
                 <tr>
                     <th style="width: 25%">Nombre</th>
-                    <th style="width: 15%">Tipo</th>
                     <th style="width: 18%">Documento</th>
+                    <th style="width: 15%">Segmento</th>
                     <th style="width: 26%">Contacto</th>
                     <th style="width: 16%">Acciones</th>
                 </tr>
@@ -67,14 +83,12 @@
                         {{ cliente.nombre }} {{ cliente.apellido }}
                     </td>
                     <td>
-                        <span class="{% if cliente.tipoCliente == 'Personal' %}cliente-persona{% else %}cliente-juridico{% endif %}">
-                            {{ cliente.get_tipoCliente_display }}
-                        </span>
+                        <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
+                        <small>{{ cliente.docCliente }}</small>
                     </td>
                     <td>
                         <div>
-                            <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
-                            <small>{{ cliente.docCliente }}</small>
+                            {{ cliente.get_segmento_display }}
                         </div>
                     </td>
                     <td>
@@ -96,9 +110,9 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7">
-                        {% if busqueda %}
-                            No se encontraron clientes que coincidan con "{{ busqueda }}".
+                    <td colspan="5">
+                        {% if busqueda or segmento_filtro %}
+                            No se encontraron clientes que coincidan con los filtros aplicados.
                         {% else %}
                             No hay clientes registrados.
                         {% endif %}

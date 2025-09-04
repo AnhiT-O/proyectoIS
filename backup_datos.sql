@@ -30,12 +30,12 @@ COPY public.auth_group (id, name) FROM stdin;
 -- Data for Name: auth_group_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.auth_group_permissions (id, group_id, permission_id) FROM stdin;
-26	4	17
-27	2	24
-28	2	25
-29	5	18
-30	5	20
+COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
+2	24
+2	25
+5	18
+5	20
+4	17
 \.
 
 
@@ -43,18 +43,18 @@ COPY public.auth_group_permissions (id, group_id, permission_id) FROM stdin;
 -- Data for Name: clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.clientes (id, nombre, apellido, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, created_at, updated_at) FROM stdin;
-1	Juan	Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	2025-09-03 12:36:01.401701-03	2025-09-03 12:38:32.291502-03
+COPY public.clientes (id, nombre, apellido, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, created_at, updated_at) FROM stdin;
+1	Juan	Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	Minorista	0	2025-09-03 12:36:01.401701-03	2025-09-03 12:38:32.291502-03
 \.
 
 --
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (id, nombre, simbolo, activa, tasa_base, decimales) FROM stdin;
-2	Euro	EUR	t	8000	3
-3	Peso argentino	ARG	t	10	5
-1	Dólar estadounidense	USD	t	7400	3
+COPY public.monedas (id, nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales) FROM stdin;
+2	Euro	EUR	t	8000	0	0	3
+3	Peso argentino	ARG	t	10	0	0	5
+1	Dólar estadounidense	USD	t	7400	0	0	3
 \.
 
 
@@ -84,8 +84,8 @@ COPY public.usuarios (id, password, last_login, is_superuser, username, first_na
 -- Data for Name: usuarios_clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios_clientes (id, created_at, cliente_id, usuario_id) FROM stdin;
-3	2025-09-03 12:45:38.297924-03	1	1
+COPY public.usuarios_clientes (created_at, cliente_id, usuario_id) FROM stdin;
+2025-09-03 12:45:38.297924-03	1	1
 \.
 
 
@@ -93,12 +93,12 @@ COPY public.usuarios_clientes (id, created_at, cliente_id, usuario_id) FROM stdi
 -- Data for Name: usuarios_groups; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios_groups (id, usuario_id, group_id) FROM stdin;
-1	2	3
-2	3	5
-3	3	4
-4	4	2
-5	1	1
+COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
+2	3
+3	5
+3	4
+4	2
+1	1
 \.
 
 --
@@ -106,13 +106,6 @@ COPY public.usuarios_groups (id, usuario_id, group_id) FROM stdin;
 --
 
 SELECT pg_catalog.setval('public.auth_group_id_seq', 5, true);
-
-
---
--- Name: auth_group_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 30, true);
 
 
 --
@@ -149,19 +142,6 @@ SELECT pg_catalog.setval('public.django_migrations_id_seq', 20, true);
 
 SELECT pg_catalog.setval('public.monedas_id_seq', 3, true);
 
-
---
--- Name: usuarios_clientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.usuarios_clientes_id_seq', 3, true);
-
-
---
--- Name: usuarios_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.usuarios_groups_id_seq', 14, true);
 
 
 --

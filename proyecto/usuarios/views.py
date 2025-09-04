@@ -485,23 +485,6 @@ def remover_cliente(request, pk, cliente_id):
 
     return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
-
-@login_required
-@permission_required('usuarios.asignacion_clientes', raise_exception=True)
-def ver_clientes_usuario(request, pk):
-    """Vista para ver todos los clientes asignados a un usuario"""
-    try:
-        usuario = Usuario.objects.get(pk=pk)
-    except Usuario.DoesNotExist:
-        messages.error(request, 'Usuario no encontrado.')
-        return redirect('usuarios:administrar_usuarios')
-    clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
-    
-    return render(request, 'usuarios/ver_clientes_usuario.html', {
-        'usuario': usuario,
-        'clientes_asignados': clientes_asignados
-    })
-
 @login_required
 def ver_clientes_asociados(request):
     """Vista para que un usuario vea los clientes con los que está asociado"""

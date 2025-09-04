@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.http import Http404
 from django.db.models import Q
 from .models import Cliente
-from .forms import ClienteForm, CambiarSegmentoForm
+from .forms import ClienteForm
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_crear(request):
@@ -80,24 +78,3 @@ def cliente_editar(request, pk):
     else:
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/cliente_form.html', {'form': form, 'cliente': cliente})
-
-@login_required
-@permission_required('clientes.gestion', raise_exception=True)
-def cambiar_segmento(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
-    
-    if request.method == 'POST':
-        form = CambiarSegmentoForm(request.POST, instance=cliente)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Segmento del cliente {cliente.nombre} actualizado exitosamente.')
-            return redirect('clientes:cliente_lista')
-    else:
-        form = CambiarSegmentoForm(instance=cliente)
-    
-    context = {
-        'form': form,
-        'cliente': cliente,
-        'titulo': f'Cambiar Segmento - {cliente.nombre}'
-    }
-    return render(request, 'clientes/cambiar_segmento.html', context)

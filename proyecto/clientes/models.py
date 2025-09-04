@@ -46,11 +46,8 @@ class Cliente(models.Model):
         max_length=20,
         choices=SEGMENTO_CHOICES,
         default='minorista',
-        verbose_name='Segmento'
     )
-    beneficio_segmento = models.FloatField(
-        default=0
-    )
+    beneficio_segmento = models.IntegerField(default=0)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
         through='UsuarioCliente',
@@ -78,7 +75,7 @@ class Cliente(models.Model):
         Sobrescribir save para ejecutar validaciones
         """
         # Actualizar el beneficio según el segmento
-        self.beneficio_segmento = self.BENEFICIOS_SEGMENTO.get(self.segmento, 0) / 100
+        self.beneficio_segmento = self.BENEFICIOS_SEGMENTO.get(self.segmento, 0)
         
         self.full_clean()
         super().save(*args, **kwargs)

@@ -37,10 +37,23 @@
                     </div>
                 </div>
                 <div class="info-celda">
-                    <span class="info-icono">💼</span>
+                    <span class="info-icono">🏷️</span>
                     <div class="info-contenido">
-                        <div class="info-titulo">Ocupación</div>
-                        <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
+                        <div class="info-titulo">Segmento</div>
+                        <div class="info-valor">{{ cliente.get_segmento_display }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🎁</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Beneficio aplicado</div>
+                        <div class="info-valor">
+                            {% if cliente.beneficio_segmento > 0 %}
+                                {{ cliente.beneficio_segmento }}%
+                            {% else %}
+                                Ninguno
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -68,6 +81,13 @@
                         <div class="info-valor">{{ cliente.direccion|default:"No especificado" }}</div>
                     </div>
                 </div>
+                <div class="info-celda">
+                    <span class="info-icono">💼</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Ocupación</div>
+                        <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -91,24 +111,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Segmento del Cliente -->
-        <div class="info-card" style="grid-column: 1 / -1;">
-            <div class="info-item">
-                <span class="info-icon">🏷️</span>
-                <div class="info-content">
-                    <div class="info-label">Segmento</div>
-                    <div class="info-value">
-                        <span class="badge 
-                            {% if cliente.segmento == 'vip' %}bg-warning text-dark
-                            {% elif cliente.segmento == 'corporativo' %}bg-info
-                            {% else %}bg-secondary{% endif %}">
-                            {{ cliente.get_segmento_display }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="zona-acciones">
@@ -116,7 +118,7 @@
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">
                 Editar Cliente
             </a>
-            <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secondary">
+            <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secundario">
                 Volver a la Lista
             </a>
         </div>
