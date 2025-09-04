@@ -37,7 +37,7 @@ class CotizacionCreateView(CreateView):
     model = Cotizacion
     template_name = 'cotizacion/cotizacion_form.html'
     fields = ['id_moneda']
-    success_url = reverse_lazy('cotizacion_lista')
+    success_url = reverse_lazy('cotizacion:cotizacion_lista')
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
