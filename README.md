@@ -115,6 +115,13 @@ python manage.py makemigrations #si hiciste algún cambio en models, este comand
 python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
+- **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
+
+```bash
+sudo mv ./backup_datos /var/lib/postgresql/backup_datos.sql
+sudo -i -u postgres
+psql -d bd_produccion < backup_datos.sql
+```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
 
 ## Ejecutar proyecto en producción
@@ -168,35 +175,70 @@ python manage.py runserver #correrá el proyecto
   ```
 
 - Para iniciar el proyecto en producción:
-  ```bash
-  python manage.py collectstatic --noinput #colecciona archivos estaticos
-  python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
-  python manage.py migrate #exportará los cambios preparados a la base de datos
-  sudo systemctl start gunicorn #inicia gunicorn
-  sudo systemctl status gunicorn #verifica estado de gunicorn
-  sudo systemctl start nginx #inicia nginx
-  sudo systemctl status nginx #verifica estado de nginx
-  ```
+```bash
+python manage.py collectstatic --noinput #colecciona archivos estaticos
+python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
+python manage.py migrate #exportará los cambios preparados a la base de datos
+sudo systemctl start gunicorn #inicia gunicorn
+sudo systemctl status gunicorn #verifica estado de gunicorn
+sudo systemctl start nginx #inicia nginx
+sudo systemctl status nginx #verifica estado de nginx
+```
 
 - Para ver logs en caso de errores:
-  ```bash
-  sudo journalctl -u gunicorn #logs de gunicorn
-  sudo tail -f /var/log/nginx/error.log #logs de nginx
-  ```
+```bash
+sudo journalctl -u gunicorn #logs de gunicorn
+sudo tail -f /var/log/nginx/error.log #logs de nginx
+```
 
 - Para detener el proyecto en producción:
-  ```bash
-  sudo systemctl stop gunicorn
-  sudo systemctl stop nginx
-  ```
+```bash
+sudo systemctl stop gunicorn
+sudo systemctl stop nginx
+```
 
 - Para reiniciar después de cambios en el código:
-  ```bash
-  python manage.py collectstatic --noinput
-  python manage.py makemigrations
-  python manage.py migrate
-  sudo systemctl restart gunicorn
-  sudo systemctl restart nginx
-  ```
+```bash
+python manage.py collectstatic --noinput
+python manage.py makemigrations
+python manage.py migrate
+sudo systemctl restart gunicorn
+sudo systemctl restart nginx
+```
 
+- **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
+
+```bash
+sudo mv ./backup_datos /var/lib/postgresql/backup_datos.sql
+sudo -i -u postgres
+psql -d bd_produccion < backup_datos.sql
+```
 - Se podrá ver los resultados del proyecto en producción en: http://localhost/
+
+## Datos del archivo 'backup_datos.sql'
+
+- Roles añadidos:
+  - Moderador de usuarios: Permiso de bloquear usuarios
+  - Encargado de clientes: Permisos de crear y asignar clientes
+
+- Roles actualizados:
+  - Analista cambiario: Permisos de cambiar tasa base y decimales a mostrar
+
+- Cliente añadido: Juan Pérez
+
+- Monedas añadidas: Dolar estadounidense, Euro, Peso argentino
+
+- Usuarios añadidos:
+  - Nombre de usuario: admin
+    - Contraseña: admin123.
+    - Rol: Administrador
+  - Nombre de usuario: brandonariel98
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Cliente asignado: Juan Pérez
+  - Nombre de usuario: irismendoza
+    - Contraseña: qweqweqwe.1
+    - Roles: Moderador de usuario, Encargado de clientes
+  - Nombre de usuario: aylen
+    - Contraseña: qweqweqwe.1
+    - Rol: Analista cambiario

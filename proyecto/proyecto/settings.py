@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'usuarios',
     'clientes',
     'roles',
@@ -101,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = []
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'es-419'
+LANGUAGE_CODE = 'de'
 
 TIME_ZONE = 'UTC'
 
@@ -113,12 +114,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -141,11 +140,11 @@ MESSAGE_TAGS = {
     messages.INFO: 'info',
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
-    messages.ERROR: 'danger',
+    messages.ERROR: 'error',
 }
 
 # Configuración de login/logout
-LOGIN_URL = '/usuarios/login/'
+LOGIN_URL = '/ingresar/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 PASSWORD_RESET_TIMEOUT = 3600

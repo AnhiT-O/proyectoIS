@@ -38,24 +38,6 @@
         line-height: 1.6;
     }
 
-    .btn-home {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: inline-block;
-    }
-
-    .btn-home:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        color: white;
-        text-decoration: none;
-    }
-
     @media (max-width: 768px) {
         .error-container {
             padding: 2rem 1rem;
@@ -83,9 +65,8 @@
             Lo sentimos, no tienes permiso para acceder a esta página. 
             Esta sección está reservada para usuarios con permisos adecuados.
         </p>
-        <a href="{% url 'inicio' %}" class="btn-home">
+        <a href="{% url 'inicio' %}" class="btn-enviar">
             Volver al Inicio
         </a>
     </div>
-</div>
 {% endblock %}

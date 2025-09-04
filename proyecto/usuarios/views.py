@@ -1,21 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponse
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from functools import wraps
-from .forms import RegistroUsuarioForm, LoginForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
+from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
+from roles.models import Roles
+from django.db.models import Q
 
 def tiene_algun_permiso(view_func):
     """
@@ -30,7 +31,7 @@ def tiene_algun_permiso(view_func):
         
         # Permisos requeridos para administrar usuarios
         permisos_requeridos = [
-            'usuarios.bloqueo',        # Permiso para bloquear usuarios
+            'usuarios.bloqueo',                 # Permiso para bloquear usuarios
             'usuarios.asignacion_roles',        # Permiso para asignar roles
             'usuarios.asignacion_clientes'      # Permiso para asignar clientes
         ]
@@ -41,58 +42,9 @@ def tiene_algun_permiso(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para administrar usuarios.")
+        raise PermissionDenied()
     
     return _wrapped_view
-
-def login_usuario(request):
-    if request.user.is_authenticated:
-        return redirect('usuarios:perfil')
-    
-    if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            
-            try:
-                # Primero verificamos si el usuario existe
-                user = Usuario.objects.get(username=username)
-                
-                # Si el usuario está bloqueado, mostramos mensaje específico
-                if user.bloqueado:
-                    return render(request, 'usuarios/login.html', {
-                        'form': form,
-                        'usuario_bloqueado': True,
-                        'nombre_usuario': user.get_full_name()
-                    })
-                if not user.is_active:
-                    return render(request, 'usuarios/login.html', {
-                        'form': form,
-                        'usuario_inactivo': True,
-                        'nombre_usuario': user.get_full_name()
-                    })
-
-                # Si no está bloqueado, intentamos autenticar
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    login(request, user)
-                    messages.success(request, f'¡Bienvenido de nuevo, {user.first_name}!')
-                    next_page = request.GET.get('next', 'usuarios:perfil')
-                    return redirect(next_page)
-                else:
-                    messages.error(request, 'La contraseña ingresada es incorrecta.')
-            except Usuario.DoesNotExist:
-                messages.error(request, 'No existe un usuario con ese nombre de usuario.')
-    else:
-        form = LoginForm()
-    
-    return render(request, 'usuarios/login.html', {'form': form})
-
-def logout_usuario(request):
-    logout(request)
-    messages.success(request, 'Has cerrado sesión exitosamente.')
-    return redirect('inicio')
 
 def registro_usuario(request):
     if request.method == 'POST':
@@ -101,24 +53,24 @@ def registro_usuario(request):
             user = form.save()
             # Enviar email de confirmación
             enviar_email_confirmacion(request, user)
-            
-            return redirect('usuarios:registro_exitoso')
+            messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
+            return redirect('login')
     else:
         form = RegistroUsuarioForm()
     
     return render(request, 'usuarios/registro.html', {'form': form})
 
 def enviar_email_confirmacion(request, user):
+    # token de activación
     token = default_token_generator.make_token(user)
+    # identificador del usuario a activar
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    
+    # generación de enlace de activación
     activacion_url = request.build_absolute_uri(
         reverse('usuarios:activar_cuenta', kwargs={'uidb64': uid, 'token': token})
     )
     
-    subject = 'Confirma tu cuenta'
-    
-    # Crear contenido HTML
+    # transforma el HTML en formato de correo
     html_content = render_to_string('usuarios/email_confirmacion.html', {
         'user': user,
         'activacion_url': activacion_url,
@@ -138,12 +90,11 @@ Si no solicitaste esta cuenta, puedes ignorar este correo.
 Saludos,
 El equipo de desarrollo
     """.strip()
-    
-    # Crear email con HTML y texto plano
+
     from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
     
     msg = EmailMultiAlternatives(
-        subject=subject,
+        subject='Confirma tu cuenta',
         body=text_content,  # Contenido de texto plano
         from_email=from_email,
         to=[user.email]
@@ -164,6 +115,8 @@ def activar_cuenta(request, uidb64, token):
     
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
+        operador_role = Group.objects.get(name='Operador')
+        user.groups.add(operador_role)
         user.save()
         login(request, user)
         messages.success(request, '¡Cuenta activada exitosamente! Bienvenido.')
@@ -182,8 +135,8 @@ def activar_cuenta(request, uidb64, token):
                 # Si el usuario ya está activo, solo mostrar error de enlace inválido
                 messages.error(request, 'El enlace de activación ya se usó.')
         else:
-            messages.error(request, 'El enlace de activación es inválido o ha expirado.')
-        
+            messages.error(request, 'Hubo un error inesperado. Contacta a soporte.')
+
         return redirect('usuarios:registro')
 
 def registro_exitoso(request):
@@ -201,7 +154,7 @@ def recuperar_password(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             # Obtener el usuario
-            user = Usuario.objects.get(email=email, is_active=True)
+            user = Usuario.objects.get(email=email)
             
             # Enviar email de recuperación
             enviar_email_recuperacion(request, user)
@@ -209,7 +162,7 @@ def recuperar_password(request):
             messages.success(request, 
                 'Se ha enviado un enlace de recuperación a tu correo electrónico. '
                 'Revisa tu bandeja de entrada y sigue las instrucciones.')
-            return redirect('usuarios:login')
+            return redirect('login')
     else:
         form = RecuperarPasswordForm()
     
@@ -224,8 +177,6 @@ def enviar_email_recuperacion(request, user):
     reset_url = request.build_absolute_uri(
         reverse('usuarios:reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
     )
-    
-    subject = 'Recuperación de contraseña - Global Exchange'
     
     # Crear contenido HTML
     html_content = render_to_string('usuarios/email_recuperacion.html', {
@@ -242,7 +193,7 @@ Has solicitado recuperar tu contraseña en Global Exchange.
 Para crear una nueva contraseña, por favor visita el siguiente enlace:
 {reset_url}
 
-Este enlace expirará en 24 horas por seguridad.
+Este enlace expirará en una hora por seguridad.
 
 Si no solicitaste este cambio, puedes ignorar este correo y tu contraseña permanecerá sin cambios.
 
@@ -254,7 +205,7 @@ El equipo de Global Exchange
     from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
     
     msg = EmailMultiAlternatives(
-        subject=subject,
+        subject='Recuperación de contraseña - Global Exchange',
         body=text_content,  # Contenido de texto plano
         from_email=from_email,
         to=[user.email]
@@ -283,7 +234,7 @@ def reset_password_confirm(request, uidb64, token):
                 messages.success(request, 
                     '¡Tu contraseña ha sido cambiada exitosamente! '
                     'Ya puedes iniciar sesión con tu nueva contraseña.')
-                return redirect('usuarios:login')
+                return redirect('login')
         else:
             form = EstablecerPasswordForm(user)
         
@@ -299,6 +250,31 @@ def reset_password_confirm(request, uidb64, token):
 
 @login_required
 @tiene_algun_permiso
+def usuario_detalle(request, pk):
+    """Vista para mostrar detalles de un usuario"""
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
+    
+    # Obtener información adicional del usuario
+    roles = usuario.groups.all()
+    clientes_asignados = usuario.clientes_operados.all()
+    
+    context = {
+        'usuario': usuario,
+        'roles': roles,
+        'clientes_asignados': clientes_asignados,
+        'total_clientes': clientes_asignados.count(),
+        'es_operador': any(rol.name == 'Operador' for rol in roles)
+    }
+    
+    return render(request, 'usuarios/usuario_detalle.html', context)
+
+
+@login_required
+@tiene_algun_permiso
 def administrar_usuarios(request):
     """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
     # Obtener el término de búsqueda
@@ -309,22 +285,26 @@ def administrar_usuarios(request):
     
     # Aplicar filtro de búsqueda si existe
     if busqueda:
-        usuarios = usuarios.filter(username__icontains=busqueda)
+        usuarios = usuarios.filter(
+            Q(first_name__icontains=busqueda) |
+            Q(last_name__icontains=busqueda) |
+            Q(username__icontains=busqueda)
+        )
     
     # Ordenar resultados
     usuarios = usuarios.order_by('first_name', 'last_name')
     
-    # Verificar permisos del usuario actual
-    permisos_usuario = {
-        'puede_bloquear': request.user.has_perm('usuarios.bloqueo'),
-        'puede_asignar_roles': request.user.has_perm('usuarios.asignacion_roles'),
-        'puede_asignar_clientes': request.user.has_perm('usuarios.asignacion_clientes'),
-    }
+    # Calcular estadísticas
+    total_usuarios = usuarios.count()
+    usuarios_activos = usuarios.filter(bloqueado=False).count()
+    usuarios_bloqueados = usuarios.filter(bloqueado=True).count()
     
     return render(request, 'usuarios/administrar_usuarios.html', {
         'usuarios': usuarios,
         'busqueda': busqueda,
-        'permisos_usuario': permisos_usuario
+        'total_usuarios': total_usuarios,
+        'usuarios_activos': usuarios_activos,
+        'usuarios_bloqueados': usuarios_bloqueados
     })
 
 @login_required
@@ -339,7 +319,7 @@ def bloquear_usuario(request, pk):
         usuario = Usuario.objects.get(pk=pk)
         
         # No permitir bloquear otros administradores (solo si es administrador)
-        if usuario.es_administrador() and not request.user.es_administrador():
+        if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, 'No puedes bloquear a otros administradores.')
             return redirect('usuarios:administrar_usuarios')
         
@@ -360,31 +340,41 @@ def bloquear_usuario(request, pk):
 @permission_required('usuarios.asignacion_roles', raise_exception=True)
 def asignar_rol(request, pk):
     """Vista para asignar roles a usuarios"""
-    usuario = get_object_or_404(Usuario, pk=pk)
-    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
+
     # No permitir asignar roles a otros administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
-    
+
     if request.method == 'POST':
         form = AsignarRolForm(request.POST, usuario=usuario)
         if form.is_valid():
-            rol = form.cleaned_data['rol']
-            usuario.groups.add(rol)
-            messages.success(request, f'Rol "{rol.name}" asignado exitosamente a {usuario.get_full_name()}.')
+            roles = form.cleaned_data['rol']
+            for rol in roles:
+                usuario.groups.add(rol)
+            if len(roles) == 1:
+                messages.success(request, f'Rol "{list(roles)[0]}" asignado exitosamente a {usuario.get_full_name()}.')
+            else:
+                messages.success(request, f'{len(roles)} roles asignados exitosamente a {usuario.get_full_name()}.')
             return redirect('usuarios:administrar_usuarios')
     else:
         form = AsignarRolForm(usuario=usuario)
-    
-    # Verificar si hay roles disponibles para asignar
-    if not form.fields['rol'].queryset.exists():
-        messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
-        return redirect('usuarios:administrar_usuarios')
-    
+        # Verificar si hay roles disponibles para asignar
+        if not form.fields['rol'].queryset.exists():
+            messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
+            return redirect('usuarios:administrar_usuarios')
+
     return render(request, 'usuarios/asignar_rol.html', {
         'form': form,
-        'usuario': usuario
+        'usuario': usuario,
+        'roles_disponibles': Roles.objects.exclude(name='Administrador').exclude(
+            id__in=usuario.groups.all().values_list('id', flat=True)
+        ).order_by('name')
     })
 
 
@@ -396,27 +386,28 @@ def remover_rol(request, pk, rol_id):
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
     
-    usuario = get_object_or_404(Usuario, pk=pk)
-    rol = get_object_or_404(Group, pk=rol_id)
-    
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        rol = Group.objects.get(pk=rol_id)
+    except:
+        messages.error(request, 'Usuario o rol no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     # No permitir modificar roles de administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
+    if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
     
-    # No permitir remover el rol de administrador
-    if rol.name == 'administrador':
-        messages.error(request, 'No puedes remover el rol de administrador.')
-        return redirect('usuarios:administrar_usuarios')
-    
-    # Verificar que el usuario tiene el rol
-    if not usuario.groups.filter(pk=rol_id).exists():
-        messages.error(request, 'El usuario no tiene este rol asignado.')
-        return redirect('usuarios:administrar_usuarios')
-    
+    # Si el rol a remover es 'Operador', desasociar todos los clientes del usuario
+    if rol.name == 'Operador':
+        clientes_asociados = usuario.clientes_operados.all()
+        for cliente in clientes_asociados:
+            try:
+                relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
+                relacion.delete()
+            except UsuarioCliente.DoesNotExist:
+                pass
     usuario.groups.remove(rol)
     messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.get_full_name()}.')
-    
     return redirect('usuarios:administrar_usuarios')
 
 
@@ -424,16 +415,20 @@ def remover_rol(request, pk, rol_id):
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def asignar_clientes(request, pk):
     """Vista para asignar clientes a usuarios"""
-    usuario = get_object_or_404(Usuario, pk=pk)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     
-    # No permitir asignar clientes a administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
-        messages.error(request, 'No puedes asignar clientes a otros administradores.')
+    # Solo permitir asignar clientes a usuarios con rol 'Operador'
+    if not usuario.groups.filter(name='Operador').exists():
+        messages.error(request, 'Solo puedes asignar clientes a usuarios con rol Operador.')
         return redirect('usuarios:administrar_usuarios')
     
     # Verificar si existen clientes creados en el sistema
     if not Cliente.objects.exists():
-        messages.info(request, 'No hay clientes creados en el sistema. Primero debes crear clientes antes de poder asignarlos.')
+        messages.info(request, 'No hay clientes creados en el sistema. Primero se deben crear clientes antes de poder asignarlos.')
         return redirect('usuarios:administrar_usuarios')
     
     if request.method == 'POST':
@@ -451,21 +446,19 @@ def asignar_clientes(request, pk):
                 messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.get_full_name()}.')
             else:
                 messages.success(request, f'{len(clientes)} clientes asignados exitosamente a {usuario.get_full_name()}.')
-            
-            return redirect('usuarios:administrar_usuarios')
+            return redirect('usuarios:usuario_detalle', pk=usuario.pk)
     else:
         form = AsignarClienteForm(usuario=usuario)
     
     # Verificar si hay clientes disponibles para asignar
     if not form.fields['clientes'].queryset.exists():
         messages.info(request, f'{usuario.get_full_name()} ya tiene todos los clientes disponibles asignados.')
-        return redirect('usuarios:ver_clientes_usuario', pk=usuario.pk)
+        return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
     return render(request, 'usuarios/asignar_clientes.html', {
         'form': form,
         'usuario': usuario
     })
-
 
 @login_required
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
@@ -475,30 +468,33 @@ def remover_cliente(request, pk, cliente_id):
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
     
-    usuario = get_object_or_404(Usuario, pk=pk)
-    cliente = get_object_or_404(Cliente, pk=cliente_id)
-    
-    # No permitir modificar asignaciones de administradores (solo si es administrador)
-    if usuario.es_administrador() and not request.user.es_administrador():
-        messages.error(request, 'No puedes modificar las asignaciones de otros administradores.')
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+        cliente = Cliente.objects.get(pk=cliente_id)
+    except:
+        messages.error(request, 'Usuario o cliente no encontrado.')
         return redirect('usuarios:administrar_usuarios')
     
     # Verificar que la relación existe
     try:
         relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
         relacion.delete()
-        messages.success(request, f'Cliente "{cliente}" removido exitosamente de {usuario.get_full_name()}.')
+        messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.get_full_name()}.')
     except UsuarioCliente.DoesNotExist:
         messages.error(request, 'La asignación no existe.')
-    
-    return redirect('usuarios:administrar_usuarios')
+
+    return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
 
 @login_required
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def ver_clientes_usuario(request, pk):
     """Vista para ver todos los clientes asignados a un usuario"""
-    usuario = get_object_or_404(Usuario, pk=pk)
+    try:
+        usuario = Usuario.objects.get(pk=pk)
+    except Usuario.DoesNotExist:
+        messages.error(request, 'Usuario no encontrado.')
+        return redirect('usuarios:administrar_usuarios')
     clientes_asignados = usuario.clientes_operados.all().order_by('nombre', 'apellido')
     
     return render(request, 'usuarios/ver_clientes_usuario.html', {

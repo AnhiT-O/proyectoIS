@@ -7,7 +7,7 @@ class Roles(Group):
     """
     Modelo que extiende auth.Group para agregar funcionalidad específica de roles
     """
-    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del rol")
+    descripcion = models.TextField(blank=True, null=True)
     
     class Meta:
         verbose_name = 'Rol'
@@ -36,15 +36,15 @@ def crear_roles_predefinidos(sender, **kwargs):
     # Definir los roles predefinidos con sus descripciones
     roles_predefinidos = [
         {
-            'name': 'operador',
+            'name': 'Operador',
             'descripcion': 'Rol encargado de realizar operaciones básicas del sistema, incluyendo registro de transacciones y consultas de clientes.'
         },
         {
-            'name': 'analista cambiario',
+            'name': 'Analista cambiario',
             'descripcion': 'Rol responsable del análisis de tipos de cambio, generación de reportes financieros y supervisión de operaciones cambiarias.'
         },
         {
-            'name': 'administrador',
+            'name': 'Administrador',
             'descripcion': 'Rol con acceso completo al sistema, incluyendo gestión de usuarios, configuración del sistema y supervisión general.'
         }
     ]
@@ -54,6 +54,6 @@ def crear_roles_predefinidos(sender, **kwargs):
             name=rol_data['name'],
             defaults={'descripcion': rol_data['descripcion']}
         )
-        
+
         if created:
             print(f"Rol '{rol.name}' creado exitosamente.")

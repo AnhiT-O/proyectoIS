@@ -4,6 +4,77 @@ import re
 from .models import Cliente
 
 class ClienteForm(forms.ModelForm):
+
+    nombre = forms.CharField(
+        error_messages={
+            'required': 'Debes ingresar el nombre.',
+            'max_length': 'El nombre no puede exceder los 100 caracteres.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    apellido = forms.CharField(
+        error_messages={
+            'required': 'Debes ingresar el apellido.',
+            'max_length': 'El apellido no puede exceder los 100 caracteres.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    docCliente = forms.CharField(
+        error_messages={
+            'required': 'Debes ingresar el número de documento.',
+            'max_length': 'El documento no puede exceder los 20 caracteres.',
+            'unique': 'Ya existe un cliente con este número de documento.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    tipoDocCliente = forms.ChoiceField(
+        choices=Cliente.TIPO_DOCUMENTO_CHOICES,
+        error_messages={
+            'required': 'Debes seleccionar un tipo de documento.'
+        },
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    correoElecCliente = forms.EmailField(
+        error_messages={
+            'required': 'Debes ingresar un correo electrónico.',
+            'invalid': 'Debes ingresar un correo electrónico válido.',
+            'unique': 'Ya existe un cliente con este correo electrónico.'
+        },
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    telefono = forms.CharField(
+        error_messages={
+            'required': 'Debes ingresar un número de teléfono.',
+            'max_length': 'El teléfono no puede exceder los 20 caracteres.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    tipoCliente = forms.ChoiceField(
+        choices=Cliente.TIPO_CLIENTE_CHOICES,
+        error_messages={
+            'required': 'Debes seleccionar un tipo de cliente.'
+        },
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    direccion = forms.CharField(
+        error_messages={
+            'max_length': 'La dirección no puede exceder los 100 caracteres.',
+            'required': 'Debes ingresar una dirección.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    ocupacion = forms.CharField(
+        error_messages={
+            'max_length': 'La ocupación no puede exceder los 30 caracteres.',
+            'required': 'Debes ingresar una ocupación.'
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    declaracion_jurada = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     class Meta:
         model = Cliente
         fields = [
@@ -18,24 +89,6 @@ class ClienteForm(forms.ModelForm):
             'ocupacion',
             'declaracion_jurada'
         ]
-        widgets = {
-            'tipoDocCliente': forms.Select(attrs={'class': 'form-control'}),
-            'tipoCliente': forms.Select(attrs={'class': 'form-control'}),
-            'declaracion_jurada': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'telefono': forms.TextInput(attrs={
-                'class': 'form-control', 
-                'placeholder': 'Solo números'
-            }),
-            'docCliente': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Solo números'
-            }),
-            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
-            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'correoElecCliente': forms.EmailInput(attrs={'class': 'form-control'}),
-            'direccion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'ocupacion': forms.TextInput(attrs={'class': 'form-control'})
-        }
 
     def clean_telefono(self):
         """
@@ -61,24 +114,7 @@ class ClienteForm(forms.ModelForm):
                 raise ValidationError('El documento debe contener solo números')
         
         return doc_cliente
-
-    def clean(self):
-        """
-        Validaciones adicionales que requieren múltiples campos
-        """
-        cleaned_data = super().clean()
-        tipo_cliente = cleaned_data.get('tipoCliente')
-        tipo_doc = cleaned_data.get('tipoDocCliente')
-        
-        # Validar coherencia entre tipo de cliente y tipo de documento
-        if tipo_cliente and tipo_doc:
-            if tipo_cliente == 'J' and tipo_doc != 'RUC':
-                raise ValidationError(
-                    'Las personas jurídicas solo pueden usar RUC'
-                )
-        
-        return cleaned_data
-
+    
 class CambiarSegmentoForm(forms.ModelForm):
     class Meta:
         model = Cliente

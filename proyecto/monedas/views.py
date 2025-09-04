@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
 from django.db.models import Q
 from .models import Moneda
 from .forms import MonedaForm
@@ -33,7 +32,7 @@ def tiene_algun_permiso(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para gestionar monedas.")
+        raise PermissionDenied()
 
     return _wrapped_view
 
@@ -61,7 +60,7 @@ def puede_editar(view_func):
                 return view_func(request, *args, **kwargs)
         
         # Si no tiene ningún permiso, denegar acceso
-        raise PermissionDenied("No tienes permisos suficientes para gestionar monedas.")
+        raise PermissionDenied()
 
     return _wrapped_view
 
@@ -76,7 +75,7 @@ def moneda_crear(request):
             return redirect('monedas:lista_monedas')
     else:
         form = MonedaForm()
-    return render(request, 'monedas/moneda_crear.html', {'form': form,})
+    return render(request, 'monedas/moneda_form.html', {'form': form,})
 
 @login_required
 @tiene_algun_permiso
@@ -98,7 +97,8 @@ def moneda_lista(request):
             messages.error(request, 'Error al cambiar el estado de la moneda.')
     
     # Obtener todas las monedas
-    monedas = Moneda.objects.all()
+    todas_las_monedas = Moneda.objects.all()
+    monedas = todas_las_monedas
     
     # Manejar búsqueda
     busqueda = request.GET.get('busqueda', '').strip()
@@ -115,11 +115,15 @@ def moneda_lista(request):
     monedas_activas = monedas.filter(activa=True).count()
     monedas_inactivas = monedas.filter(activa=False).count()
     
+    # Total de monedas en el sistema (sin filtrar)
+    total_monedas_sistema = todas_las_monedas.count()
+    
     context = {
         'monedas': monedas,
         'monedas_activas': monedas_activas,
         'monedas_inactivas': monedas_inactivas,
         'busqueda': busqueda,
+        'total_monedas_sistema': total_monedas_sistema,
     }
     return render(request, 'monedas/moneda_lista.html', context)
 
@@ -149,4 +153,4 @@ def moneda_editar(request, pk):
             return redirect('monedas:lista_monedas')
         else:
             messages.error(request, 'Error al actualizar la moneda.')
-    return render(request, 'monedas/moneda_editar.html', {'form': form, 'moneda': moneda,})
+    return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})

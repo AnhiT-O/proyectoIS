@@ -1,225 +1,73 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Global Exchange - Bienvenido{% endblock %}
 
 {% block extra_css %}
-<style>
-    .container {
-        background: white;
-        padding: 3rem;
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        max-width: 500px;
-        width: 90%;
-        margin: 0 auto;
-    }
-
-    .logo {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 1rem;
-    }
-
-    .subtitle {
-        color: #666;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-        line-height: 1.6;
-    }
-
-    .features {
-        text-align: left;
-        margin: 2rem 0;
-        padding: 0 1rem;
-    }
-
-    .feature {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        color: #555;
-    }
-
-    .feature-icon {
-        background: #667eea;
-        color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        font-weight: bold;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-decoration: none;
-        display: inline-block;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin: 0.5rem;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: #667eea;
-        padding: 1rem 2rem;
-        border: 2px solid #667eea;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s ease;
-        margin: 0.5rem;
-    }
-
-    .btn-secondary:hover {
-        background: #667eea;
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .welcome-back {
-        background: #f8f9fa;
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        border-left: 4px solid #28a745;
-    }
-
-    .welcome-title {
-        font-size: 1.5rem;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-
-    .welcome-text {
-        color: #666;
-        margin-bottom: 1rem;
-    }
-
-    .quick-actions {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    @media (max-width: 768px) {
-        .container {
-            padding: 2rem 1.5rem;
-        }
-        
-        .logo {
-            font-size: 2rem;
-        }
-        
-        .btn-primary, .btn-secondary {
-            display: block;
-            margin: 0.5rem 0;
-            width: 100%;
-        }
-
-        .quick-actions {
-            flex-direction: column;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'inicio.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="contenido">
     {% if user.is_authenticated %}
         <!-- Contenido para usuarios autenticados -->
-        <div class="welcome-back">
-            <h2 class="welcome-title">¡Bienvenido de vuelta, {{ user.first_name }}!</h2>
-            <p class="welcome-text">
-                Tu sesión está activa. Puedes acceder a todas las funciones de tu cuenta.
-            </p>
-        </div>
-
         <div class="logo">💰 Global Exchange</div>
-        
-        <p class="subtitle">
+        <p class="subtitulo">
             Sistema de gestión de casa de cambios. 
             Gestiona tus operaciones de manera segura y eficiente.
         </p>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">✓</div>
+        <div class="funcionalidades">
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">✓</div>
                 <span>Gestión segura de transacciones</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">📊</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">📊</div>
                 <span>Reportes y estadísticas detalladas</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🔒</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">🔒</div>
                 <span>Seguridad y privacidad garantizada</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">⚡</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">⚡</div>
                 <span>Proceso rápido y confiable</span>
             </div>
         </div>
 
-        <div class="quick-actions">
-            <a href="#" class="btn-primary" onclick="alert('Funcionalidad en desarrollo'); return false;">
+        <div class="acciones-rapidas">
+            <a href="#" class="btn-primario" onclick="alert('Funcionalidad en desarrollo'); return false;">
                 � Ver monedas disponibles
             </a>
-            
-            <a href="#" class="btn-secondary" onclick="alert('Funcionalidad en desarrollo'); return false;">
+
+            <a href="#" class="btn-secundario" onclick="alert('Funcionalidad en desarrollo'); return false;">
                 � Simular conversiones
             </a>
         </div>
-
-         <div class="quick-actions">
-            <a href="{% url 'usuarios:ver_clientes_asociados' %}" class="btn-primary">
-                👥 Mis Clientes
-            </a>
-            
-        </div>
-
     {% else %}
         <!-- Contenido para usuarios no autenticados -->
         <div class="logo">💰 Global Exchange</div>
 
-        <p class="subtitle">
+        <p class="subtitulo">
             Bienvenido a nuestro sistema de gestión de casa de cambios. 
             Registra tus operaciones de manera segura y eficiente.
         </p>
 
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">✓</div>
+        <div class="funcionalidades">
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">✓</div>
                 <span>Gestión segura de transacciones</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">📊</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">📊</div>
                 <span>Reportes y estadísticas detalladas</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🔒</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">🔒</div>
                 <span>Seguridad y privacidad garantizada</span>
             </div>
-            <div class="feature">
-                <div class="feature-icon">⚡</div>
+            <div class="funcionalidad">
+                <div class="icono-funcionalidad">⚡</div>
                 <span>Proceso rápido y confiable</span>
             </div>
         </div>

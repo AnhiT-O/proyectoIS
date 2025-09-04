@@ -1,259 +1,28 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestionar Roles - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion.css' %}">
+{% endblock %}
 
 {% block content %}
-<style>
-    .admin-container {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 2rem;
-        margin: 2rem auto;
-        max-width: 1200px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .admin-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .admin-header h2 {
-        margin: 0;
-        color: #333;
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-
-    .btn-crear {
-        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        font-weight: 600;
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-crear:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        color: white;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .admin-table {
-        width: 100%;
-        margin-top: 0;
-        background-color: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        border-collapse: collapse;
-    }
-
-    .admin-table th {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: #495057;
-        padding: 1.25rem 1.5rem;
-        font-weight: 600;
-        text-align: left;
-        border-bottom: 2px solid #dee2e6;
-        font-size: 0.9rem;
-    }
-
-    .admin-table td {
-        padding: 1.25rem 1.5rem;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f3f4;
-        color: #495057;
-    }
-
-    .admin-table th:not(:last-child),
-    .admin-table td:not(:last-child) {
-        border-right: 1px solid #e9ecef;
-    }
-
-    .admin-table tbody tr {
-        transition: all 0.3s ease;
-        background: white;
-    }
-
-    .admin-table tbody tr:hover {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
-        transform: scale(1.01);
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
-    }
-
-    .actions-container {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-start;
-        align-items: center;
-    }
-
-    .btn-admin {
-        padding: 0.5rem 0.75rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-
-    .btn-view {
-        background-color: #17a2b8;
-        color: white;
-    }
-
-    .btn-view:hover {
-        background-color: #138496;
-        color: white;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .btn-edit {
-        background-color: #ffc107;
-        color: #212529;
-    }
-
-    .btn-edit:hover {
-        background-color: #e0a800;
-        color: #212529;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .btn-delete {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .btn-delete:hover {
-        background-color: #c82333;
-        color: white;
-        text-decoration: none;
-        transform: scale(1.05);
-    }
-
-    .badge-status {
-        padding: 0.5em 0.75em;
-        border-radius: 30px;
-        font-weight: 500;
-    }
-
-    .badge-active {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .badge-inactive {
-        background-color: #eb82b7;
-        color: white;
-    }
-
-    /* Mensajes de alerta */
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-
-    .alert {
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-    }
-
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    /* Estado cuando no hay datos */
-    .text-center {
-        text-align: center;
-        color: #6c757d;
-        font-style: italic;
-        padding: 2rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .admin-container {
-            margin: 1rem;
-            padding: 1.5rem;
-        }
-
-        .admin-header {
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-        }
-
-        .admin-header h2 {
-            font-size: 1.6rem;
-        }
-
-        .admin-table {
-            font-size: 0.8rem;
-        }
-
-        .admin-table th,
-        .admin-table td {
-            padding: 0.75rem 0.5rem;
-        }
-
-        .actions-container {
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .btn-admin {
-            font-size: 0.7rem;
-            padding: 0.4rem 0.6rem;
-        }
-    }
-</style>
-
-<div class="admin-container">
-    <div class="admin-header">
+<div class="contenido">
+    <div class="gestion-cabecera">
         <h2>Gestionar Roles</h2>
-        <a href="{% url 'crear_rol' %}" class="btn-crear">
-            <i class="fas fa-plus"></i> Nuevo Rol
+        <a href="{% url 'roles:crear_rol' %}" class="btn-primario">
+            Nuevo Rol
         </a>
     </div>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <div class="table-responsive">
-        <table class="admin-table">
+    
+    <div class="contenedor-tabla">
+        <table class="gestion-tabla">
             <thead>
                 <tr>
-                        <th style="width: 20%">Nombre</th>
-                        <th style="width: 60%">Descripción</th>
-                        <th style="width: 1%; white-space: nowrap;">Acciones</th>
+                    <th style="width: 20%">Nombre</th>
+                    <th style="width: 63%">Descripción</th>
+                    <th style="width: 17%">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -262,19 +31,19 @@
                     <td>{{ rol.name }}</td>
                     <td>{{ rol.descripcion|default:"Sin descripción" }}</td>
                     <td>
-                        <div class="actions-container">
-                            <a href="{% url 'detalle_rol' rol.pk %}" class="btn-admin btn-view" title="Ver detalles">
-                                <i class="fas fa-eye"></i> Detalles
+                        <div class="zona-acciones">
+                            <a href="{% url 'roles:detalle_rol' rol.pk %}" class="btn-ver" title="Ver detalles">
+                                Detalles
                             </a>
-                            <a href="{% url 'editar_rol' rol.pk %}" class="btn-admin btn-edit" title="Editar">
-                                <i class="fas fa-edit"></i> Editar
+                            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-editar" title="Editar">
+                                Editar
                             </a>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="text-center">No hay roles registrados.</td>
+                    <td colspan="3">No hay roles registrados.</td>
                 </tr>
                 {% endfor %}
             </tbody>

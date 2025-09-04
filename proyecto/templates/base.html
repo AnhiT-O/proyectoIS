@@ -4,319 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Global Exchange{% endblock %}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        /* Barra de navegación */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .navbar-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #667eea;
-            text-decoration: none;
-            margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
-        }
-
-        .navbar-nav {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 1; /* Toma el espacio disponible */
-            justify-content: flex-end; /* Alinea el contenido hacia la derecha */
-        }
-
-        .nav-item {
-            text-decoration: none;
-            color: #333;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: fit-content;
-            flex-shrink: 0;
-        }
-
-        .nav-item:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-        }
-
-        .nav-item.btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .nav-item.btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .nav-item.btn-danger {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .nav-item.btn-danger:hover {
-            background: #764ba2;
-            color: #667eea;
-            transform: translateY(-1px);
-        }
-
-        .nav-item.btn-secondary {
-            background: transparent;
-            color: #667eea;
-            border: 1px solid #667eea;
-        }
-
-        .nav-item.btn-secondary:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .user-inf {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .user-name {
-            color: #333;
-            font-weight: 600;
-        }
-
-        /* Estilos para el dropdown del panel de administración */
-        .admin-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .admin-toggle {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .admin-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            z-index: 1000;
-            display: none;
-            min-width: 280px;
-            padding: 0.5rem 0;
-            margin: 0.125rem 0 0;
-            background-color: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            border-radius: 0.375rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
-            white-space: nowrap;
-        }
-
-        .admin-menu.show {
-            display: block;
-        }
-
-        .admin-section {
-            padding: 0.25rem 0;
-        }
-
-        .admin-section:not(:last-child) {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-            margin-bottom: 0.25rem;
-            padding-bottom: 0.5rem;
-        }
-
-        .admin-item {
-            display: block;
-            width: 100%;
-            padding: 0.375rem 1rem;
-            clear: both;
-            font-weight: 400;
-            color: #212529;
-            text-decoration: none;
-            background-color: transparent;
-            border: 0;
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-        }
-
-        .admin-item:hover,
-        .admin-item:focus {
-            color: #1e2125;
-            background-color: #e9ecef;
-            text-decoration: none;
-        }
-
-        .admin-header {
-            display: block;
-            padding: 0.5rem 1rem 0.25rem;
-            margin-bottom: 0;
-            font-size: 0.875rem;
-            color: #6c757d;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-
-        /* Contenido principal */
-        .main-content {
-            padding: 2rem 1rem;
-            min-height: calc(100vh - 80px);
-        }
-
-        /* Mensajes */
-        .messages {
-            max-width: 1200px;
-            margin: 0 auto 2rem;
-        }
-
-        .alert {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border-left: 4px solid #17a2b8;
-        }
-
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border-left: 4px solid #ffc107;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
-            }
-
-            .navbar-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .navbar-brand {
-                margin-right: 0; /* Quita el margen en móviles */
-            }
-
-            .navbar-nav {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .user-inf{
-                flex-direction: column;
-                text-align: center;
-                gap: 0.5rem;
-            }
-
-            /* Asegurar que todos los nav-items mantengan su texto en una línea */
-            .nav-item {
-                min-width: 140px;
-                text-align: center;
-            }
-
-            .main-content {
-                padding: 1rem 0.5rem;
-            }
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'global.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Barra de navegación -->
     {% block navbar %}
-    <nav class="navbar">
-        <div class="navbar-content">
-            <a href="{% url 'inicio' %}" class="navbar-brand">
+    <nav class="zona-barra">
+        <div class="barra-contenido">
+            <a href="{% url 'inicio' %}" class="barra-logo">
                 💰 Global Exchange
             </a>
             
-            <div class="navbar-nav">
+            <div class="barra-navegacion">
                 {% if user.is_authenticated %}
-                    <div class="user-inf">
-                        <span class="user-name">Hola, {{ user.first_name }}!</span>
-                        
+                    <div class="zona-usuario">
+                        <span class="usuario-nombre">Hola, {{ user.first_name }}!</span>
+
                         <!-- Panel de Administración basado en permisos -->
-                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas or perms.tasa.ver_tasa %}
-                            <div class="admin-dropdown">
-                                <a href="#" class="nav-item admin-toggle" onclick="toggleAdminMenu(event)">
-                                    ⚙️ Panel de Administración
+                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas %}
+                            <div class="panel-gestiones">
+                                <a href="#" class="btn-admin" onclick="toggleAdminMenu(event)">
+                                    ⚙️ Panel de Gestiones
                                 </a>
-                                <div class="admin-menu" id="adminMenu">
+                                <div class="gestion-menu" id="adminMenu">
                                     <!-- Gestión de Usuarios -->
                                     {% if perms.usuarios %}
-                                        <div class="admin-section">
-                                            <a class="admin-item" href="{% url 'usuarios:administrar_usuarios' %}">👥 Gestionar Usuarios</a>
-                                        </div>
+                                        <a href="{% url 'usuarios:administrar_usuarios' %}" class="gestion-seleccion">
+                                            👥 Gestionar Usuarios
+                                        </a>
                                     {% endif %}
                                     
                                     <!-- Gestión de Roles -->
                                     {% if perms.roles %}
-                                        <div class="admin-section">
-                                            <a class="admin-item" href="{% url 'listar_roles' %}">🎭 Gestionar Roles</a>
-                                        </div>
+                                        <a href="{% url 'roles:listar_roles' %}" class="gestion-seleccion">
+                                            🎭 Gestionar Roles
+                                        </a>
                                     {% endif %}
                                     
                                     <!-- Gestión de Clientes -->
                                     {% if perms.clientes %}
-                                        <div class="admin-section">
-                                            <a class="admin-item" href="{% url 'clientes:cliente_lista' %}">👥 Gestionar Clientes</a>
-                                        </div>
+                                        <a href="{% url 'clientes:cliente_lista' %}" class="gestion-seleccion">
+                                            👥 Gestionar Clientes
+                                        </a>
                                     {% endif %}
                                     
                                     <!-- Gestión de Monedas -->
                                     {% if perms.monedas %}
-                                        <div class="admin-section">
-                                            <a class="admin-item" href="{% url 'monedas:lista_monedas' %}">💱 Gestionar Monedas</a>
-                                        </div>
+                                        <a href="{% url 'monedas:lista_monedas' %}" class="gestion-seleccion">
+                                            💱 Gestionar Monedas
+                                        </a>
                                     {% endif %}
 
                                     <!-- Gestión de Tasas de Cambio -->
@@ -329,18 +67,18 @@
                             </div>
                         {% endif %}
                         
-                        <a href="{% url 'usuarios:perfil' %}" class="nav-item">
+                        <a href="{% url 'usuarios:perfil' %}" class="btn-secundario">
                             👤 Mi Perfil
                         </a>
-                        <a href="{% url 'usuarios:logout' %}" class="nav-item btn-danger">
+                        <a href="{% url 'logout' %}" class="btn-primario">
                              Cerrar Sesión
                         </a>
                     </div>
                 {% else %}
-                    <a href="{% url 'usuarios:login' %}" class="nav-item btn-secondary">
+                    <a href="{% url 'login' %}" class="btn-secundario">
                         Iniciar Sesión
                     </a>
-                    <a href="{% url 'usuarios:registro' %}" class="nav-item btn-primary">
+                    <a href="{% url 'usuarios:registro' %}" class="btn-primario">
                         Registrarse
                     </a>
                 {% endif %}
@@ -351,9 +89,9 @@
 
     <!-- Mensajes del sistema -->
     {% if messages %}
-        <div class="messages">
+        <div class="zona-alertas">
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
+                <div class="alerta alerta-{{ message.tags }}">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -361,7 +99,7 @@
     {% endif %}
 
     <!-- Contenido principal -->
-    <main class="main-content">
+    <main class="cuerpo">
         {% block content %}{% endblock %}
     </main>
 
@@ -379,10 +117,10 @@
 
         // Cerrar el menú al hacer clic fuera de él
         document.addEventListener('click', function(event) {
-            const adminDropdown = document.querySelector('.admin-dropdown');
+            const panelGestiones = document.querySelector('.panel-gestiones');
             const menu = document.getElementById('adminMenu');
             
-            if (adminDropdown && menu && !adminDropdown.contains(event.target)) {
+            if (panelGestiones && menu && !panelGestiones.contains(event.target)) {
                 menu.classList.remove('show');
             }
         });

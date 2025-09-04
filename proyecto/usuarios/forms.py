@@ -1,50 +1,56 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 import re
 from .models import Usuario
-from clientes.models import Cliente, UsuarioCliente
-
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        max_length=254,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Nombre de usuario'
-        })
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Contraseña'
-        })
-    )
-    
-    error_messages = {
-        'invalid_login': "El nombre de usuario y contraseña no coinciden. Inténtelo de nuevo.",
-        'inactive': "Esta cuenta está inactiva.",
-    }
+from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'autofocus': True
+        }),
+        error_messages={
+            'required': "El nombre de usuario es obligatorio.",
+            'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
+            'unique': "Ya existe un usuario registrado con este nombre de usuario."
+        }
+    )
     email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'invalid': "Introduce un correo electrónico válido.",
+            'required': "El correo electrónico es obligatorio.",
+            'unique': "Ya existe un usuario registrado con este correo electrónico."
+        }
     )
     first_name = forms.CharField(
-        max_length=40,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El nombre es obligatorio.",
+            'max_length': "El nombre no puede tener más de 40 caracteres."
+        }
     )
     last_name = forms.CharField(
-        max_length=40,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El apellido es obligatorio.",
+            'max_length': "El apellido no puede tener más de 40 caracteres."
+        }
     )
     tipo_cedula = forms.ChoiceField(
         choices=Usuario.TIPO_CEDULA_CHOICES,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     cedula_identidad = forms.CharField(
-        max_length=11,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "La cédula de identidad es obligatoria.",
+            'max_length': "La cédula de identidad no puede tener más de 11 caracteres.",
+            'unique': "Ya existe un usuario registrado con esta cédula."
+        }
     )
 
     class Meta:
@@ -53,35 +59,16 @@ class RegistroUsuarioForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({'class': 'form-control'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
     def clean_cedula_identidad(self):
         cedula = self.cleaned_data.get('cedula_identidad')
-        
         if not cedula.isdigit():
-            raise ValidationError("La cédula debe contener solo números.")
-
-        # Verificar unicidad excluyendo usuarios inactivos con cédula duplicada
-        existing_user = Usuario.objects.filter(cedula_identidad=cedula).first()
-        if existing_user:
-            if existing_user.is_active:
-                raise ValidationError("Ya existe un usuario registrado con esta cédula.")
-            else:
-                raise ValidationError("Una cuenta con esta cédula ya existe, aunque no está activada.")
-
+            raise ValidationError("La cédula de identidad debe ser numérica.")
+        if len(cedula) < 4:
+            raise ValidationError("La cédula de identidad debe tener al menos 4 dígitos.")
         return cedula
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        existing_user = Usuario.objects.filter(email=email).first()
-        if existing_user:
-            if existing_user.is_active:
-                raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
-            else:
-                raise ValidationError("Una cuenta con este correo electrónico ya existe, pero no está activada. Revisá tu bandeja de entrada")
-        return email
 
     def clean_password1(self):
         password1 = self.cleaned_data.get('password1')
@@ -116,7 +103,6 @@ class RegistroUsuarioForm(UserCreationForm):
         user.last_name = self.cleaned_data['last_name']
         user.tipo_cedula = self.cleaned_data['tipo_cedula']
         user.cedula_identidad = self.cleaned_data['cedula_identidad']
-        user.is_active = False  # Usuario inactivo hasta confirmar email
         if commit:
             user.save()
         return user
@@ -125,13 +111,14 @@ class RegistroUsuarioForm(UserCreationForm):
 class RecuperarPasswordForm(PasswordResetForm):
     """Formulario personalizado para recuperación de contraseña"""
     email = forms.EmailField(
-        max_length=254,
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Correo electrónico',
             'autofocus': True
         }),
-        label='Correo electrónico'
+        error_messages={
+            'required': "El correo electrónico es obligatorio.",
+            'invalid': "Ingrese un correo electrónico válido."
+        }
     )
 
     def clean_email(self):
@@ -144,26 +131,18 @@ class RecuperarPasswordForm(PasswordResetForm):
                 raise ValidationError("No existe una cuenta activa asociada a este correo electrónico.")
         return email
 
-    def get_users(self, email):
-        """Sobrescribir método para obtener solo usuarios activos"""
-        return Usuario.objects.filter(
-            email__iexact=email,
-            is_active=True
-        )
-
 
 class EstablecerPasswordForm(SetPasswordForm):
     """Formulario personalizado para establecer nueva contraseña"""
     new_password1 = forms.CharField(
-        label="Nueva contraseña",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Nueva contraseña'
+            'placeholder': 'Nueva contraseña',
+            'autofocus': True
         }),
         strip=False,
     )
     new_password2 = forms.CharField(
-        label="Confirmar nueva contraseña",
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Confirmar nueva contraseña'
@@ -191,14 +170,15 @@ class EstablecerPasswordForm(SetPasswordForm):
 
 class AsignarRolForm(forms.Form):
     """Formulario para asignar roles a usuarios"""
-    rol = forms.ModelChoiceField(
-        queryset=Group.objects.exclude(name='administrador').order_by('name'),
-        empty_label="Seleccionar rol",
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'style': 'width: 100%; padding: 0.5rem;'
+    rol = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.exclude(name='Administrador').order_by('name'),
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-check-input'
         }),
-        label='Rol'
+        label='Roles disponibles',
+        error_messages={
+            'required': "Debes seleccionar al menos un rol."
+        }
     )
 
     def __init__(self, *args, **kwargs):
@@ -209,16 +189,10 @@ class AsignarRolForm(forms.Form):
             # Excluir roles que el usuario ya tiene
             roles_actuales = usuario.groups.all()
             self.fields['rol'].queryset = Group.objects.exclude(
-                name='administrador'
+                name='Administrador'
             ).exclude(
                 id__in=roles_actuales.values_list('id', flat=True)
             ).order_by('name')
-
-    def clean_rol(self):
-        rol = self.cleaned_data.get('rol')
-        if not rol:
-            raise ValidationError("Debe seleccionar un rol.")
-        return rol
 
 
 class AsignarClienteForm(forms.Form):
@@ -229,7 +203,9 @@ class AsignarClienteForm(forms.Form):
             'class': 'form-check-input'
         }),
         label='Clientes disponibles',
-        required=False
+        error_messages={
+            'required': "Debes seleccionar al menos un cliente."
+        }
     )
 
     def __init__(self, *args, **kwargs):
@@ -245,9 +221,3 @@ class AsignarClienteForm(forms.Form):
             
             # Personalizar la etiqueta de cada cliente
             self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} {obj.apellido} ({obj.docCliente})"
-
-    def clean_clientes(self):
-        clientes = self.cleaned_data.get('clientes')
-        if not clientes:
-            raise ValidationError("Debe seleccionar al menos un cliente.")
-        return clientes

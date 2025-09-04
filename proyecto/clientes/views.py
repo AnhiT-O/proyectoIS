@@ -39,9 +39,7 @@ def cliente_lista(request):
         clientes = clientes.filter(
             Q(nombre__icontains=busqueda) | 
             Q(apellido__icontains=busqueda) |
-            Q(docCliente__icontains=busqueda) |
-            Q(correoElecCliente__icontains=busqueda) |
-            Q(telefono__icontains=busqueda)
+            Q(docCliente__icontains=busqueda)
         )
     
     # Ordenar por nombre
