@@ -4,3 +4,4 @@ pvenv/
 __pycache__/
 .pytest_cache/
 .vscode/
+proyecto/*/migrations/[0-9]*.py

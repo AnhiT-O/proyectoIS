@@ -21,9 +21,9 @@ SET row_security = off;
 -- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.auth_group (id, name) FROM stdin;
-4	Moderador de usuarios
-5	Encargado de clientes
+COPY public.auth_group (name) FROM stdin;
+Moderador de usuarios
+Encargado de clientes
 \.
 
 --
@@ -43,18 +43,17 @@ COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
 -- Data for Name: clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.clientes (id, nombre, apellido, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, created_at, updated_at) FROM stdin;
-1	Juan	Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	Minorista	0	2025-09-03 12:36:01.401701-03	2025-09-03 12:38:32.291502-03
+COPY public.clientes (nombre, apellido, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, created_at, updated_at) FROM stdin;
+Juan	Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	Minorista	0	2025-09-03 12:36:01.401701-03	2025-09-03 12:38:32.291502-03
 \.
 
 --
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (id, nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales) FROM stdin;
-2	Euro	EUR	t	8000	250 300 3
-3	Peso argentino	ARG	t	10  150 250 5
-1	Dólar estadounidense	USD	t	7400	200 300 3
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales) FROM stdin;
+Euro	EUR	t	8000	250	300	3
+Peso argentino	ARG	t	10	150	250	5
 \.
 
 
@@ -72,11 +71,11 @@ COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios (id, password, last_login, is_superuser, username, first_name, last_name, email, tipo_cedula, cedula_identidad, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
-3	pbkdf2_sha256$1000000$KUtO3Kz9sYyDujs6givUsm$VVkcJj72tGebc5JKVfCC9OcdmKFwxr20mwyo0fYqECU=	2025-09-03 12:33:58.499498-03	f	irismendoza	Iris	Mendoza	iris@example.com	CI	7897897	f	t	2025-09-03 12:26:33.888296-03	\N
-4	pbkdf2_sha256$1000000$nZ5bZGdPP4MeFsTQG0VxIc$NswnhxthPgnIjpC2ub27BMXWi9bdOmR8m/CDLbOwsLM=	2025-09-03 12:37:04.904755-03	f	aylen	Aylen	Wyder	aylen@example.com	CI	4564564	f	t	2025-09-03 12:31:58.921293-03	\N
-2	pbkdf2_sha256$1000000$gG25IPHhpfNHXpI6vKQYCg$1lsAHqYbrXyYWF+DKB6IgNE0sweuyzyfOnyv16J1Ivw=	2025-09-03 12:38:04.986121-03	f	admin	Brandon	Rivarola	admin@example.com	CI	0000	f	t	2025-09-03 12:15:32.987744-03	\N
-1	pbkdf2_sha256$1000000$8CZjXkHPfB9pPRieXoEZe1$020CX9YgH6xhCaofCG7GHX2A2dtXp0XKYSO2p5kz2bQ=	2025-09-03 12:26:56.50529-03	f	brandonariel98	Brandon Ariel	Rivarola Valenzuela	losrivarola612@gmail.com	CI	4808795	f	t	2025-09-03 12:12:48.517303-03	\N
+COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, tipo_cedula, cedula_identidad, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
+pbkdf2_sha256$1000000$KUtO3Kz9sYyDujs6givUsm$VVkcJj72tGebc5JKVfCC9OcdmKFwxr20mwyo0fYqECU=	2025-09-03 12:33:58.499498-03	f	iris	Iris	Mendoza	iris@example.com	CI	7897897	f	t	2025-09-03 12:26:33.888296-03	\N
+pbkdf2_sha256$1000000$nZ5bZGdPP4MeFsTQG0VxIc$NswnhxthPgnIjpC2ub27BMXWi9bdOmR8m/CDLbOwsLM=	2025-09-03 12:37:04.904755-03	f	aylen	Aylen	Wyder	aylen@example.com	CI	4564564	f	t	2025-09-03 12:31:58.921293-03	\N
+pbkdf2_sha256$1000000$gG25IPHhpfNHXpI6vKQYCg$1lsAHqYbrXyYWF+DKB6IgNE0sweuyzyfOnyv16J1Ivw=	2025-09-03 12:38:04.986121-03	f	admin	Brandon	Rivarola	admin@example.com	CI	0000	f	t	2025-09-03 12:15:32.987744-03	\N
+pbkdf2_sha256$1000000$8CZjXkHPfB9pPRieXoEZe1$020CX9YgH6xhCaofCG7GHX2A2dtXp0XKYSO2p5kz2bQ=	2025-09-03 12:26:56.50529-03	f	brandon	Brandon Ariel	Rivarola Valenzuela	brandon@example.com	CI	4808795	f	t	2025-09-03 12:12:48.517303-03	\N
 \.
 
 
@@ -85,7 +84,7 @@ COPY public.usuarios (id, password, last_login, is_superuser, username, first_na
 --
 
 COPY public.usuarios_clientes (created_at, cliente_id, usuario_id) FROM stdin;
-2025-09-03 12:45:38.297924-03	1	1
+2025-09-03 12:45:38.297924-03	1	4
 \.
 
 
@@ -94,53 +93,53 @@ COPY public.usuarios_clientes (created_at, cliente_id, usuario_id) FROM stdin;
 --
 
 COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
-2	3
-3	5
-3	4
-4	2
-1	1
+3	3
+1	5
+1	4
+2	2
+4	1
 \.
 
 --
 -- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_group_id_seq', 5, true);
+-- SELECT pg_catalog.setval('public.auth_group_id_seq', 5, true);
 
 
 --
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.auth_permission_id_seq', 25, true);
+-- SELECT pg_catalog.setval('public.auth_permission_id_seq', 25, true);
 
 
 --
 -- Name: clientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.clientes_id_seq', 1, true);
+-- SELECT pg_catalog.setval('public.clientes_id_seq', 1, true);
 
 
 --
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_content_type_id_seq', 9, true);
+-- SELECT pg_catalog.setval('public.django_content_type_id_seq', 9, true);
 
 
 --
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 20, true);
+-- SELECT pg_catalog.setval('public.django_migrations_id_seq', 20, true);
 
 
 --
 -- Name: monedas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.monedas_id_seq', 3, true);
+-- SELECT pg_catalog.setval('public.monedas_id_seq', 3, true);
 
 
 
@@ -148,14 +147,14 @@ SELECT pg_catalog.setval('public.monedas_id_seq', 3, true);
 -- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuarios_id_seq', 4, true);
+-- SELECT pg_catalog.setval('public.usuarios_id_seq', 4, true);
 
 
 --
 -- Name: usuarios_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuarios_user_permissions_id_seq', 1, false);
+-- SELECT pg_catalog.setval('public.usuarios_user_permissions_id_seq', 1, false);
 
 
 --

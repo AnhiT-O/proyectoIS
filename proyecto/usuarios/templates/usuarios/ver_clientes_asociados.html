@@ -70,22 +70,21 @@
     <div class="profile-content">
         <!-- Lista de clientes -->
         {% if clientes %}
-            <div class="clientes-grid">
+            <div class="info-grid">
                 {% for cliente in clientes %}
-                <div class="cliente-card {% if cliente == cliente_activo %}cliente-activo{% endif %}">
+                <div class="profile-info {% if cliente == cliente_activo %}cliente-activo{% endif %}">
                     <h2 class="info-title">{{ cliente.nombre }} {{ cliente.apellido }}</h2>
-                    <!-- Información del cliente -->
-                    <div style="margin-bottom: 1rem;">
-                        <div style="margin-bottom: 0.5rem;">
-                            <span style="color: #666; font-weight: bold;">{{ cliente.get_tipoDocCliente_display }}:</span>
-                            <span style="color: #333;">{{ cliente.docCliente }}</span>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <span style="color: #666; font-weight: bold;">Tipo:</span>
-                            <span style="color: #333;">{{ cliente.get_tipoCliente_display }}</span>
+                    <div class="info-grid" style="margin-bottom: 1rem;">
+                        <!-- Información del cliente -->
+                        <div class="info-item">
+                            <div class="info-label">{{ cliente.get_tipoDocCliente_display }}:</div>
+                            <div class="info-value">{{ cliente.docCliente }}</div>
+                        </div>  
+                        <div class="info-item">
+                            <div class="info-label">Tipo:</div>
+                            <div class="info-value">{{ cliente.get_tipoCliente_display }}</div>
                         </div>
                     </div>
-
                     <!-- Botón de detalles -->
                     <div class="zona-acciones">
                         {% if cliente == cliente_activo %}

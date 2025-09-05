@@ -115,14 +115,16 @@ python manage.py makemigrations #si hiciste algún cambio en models, este comand
 python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
-- **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
-
-```bash
-sudo cp backup_datos.sql /var/lib/postgresql/backup_datos.sql # para copiar el archivo al directorio donde 'postgres' tiene permiso de usarlo para su base de datos, esto solo hacelo una vez
-sudo -i -u postgres
-psql -d bd_desarrollo < backup_datos.sql
-exit
-```
+  - Si necesitas reestablecer la base de datos debes posicionarte en ProyectoIS, luego: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo
+  python manage.py runserver
+  ```
+  - Si deseas usar `backup_datos.sql`: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo backup_datos
+  python manage.py runserver
+  ```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
 
 ## Ejecutar proyecto en producción
@@ -235,3 +237,8 @@ sudo systemctl restart nginx
   - Nombre de usuario: aylen
     - Contraseña: qweqweqwe.1
     - Rol: Analista cambiario
+
+## Reestablecer base de datos:
+```bash
+find . -path "clientes/migrations/*.py" -not -name "__init__.py" -delete
+```

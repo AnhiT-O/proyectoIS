@@ -72,23 +72,21 @@
 
                     <td>
                         {% if usuario.groups.exists %}
-                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                                {% for group in usuario.groups.all %}
-                                    <div>
-                                        <span class="{% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
-                                            {{ group.name|title }}
-                                            {% if perms.usuarios.asignacion_roles %}
-                                                <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn-remover-rol" 
-                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
-                                                            title="Desasignar rol">×</button>
-                                                </form>
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                {% endfor %}
-                            </div>
+                            {% for group in usuario.groups.all %}
+                                <div>
+                                    <span class="{% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
+                                        {{ group.name|title }}
+                                        {% if perms.usuarios.asignacion_roles %}
+                                            <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-remover-rol" 
+                                                        onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
+                                                        title="Desasignar rol">×</button>
+                                            </form>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            {% endfor %}
                         {% else %}
                             <span style="color: #6c757d; font-style: italic;">Sin roles</span>
                         {% endif %}

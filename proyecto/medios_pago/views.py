@@ -18,7 +18,7 @@ def medio_pago_lista(request):
     
 
     # Ordenar por nombre
-    medios_pago = medios_pago.order_by('nombre')
+    medios_pago = medios_pago.order_by('tipo')
     
     context = {
         'medios_pago': medios_pago,

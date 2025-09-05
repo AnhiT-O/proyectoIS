@@ -466,6 +466,7 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     width: fit-content;
+    margin-bottom: 0.3rem;
 }
 
 .rol-analista {
@@ -478,6 +479,7 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     width: fit-content;
+    margin-bottom: 0.3rem;
 }
 
 .rol-operador {
@@ -490,6 +492,7 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     width: fit-content;
+    margin-bottom: 0.3rem;
 }
 
 .rol-otro {
@@ -502,6 +505,7 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     width: fit-content;
+    margin-bottom: 0.3rem;
 }
 
 .etiqueta-activo {

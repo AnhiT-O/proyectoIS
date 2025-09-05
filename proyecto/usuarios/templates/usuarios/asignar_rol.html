@@ -5,41 +5,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'formularios.css' %}">
-<style>
-    .role-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        margin: 0.2rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    .role-admin {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .role-analyst {
-        background-color: #78e7e2;
-        color: black;
-    }
-
-    .role-operator {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .role-other {
-        background-color: #6f42c1;
-        color: white;
-    }
-
-    .no-roles {
-        color: #6c757d;
-        font-style: italic;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -48,19 +13,21 @@
         <h2>Asignar Rol a Usuario</h2>
     </div>
     <div class="info-usuario">
-        <p><strong>Nombre del Usuario:</strong> {{ usuario.get_full_name }}</p>
-        <div class="roles-actuales">
-            <strong>Roles actuales:</strong>
+        <div class="info-label">Nombre del Usuario:</div>
+        <div class="info-value">{{ usuario.get_full_name }}</div>
+        <div style="margin-top: 0.5rem;"></div>
+        <div class="info-label">Roles actuales:</div>
+        <div class="info-value">
             {% if usuario.groups.exists %}
                 {% for group in usuario.groups.all %}
                     {% if group.name == 'Administrador' %}
-                        <span class="role-badge role-admin">Administrador</span>
+                        <span class="rol-administrador">Administrador</span>
                     {% elif group.name == 'Analista cambiario' %}
-                        <span class="role-badge role-analyst">Analista Cambiario</span>
+                        <span class="rol-analista">Analista Cambiario</span>
                     {% elif group.name == 'Operador' %}
-                        <span class="role-badge role-operator">Operador</span>
+                        <span class="rol-operador">Operador</span>
                     {% else %}
-                        <span class="role-badge role-other">{{ group.name|title }}</span>
+                        <span class="rol-otro">{{ group.name|title }}</span>
                     {% endif %}
                 {% endfor %}
             {% else %}
@@ -99,12 +66,12 @@
 
             <div class="zona-botones">
                 <button type="submit" class="btn-enviar">Asignar Rol</button>
-                <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-atras">Cancelar</a>
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
             </div>
         {% else %}
             <p class="no-roles">No hay roles disponibles para asignar.</p>
             <div class="zona-botones">
-                <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-atras">Volver</a>
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Volver</a>
             </div>
         {% endif %}
     </form>
