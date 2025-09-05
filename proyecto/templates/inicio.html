@@ -12,36 +12,50 @@
     {% if user.is_authenticated %}
         <!-- Contenido para usuarios autenticados -->
         <div class="logo">💰 Global Exchange</div>
-        <p class="subtitulo">
-            Sistema de gestión de casa de cambios. 
-            Gestiona tus operaciones de manera segura y eficiente.
-        </p>
-        <div class="funcionalidades">
-            <div class="funcionalidad">
-                <div class="icono-funcionalidad">✓</div>
-                <span>Gestión segura de transacciones</span>
+        {% if user.cliente_activo %}
+            <div class="cliente-activo">
+                <p>Cliente seleccionado: {{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</p>
+                <p>Segmento: {{ user.cliente_activo.get_segmento_display }}</p>
             </div>
-            <div class="funcionalidad">
-                <div class="icono-funcionalidad">📊</div>
-                <span>Reportes y estadísticas detalladas</span>
+        {% endif %}
+
+        {% if cotizaciones %}
+            <div class="cotizaciones">
+                <h2>Cotizaciones del día</h2>
+                <div class="tabla-cotizaciones">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Moneda</th>
+                                <th>Compra</th>
+                                <th>Venta</th>
+                                <th>Última actualización</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cotizacion in cotizaciones %}
+                                <tr>
+                                    <td><span class="moneda-simbolo">{{ cotizacion.simbolo }}</span> {{ cotizacion.moneda.nombre }}</td>
+                                    <td>{{ cotizacion.precio_compra }}</td>
+                                    <td>{{ cotizacion.precio_venta }}</td>
+                                    <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="funcionalidad">
-                <div class="icono-funcionalidad">🔒</div>
-                <span>Seguridad y privacidad garantizada</span>
-            </div>
-            <div class="funcionalidad">
-                <div class="icono-funcionalidad">⚡</div>
-                <span>Proceso rápido y confiable</span>
-            </div>
-        </div>
+        {% else %}
+            <p class="sin-cotizaciones">No hay cotizaciones disponibles para el día de hoy.</p>
+        {% endif %}
 
         <div class="acciones-rapidas">
             <a href="#" class="btn-primario" onclick="alert('Funcionalidad en desarrollo'); return false;">
-                � Ver monedas disponibles
+                Ver monedas disponibles
             </a>
 
             <a href="#" class="btn-secundario" onclick="alert('Funcionalidad en desarrollo'); return false;">
-                � Simular conversiones
+                Simular conversiones
             </a>
         </div>
     {% else %}

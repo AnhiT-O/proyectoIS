@@ -1,7 +1,7 @@
 from django.db import models
 from decimal import Decimal
 from monedas.models import Moneda
-from clientes.models import Cliente
+from clientes.models import Cliente, SegmentacionCliente
 
 class Cotizacion(models.Model):
     id_moneda = models.ForeignKey(
@@ -9,6 +9,14 @@ class Cotizacion(models.Model):
         on_delete=models.PROTECT,  # Protege contra eliminación de monedas que tienen cotizaciones
         related_name='cotizaciones',
         verbose_name='Moneda'
+    )
+    segmentacion = models.ForeignKey(
+        SegmentacionCliente,
+        on_delete=models.PROTECT,  # Protege contra eliminación de segmentaciones con cotizaciones
+        related_name='cotizaciones',
+        verbose_name='Segmentación de Cliente',
+        null=True,  # Permitimos nulos temporalmente para la migración
+        blank=True
     )
     fecha_cotizacion = models.DateTimeField(
         auto_now_add=True,
@@ -57,10 +65,10 @@ class Cotizacion(models.Model):
         Obtiene los precios de compra y venta para un cliente específico
         aplicando su porcentaje de beneficio.
         """
-        porcentaje_beneficio = cliente.beneficio_segmento
+        # Obtiene el segmento del cliente y busca la cotización correspondiente
         return {
-            'precio_venta': self.calcular_precio_venta(porcentaje_beneficio),
-            'precio_compra': self.calcular_precio_compra(porcentaje_beneficio)
+            'precio_venta': self.calcular_precio_venta(float(self.segmentacion.porcentaje_beneficio)),
+            'precio_compra': self.calcular_precio_compra(float(self.segmentacion.porcentaje_beneficio))
         }
 
     class Meta:
