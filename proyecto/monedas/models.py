@@ -1,5 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -40,3 +42,24 @@ class Moneda(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+@receiver(post_migrate)
+def crear_moneda_usd(sender, **kwargs):
+    """
+    Crea automáticamente la moneda USD después de ejecutar las migraciones
+    """
+    # Solo crear si la migración es de la app monedas
+    if kwargs['app_config'].name == 'monedas':
+        # Verificar si ya existe la moneda USD
+        if not Moneda.objects.filter(simbolo='USD').exists():
+            Moneda.objects.create(
+                nombre='Dólar Estadounidense',
+                simbolo='USD',
+                activa=True,
+                tasa_base=7400,
+                comision_compra=200,
+                comision_venta=250,
+                decimales=2
+            )
+            print("✓ Moneda USD creada automáticamente")

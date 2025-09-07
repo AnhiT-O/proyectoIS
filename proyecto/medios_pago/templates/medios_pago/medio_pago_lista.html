@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Medios de Pago - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<style>
+    .medios-pago-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 1300px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .medios-pago-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .header-info h1 {
+        margin: 0;
+        color: #333;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .btn-nuevo {
+        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-nuevo:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .stats-bar {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-info {
+        color: #495057;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stats-count {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .search-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-form {
+        display: flex;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: white;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        height: 44px;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: end;
+    }
+
+    .btn-search {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        font-size: 0.9rem;
+        height: 44px;
+        min-width: 80px;
+    }
+
+    .btn-search:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-clear {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        color: #495057;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        height: 44px;
+        min-width: 80px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-clear:hover {
+        background: #dee2e6;
+        color: #495057;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .table-container {
+        padding: 0;
+        overflow-x: auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .custom-table th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #495057;
+        font-weight: 600;
+        padding: 1.25rem 1rem;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 0.9rem;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .custom-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        color: #495057;
+        vertical-align: middle;
+    }
+
+    .custom-table tbody tr {
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .custom-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+        transform: scale(1.01);
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
+    }
+
+    .medio-pago-name {
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tipo-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tipo-efectivo {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .tipo-tarjeta_credito {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .tipo-transferencia {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .tipo-billetera_electronica {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .tipo-cheque {
+        background: #fce4ec;
+        color: #ad1457;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-activo {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-inactivo {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    .btn-ver {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-ver:hover {
+        background: #138496;
+        color: white;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
+    .btn-editar {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-editar:hover {
+        background: #e0a800;
+        color: #212529;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
+    .btn-eliminar {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-eliminar:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
+    .btn-activar {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-activar:hover {
+        background: #218838;
+        color: white;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
+    .btn-desactivar {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-desactivar:hover {
+        background: #545b62;
+        color: white;
+        text-decoration: none;
+        transform: scale(1.05);
+    }
+
+    .no-medios {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .no-medios-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .no-medios h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+
+    .no-medios p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.5;
+    }
+
+    .btn-crear-primero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-crear-primero:hover {
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .detalles-cell {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    @media (max-width: 1200px) {
+        .medios-pago-container {
+            margin: 1rem;
+            border-radius: 12px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .medios-pago-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .header-info h1 {
+            font-size: 1.6rem;
+        }
+
+        .stats-bar {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .search-container {
+            padding: 1rem;
+        }
+
+        .search-form {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .search-buttons {
+            justify-content: center;
+        }
+
+        .custom-table {
+            font-size: 0.8rem;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .actions-cell {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .btn-action {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+        }
+
+        .no-medios {
+            padding: 3rem 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="medios-pago-container">
+    <div class="medios-pago-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1>💳 Gestionar Medios de Pago</h1>
+            </div>
+            <a href="{% url 'medios_pago:medio_pago_crear' %}" class="btn-nuevo">
+                Nuevo Medio de Pago
+            </a>
+        </div>
+    </div>
+
+    {% if hay_medios %}
+        <!-- Formulario de búsqueda -->
+        <div class="search-container">
+            <form method="get" class="search-form">
+                <div class="form-group">
+                    <label for="id_buscar">Buscar:</label>
+                    {{ form_busqueda.buscar }}
+                </div>
+                <div class="form-group">
+                    <label for="id_tipo">Tipo:</label>
+                    {{ form_busqueda.tipo }}
+                </div>
+                <div class="form-group">
+                    <label for="id_activo">Estado:</label>
+                    {{ form_busqueda.activo }}
+                </div>
+                <div class="search-buttons">
+                    <button type="submit" class="btn-search">
+                        Buscar
+                    </button>
+                    <a href="{% url 'medios_pago:medio_pago_lista' %}" class="btn-clear">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stats-info">
+                Total de medios de pago: <span class="stats-count">{{ medios_pago|length }}</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Detalles</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medio_pago in medios_pago %}
+                    <tr>
+                        <td>
+                            <div class="medio-pago-name">
+                                {{ medio_pago.nombre }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="tipo-badge tipo-{{ medio_pago.tipo }}">
+                                {{ medio_pago.get_tipo_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if medio_pago.activo %}
+                                <span class="status-badge status-activo">
+                                    ✓ Activo
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactivo">
+                                    ✗ Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="detalles-cell">
+                                {% if medio_pago.tipo == 'transferencia' %}
+                                    Moneda: {{ medio_pago.get_moneda_transferencia_display }}
+                                {% elif medio_pago.tipo == 'billetera_electronica' %}
+                                    {{ medio_pago.get_tipo_billetera_display }}<br>
+                                    <small>{{ medio_pago.numero_billetera }}</small>
+                                {% elif medio_pago.tipo == 'tarjeta_credito' %}
+                                    Cuenta: {{ medio_pago.get_cuenta_destino_display }}<br>
+                                    <small>{{ medio_pago.numero_cuenta }}</small>
+                                {% elif medio_pago.tipo == 'cheque' %}
+                                    Solo compra extranjera<br>
+                                    Moneda: {{ medio_pago.get_moneda_cheque_display }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {{ medio_pago.created_at|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="{% url 'medios_pago:medio_pago_detalle' medio_pago.pk %}" class="btn-action btn-ver" title="Ver detalles">
+                                    Ver
+                                </a>
+                                <a href="{% url 'medios_pago:medio_pago_editar' medio_pago.pk %}" class="btn-action btn-editar" title="Editar">
+                                    Editar
+                                </a>
+                                {% if perms.medios_pago.activacion %}
+                                    {% if medio_pago.activo %}
+                                        <form method="post" action="{% url 'medios_pago:medio_pago_cambiar_estado' medio_pago.pk %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action btn-desactivar" title="Desactivar" onclick="return confirm('¿Está seguro de desactivar este medio de pago?')">
+                                                Desactivar
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{% url 'medios_pago:medio_pago_cambiar_estado' medio_pago.pk %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action btn-activar" title="Activar">
+                                                Activar
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                                <a href="{% url 'medios_pago:medio_pago_eliminar' medio_pago.pk %}" class="btn-action btn-eliminar" title="Eliminar">
+                                    Eliminar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="padding: 2rem; text-align: center; color: #6c757d; font-style: italic;">
+                            No se encontraron medios de pago que coincidan con los filtros aplicados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="no-medios">
+            <div class="no-medios-icon">💳</div>
+            <h3>No hay medios de pago configurados</h3>
+            <p>Aún no se han configurado medios de pago en el sistema. Configure los medios de pago disponibles para las operaciones de cambio.</p>
+            <a href="{% url 'medios_pago:medio_pago_crear' %}" class="btn-crear-primero">
+                Crear Primer Medio de Pago
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

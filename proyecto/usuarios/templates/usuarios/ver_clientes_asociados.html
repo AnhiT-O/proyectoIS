@@ -1,325 +1,120 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Mis Clientes - Casa de Cambios{% endblock %}
+{% block title %}Mis Clientes - Global Exchange{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'perfil.css' %}">
 <style>
-    .main-content {
-        padding: 2rem 1rem;
-        min-height: 100vh;
-    }
-
-    .clientes-container {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        margin: 0 auto;
-        max-width: 1200px;
-    }
-
-    .clientes-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .logo {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 0.5rem;
-    }
-
-    .subtitle {
-        color: #666;
-        font-size: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .stats-bar {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-
-    .stats-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #667eea;
-    }
-
-    .stats-label {
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .cliente-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        border: 1px solid #e1e5e9;
-    }
-
-    .cliente-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        border-color: #667eea;
-    }
-
-    .cliente-info {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .cliente-nombre {
-        font-weight: 600;
-        color: #333;
-        font-size: 1.1rem;
-    }
-
-    .cliente-detalle {
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .cliente-label {
-        font-weight: 600;
-        color: #666;
-        margin-right: 0.5rem;
-    }
-
-    .cliente-tipo {
-        text-align: right;
-    }
-
-    .badge {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 0.8rem;
-    }
-
-    .badge-fisica {
-        background: #d1ecf1;
-        color: #0c5460;
-    }
-
-    .badge-juridica {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #666;
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        color: #ddd;
-        margin-bottom: 1rem;
-    }
-
-    .btn-back {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        display: inline-block;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        margin-top: 2rem;
-    }
-
-    .btn-back:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        color: white;
-    }
-
-    .btn-seleccionar {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        text-decoration: none;
-        display: inline-block;
-        font-weight: 500;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        margin-top: 0.5rem;
-    }
-
-    .btn-seleccionar:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        color: white;
-    }
-
-    .btn-activo {
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-        cursor: not-allowed;
-    }
-
-    .btn-activo:hover {
-        transform: none;
-        box-shadow: none;
-    }
-
-    .cliente-activo-badge {
-        background: #d4edda;
-        color: #155724;
+    .status-badge {
         padding: 0.3rem 0.8rem;
         border-radius: 15px;
         font-size: 0.8rem;
         font-weight: 600;
         display: inline-block;
-        margin-top: 0.5rem;
     }
 
-    .cliente-info {
+    .status-cliente-activo {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-sin-cliente {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .clientes-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 200px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1rem;
-        align-items: center;
+        margin-top: 1rem;
     }
 
-    @media (max-width: 768px) {
-        .clientes-container {
-            padding: 1.5rem;
-            margin: 1rem;
-        }
-        
-        .cliente-info {
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-        
-        .cliente-tipo {
-            text-align: left;
-        }
+    .cliente-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: fit-content;
     }
+
+    .cliente-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .cliente-activo {
+        background-color: #f0fdf3 !important;
+        border-left-color: #10b981 !important;
+    }
+    .zona-acciones {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="clientes-container">
-    <div class="clientes-header">
-        <div class="logo">👥 Mis Clientes</div>
-        <p class="subtitle">
-            Clientes con los que estás autorizado a operar
-        </p>
-        {% if cliente_activo %}
-        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-            <strong>Cliente Activo:</strong> {{ cliente_activo.nombre }} {{ cliente_activo.apellido }}
-        </div>
-        {% else %}
-        <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-            <strong>Nota:</strong> No tienes ningún cliente seleccionado para operar
-        </div>
-        {% endif %}
+<div class="container">
+    <div class="profile-header">
+        <div class="logo">👥 {{ usuario.username}}</div>
+        <h1 class="welcome-text">Mis Clientes</h1>
+        <p class="subtitle">Clientes con los que estás autorizado a operar</p>
     </div>
 
-    <div class="stats-bar">
-        <div class="stats-number">{{ total_clientes }}</div>
-        <div class="stats-label">Cliente{{ total_clientes|pluralize:"s" }} asociado{{ total_clientes|pluralize:"s" }}</div>
-    </div>
-
-    {% if clientes %}
-        <div class="clientes-list">
-            {% for cliente in clientes %}
-            <div class="cliente-card">
-                <div class="cliente-info">
-                    <div>
-                        <div class="cliente-nombre">
-                            {{ cliente.nombre }} {{ cliente.apellido }}
+    <div class="profile-content">
+        <!-- Lista de clientes -->
+        {% if clientes %}
+            <div class="clientes-grid">
+                {% for cliente in clientes %}
+                <div class="cliente-card {% if cliente == cliente_activo %}cliente-activo{% endif %}">
+                    <h2 class="info-title">{{ cliente.nombre }} {{ cliente.apellido }}</h2>
+                    <!-- Información del cliente -->
+                    <div style="margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.5rem;">
+                            <span style="color: #666; font-weight: bold;">{{ cliente.get_tipoDocCliente_display }}:</span>
+                            <span style="color: #333;">{{ cliente.docCliente }}</span>
                         </div>
-                        <div class="cliente-detalle">
-                            <span class="cliente-label">Email:</span>{{ cliente.correoElecCliente }}
-                        </div>
-                        <div class="cliente-detalle">
-                            <span class="cliente-label">Teléfono:</span>{{ cliente.telefono }}
+                        <div style="margin-bottom: 1rem;">
+                            <span style="color: #666; font-weight: bold;">Tipo:</span>
+                            <span style="color: #333;">{{ cliente.get_tipoCliente_display }}</span>
                         </div>
                     </div>
-                    
-                    <div>
-                        <div class="cliente-detalle">
-                            <strong>{{ cliente.get_tipoDocCliente_display }}:</strong> {{ cliente.docCliente }}
-                        </div>
-                        {% if cliente.direccion %}
-                        <div class="cliente-detalle">
-                            <span class="cliente-label">Dirección:</span>{{ cliente.direccion|truncatechars:50 }}
-                        </div>
-                        {% endif %}
-                        {% if cliente.ocupacion %}
-                        <div class="cliente-detalle">
-                            <span class="cliente-label">Ocupación:</span>{{ cliente.ocupacion }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="cliente-tipo">
-                        {% if cliente.tipoCliente == 'F' %}
-                            <span class="badge badge-fisica">
-                                👤 Persona Física
-                            </span>
-                        {% else %}
-                            <span class="badge badge-juridica">
-                                🏢 Persona Jurídica
-                            </span>
-                        {% endif %}
-                        
-                        {% if cliente.declaracion_jurada %}
-                        <div class="cliente-detalle" style="margin-top: 0.5rem;">
-                             Declaración Jurada
-                        </div>
-                        {% else %}
-                        <div class="cliente-detalle" style="margin-top: 0.5rem;">
-                             Sin Declaración Jurada
-                        </div>
-                        {% endif %}
 
-                        <!-- Botón para seleccionar cliente activo -->
+                    <!-- Botón de detalles -->
+                    <div class="zona-acciones">
                         {% if cliente == cliente_activo %}
-                            <div class="cliente-activo-badge">
-                                ✓ Cliente Activo
-                            </div>
+                                <span class="etiqueta-activo">Seleccionado</span>
                         {% else %}
-                            <form method="post" action="{% url 'usuarios:seleccionar_cliente_activo' cliente.id %}" style="margin-top: 0.5rem;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-seleccionar" 
-                                        onclick="return confirm('¿Confirmas que quieres seleccionar a {{ cliente.nombre }} {{ cliente.apellido }} como tu cliente activo?')">
-                                    Seleccionar como Activo
-                                </button>
-                            </form>
+                                <form method="post" action="{% url 'usuarios:seleccionar_cliente_activo' cliente.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-activar" 
+                                            onclick="return confirm('¿Confirmas que quieres seleccionar a {{ cliente.nombre }} {{ cliente.apellido }} como tu cliente activo?')">
+                                        Seleccionar
+                                    </button>
+                                </form>
                         {% endif %}
+                        <a href="{% url 'usuarios:detalle_cliente' cliente.id %}" class="btn-ver">
+                            Ver Detalles
+                        </a>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty-state">
-            <div class="empty-icon">👥</div>
-            <h3>No tienes clientes asignados</h3>
-            <p>Contacta al administrador para que te asigne clientes con los que puedas operar.</p>
-        </div>
-    {% endif %}
-
-    <div style="text-align: center;">
-        <a href="{% url 'inicio' %}" class="btn-back">
-            Volver al Inicio
-        </a>
+        {% else %}
+            <div class="profile-info">
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <h3>No tienes clientes asignados</h3>
+                    <p>Contacta al administrador para que te asigne clientes con los que puedas operar.</p>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
