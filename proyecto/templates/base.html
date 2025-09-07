@@ -56,6 +56,14 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
+
+                                    <!-- Gestión de Cotizaciones -->
+                                    {% if perms.clientes %}
+                                        <a href="{% url 'cotizacion:cotizacion_lista' %}" class="gestion-seleccion">
+                                            💹 Gestionar Cotizaciones
+                                        </a>
+                                    {% endif %}
+                                  
                                 </div>
                             </div>
                         {% endif %}
