@@ -15,9 +15,9 @@ class Moneda(models.Model):
         null=False
     )
     activa = models.BooleanField(default=True)
-    tasa_base = models.IntegerField(default=0)
-    comision_compra = models.IntegerField(default=0)
-    comision_venta = models.IntegerField(default=0)
+    tasa_base = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Tasa base')
+    comision_compra = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Comisión de compra')
+    comision_venta = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Comisión de venta')
     decimales = models.SmallIntegerField(default=3)
 
     class Meta:

@@ -108,19 +108,42 @@
             </div>
         {% endif %}
 
-        <div class="zona-botones">
-            <button type="submit" class="btn-enviar">
+                <div class="zona-botones">
+            <button type="submit" class="btn-primario">
                 {% if form.instance.pk %}
-                    Editar Moneda
+                    Guardar Cambios
                 {% else %}
                     Crear Moneda
                 {% endif %}
             </button>
-            <a href="{% url 'monedas:lista_monedas' %}" class="btn-atras">
-                Cancelar
-            </a>
+            <a href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'monedas:lista_monedas' %}{% endif %}" class="btn-secundario">Cancelar</a>
         </div>
     </form>
+    
+    <script>
+        // Si el formulario se envía exitosamente, redirigir a la página de retorno si existe
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const returnUrl = '{{ request.GET.return_url|escapejs }}';
+            if (returnUrl) {
+                e.preventDefault();
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = returnUrl;
+                    } else {
+                        this.submit();
+                    }
+                }).catch(() => {
+                    this.submit();
+                });
+            }
+        });
+    </script>
     </div>
 </div>
 {% endblock %}

@@ -50,12 +50,20 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Configuración de internacionalización
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Asuncion'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 ROOT_URLCONF = 'proyecto.urls'
 

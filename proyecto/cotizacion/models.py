@@ -65,10 +65,17 @@ class Cotizacion(models.Model):
         Obtiene los precios de compra y venta para un cliente específico
         aplicando su porcentaje de beneficio.
         """
-        # Obtiene el segmento del cliente y busca la cotización correspondiente
+        # Si hay un cliente, usamos su beneficio_segmento
+        porcentaje_beneficio = 0
+        if cliente:
+            porcentaje_beneficio = cliente.beneficio_segmento
+        # Si no hay cliente pero hay segmentación específica en la cotización
+        elif self.segmentacion:
+            porcentaje_beneficio = float(self.segmentacion.porcentaje_beneficio)
+        
         return {
-            'precio_venta': self.calcular_precio_venta(float(self.segmentacion.porcentaje_beneficio)),
-            'precio_compra': self.calcular_precio_compra(float(self.segmentacion.porcentaje_beneficio))
+            'precio_venta': self.calcular_precio_venta(porcentaje_beneficio),
+            'precio_compra': self.calcular_precio_compra(porcentaje_beneficio)
         }
 
     class Meta:

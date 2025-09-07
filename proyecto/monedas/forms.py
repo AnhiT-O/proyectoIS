@@ -27,7 +27,9 @@ class MonedaForm(forms.ModelForm):
             'unique': 'Ya existe una moneda con este símbolo.'
         }
     )
-    tasa_base = forms.IntegerField(
+    tasa_base = forms.DecimalField(
+        max_digits=15,
+        decimal_places=2,
         required=False,
         error_messages={
             'min_value': 'La tasa base debe ser un número positivo.'
@@ -38,7 +40,9 @@ class MonedaForm(forms.ModelForm):
             'type': 'number'
         })
     )
-    comision_compra = forms.IntegerField(
+    comision_compra = forms.DecimalField(
+        max_digits=15,
+        decimal_places=2,
         required=False,
         error_messages={
             'min_value': 'La comisión de compra debe ser un número positivo.'
@@ -46,16 +50,20 @@ class MonedaForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'min': '0',
+            'step': '0.01',
             'type': 'number'
         })
     )
-    comision_venta = forms.IntegerField(
+    comision_venta = forms.DecimalField(
+        max_digits=15,
+        decimal_places=2,
         required=False,
         error_messages={
             'min_value': 'La comisión de venta debe ser un número positivo.'
         },
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
+            'step': '0.01',
             'min': '0',
             'type': 'number'
         })

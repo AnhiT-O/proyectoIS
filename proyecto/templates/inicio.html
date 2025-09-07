@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'inicio.css' %}">
+<link rel="stylesheet" href="{% static 'selector-segmento.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -16,6 +17,22 @@
             <div class="cliente-activo">
                 <p>Cliente seleccionado: {{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</p>
                 <p>Segmento: {{ user.cliente_activo.get_segmento_display }}</p>
+            </div>
+        {% endif %}
+        
+        {% if es_admin %}
+            <div class="selector-segmento">
+                <form method="get" action="{% url 'inicio' %}">
+                    <label for="segmento">Ver cotizaciones para segmento:</label>
+                    <select name="segmento" id="segmento" onchange="this.form.submit()">
+                        <option value="">Seleccione un segmento</option>
+                        {% for seg in segmentaciones %}
+                            <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id|stringformat:"i" %}selected{% endif %}>
+                                {{ seg.nombre }} ({{ seg.porcentaje_beneficio }}%)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
             </div>
         {% endif %}
 
@@ -50,11 +67,8 @@
         {% endif %}
 
         <div class="acciones-rapidas">
-            <a href="#" class="btn-primario" onclick="alert('Funcionalidad en desarrollo'); return false;">
-                Ver monedas disponibles
-            </a>
 
-            <a href="#" class="btn-secundario" onclick="alert('Funcionalidad en desarrollo'); return false;">
+            <a href="#" class="btn-primario" onclick="alert('Funcionalidad en desarrollo'); return false;">
                 Simular conversiones
             </a>
         </div>
