@@ -1,7 +1,7 @@
 from django.db import models
 from decimal import Decimal
 from monedas.models import Moneda
-from clientes.models import Cliente, SegmentacionCliente
+from clientes.models import Cliente
 
 class Cotizacion(models.Model):
     id_moneda = models.ForeignKey(
@@ -9,14 +9,6 @@ class Cotizacion(models.Model):
         on_delete=models.PROTECT,  # Protege contra eliminación de monedas que tienen cotizaciones
         related_name='cotizaciones',
         verbose_name='Moneda'
-    )
-    segmentacion = models.ForeignKey(
-        SegmentacionCliente,
-        on_delete=models.PROTECT,  # Protege contra eliminación de segmentaciones con cotizaciones
-        related_name='cotizaciones',
-        verbose_name='Segmentación de Cliente',
-        null=True,  # Permitimos nulos temporalmente para la migración
-        blank=True
     )
     fecha_cotizacion = models.DateTimeField(
         auto_now_add=True,
@@ -57,7 +49,7 @@ class Cotizacion(models.Model):
         comision_compra = Decimal(str(self.id_moneda.comision_compra))
         beneficio = Decimal(str(porcentaje_beneficio)) / Decimal('100')
         
-        precio = tasa_base - comision_compra - (comision_compra * beneficio)
+        precio = tasa_base - comision_compra + (comision_compra * beneficio)
         return round(precio, self.id_moneda.decimales)
 
     def get_precios_cliente(self, cliente):
@@ -69,9 +61,6 @@ class Cotizacion(models.Model):
         porcentaje_beneficio = 0
         if cliente:
             porcentaje_beneficio = cliente.beneficio_segmento
-        # Si no hay cliente pero hay segmentación específica en la cotización
-        elif self.segmentacion:
-            porcentaje_beneficio = float(self.segmentacion.porcentaje_beneficio)
         
         return {
             'precio_venta': self.calcular_precio_venta(porcentaje_beneficio),

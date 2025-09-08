@@ -103,26 +103,6 @@
     text-decoration: underline;
 }
 
-.info-usuario {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border-left: 4px solid #007bff;
-}
-
-.info-label {
-    font-weight: 600;
-    color: #555;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
-
-.info-value {
-    color: #333;
-    font-size: 1rem;
-}
-
 .form-casilla {
     margin-bottom: 0;
     margin-right: 0.5rem;

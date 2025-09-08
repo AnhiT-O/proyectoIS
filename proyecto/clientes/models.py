@@ -1,18 +1,5 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.conf import settings
-
-class SegmentacionCliente(models.Model):
-    porcentaje_beneficio = models.DecimalField(max_digits=5, decimal_places=2)
-    nombre = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'segmentacion_clientes'
-        verbose_name = 'Segmentación de Cliente'
-        verbose_name_plural = 'Segmentaciones de Clientes'
-
-    def __str__(self):
-        return f"{self.nombre} - {self.porcentaje_beneficio}%"
 
 class Cliente(models.Model):
     TIPO_CLIENTE_CHOICES = [

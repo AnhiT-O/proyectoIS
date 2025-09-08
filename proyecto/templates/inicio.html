@@ -14,10 +14,13 @@
         <!-- Contenido para usuarios autenticados -->
         <div class="logo">💰 Global Exchange</div>
         {% if user.cliente_activo %}
-            <div class="cliente-activo">
-                <p>Cliente seleccionado: {{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</p>
-                <p>Segmento: {{ user.cliente_activo.get_segmento_display }}</p>
-            </div>
+        <div class="info-usuario" style="display: inline-block; background-color: #f0fdf3 ;">
+                <div class="info-label">Cliente seleccionado:</div>
+                <div class="info-value">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
+                <div style="margin-top: 0.5rem;"></div>
+                <div class="info-label">Segmento:</div>
+                <div class="info-value">{{ user.cliente_activo.get_segmento_display }}</div>
+        </div>
         {% endif %}
         
         {% if es_admin %}
@@ -27,7 +30,7 @@
                     <select name="segmento" id="segmento" onchange="this.form.submit()">
                         <option value="">Seleccione un segmento</option>
                         {% for seg in segmentaciones %}
-                            <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id|stringformat:"i" %}selected{% endif %}>
+                            <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id %}selected{% endif %}>
                                 {{ seg.nombre }} ({{ seg.porcentaje_beneficio }}%)
                             </option>
                         {% endfor %}
