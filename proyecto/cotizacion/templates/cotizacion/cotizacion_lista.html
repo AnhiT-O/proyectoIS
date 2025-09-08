@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cotizaciones{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cuerpo">
+    <div class="contenido">
+        <div class="gestion-cabecera">
+            <h2>Cotizaciones</h2>
+            {% if perms.cotizacion.add_cotizacion %}
+            <div class="zona-acciones">
+                <a href="{% url 'cotizacion:cotizacion_crear' %}" class="btn-primario">Nueva Cotización</a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+        <div class="mensajes">
+            {% for message in messages %}
+            <div class="mensaje {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if cotizaciones %}
+        <div class="contenedor-tabla">
+            <table class="gestion-tabla">
+                <thead>
+                    <tr>
+                        <th>Moneda</th>
+                        <th>Símbolo</th>
+                        <th>Precio Compra</th>
+                        <th>Precio Venta</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cotizaciones %}
+                    <tr>
+                        {% if item.cotizacion %}
+                            {# Vista de cliente con precios personalizados #}
+                            <td>{{ item.cotizacion.id_moneda.nombre }}</td>
+                            <td><span class="moneda-simbolo">{{ item.cotizacion.id_moneda.simbolo }}</span></td>
+                            <td>{{ item.precio_compra }}</td>
+                            <td>{{ item.precio_venta }}</td>
+                            <td>{{ item.cotizacion.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
+                        {% else %}
+                            {# Vista de administrador #}
+                            <td>{{ item.id_moneda.nombre }}</td>
+                            <td><span class="moneda-simbolo">{{ item.id_moneda.simbolo }}</span></td>
+                            <td>{{ item.calcular_precio_compra }}</td>
+                            <td>{{ item.calcular_precio_venta }}</td>
+                            <td>{{ item.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="mensaje info">
+            No hay cotizaciones disponibles.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

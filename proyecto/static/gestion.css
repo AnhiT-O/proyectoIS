@@ -15,6 +15,19 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.moneda-simbolo {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    min-width: 40px;
+    text-align: center;
+}
+
 .gestion-cabecera{
     display: flex;
     justify-content: space-between;
@@ -302,17 +315,7 @@
     font-weight: 700;
 }
 
-.moneda-simbolo {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 1px;
-    min-width: 50px;
-    text-align: right;
-}
+
 
 /* Estilos específicos para tablas dentro de tarjetas de monedas */
 .tarjeta-moneda .gestion-tabla {
