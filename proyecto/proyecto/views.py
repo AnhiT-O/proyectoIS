@@ -8,9 +8,6 @@ from .forms import LoginForm
 
 from cotizacion.models import Cotizacion
 from monedas.models import Moneda
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Max
 
 def inicio(request):
     """Vista para la página de inicio"""

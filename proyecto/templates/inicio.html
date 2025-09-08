@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Global Exchange - Bienvenido{% endblock %}
 
@@ -56,8 +57,8 @@
                             {% for cotizacion in cotizaciones %}
                                 <tr>
                                     <td><span class="moneda-simbolo">{{ cotizacion.simbolo }}</span> {{ cotizacion.moneda.nombre }}</td>
-                                    <td>{{ cotizacion.precio_compra }}</td>
-                                    <td>{{ cotizacion.precio_venta }}</td>
+                                    <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
+                                    <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
                                     <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
                                 </tr>
                             {% endfor %}

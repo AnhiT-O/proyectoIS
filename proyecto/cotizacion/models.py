@@ -21,36 +21,30 @@ class Cotizacion(models.Model):
         db_table = 'cotizaciones'
         ordering = ['-fecha_cotizacion']
         default_permissions = []  # Deshabilita permisos predeterminados
-        permissions = [
-            ("add_cotizacion", "Puede crear cotizaciones"),
-            ("view_cotizacion", "Puede ver cotizaciones"),
-            ("change_cotizacion", "Puede modificar cotizaciones"),
-            ("delete_cotizacion", "Puede eliminar cotizaciones")
-        ]
 
     def calcular_precio_venta(self, porcentaje_beneficio=0):
         """
         Calcula el precio de venta aplicando el beneficio del cliente.
         precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)
         """
-        tasa_base = Decimal(str(self.id_moneda.tasa_base))
-        comision_venta = Decimal(str(self.id_moneda.comision_venta))
-        beneficio = Decimal(str(porcentaje_beneficio)) / Decimal('100')
+        tasa_base = self.id_moneda.tasa_base
+        comision_venta = self.id_moneda.comision_venta
+        beneficio = porcentaje_beneficio / 100
         
-        precio = tasa_base + comision_venta - (comision_venta * beneficio)
-        return round(precio, self.id_moneda.decimales)
+        precio = int(tasa_base + comision_venta - (comision_venta * beneficio))
+        return precio
 
     def calcular_precio_compra(self, porcentaje_beneficio=0):
         """
         Calcula el precio de compra aplicando el beneficio del cliente.
         precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)
         """
-        tasa_base = Decimal(str(self.id_moneda.tasa_base))
-        comision_compra = Decimal(str(self.id_moneda.comision_compra))
-        beneficio = Decimal(str(porcentaje_beneficio)) / Decimal('100')
-        
-        precio = tasa_base - comision_compra + (comision_compra * beneficio)
-        return round(precio, self.id_moneda.decimales)
+        tasa_base = self.id_moneda.tasa_base
+        comision_compra = self.id_moneda.comision_compra
+        beneficio = porcentaje_beneficio / 100
+
+        precio = int(tasa_base - comision_compra + (comision_compra * beneficio))
+        return precio
 
     def get_precios_cliente(self, cliente):
         """
