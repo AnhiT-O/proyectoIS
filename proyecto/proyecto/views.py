@@ -3,10 +3,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from clientes.models import Cliente
-
 from .forms import LoginForm
-
-from cotizacion.models import Cotizacion
 from monedas.models import Moneda
 
 def inicio(request):
@@ -40,36 +37,31 @@ def inicio(request):
     if request.user.is_authenticated:
         cotizaciones = []
         for moneda in monedas_activas:
-            ultima_cotizacion = (Cotizacion.objects
-                               .filter(id_moneda=moneda)
-                               .order_by('-fecha_cotizacion')
-                               .first())
+            if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+                # Usuario u operador con cliente seleccionado
+                cliente = request.user.cliente_activo
+                precios = moneda.get_precios_cliente(cliente)
+            elif segmento_seleccionado:
+                # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
+                    'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+                }
+            else:
+                # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(0),
+                    'precio_venta': moneda.calcular_precio_venta(0)
+                }
             
-            if ultima_cotizacion:
-                if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
-                    # Usuario u operador con cliente seleccionado
-                    cliente = request.user.cliente_activo
-                    precios = ultima_cotizacion.get_precios_cliente(cliente)
-                elif segmento_seleccionado:
-                    # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
-                    precios = {
-                        'precio_compra': ultima_cotizacion.calcular_precio_compra(porcentaje_beneficio_admin),
-                        'precio_venta': ultima_cotizacion.calcular_precio_venta(porcentaje_beneficio_admin)
-                    }
-                else:
-                    # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
-                    precios = {
-                        'precio_compra': ultima_cotizacion.calcular_precio_compra(0),
-                        'precio_venta': ultima_cotizacion.calcular_precio_venta(0)
-                    }
-                
-                cotizaciones.append({
-                    'moneda': moneda,
-                    'simbolo': moneda.simbolo,
-                    'precio_compra': precios['precio_compra'],
-                    'precio_venta': precios['precio_venta'],
-                    'fecha': ultima_cotizacion.fecha_cotizacion
-                })
+            cotizaciones.append({
+                'moneda': moneda,
+                'simbolo': moneda.simbolo,
+                'precio_compra': precios['precio_compra'],
+                'precio_venta': precios['precio_venta'],
+                'fecha': moneda.fecha_cotizacion
+            })
+        cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
         context['cotizaciones'] = cotizaciones
     
     return render(request, 'inicio.html', context)

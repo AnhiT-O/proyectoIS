@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'clientes',
     'roles',
     'monedas',
-    'cotizacion',
     'medios_pago'
 ]
 

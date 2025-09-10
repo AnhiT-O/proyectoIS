@@ -557,4 +557,3 @@ def detalle_cliente(request, cliente_id):
     except Cliente.DoesNotExist:
         messages.error(request, 'Cliente no encontrado o no autorizado.')
         return redirect('usuarios:mis_clientes')
-

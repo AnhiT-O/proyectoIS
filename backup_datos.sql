@@ -62,9 +62,9 @@ Empresa S.A.	RUC	3456789	empresa@example.com	0983456789	J	Asunción, Paraguay	Em
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales) FROM stdin;
-Euro	EUR	t	8000	250	300	3
-Peso argentino	ARG	t	10	5	7	5
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
+Euro	EUR	t	8000	250	300	3	2025-09-10 12:00:00.000000-03
+Peso argentino	ARG	t	10	5	7	5	2025-09-10 12:00:00.000000-03
 \.
 
 

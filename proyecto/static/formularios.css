@@ -236,3 +236,25 @@
     overflow-y: auto;
     background: #f8f9fa;
 }
+
+.info-usuario {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #007bff;
+    display:inline-block;
+    width: 100%;
+}
+
+.info-titulo {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-valor {
+    color: #333;
+    font-size: 1rem;
+}

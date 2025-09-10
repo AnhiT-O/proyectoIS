@@ -8,9 +8,7 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('roles/', include('roles.urls')),
     path('clientes/', include('clientes.urls')),
-    path('monedas/', include('monedas.urls')),
-    path('cotizaciones/', include('cotizacion.urls')),
-    path('medios-pago/', include('medios_pago.urls', namespace='medios_pago'))
+    path('monedas/', include('monedas.urls'))
 ]
 
 handler403 = 'proyecto.views.custom_permission_denied_view'
