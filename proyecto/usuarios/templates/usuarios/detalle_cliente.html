@@ -8,56 +8,56 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="profile-header">
+<div class="contenido">
+    <div class="cabecera-perfil">
         <div class="logo">👤</div>
-        <h1 class="welcome-text">Detalle del Cliente</h1>
-        <p class="subtitle">Información completa del cliente {{ cliente.nombre }} {{ cliente.apellido }}</p>
+        <h1 class="titulo">Detalle del Cliente</h1>
+        <p class="subtitulo">Información completa del cliente {{ cliente.nombre }}</p>
     </div>
 
-    <div class="profile-content">
-        <div class="profile-info">
-            <h2 class="info-title">Información Personal</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Nombre Completo</div>
-                    <div class="info-value">{{ cliente.nombre }} {{ cliente.apellido }}</div>
+    <div class="zona-perfil">
+        <div class="perfil-info">
+            <h2 class="perfil-titulo">Información Personal</h2>
+            <div class="info-campos">
+                <div class="info-campo">
+                    <div class="info-titulo">Nombre Completo</div>
+                    <div class="info-valor">{{ cliente.nombre }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Tipo de Cliente</div>
-                    <div class="info-value">{{ cliente.get_tipoCliente_display }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Tipo de Cliente</div>
+                    <div class="info-valor">{{ cliente.get_tipoCliente_display }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Correo Electrónico</div>
-                    <div class="info-value">{{ cliente.correoElecCliente }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Correo Electrónico</div>
+                    <div class="info-valor">{{ cliente.correoElecCliente }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Teléfono</div>
-                    <div class="info-value">{{ cliente.telefono }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Teléfono</div>
+                    <div class="info-valor">{{ cliente.telefono }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Tipo de Documento</div>
-                    <div class="info-value">{{ cliente.get_tipoDocCliente_display }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Tipo de Documento</div>
+                    <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Número de Documento</div>
-                    <div class="info-value">{{ cliente.docCliente }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Número de Documento</div>
+                    <div class="info-valor">{{ cliente.docCliente }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Dirección</div>
-                    <div class="info-value">{{ cliente.direccion }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Dirección</div>
+                    <div class="info-valor">{{ cliente.direccion }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Ocupación</div>
-                    <div class="info-value">{{ cliente.ocupacion }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Ocupación</div>
+                    <div class="info-valor">{{ cliente.ocupacion }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Segmento</div>
-                    <div class="info-value">{{ cliente.get_segmento_display }}</div>
+                <div class="info-campo">
+                    <div class="info-titulo">Segmento</div>
+                    <div class="info-valor">{{ cliente.get_segmento_display }}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Declaración Jurada</div>
-                    <div class="info-value">
+                <div class="info-campo">
+                    <div class="info-titulo">Declaración Jurada</div>
+                    <div class="info-valor">
                         {% if cliente.declaracion_jurada %}
                             <span class="etiqueta-activo">Firmada</span>
                         {% else %}
@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div class="actions-section">
+        <div class="zona-acciones">
             <a href="{% url 'usuarios:mis_clientes' %}" class="btn-secundario">
                 Volver a Mis Clientes
             </a>

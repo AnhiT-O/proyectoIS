@@ -23,7 +23,7 @@
                         name="busqueda" 
                         class="texto-busqueda" 
                         value="{{ busqueda }}" 
-                        placeholder="Buscar cliente por nombre, apellido o documento">
+                        placeholder="Buscar cliente por nombre o documento">
             </div>
             <div class="campo-filtro">
                 <select name="segmento" class="select-filtro">
@@ -80,7 +80,7 @@
                 {% for cliente in clientes %}
                 <tr>
                     <td>
-                        {{ cliente.nombre }} {{ cliente.apellido }}
+                        {{ cliente.nombre }}
                     </td>
                     <td>
                         <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
@@ -99,7 +99,7 @@
                     </td>
                     <td>
                         <div class="zona-acciones">
-                            <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-ver" title="Ver detalles">
+                            <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-detalles" title="Ver detalles">
                                 Detalles
                             </a>
                             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-editar" title="Editar">

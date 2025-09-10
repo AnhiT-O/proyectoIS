@@ -6,6 +6,9 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from .models import Moneda
 from .forms import MonedaForm
+from decimal import Decimal
+from django.http import JsonResponse
+from django.utils import formats
 
 def tiene_algun_permiso(view_func):
     """
@@ -21,9 +24,7 @@ def tiene_algun_permiso(view_func):
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
             'monedas.gestion',
-            'monedas.activacion',    # Permiso para activar/desactivar monedas
-            'monedas.cambiar_tasa',  # Permiso para cambiar la tasa base de una moneda
-            'monedas.cambiar_decimales'  # Permiso para cambiar el número de decimales de una moneda
+            'monedas.activacion'    # Permiso para activar/desactivar monedas
         ]
         
         # Verificar si el usuario tiene al menos uno de los permisos
@@ -50,9 +51,7 @@ def puede_editar(view_func):
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
             'monedas.gestion',       # Permiso para editar monedas
-            'monedas.cambiar_tasa',  # Permiso para cambiar la tasa base de una moneda
-            'monedas.cambiar_decimales', # Permiso para cambiar el número de decimales de una moneda
-            'monedas.cambiar_comisiones'  # Permiso para cambiar las comisiones de una moneda
+            'monedas.cotizacion'  # Permiso para cambiar la tasa base de una moneda
         ]
         
         # Verificar si el usuario tiene al menos uno de los permisos
@@ -137,17 +136,12 @@ def moneda_editar(request, pk):
         form = MonedaForm(request.POST, instance=moneda)
     else:
         form = MonedaForm(instance=moneda)
+
     if not request.user.has_perm('monedas.gestion'):
     # Elimina campos según permisos
         form.fields.pop('nombre')
         form.fields.pop('simbolo')
-        if not request.user.has_perm('monedas.cambiar_tasa'):
-            form.fields.pop('tasa_base')
-        if not request.user.has_perm('monedas.cambiar_decimales'):
-            form.fields.pop('decimales')
-        if not request.user.has_perm('monedas.cambiar_comisiones'):
-            form.fields.pop('comision_compra')
-            form.fields.pop('comision_venta')
+        form.fields.pop('decimales')
 
     # Procesa el formulario
     if request.method == 'POST':
@@ -158,3 +152,101 @@ def moneda_editar(request, pk):
         else:
             messages.error(request, 'Error al actualizar la moneda.')
     return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})
+
+@login_required
+def simular(request):
+    if request.method == 'GET':
+        monedas = Moneda.objects.filter(activa=True)
+        return render(request, 'monedas/simulador.html', {'monedas': monedas})
+
+    elif request.method == 'POST':
+        try:
+            moneda_id = request.POST.get('moneda')
+            monto_str = request.POST.get('monto', '').strip()
+            operacion = request.POST.get('operacion')
+
+            # Validaciones simples
+            errores = {}
+            
+            # Validar moneda requerida
+            if not moneda_id:
+                errores['moneda'] = ['Debe seleccionar una moneda.']
+            else:
+                try:
+                    moneda = Moneda.objects.get(id=moneda_id, activa=True)
+                except Moneda.DoesNotExist:
+                    errores['moneda'] = ['La moneda seleccionada no es válida.']
+            
+            # Validar monto requerido y mínimo
+            if not monto_str:
+                errores['monto'] = ['El monto es obligatorio.']
+            else:
+                try:
+                    monto = Decimal(monto_str)
+                    if monto <= 0:
+                        errores['monto'] = ['El monto debe ser mayor a 0.']
+                    elif operacion == 'compra':
+                        # Para compra (PYG), no permitir decimales
+                        if '.' in monto_str and monto_str.split('.')[1] != '0':
+                            errores['monto'] = ['Para compra, ingrese solo números enteros (guaraníes).']
+                        elif monto < 1:
+                            errores['monto'] = ['El monto mínimo para compra es 1 guaraní.']
+                    elif operacion == 'venta':
+                        # Para venta, usar los decimales de la moneda seleccionada
+                        if 'moneda' in locals():
+                            monto_minimo = Decimal('1') / (Decimal('10') ** moneda.decimales)
+                            if monto < monto_minimo:
+                                errores['monto'] = [f'El monto mínimo para venta es {monto_minimo} {moneda.simbolo}.']
+                        else:
+                            # Fallback si no se puede obtener la moneda
+                            if monto < Decimal('0.01'):
+                                errores['monto'] = ['El monto mínimo para venta es 0.01.']
+                except (ValueError, TypeError):
+                    errores['monto'] = ['Por favor, ingrese un monto válido.']
+            
+            # Si hay errores, devolverlos
+            if errores:
+                return JsonResponse({
+                    'success': False,
+                    'errors': errores
+                })
+
+            # Si todo está bien, realizar la conversión
+            monto = Decimal(monto_str)
+            
+            # Obtener el cliente activo si el usuario está autenticado
+            cliente = None
+            if request.user.is_authenticated and hasattr(request.user, 'cliente_activo'):
+                cliente = request.user.cliente_activo
+
+            # Obtener precios según la segmentación del cliente
+            precios = moneda.get_precios_cliente(cliente) if cliente else {
+                'precio_compra': moneda.calcular_precio_compra(),
+                'precio_venta': moneda.calcular_precio_venta()
+            }
+
+            # Realizar la conversión según el tipo de operación
+            if operacion == 'venta':
+                # Venta: moneda extranjera a PYG
+                resultado = monto * precios['precio_compra']
+                return JsonResponse({
+                    'success': True,
+                    'resultado_numerico': int(resultado),
+                    'tipo_resultado': 'guaranies'
+                })
+            else:  # compra
+                # Compra: PYG a moneda extranjera
+                resultado = monto / precios['precio_venta']
+                return JsonResponse({
+                    'success': True,
+                    'resultado_numerico': float(resultado),
+                    'decimales': moneda.decimales,
+                    'simbolo': moneda.simbolo,
+                    'tipo_resultado': 'moneda_extranjera'
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': 'Ocurrió un error al procesar la conversión.'
+            })

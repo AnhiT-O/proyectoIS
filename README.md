@@ -115,14 +115,16 @@ python manage.py makemigrations #si hiciste algún cambio en models, este comand
 python manage.py migrate #exportará los cambios preparados a la base de datos
 python manage.py runserver #correrá el proyecto
 ```
-- **(Opcional)** Si deseas usar los datos del archivo `backup_datos.sql`, posicionate en el directorio donde está el archivo, luego: 
-
-```bash
-sudo cp backup_datos.sql /var/lib/postgresql/backup_datos.sql # para copiar el archivo al directorio donde 'postgres' tiene permiso de usarlo para su base de datos, esto solo hacelo una vez
-sudo -i -u postgres
-psql -d bd_desarrollo < backup_datos.sql
-exit
-```
+  - Si necesitas reestablecer la base de datos debes posicionarte en ProyectoIS, luego: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo
+  python manage.py runserver
+  ```
+  - Si deseas usar `backup_datos.sql`: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo backup_datos.sql
+  python manage.py runserver
+  ```
 - Se podrá ver los resultados del proyecto en: http://localhost:8000/
 
 ## Ejecutar proyecto en producción
@@ -215,23 +217,31 @@ sudo systemctl restart nginx
   - Encargado de clientes: Permisos de crear y asignar clientes
 
 - Roles actualizados:
-  - Analista cambiario: Permisos de cambiar tasa base y decimales a mostrar
+  - Analista cambiario: Permisos de activar/desactivar monedas y cambiar cotizaciones
 
-- Cliente añadido: Juan Pérez
+- 12 clientes añadidos
 
-- Monedas añadidas: Dolar estadounidense, Euro, Peso argentino
+- Monedas añadidas: Euro, Peso argentino
 
 - Usuarios añadidos:
   - Nombre de usuario: admin
     - Contraseña: admin123.
     - Rol: Administrador
-  - Nombre de usuario: brandonariel98
-    - Contraseña: qweqweqwe.1
-    - Rol: Operador
-    - Cliente asignado: Juan Pérez
-  - Nombre de usuario: irismendoza
+  - Nombre de usuario: iris
     - Contraseña: qweqweqwe.1
     - Roles: Moderador de usuario, Encargado de clientes
   - Nombre de usuario: aylen
     - Contraseña: qweqweqwe.1
     - Rol: Analista cambiario
+  - Nombre de usuario: brandon
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar
+  - Nombre de usuario: josias
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar
+  - Nombre de usuario: anahi
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar

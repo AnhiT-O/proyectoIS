@@ -11,13 +11,6 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    apellido = forms.CharField(
-        error_messages={
-            'required': 'Debes ingresar el apellido.',
-            'max_length': 'El apellido no puede exceder los 100 caracteres.'
-        },
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
     docCliente = forms.CharField(
         error_messages={
             'required': 'Debes ingresar el número de documento.',
@@ -85,7 +78,6 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = [
             'nombre', 
-            'apellido',
             'tipoDocCliente',
             'docCliente',
             'correoElecCliente',

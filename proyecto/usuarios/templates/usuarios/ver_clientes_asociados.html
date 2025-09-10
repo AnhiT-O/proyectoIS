@@ -5,116 +5,55 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'perfil.css' %}">
-<style>
-    .status-badge {
-        padding: 0.3rem 0.8rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: inline-block;
-    }
-
-    .status-cliente-activo {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-sin-cliente {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .clientes-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .cliente-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: fit-content;
-    }
-
-    .cliente-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .cliente-activo {
-        background-color: #f0fdf3 !important;
-        border-left-color: #10b981 !important;
-    }
-    .zona-acciones {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    align-items: center;
-}
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="profile-header">
+<div class="contenido">
+    <div class="cabecera-perfil">
         <div class="logo">👥 {{ usuario.username}}</div>
-        <h1 class="welcome-text">Mis Clientes</h1>
-        <p class="subtitle">Clientes con los que estás autorizado a operar</p>
+        <h1 class="titulo">Mis Clientes</h1>
+        <p class="subtitulo">Clientes con los que estás autorizado a operar</p>
     </div>
 
-    <div class="profile-content">
-        <!-- Lista de clientes -->
-        {% if clientes %}
-            <div class="clientes-grid">
-                {% for cliente in clientes %}
-                <div class="cliente-card {% if cliente == cliente_activo %}cliente-activo{% endif %}">
-                    <h2 class="info-title">{{ cliente.nombre }} {{ cliente.apellido }}</h2>
+    <div class="zona-perfil">
+    <!-- Lista de clientes -->
+    {% if clientes %}
+        <div class="info-campos">
+            {% for cliente in clientes %}
+            <div class="perfil-info {% if cliente == cliente_activo %}cliente-activo{% endif %}">
+                <h2 class="perfil-titulo">{{ cliente.nombre }}</h2>
+                <div class="info-campos" style="margin-bottom: 1rem;">
                     <!-- Información del cliente -->
-                    <div style="margin-bottom: 1rem;">
-                        <div style="margin-bottom: 0.5rem;">
-                            <span style="color: #666; font-weight: bold;">{{ cliente.get_tipoDocCliente_display }}:</span>
-                            <span style="color: #333;">{{ cliente.docCliente }}</span>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <span style="color: #666; font-weight: bold;">Tipo:</span>
-                            <span style="color: #333;">{{ cliente.get_tipoCliente_display }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Botón de detalles -->
-                    <div class="zona-acciones">
-                        {% if cliente == cliente_activo %}
-                                <span class="etiqueta-activo">Seleccionado</span>
-                        {% else %}
-                                <form method="post" action="{% url 'usuarios:seleccionar_cliente_activo' cliente.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-activar" 
-                                            onclick="return confirm('¿Confirmas que quieres seleccionar a {{ cliente.nombre }} {{ cliente.apellido }} como tu cliente activo?')">
-                                        Seleccionar
-                                    </button>
-                                </form>
-                        {% endif %}
-                        <a href="{% url 'usuarios:detalle_cliente' cliente.id %}" class="btn-ver">
-                            Ver Detalles
-                        </a>
+                    <div class="info-campo">
+                        <div class="info-titulo">{{ cliente.get_tipoDocCliente_display }}:</div>
+                        <div class="info-valor">{{ cliente.docCliente }}</div>
+                    </div>  
+                    <div class="info-campo">
+                        <div class="info-titulo">Segmentación:</div>
+                        <div class="info-valor">{{ cliente.get_segmento_display }}</div>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="profile-info">
-                <div class="empty-state">
-                    <div class="empty-icon">👥</div>
-                    <h3>No tienes clientes asignados</h3>
-                    <p>Contacta al administrador para que te asigne clientes con los que puedas operar.</p>
+                <!-- Botón de detalles -->
+                <div class="zona-acciones">
+                    {% if cliente == cliente_activo %}
+                            <span class="etiqueta-activo">Seleccionado</span>
+                    {% else %}
+                            <form method="post" action="{% url 'usuarios:seleccionar_cliente_activo' cliente.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-activar" 
+                                        onclick="return confirm('¿Confirmas que quieres seleccionar a {{ cliente.nombre }} como tu cliente activo?')">
+                                    Seleccionar
+                                </button>
+                            </form>
+                    {% endif %}
+                    <a href="{% url 'usuarios:detalle_cliente' cliente.id %}" class="btn-detalles">
+                        Ver Detalles
+                    </a>
                 </div>
             </div>
-        {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
     </div>
 </div>
 {% endblock %}

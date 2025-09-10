@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ cliente.nombre }} {{ cliente.apellido }} - Global Exchange{% endblock %}
+{% block title %}{{ cliente.nombre }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'detalles.css' %}">
@@ -11,7 +11,7 @@
 <div class="contenido">
     <div class="detalle-cabecera">
         <h1 class="detalle-nombre">
-                {{ cliente.nombre }} {{ cliente.apellido }}
+                {{ cliente.nombre }}
         </h1>
         <div class="detalle-tipo">
             {{ cliente.get_tipoCliente_display }}

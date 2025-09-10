@@ -6,12 +6,12 @@
     padding: 2rem;
 }  
 
-.container {
+.contenido {
     max-width: 800px;
     margin: 0 auto;
 }
 
-.profile-header {
+.cabecera-perfil {
     background: white;
     padding: 2rem;
     border-radius: 15px 15px 0 0;
@@ -27,32 +27,37 @@
     margin-bottom: 0.5rem;
 }
 
-.welcome-text {
+.titulo {
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 0.5rem;
 }
 
-.subtitle {
+.subtitulo {
     color: #666;
     font-size: 1rem;
 }
 
-.profile-content {
+.zona-perfil {
     background: white;
     padding: 2rem;
     border-radius: 0 0 15px 15px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
-.profile-info {
+.perfil-info {
     background: #f8f9fa;
     padding: 1.5rem;
     border-radius: 10px;
     margin-bottom: 2rem;
 }
 
-.info-title {
+.perfil-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.perfil-titulo{
     font-size: 1.2rem;
     font-weight: 600;
     color: #333;
@@ -61,39 +66,39 @@
     padding-bottom: 0.5rem;
 }
 
-.info-grid {
+.info-campos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
 }
 
-.profile-info:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.info-item {
+.info-campo {
     background: white;
     padding: 1rem;
     border-radius: 8px;
     border-left: 4px solid #667eea;
 }
 
-.info-label {
+.info-titulo {
     font-weight: 600;
     color: #555;
     font-size: 0.9rem;
     margin-bottom: 0.25rem;
 }
 
-.info-value {
+.info-valor {
     color: #333;
     font-size: 1rem;
 }
 
-.actions-section {
+.zona-acciones {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+.cliente-activo {
+    background-color: #f0fdf3;
+    border-left-color: #10b981;
 }

@@ -103,14 +103,6 @@
     text-decoration: underline;
 }
 
-.info-usuario {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border-left: 4px solid #007bff;
-}
-
 .form-casilla {
     margin-bottom: 0;
     margin-right: 0.5rem;
@@ -234,4 +226,35 @@
     margin: 0;
     accent-color: #667eea;
     cursor: pointer;
+}
+
+.seccion-permisos {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.info-usuario {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #007bff;
+    display:inline-block;
+    width: 100%;
+}
+
+.info-titulo {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-valor {
+    color: #333;
+    font-size: 1rem;
 }

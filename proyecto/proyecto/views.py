@@ -3,70 +3,65 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from clientes.models import Cliente
-
 from .forms import LoginForm
-
-from cotizacion.models import Cotizacion
 from monedas.models import Moneda
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Max
 
 def inicio(request):
     """Vista para la página de inicio"""
-    from clientes.models import SegmentacionCliente
     context = {}
     
     # Obtener las monedas activas
     monedas_activas = Moneda.objects.filter(activa=True)
     
     # Obtener todas las segmentaciones disponibles
-    segmentaciones = SegmentacionCliente.objects.all()
-    context['segmentaciones'] = segmentaciones
+    segmentaciones_lista = []
+    for key, value in Cliente.BENEFICIOS_SEGMENTO.items():
+        segmentaciones_lista.append({
+            'id': key,
+            'nombre': key.title(),
+            'porcentaje_beneficio': value
+        })
+    context['segmentaciones'] = segmentaciones_lista
     
     # Obtener el segmento seleccionado (solo para administradores)
     segmento_seleccionado = None
-    if request.user.groups.filter(id=3).exists():  # Si es administrador
+    porcentaje_beneficio_admin = 0
+    if request.user.has_perm('monedas.cotizacion'):
         segmento_id = request.GET.get('segmento')
-        if segmento_id:
-            try:
-                segmento_seleccionado = SegmentacionCliente.objects.get(id=segmento_id)
-            except SegmentacionCliente.DoesNotExist:
-                pass
-        context['es_admin'] = True
+        if segmento_id and segmento_id in Cliente.BENEFICIOS_SEGMENTO:
+            segmento_seleccionado = segmento_id
+            porcentaje_beneficio_admin = Cliente.BENEFICIOS_SEGMENTO[segmento_id]
+        context['segmento_seleccionado'] = segmento_seleccionado
     
     # Si el usuario está autenticado
     if request.user.is_authenticated:
         cotizaciones = []
         for moneda in monedas_activas:
-            ultima_cotizacion = (Cotizacion.objects
-                               .filter(id_moneda=moneda)
-                               .order_by('-fecha_cotizacion')
-                               .first())
+            if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+                # Usuario u operador con cliente seleccionado
+                cliente = request.user.cliente_activo
+                precios = moneda.get_precios_cliente(cliente)
+            elif segmento_seleccionado:
+                # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
+                    'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+                }
+            else:
+                # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(0),
+                    'precio_venta': moneda.calcular_precio_venta(0)
+                }
             
-            if ultima_cotizacion:
-                if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
-                    # Usuario u operador con cliente seleccionado
-                    cliente = request.user.cliente_activo
-                    precios = ultima_cotizacion.get_precios_cliente(cliente)
-                elif segmento_seleccionado:
-                    # Administrador con segmento seleccionado
-                    ultima_cotizacion.segmentacion = segmento_seleccionado
-                    precios = ultima_cotizacion.get_precios_cliente(None)
-                else:
-                    # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
-                    precios = {
-                        'precio_compra': ultima_cotizacion.calcular_precio_compra(0),
-                        'precio_venta': ultima_cotizacion.calcular_precio_venta(0)
-                    }
-                
-                cotizaciones.append({
-                    'moneda': moneda,
-                    'simbolo': moneda.simbolo,
-                    'precio_compra': precios['precio_compra'],
-                    'precio_venta': precios['precio_venta'],
-                    'fecha': ultima_cotizacion.fecha_cotizacion
-                })
+            cotizaciones.append({
+                'moneda': moneda,
+                'simbolo': moneda.simbolo,
+                'precio_compra': precios['precio_compra'],
+                'precio_venta': precios['precio_venta'],
+                'fecha': moneda.fecha_cotizacion
+            })
+        cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
         context['cotizaciones'] = cotizaciones
     
     return render(request, 'inicio.html', context)

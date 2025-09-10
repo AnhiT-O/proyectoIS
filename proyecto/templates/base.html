@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Global Exchange{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'global.css' %}">
@@ -25,7 +24,7 @@
                         <!-- Panel de Administración basado en permisos -->
                         {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas %}
                             <div class="panel-gestiones">
-                                <a href="#" class="btn-admin" onclick="toggleAdminMenu(event)">
+                                <a href="#" class="btn-panel" onclick="toggleAdminMenu(event)">
                                     ⚙️ Panel de Gestiones
                                 </a>
                                 <div class="gestion-menu" id="adminMenu">
@@ -56,13 +55,6 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
-
-                                    <!-- Gestión de Cotizaciones -->
-                                    {% if perms.clientes %}
-                                        <a href="{% url 'cotizacion:cotizacion_lista' %}" class="gestion-seleccion">
-                                            💹 Gestionar Cotizaciones
-                                        </a>
-                                    {% endif %}
                                   
                                 </div>
                             </div>
@@ -70,7 +62,7 @@
                         
                         <!-- Mostrar Ver Clientes solo si el usuario tiene clientes asociados -->
                         {% if user.clientes_operados.exists %}
-                            <a href="{% url 'usuarios:mis_clientes' %}" class="btn-admin">
+                            <a href="{% url 'usuarios:mis_clientes' %}" class="btn-panel">
                                 👥 Ver Clientes
                             </a>
                         {% endif %}
@@ -99,7 +91,7 @@
     {% if messages %}
         <div class="zona-alertas">
             {% for message in messages %}
-                <div class="alerta alerta-{{ message.tags }}">
+                <div class="alerta-{{ message.tags }}">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -113,35 +105,6 @@
 
     {% block extra_js %}{% endblock %}
     
-    <!-- JavaScript personalizado para el dropdown del panel de administración -->
-    <script>
-        function toggleAdminMenu(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            const menu = document.getElementById('adminMenu');
-            menu.classList.toggle('show');
-        }
-
-        // Cerrar el menú al hacer clic fuera de él
-        document.addEventListener('click', function(event) {
-            const panelGestiones = document.querySelector('.panel-gestiones');
-            const menu = document.getElementById('adminMenu');
-            
-            if (panelGestiones && menu && !panelGestiones.contains(event.target)) {
-                menu.classList.remove('show');
-            }
-        });
-
-        // Cerrar el menú al presionar Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const menu = document.getElementById('adminMenu');
-                if (menu) {
-                    menu.classList.remove('show');
-                }
-            }
-        });
-    </script>
+    <script src="{% static 'global.js' %}"></script>
 </body>
 </html>

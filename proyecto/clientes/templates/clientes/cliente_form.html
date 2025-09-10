@@ -11,6 +11,7 @@
 
 <div class="contenido extendido">
     <div class="form-cabecera">
+        <h2>{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente</h2>
         <p class="subtitulo">
             {% if form.instance.pk %}
                 Modifica la información del cliente en el sistema
@@ -35,13 +36,12 @@
                     </div>
                 {% endif %}
             </div>
-
             <div class="form-campo">
-                <label for="{{ form.apellido.id_for_label }}">Apellido</label>
-                {{ form.apellido }}
-                {% if form.apellido.errors %}
+                <label for="{{ form.tipoCliente.id_for_label }}">Tipo de Cliente</label>
+                {{ form.tipoCliente }}
+                {% if form.tipoCliente.errors %}
                     <div class="form-errores">
-                        {% for error in form.apellido.errors %}
+                        {% for error in form.tipoCliente.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -103,23 +103,22 @@
 
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.tipoCliente.id_for_label }}">Tipo de Cliente</label>
-                {{ form.tipoCliente }}
-                {% if form.tipoCliente.errors %}
-                    <div class="form-errores">
-                        {% for error in form.tipoCliente.errors %}
-                            <div class="mensaje-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-campo">
                 <label for="{{ form.ocupacion.id_for_label }}">Ocupación</label>
                 {{ form.ocupacion }}
                 {% if form.ocupacion.errors %}
                     <div class="form-errores">
                         {% for error in form.ocupacion.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                {{ form.direccion }}
+                {% if form.direccion.errors %}
+                    <div class="form-errores">
+                        {% for error in form.direccion.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -134,18 +133,6 @@
                 {% if form.segmento.errors %}
                     <div class="form-errores">
                         {% for error in form.segmento.errors %}
-                            <div class="mensaje-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-campo">
-                <label for="{{ form.direccion.id_for_label }}">Dirección</label>
-                {{ form.direccion }}
-                {% if form.direccion.errors %}
-                    <div class="form-errores">
-                        {% for error in form.direccion.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>

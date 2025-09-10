@@ -35,13 +35,12 @@ def cliente_lista(request):
     busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
         clientes = clientes.filter(
-            Q(nombre__icontains=busqueda) | 
-            Q(apellido__icontains=busqueda) |
+            Q(nombre__icontains=busqueda) |
             Q(docCliente__icontains=busqueda)
         )
     
     # Ordenar por nombre
-    clientes = clientes.order_by('nombre', 'apellido')
+    clientes = clientes.order_by('nombre')
     
     # Estadísticas por segmento para mostrar en filtros
     stats_segmentos = {

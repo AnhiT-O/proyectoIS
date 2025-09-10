@@ -32,7 +32,7 @@
                     <td>{{ rol.descripcion|default:"Sin descripción" }}</td>
                     <td>
                         <div class="zona-acciones">
-                            <a href="{% url 'roles:detalle_rol' rol.pk %}" class="btn-ver" title="Ver detalles">
+                            <a href="{% url 'roles:detalle_rol' rol.pk %}" class="btn-detalles" title="Ver detalles">
                                 Detalles
                             </a>
                             <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-editar" title="Editar">
