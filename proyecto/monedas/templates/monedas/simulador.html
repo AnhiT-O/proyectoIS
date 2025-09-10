@@ -56,10 +56,9 @@
 
             <div class="form-campo">
                 <label for="resultado">Resultado:</label>
-                <input type="text" 
-                       id="resultado" 
-                       class="form-control" 
-                       readonly>
+                <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
+                    <div id="resultado" class="info-titulo" style="font-size: large;">&nbsp;</div>
+                </div>
             </div>
 
             <div class="zona-botones">
@@ -69,192 +68,192 @@
         </form>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('simulador-form');
-    const btnCompra = document.querySelector('[data-operacion="compra"]');
-    const btnVenta = document.querySelector('[data-operacion="venta"]');
-    const montoInput = document.getElementById('monto');
-    const monedaSelect = document.getElementById('moneda');
-    const resultadoInput = document.getElementById('resultado');
-    let tipoOperacion = 'compra';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('simulador-form');
+        const btnCompra = document.querySelector('[data-operacion="compra"]');
+        const btnVenta = document.querySelector('[data-operacion="venta"]');
+        const montoInput = document.getElementById('monto');
+        const monedaSelect = document.getElementById('moneda');
+        const resultadoDiv = document.getElementById('resultado');
+        let tipoOperacion = 'compra';
 
-    // Función para actualizar el step y min del input según la operación y moneda
-    function actualizarStepMonto() {
-        if (tipoOperacion === 'compra') {
-            // Para compra: solo números enteros en guaraníes
-            montoInput.step = '1';
-            montoInput.min = '1'; // Monto mínimo de 1000 guaraníes
-        } else {
-            // Para venta: decimales según la moneda seleccionada
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                // Obtener decimales de la moneda desde el backend o usar un valor por defecto
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
-                montoInput.min = montoInput.step; // Monto mínimo igual al step mínimo
+        // Función para actualizar el step y min del input según la operación y moneda
+        function actualizarStepMonto() {
+            if (tipoOperacion === 'compra') {
+                // Para compra: solo números enteros en guaraníes
+                montoInput.step = '1';
+                montoInput.min = '1'; // Monto mínimo de 1000 guaraníes
             } else {
-                montoInput.step = '0.01'; // Valor por defecto
-                montoInput.min = '0.01'; // Monto mínimo por defecto
+                // Para venta: decimales según la moneda seleccionada
+                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+                if (monedaSeleccionada && monedaSeleccionada.value) {
+                    // Obtener decimales de la moneda desde el backend o usar un valor por defecto
+                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                    montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
+                    montoInput.min = montoInput.step; // Monto mínimo igual al step mínimo
+                } else {
+                    montoInput.step = '0.01'; // Valor por defecto
+                    montoInput.min = '0.01'; // Monto mínimo por defecto
+                }
             }
         }
-    }
 
-    // Función para obtener los decimales de una moneda
-    function getDecimalesMoneda(monedaId) {
-        // Crear un objeto con los decimales de las monedas disponibles
-        const monedasDecimales = {
-            {% for moneda in monedas %}'{{ moneda.id }}': {{ moneda.decimales }}{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        };
-        return monedasDecimales[monedaId] || 2; // Por defecto 2 decimales
-    }
-
-    // Manejador de botones de operación
-    function toggleOperacion(btn) {
-        // Restaurar estilos por defecto
-        if (btn === btnCompra) {
-            btnCompra.classList.remove('btn-secundario');
-            btnCompra.classList.add('btn-primario', 'activo');
-            btnVenta.classList.remove('btn-primario', 'activo');
-            btnVenta.classList.add('btn-secundario');
-        } else {
-            btnVenta.classList.remove('btn-secundario');
-            btnVenta.classList.add('btn-primario', 'activo');
-            btnCompra.classList.remove('btn-primario', 'activo');
-            btnCompra.classList.add('btn-secundario');
+        // Función para obtener los decimales de una moneda
+        function getDecimalesMoneda(monedaId) {
+            // Crear un objeto con los decimales de las monedas disponibles
+            const monedasDecimales = {
+                {% for moneda in monedas %}'{{ moneda.id }}': {{ moneda.decimales }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            };
+            return monedasDecimales[monedaId] || 2; // Por defecto 2 decimales
         }
-        tipoOperacion = btn.dataset.operacion;
-        
-        // Actualizar placeholder según operación
-        if (tipoOperacion === 'compra') {
-            montoInput.placeholder = 'Ingrese el monto en guaraníes';
-        } else {
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+
+        // Manejador de botones de operación
+        function toggleOperacion(btn) {
+            // Restaurar estilos por defecto
+            if (btn === btnCompra) {
+                btnCompra.classList.remove('btn-secundario');
+                btnCompra.classList.add('btn-primario', 'activo');
+                btnVenta.classList.remove('btn-primario', 'activo');
+                btnVenta.classList.add('btn-secundario');
             } else {
-                montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+                btnVenta.classList.remove('btn-secundario');
+                btnVenta.classList.add('btn-primario', 'activo');
+                btnCompra.classList.remove('btn-primario', 'activo');
+                btnCompra.classList.add('btn-secundario');
             }
+            tipoOperacion = btn.dataset.operacion;
+            
+            // Actualizar placeholder según operación
+            if (tipoOperacion === 'compra') {
+                montoInput.placeholder = 'Ingrese el monto en guaraníes';
+            } else {
+                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+                if (monedaSeleccionada && monedaSeleccionada.value) {
+                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+                } else {
+                    montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+                }
+            }
+                
+            // Actualizar step del input
+            actualizarStepMonto();
+                
+            // Limpiar campos
+            montoInput.value = '';
+            resultadoDiv.textContent = '\u00A0';
+            
+            // Limpiar errores
+            clearErrors();
         }
-            
-        // Actualizar step del input
-        actualizarStepMonto();
-            
-        // Limpiar campos
-        montoInput.value = '';
-        resultadoInput.value = '';
-        
-        // Limpiar errores
-        clearErrors();
-    }
 
-    // Event listener para cambio de moneda
-    monedaSelect.addEventListener('change', function() {
+        // Event listener para cambio de moneda
+        monedaSelect.addEventListener('change', function() {
+            actualizarStepMonto();
+            
+            // Actualizar placeholder si estamos en modo venta
+            if (tipoOperacion === 'venta') {
+                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+                if (monedaSeleccionada && monedaSeleccionada.value) {
+                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+                }
+            }
+            
+            // Limpiar campos cuando cambie la moneda
+            montoInput.value = '';
+            resultadoDiv.textContent = '\u00A0';
+            
+            // Limpiar errores
+            clearErrors();
+        });
+
+        btnCompra.addEventListener('click', () => toggleOperacion(btnCompra));
+        btnVenta.addEventListener('click', () => toggleOperacion(btnVenta));
+
+        // Inicializar step por defecto
         actualizarStepMonto();
-        
-        // Actualizar placeholder si estamos en modo venta
-        if (tipoOperacion === 'venta') {
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Limpiar errores previos
+            clearErrors();
+            
+            const formData = new FormData(form);
+            formData.append('operacion', tipoOperacion);
+
+            fetch('{% url "monedas:simular" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultadoDiv.textContent = data.resultado;
+                } else if (data.errors) {
+                    // Mostrar errores de validación específicos
+                    showErrors(data.errors);
+                } else {
+                    // Mostrar error general
+                    alert(data.error || 'Ocurrió un error al procesar la conversión');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al procesar la conversión');
+            });
+        });
+
+        // Función para mostrar errores
+        function showErrors(errors) {
+            for (const field in errors) {
+                const errorContainer = document.getElementById(field + '-errors');
+                if (errorContainer) {
+                    errorContainer.style.display = 'block';
+                    errorContainer.innerHTML = '';
+                    errors[field].forEach(error => {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'mensaje-error';
+                        errorDiv.textContent = error;
+                        errorContainer.appendChild(errorDiv);
+                    });
+                }
             }
         }
-        
-        // Limpiar campos cuando cambie la moneda
-        montoInput.value = '';
-        resultadoInput.value = '';
-        
-        // Limpiar errores
-        clearErrors();
+
+        // Función para limpiar errores
+        function clearErrors() {
+            const errorContainers = document.querySelectorAll('.form-errores');
+            errorContainers.forEach(container => {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            });
+        }
+
+        // Limpiar errores cuando el usuario empiece a escribir
+        montoInput.addEventListener('input', clearErrors);
+        monedaSelect.addEventListener('change', clearErrors);
     });
 
-    btnCompra.addEventListener('click', () => toggleOperacion(btnCompra));
-    btnVenta.addEventListener('click', () => toggleOperacion(btnVenta));
-
-    // Inicializar step por defecto
-    actualizarStepMonto();
-
-    // Manejar envío del formulario
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Limpiar errores previos
-        clearErrors();
-        
-        const formData = new FormData(form);
-        formData.append('operacion', tipoOperacion);
-
-        fetch('{% url "monedas:simular" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                resultadoInput.value = data.resultado;
-            } else if (data.errors) {
-                // Mostrar errores de validación específicos
-                showErrors(data.errors);
-            } else {
-                // Mostrar error general
-                alert(data.error || 'Ocurrió un error al procesar la conversión');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Ocurrió un error al procesar la conversión');
-        });
-    });
-
-    // Función para mostrar errores
-    function showErrors(errors) {
-        for (const field in errors) {
-            const errorContainer = document.getElementById(field + '-errors');
-            if (errorContainer) {
-                errorContainer.style.display = 'block';
-                errorContainer.innerHTML = '';
-                errors[field].forEach(error => {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'mensaje-error';
-                    errorDiv.textContent = error;
-                    errorContainer.appendChild(errorDiv);
-                });
-            }
-        }
+    function resetForm() {
+        const form = document.getElementById('simulador-form');
+        const btnCompra = document.querySelector('[data-operacion="compra"]');
+        form.reset();
+        toggleOperacion(btnCompra);
     }
-
-    // Función para limpiar errores
-    function clearErrors() {
-        const errorContainers = document.querySelectorAll('.form-errores');
-        errorContainers.forEach(container => {
-            container.style.display = 'none';
-            container.innerHTML = '';
-        });
-    }
-
-    // Limpiar errores cuando el usuario empiece a escribir
-    montoInput.addEventListener('input', clearErrors);
-    monedaSelect.addEventListener('change', clearErrors);
-});
-
-function resetForm() {
-    const form = document.getElementById('simulador-form');
-    const btnCompra = document.querySelector('[data-operacion="compra"]');
-    form.reset();
-    toggleOperacion(btnCompra);
-}
-</script>
-{% endblock %}
+    </script>
 {% endblock %}

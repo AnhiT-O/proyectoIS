@@ -27,6 +27,7 @@
 /* Botón secundario - Acción alternativa */
 .btn-secundario {
     color: #667eea;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     border: 0.5px solid #667eea;
     padding: 0.875rem 1.5rem;
     border-radius: 8px;
@@ -77,6 +78,7 @@
 
 .btn-atras {
     background: transparent;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #667eea;
     border: 0.5px solid #667eea;
     width: auto;
