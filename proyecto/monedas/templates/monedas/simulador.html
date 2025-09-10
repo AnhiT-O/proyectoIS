@@ -72,6 +72,22 @@
 
 {% block extra_js %}
     <script>
+        // Función para formatear números con separadores de miles (equivalente a intcomma)
+        function formatearNumero(numero) {
+            return new Intl.NumberFormat('es-PY', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(numero);
+        }
+
+        // Función para formatear números con decimales específicos
+        function formatearNumeroConDecimales(numero, decimales) {
+            return new Intl.NumberFormat('es-PY', {
+                minimumFractionDigits: decimales,
+                maximumFractionDigits: decimales
+            }).format(numero);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('simulador-form');
         const btnCompra = document.querySelector('[data-operacion="compra"]');
@@ -203,7 +219,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    resultadoDiv.textContent = data.resultado;
+                    // Aplicar formato según el tipo de resultado
+                    if (data.tipo_resultado === 'guaranies') {
+                        resultadoDiv.textContent = `Gs. ${formatearNumero(data.resultado_numerico)}`;
+                    } else if (data.tipo_resultado === 'moneda_extranjera') {
+                        const numeroFormateado = formatearNumeroConDecimales(data.resultado_numerico, data.decimales);
+                        resultadoDiv.textContent = `${numeroFormateado} ${data.simbolo}`;
+                    } else {
+                        // Fallback para compatibilidad
+                        resultadoDiv.textContent = data.resultado;
+                    }
                 } else if (data.errors) {
                     // Mostrar errores de validación específicos
                     showErrors(data.errors);

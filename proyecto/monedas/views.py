@@ -8,7 +8,7 @@ from .models import Moneda
 from .forms import MonedaForm
 from decimal import Decimal
 from django.http import JsonResponse
-from django.contrib.humanize.templatetags.humanize import intcomma
+from django.utils import formats
 
 def tiene_algun_permiso(view_func):
     """
@@ -229,16 +229,21 @@ def simular(request):
             if operacion == 'venta':
                 # Venta: moneda extranjera a PYG
                 resultado = monto * precios['precio_compra']
-                mensaje = f"Gs. {intcomma(int(resultado))}"
+                return JsonResponse({
+                    'success': True,
+                    'resultado_numerico': int(resultado),
+                    'tipo_resultado': 'guaranies'
+                })
             else:  # compra
                 # Compra: PYG a moneda extranjera
                 resultado = monto / precios['precio_venta']
-                mensaje = f"{resultado:.{moneda.decimales}f} {moneda.simbolo}"
-
-            return JsonResponse({
-                'success': True,
-                'resultado': mensaje
-            })
+                return JsonResponse({
+                    'success': True,
+                    'resultado_numerico': float(resultado),
+                    'decimales': moneda.decimales,
+                    'simbolo': moneda.simbolo,
+                    'tipo_resultado': 'moneda_extranjera'
+                })
 
         except Exception as e:
             return JsonResponse({
