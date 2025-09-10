@@ -32,7 +32,7 @@ class CotizacionListView(ListView):
         return context
 
 @method_decorator(login_required, name='dispatch')
-@method_decorator(permission_required('cotizacion.add_cotizacion', raise_exception=True), name='dispatch')
+@method_decorator(permission_required('monedas.cotizacion', raise_exception=True), name='dispatch')
 class CotizacionCreateView(CreateView):
     model = Cotizacion
     template_name = 'cotizacion/cotizacion_form.html'

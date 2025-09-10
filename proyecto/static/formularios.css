@@ -227,3 +227,12 @@
     accent-color: #667eea;
     cursor: pointer;
 }
+
+.seccion-permisos {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}

@@ -29,12 +29,11 @@ def inicio(request):
     # Obtener el segmento seleccionado (solo para administradores)
     segmento_seleccionado = None
     porcentaje_beneficio_admin = 0
-    if request.user.groups.filter(id=3).exists():  # Si es administrador
+    if request.user.has_perm('monedas.cotizacion'):
         segmento_id = request.GET.get('segmento')
         if segmento_id and segmento_id in Cliente.BENEFICIOS_SEGMENTO:
             segmento_seleccionado = segmento_id
             porcentaje_beneficio_admin = Cliente.BENEFICIOS_SEGMENTO[segmento_id]
-        context['es_admin'] = True
         context['segmento_seleccionado'] = segmento_seleccionado
     
     # Si el usuario está autenticado

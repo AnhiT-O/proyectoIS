@@ -131,7 +131,7 @@
                         {{ form.id_moneda }}
                     </div>
                     <div id="editarMonedaContainer" style="display: none; align-self: flex-end; margin-bottom: 2px;">
-                        {% if perms.monedas.gestion or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
+                        {% if perms.monedas.gestion or perms.monedas.cotizacion %}
                         <a href="#" id="btnEditarMoneda" class="btn-editar" style="display: none;" title="Editar moneda">
                             Editar
                         </a>

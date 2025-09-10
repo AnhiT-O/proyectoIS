@@ -35,18 +35,6 @@
                     </div>
                 {% endif %}
             </div>
-
-            <div class="form-campo">
-                <label for="{{ form.apellido.id_for_label }}">Apellido</label>
-                {{ form.apellido }}
-                {% if form.apellido.errors %}
-                    <div class="form-errores">
-                        {% for error in form.apellido.errors %}
-                            <div class="mensaje-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
         </div>
 
         <div class="form-fila">

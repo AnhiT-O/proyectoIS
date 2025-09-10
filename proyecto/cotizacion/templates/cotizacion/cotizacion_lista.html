@@ -12,7 +12,7 @@
     <div class="contenido">
         <div class="gestion-cabecera">
             <h2>Cotizaciones</h2>
-            {% if perms.cotizacion.add_cotizacion %}
+            {% if perms.monedas.cotizacion %}
             <div class="zona-acciones">
                 <a href="{% url 'cotizacion:cotizacion_crear' %}" class="btn-primario">Nueva Cotización</a>
             </div>

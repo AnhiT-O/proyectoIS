@@ -61,7 +61,7 @@
                 <table class="gestion-tabla">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">Estado</th>
+                            <th style="width: 30%;">Estado</th>
                             <th style="width: 30%;">Decimales a mostrar</th>
                             <th style="width: 30%;">Tasa base</th>
                             <th style="width: 30%;">Comisión de compra</th>
@@ -71,7 +71,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-inactivo{% endif %}">
+                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
                                     {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
                                 </span>
                             </td>
@@ -91,7 +91,7 @@
                     </tbody>
                 </table>
             <div class="zona-acciones" style="justify-content: flex-end">
-                {% if perms.monedas.gestion or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
+                {% if perms.monedas.gestion or perms.monedas.cotizacion %}
                 <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-editar" title="Editar moneda">
                     Editar
                 </a>

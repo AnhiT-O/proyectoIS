@@ -30,9 +30,7 @@ class Moneda(models.Model):
         permissions = [
             ("gestion", "Puede gestionar monedas (crear y editar)"),
             ("activacion", "Puede activar/desactivar monedas"),
-            ("cambiar_tasa", "Puede cambiar la tasa base de una moneda"),
-            ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda"),    
-            ("cambiar_comisiones", "Puede cambiar las comisiones de compra y venta de una moneda")
+            ("cotizacion", "Puede actualizar cotización de monedas")
         ]
 
     def clean(self):
@@ -54,7 +52,7 @@ def crear_moneda_usd(sender, **kwargs):
         # Verificar si ya existe la moneda USD
         if not Moneda.objects.filter(simbolo='USD').exists():
             Moneda.objects.create(
-                nombre='Dólar Estadounidense',
+                nombre='Dólar estadounidense',
                 simbolo='USD',
                 activa=True,
                 tasa_base=7400,

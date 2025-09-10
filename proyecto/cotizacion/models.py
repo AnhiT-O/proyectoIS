@@ -61,13 +61,5 @@ class Cotizacion(models.Model):
             'precio_compra': self.calcular_precio_compra(porcentaje_beneficio)
         }
 
-    class Meta:
-        verbose_name = 'Cotización'
-        verbose_name_plural = 'Cotizaciones'
-        db_table = 'cotizaciones'
-        ordering = ['-fecha_cotizacion']  # Ordena por fecha descendente
-        # Asegura que no haya cotizaciones duplicadas para la misma moneda en la misma fecha
-        unique_together = ['id_moneda', 'fecha_cotizacion']
-
     def __str__(self):
         return f"{self.id_moneda.simbolo} - {self.fecha_cotizacion.strftime('%Y-%m-%d %H:%M')}"
