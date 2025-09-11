@@ -4,7 +4,8 @@
 {% block title %}{{ cliente.nombre }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'detalles.css' %}">
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}

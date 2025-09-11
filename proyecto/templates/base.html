@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>{% block title %}Global Exchange{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'global.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'claro/global.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
     {% block extra_css %}{% endblock %}
 </head>
 <body>

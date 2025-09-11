@@ -4,7 +4,8 @@
 {% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'formularios.css' %}">
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}

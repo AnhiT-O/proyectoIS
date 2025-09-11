@@ -4,7 +4,8 @@
 {% block title %}Administrar Clientes - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'gestion.css' %}">
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
