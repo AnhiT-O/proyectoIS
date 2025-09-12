@@ -39,31 +39,27 @@
         {% endif %}
 
         {% if cotizaciones %}
-            <div class="zona-cotizaciones">
-                <h2>Cotizaciones del día</h2>
-                <div class="tabla-cotizaciones">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th width="10%">Moneda</th>
-                                <th width="20%">Compra</th>
-                                <th width="20%">Venta</th>
-                                <th width="30%">Última actualización</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cotizacion in cotizaciones %}
-                                <tr>
-                                    <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.simbolo }}</span></td>
-                                    <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
-                                    <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
-                                    <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <h2 style="margin-bottom: 1rem;">Cotizaciones del día</h2>
+            <table class="tabla-cotizaciones">
+                <thead>
+                    <tr>
+                        <th width="10%">Moneda</th>
+                        <th width="20%">Compra</th>
+                        <th width="20%">Venta</th>
+                        <th width="30%">Última actualización</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cotizacion in cotizaciones %}
+                        <tr>
+                            <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.simbolo }}</span></td>
+                            <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
+                            <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
+                            <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% else %}
             <p class="sin-cotizaciones">No hay monedas registradas aún.</p>
         {% endif %}

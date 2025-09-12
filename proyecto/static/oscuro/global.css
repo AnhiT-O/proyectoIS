@@ -158,12 +158,13 @@
 
 /* Botón para ver detalles */
 .btn-detalles {
-    background-color: #17a2b8;
+    background: linear-gradient(135deg, #17a2b8 0%, #117c8d 100%);
     color: white;
     padding: 0.375rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -171,22 +172,19 @@
     gap: 0.25rem;
 }
 
-.btn-detalles:hover {
-    background-color: #138496;
-    color: white;
-    text-decoration: none;
+.btn-detalles:hover, .btn-editar:hover, .btn-activar:hover, .btn-desactivar:hover {
     transform: scale(1.05);
 }
 
 /* Botón para editar */
 .btn-editar {
-    background-color: #ffc107;
-    color: white;
+    background: linear-gradient(135deg, #ffc107 0%, #daa405 100%);
+    color: #212529;
     padding: 0.375rem 0.75rem;
     border-radius: 6px;
     text-decoration: none;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: bold;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
@@ -195,50 +193,31 @@
     gap: 0.25rem;
 }
 
-.btn-editar:hover {
-    background-color: #e0a800;
-    color: white;
-    text-decoration: none;
-    transform: scale(1.05);
-}
-
 /* Botones para activar y desactivar */
 .btn-activar {
-    background-color: #28a745;
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
     color: white;
     padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
-}
-
-.btn-activar:hover {
-    background-color: #218838;
-    color: white;
-    text-decoration: none;
-    transform: scale(1.05);
 }
 
 .btn-desactivar {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc3545 0%, #a52734 100%);
     color: white;
     padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
-}
-
-.btn-desactivar:hover {
-    background: #c82333;
-    color: white;
-    text-decoration: none;
-    transform: scale(1.05);
 }
 
 .btn-panel {

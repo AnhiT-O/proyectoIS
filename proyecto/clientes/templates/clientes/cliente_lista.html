@@ -65,63 +65,60 @@
             {% endif %}
         </div>
     </div>
-
-    <div class="contenedor-tabla">
-        <table class="gestion-tabla">
-            <thead>
-                <tr>
-                    <th style="width: 25%">Nombre</th>
-                    <th style="width: 18%">Documento</th>
-                    <th style="width: 15%">Segmento</th>
-                    <th style="width: 26%">Contacto</th>
-                    <th style="width: 16%">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cliente in clientes %}
-                <tr>
-                    <td>
-                        {{ cliente.nombre }}
-                    </td>
-                    <td>
-                        <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
-                        <small>{{ cliente.docCliente }}</small>
-                    </td>
-                    <td>
-                        <div>
-                            {{ cliente.get_segmento_display }}
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            📧 {{ cliente.correoElecCliente|truncatechars:30 }}<br>
-                            📞 {{ cliente.telefono }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="zona-acciones">
-                            <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-detalles" title="Ver detalles">
-                                Detalles
-                            </a>
-                            <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-editar" title="Editar">
-                                Editar
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">
-                        {% if busqueda or segmento_filtro %}
-                            No se encontraron clientes que coincidan con los filtros aplicados.
-                        {% else %}
-                            No hay clientes registrados.
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th style="width: 25%">Nombre</th>
+                <th style="width: 18%">Documento</th>
+                <th style="width: 15%">Segmento</th>
+                <th style="width: 26%">Contacto</th>
+                <th style="width: 16%">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>
+                    {{ cliente.nombre }}
+                </td>
+                <td>
+                    <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
+                    <small>{{ cliente.docCliente }}</small>
+                </td>
+                <td>
+                    <div>
+                        {{ cliente.get_segmento_display }}
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        📧 {{ cliente.correoElecCliente|truncatechars:30 }}<br>
+                        📞 {{ cliente.telefono }}
+                    </div>
+                </td>
+                <td>
+                    <div class="zona-acciones">
+                        <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-detalles" title="Ver detalles">
+                            Detalles
+                        </a>
+                        <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-editar" title="Editar">
+                            Editar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    {% if busqueda or segmento_filtro %}
+                        No se encontraron clientes que coincidan con los filtros aplicados.
+                    {% else %}
+                        No hay clientes registrados.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
