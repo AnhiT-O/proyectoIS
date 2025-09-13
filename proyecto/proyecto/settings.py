@@ -154,3 +154,6 @@ SILENCED_SYSTEM_CHECKS = ['auth.W004']
 
 # Manejador personalizado para errores 403
 HANDLER403 = 'proyecto.views.custom_permission_denied_view'
+
+SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
+SESSION_SAVE_EVERY_REQUEST = True  

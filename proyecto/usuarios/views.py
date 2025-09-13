@@ -17,6 +17,7 @@ from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
 from roles.models import Roles
 from django.db.models import Q
+from django.contrib.sessions.models import Session
 
 def tiene_algun_permiso(view_func):
     """
@@ -343,7 +344,11 @@ def bloquear_usuario(request, pk):
         # Cambiar estado de bloqueo del usuario
         usuario.bloqueado = not usuario.bloqueado
         usuario.save()
-        
+        if usuario.is_authenticated and usuario.bloqueado:
+            for session in Session.objects.all():
+                data = session.get_decoded()
+                if data.get('_auth_user_id') == str(usuario.pk):
+                    session.delete()
         estado = 'desbloqueado' if not usuario.bloqueado else 'bloqueado'
         messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
         
