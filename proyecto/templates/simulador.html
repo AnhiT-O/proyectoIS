@@ -210,7 +210,7 @@
             const formData = new FormData(form);
             formData.append('operacion', tipoOperacion);
 
-            fetch('{% url "monedas:simular" %}', {
+            fetch('{% url "simular" %}', {
                 method: 'POST',
                 body: formData,
                 headers: {
