@@ -2,9 +2,9 @@
 
 /* Botón primario - Acción principal */
 .btn-primario {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     color: white;
     padding: 0.875rem 1.5rem;
     border: none;
@@ -21,14 +21,14 @@
 
 .btn-primario:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(79, 95, 247, 0.6);
 }
 
 /* Botón secundario - Acción alternativa */
 .btn-secundario {
-    color: #667eea;
+    color: #8b5cf6;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border: 0.5px solid #667eea;
+    border: 0.5px solid #8b5cf6;
     padding: 0.875rem 1.5rem;
     border-radius: 8px;
     font-size: 1rem;
@@ -44,16 +44,16 @@
 }
 
 .btn-secundario:hover {
-    background: #667eea;
+    background: #8b5cf6;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
 }
 
 /* Botones de formularios */
 .btn-enviar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     color: white;
     width: auto;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -73,14 +73,14 @@
 
 .btn-enviar:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(79, 95, 247, 0.6);
 }
 
 .btn-atras {
     background: transparent;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #667eea;
-    border: 0.5px solid #667eea;
+    color: #8b5cf6;
+    border: 0.5px solid #8b5cf6;
     width: auto;
     flex: 1;
     padding: 0.875rem 1.5rem;
@@ -97,23 +97,23 @@
 }
 
 .btn-atras:hover {
-    background: #667eea;
+    background: #8b5cf6;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
 }
 
 /* Botón de búsqueda */
 .btn-buscar {
     padding: 0.5rem 1.25rem;
     border-radius: 8px;
-    background: linear-gradient(135deg, #667fea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
     border: none;
     color: white;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 10px rgba(79, 95, 247, 0.5);
     font-size: 0.9rem;
     font-weight: bold;
     display: inline-flex;
@@ -124,18 +124,18 @@
 }
 
 .btn-buscar:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    background: linear-gradient(135deg, #3b4acb 0%, #5b61e8 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(79, 95, 247, 0.6);
 }
 
 /* Botón de limpiar búsqueda */
 .btn-limpiar {
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
-    background: #e9ecef;
-    border: 1px solid #ced4da;
-    color: #495057;
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #d1d5db;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
@@ -150,20 +150,21 @@
 }
 
 .btn-limpiar:hover {
-    background: #dee2e6;
-    color: #495057;
+    background: #4b5563;
+    color: #f3f4f6;
     text-decoration: none;
     transform: translateY(-1px);
 }
 
 /* Botón para ver detalles */
 .btn-detalles {
-    background-color: #17a2b8;
+    background: linear-gradient(135deg, #17a2b8 0%, #117c8d 100%);
     color: white;
     padding: 0.375rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -171,22 +172,19 @@
     gap: 0.25rem;
 }
 
-.btn-detalles:hover {
-    background-color: #138496;
-    color: white;
-    text-decoration: none;
+.btn-detalles:hover, .btn-editar:hover, .btn-activar:hover, .btn-desactivar:hover {
     transform: scale(1.05);
 }
 
 /* Botón para editar */
 .btn-editar {
-    background-color: #ffc107;
+    background: linear-gradient(135deg, #ffc107 0%, #daa405 100%);
     color: #212529;
     padding: 0.375rem 0.75rem;
     border-radius: 6px;
     text-decoration: none;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: bold;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
@@ -195,56 +193,37 @@
     gap: 0.25rem;
 }
 
-.btn-editar:hover {
-    background-color: #e0a800;
-    color: #212529;
-    text-decoration: none;
-    transform: scale(1.05);
-}
-
 /* Botones para activar y desactivar */
 .btn-activar {
-    background-color: #28a745;
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
     color: white;
     padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
-}
-
-.btn-activar:hover {
-    background-color: #218838;
-    color: white;
-    text-decoration: none;
-    transform: scale(1.05);
 }
 
 .btn-desactivar {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc3545 0%, #a52734 100%);
     color: white;
     padding: 0.5rem 0.75rem;
     border: none;
     border-radius: 4px;
     font-size: 0.875rem;
+    font-weight: bold;
     text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
-}
-
-.btn-desactivar:hover {
-    background: #c82333;
-    color: white;
-    text-decoration: none;
-    transform: scale(1.05);
 }
 
 .btn-panel {
     cursor: pointer;
     user-select: none;
-    color: #764ba2;
+    color: #8b5cf6;
     padding: 0.875rem 1.5rem;
     border: none;
     border-radius: 8px;
@@ -292,56 +271,57 @@
     padding: 0.75rem 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    background-color: #d4edda;
-    color: #155724;
-    border-left: 4px solid #28a745;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #064e3b;
+    color: #10b981;
+    border-left: 4px solid #10b981;
 }
 
 .alerta-error {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    background-color: #f8d7da;
-    color: #721c24;
-    border-left: 4px solid #dc3545;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #7f1d1d;
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
 }
 
 .alerta-info {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border-left: 4px solid #17a2b8;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #0c4a6e;
+    color: #0ea5e9;
+    border-left: 4px solid #0ea5e9;
 }
 
 .alerta-warning {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff3cd;
-    color: #856404;
-    border-left: 4px solid #ffc107;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #78350f;
+    color: #f59e0b;
+    border-left: 4px solid #f59e0b;
 }
 
 /* ESTILOS PARA LA BARRA DE NAVEGACIÓN */
 
 .zona-barra {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(26, 26, 46, 0.95);
     backdrop-filter: blur(10px);
     padding: 1.5rem 2rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     position: sticky;
     top: 0;
     z-index: 1000;
+    border-bottom: 1px solid #2d3748;
 }
 
 .barra-contenido {
@@ -355,7 +335,7 @@
 .barra-logo {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #667eea;
+    color: #8b5cf6;
     text-decoration: none;
     margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
 }
@@ -376,7 +356,7 @@
 }
 
 .usuario-nombre {
-    color: #333;
+    color: #e0e6ed;
     font-weight: bold;
 }
 
@@ -393,10 +373,10 @@
     z-index: 1000;
     display: none;
     min-width: 250px;
-    background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    background-color: #2d3748;
+    border: 1px solid rgba(139, 92, 246, 0.3);
     border-radius: 0.375rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
     white-space: nowrap;
 }
 
@@ -410,7 +390,7 @@
     padding: 0.5rem 1rem;
     clear: both;
     font-weight: bold;
-    color: #212529;
+    color: #e0e6ed;
     text-decoration: none;
     text-align: left;
     background-color: transparent;
@@ -419,19 +399,19 @@
 }
 
 .gestion-seleccion:not(:last-child) {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .gestion-separador {
     height: 1px;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(139, 92, 246, 0.5);
     margin: 0.25rem 0;
 }
 
 .gestion-seleccion:hover,
 .gestion-seleccion:focus {
     color: white;
-    background-color: #667eea;
+    background-color: #8b5cf6;
 }
 
 /* ESTILOS DE ETIQUETAS */
@@ -489,9 +469,9 @@
 }
 
 .etiqueta-activo {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background: #064e3b;
+    color: #10b981;
+    border: 1px solid #10b981;
     display: inline-flex;
     align-items: center;
     padding: 0.4rem 0.8rem;
@@ -502,9 +482,9 @@
 }
 
 .etiqueta-bloqueado {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: #7f1d1d;
+    color: #ef4444;
+    border: 1px solid #ef4444;
     display: inline-flex;
     align-items: center;
     padding: 0.4rem 0.8rem;
@@ -524,6 +504,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     min-height: 100vh;
+    color: #e0e6ed;
 }

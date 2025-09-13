@@ -5,7 +5,8 @@
 {% block title %}Gestionar Monedas - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'gestion.css' %}">
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -76,16 +77,16 @@
                                 </span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.decimales }}</span>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.decimales }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
                             </td>
                         </tr>
                     </tbody>

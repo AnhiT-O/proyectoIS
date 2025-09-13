@@ -4,7 +4,8 @@
 {% block title %}Simulador de Conversiones{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'formularios.css' %}">
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -57,7 +58,7 @@
             <div class="form-campo">
                 <label for="resultado">Resultado:</label>
                 <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
-                    <div id="resultado" class="info-titulo" style="font-size: large;">&nbsp;</div>
+                    <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
                 </div>
             </div>
 
@@ -209,7 +210,7 @@
             const formData = new FormData(form);
             formData.append('operacion', tipoOperacion);
 
-            fetch('{% url "monedas:simular" %}', {
+            fetch('{% url "simular" %}', {
                 method: 'POST',
                 body: formData,
                 headers: {

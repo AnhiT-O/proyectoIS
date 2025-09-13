@@ -4,7 +4,8 @@
 {% block title %}Acceso Denegado - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'inicio.css' %}">
+<link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}

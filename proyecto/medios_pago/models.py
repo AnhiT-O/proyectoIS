@@ -132,10 +132,6 @@ class MedioPago(models.Model):
         verbose_name = 'Medio de Pago'
         verbose_name_plural = 'Medios de Pago'
         default_permissions = []  # Deshabilita permisos predeterminados
-        permissions = [
-            ("gestion", "Puede gestionar medios de pago (crear y editar)"),
-            ("activacion", "Puede activar/desactivar medios de pago"),
-        ]
         ordering = ['tipo']
 
 

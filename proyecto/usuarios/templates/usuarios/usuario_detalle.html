@@ -4,7 +4,8 @@
 {% block title %}{{ usuario.get_full_name }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'detalles.css' %}">
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}

@@ -4,7 +4,8 @@
 {% block title %}Perfil de Usuario - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'perfil.css' %}">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -55,7 +56,7 @@
                                 {% endif %}
                             {% endfor %}
                         {% else %}
-                            <span style="background: #6c757d;">Sin roles asignados</span>
+                            <span>Sin roles asignados</span>
                         {% endif %}
                     </div>
                 </div>
