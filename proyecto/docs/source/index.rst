@@ -19,6 +19,7 @@ documentation for details.
    usuarios
    roles
    monedas
+   medios_pago
    
 
 

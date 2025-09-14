@@ -160,12 +160,12 @@
 </li>
       <li><a href="clientes.html#clientes.views.cliente_crear">cliente_crear() (en el módulo clientes.views)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.views.cliente_detalle">cliente_detalle() (en el módulo clientes.views)</a>
 </li>
       <li><a href="clientes.html#clientes.views.cliente_editar">cliente_editar() (en el módulo clientes.views)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.cliente_id">cliente_id (atributo de clientes.models.UsuarioCliente)</a>
 </li>
       <li><a href="clientes.html#clientes.views.cliente_lista">cliente_lista() (en el módulo clientes.views)</a>
@@ -173,6 +173,8 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm">ClienteForm (clase en clientes.forms)</a>
 </li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta">ClienteForm.Meta (clase en clientes.forms)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.clientes">clientes (atributo de medios_pago.models.MedioPago)</a>
 </li>
       <li>
     clientes.forms
@@ -203,6 +205,8 @@
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.correoElecCliente">correoElecCliente (atributo de clientes.models.Cliente)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.crear_medios_pago_iniciales">crear_medios_pago_iniciales() (en el módulo medios_pago.models)</a>
+</li>
       <li><a href="monedas.html#monedas.models.crear_moneda_usd">crear_moneda_usd() (en el módulo monedas.models)</a>
 </li>
       <li><a href="roles.html#roles.views.crear_rol">crear_rol() (en el módulo roles.views)</a>
@@ -216,7 +220,11 @@
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.created_at">(atributo de clientes.models.UsuarioCliente)</a>
 </li>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.created_at">(atributo de medios_pago.models.MedioPago)</a>
+</li>
       </ul></li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.cuenta_destino">cuenta_destino (atributo de medios_pago.models.MedioPago)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -269,11 +277,13 @@
 </li>
       <li><a href="usuarios.html#usuarios.models.Usuario.email">email (atributo de usuarios.models.Usuario)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.views.enviar_email_confirmacion">enviar_email_confirmacion() (en el módulo usuarios.views)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.views.enviar_email_recuperacion">enviar_email_recuperacion() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.es_efectivo">es_efectivo (medios_pago.models.MedioPago propiedad)</a>
 </li>
       <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm">EstablecerPasswordForm (clase en usuarios.forms)</a>
 </li>
@@ -307,10 +317,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.models.Usuario.get_full_name">get_full_name() (método de usuarios.models.Usuario)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_moneda_cheque_display">get_moneda_cheque_display() (método de medios_pago.models.MedioPago)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_moneda_tc_display">get_moneda_tc_display() (método de medios_pago.models.MedioPago)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.get_next_by_created_at">get_next_by_created_at() (método de clientes.models.Cliente)</a>
 
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.get_next_by_created_at">(método de clientes.models.UsuarioCliente)</a>
+</li>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_next_by_created_at">(método de medios_pago.models.MedioPago)</a>
 </li>
       </ul></li>
       <li><a href="usuarios.html#usuarios.models.Usuario.get_next_by_date_joined">get_next_by_date_joined() (método de usuarios.models.Usuario)</a>
@@ -318,13 +334,19 @@
       <li><a href="monedas.html#monedas.models.Moneda.get_next_by_fecha_cotizacion">get_next_by_fecha_cotizacion() (método de monedas.models.Moneda)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_next_by_updated_at">get_next_by_updated_at() (método de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_next_by_updated_at">(método de medios_pago.models.MedioPago)</a>
 </li>
+      </ul></li>
       <li><a href="monedas.html#monedas.models.Moneda.get_precios_cliente">get_precios_cliente() (método de monedas.models.Moneda)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_previous_by_created_at">get_previous_by_created_at() (método de clientes.models.Cliente)</a>
 
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.get_previous_by_created_at">(método de clientes.models.UsuarioCliente)</a>
+</li>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_previous_by_created_at">(método de medios_pago.models.MedioPago)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -334,10 +356,18 @@
       <li><a href="monedas.html#monedas.models.Moneda.get_previous_by_fecha_cotizacion">get_previous_by_fecha_cotizacion() (método de monedas.models.Moneda)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_previous_by_updated_at">get_previous_by_updated_at() (método de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_previous_by_updated_at">(método de medios_pago.models.MedioPago)</a>
 </li>
+      </ul></li>
       <li><a href="clientes.html#clientes.models.Cliente.get_segmento_display">get_segmento_display() (método de clientes.models.Cliente)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_tipo_billetera_display">get_tipo_billetera_display() (método de medios_pago.models.MedioPago)</a>
+</li>
       <li><a href="usuarios.html#usuarios.models.Usuario.get_tipo_cedula_display">get_tipo_cedula_display() (método de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.get_tipo_display">get_tipo_display() (método de medios_pago.models.MedioPago)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_tipoCliente_display">get_tipoCliente_display() (método de clientes.models.Cliente)</a>
 </li>
@@ -359,6 +389,8 @@
 
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.id">(atributo de clientes.models.UsuarioCliente)</a>
+</li>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.id">(atributo de medios_pago.models.MedioPago)</a>
 </li>
         <li><a href="monedas.html#monedas.models.Moneda.id">(atributo de monedas.models.Moneda)</a>
 </li>
@@ -411,10 +443,36 @@
         <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.media">(usuarios.forms.RegistroUsuarioForm propiedad)</a>
 </li>
       </ul></li>
+      <li><a href="medios_pago.html#medios_pago.views.medio_pago_cambiar_estado">medio_pago_cambiar_estado() (en el módulo medios_pago.views)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.views.medio_pago_detalle">medio_pago_detalle() (en el módulo medios_pago.views)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.views.medio_pago_lista">medio_pago_lista() (en el módulo medios_pago.views)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago">MedioPago (clase en medios_pago.models)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.DoesNotExist">MedioPago.DoesNotExist</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.MultipleObjectsReturned">MedioPago.MultipleObjectsReturned</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.medios_pago">medios_pago (atributo de clientes.models.Cliente)</a>
 
       <ul>
         <li><a href="monedas.html#monedas.models.Moneda.medios_pago">(atributo de monedas.models.Moneda)</a>
+</li>
+      </ul></li>
+      <li>
+    medios_pago.models
+
+      <ul>
+        <li><a href="medios_pago.html#module-medios_pago.models">module</a>
+</li>
+      </ul></li>
+      <li>
+    medios_pago.views
+
+      <ul>
+        <li><a href="medios_pago.html#module-medios_pago.views">module</a>
 </li>
       </ul></li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta.model">model (atributo de clientes.forms.ClienteForm.Meta)</a>
@@ -436,6 +494,10 @@
         <li><a href="clientes.html#module-clientes.models">clientes.models</a>
 </li>
         <li><a href="clientes.html#module-clientes.views">clientes.views</a>
+</li>
+        <li><a href="medios_pago.html#module-medios_pago.models">medios_pago.models</a>
+</li>
+        <li><a href="medios_pago.html#module-medios_pago.views">medios_pago.views</a>
 </li>
         <li><a href="monedas.html#module-monedas.forms">monedas.forms</a>
 </li>
@@ -464,15 +526,23 @@
 </li>
       <li><a href="monedas.html#monedas.models.Moneda.MultipleObjectsReturned">Moneda.MultipleObjectsReturned</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.moneda_cheque">moneda_cheque (atributo de medios_pago.models.MedioPago)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.MONEDA_CHOICES">MONEDA_CHOICES (atributo de medios_pago.models.MedioPago)</a>
+</li>
       <li><a href="monedas.html#monedas.views.moneda_crear">moneda_crear() (en el módulo monedas.views)</a>
 </li>
       <li><a href="monedas.html#monedas.views.moneda_editar">moneda_editar() (en el módulo monedas.views)</a>
 </li>
       <li><a href="monedas.html#monedas.views.moneda_lista">moneda_lista() (en el módulo monedas.views)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.moneda_tc">moneda_tc (atributo de medios_pago.models.MedioPago)</a>
+</li>
       <li><a href="monedas.html#monedas.forms.MonedaForm">MonedaForm (clase en monedas.forms)</a>
 </li>
       <li><a href="monedas.html#monedas.forms.MonedaForm.Meta">MonedaForm.Meta (clase en monedas.forms)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.monedas">monedas (atributo de medios_pago.models.MedioPago)</a>
 </li>
       <li>
     monedas.forms
@@ -510,6 +580,12 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.numero_billetera">numero_billetera (atributo de medios_pago.models.MedioPago)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.numero_cuenta">numero_cuenta (atributo de medios_pago.models.MedioPago)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
@@ -520,6 +596,8 @@
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.objects">(atributo de clientes.models.UsuarioCliente)</a>
 </li>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.objects">(atributo de medios_pago.models.MedioPago)</a>
+</li>
         <li><a href="monedas.html#monedas.models.Moneda.objects">(atributo de monedas.models.Moneda)</a>
 </li>
         <li><a href="usuarios.html#usuarios.models.Usuario.objects">(atributo de usuarios.models.Usuario)</a>
@@ -527,6 +605,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="medios_pago.html#medios_pago.views.obtener_campos_por_tipo">obtener_campos_por_tipo() (en el módulo medios_pago.views)</a>
+</li>
       <li><a href="usuarios.html#usuarios.models.Usuario.obtener_roles">obtener_roles() (método de usuarios.models.Usuario)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.ocupacion">ocupacion (atributo de clientes.models.Cliente)</a>
@@ -544,6 +624,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="roles.html#roles.forms.PermissionCheckboxSelectMultiple">PermissionCheckboxSelectMultiple (clase en roles.forms)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.permite_moneda_extranjera">permite_moneda_extranjera (medios_pago.models.MedioPago propiedad)</a>
 </li>
       <li><a href="monedas.html#monedas.views.puede_editar">puede_editar() (en el módulo monedas.views)</a>
 </li>
@@ -565,16 +647,20 @@
 </li>
       <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta">RegistroUsuarioForm.Meta (clase en usuarios.forms)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.relacionar_nueva_moneda_con_efectivo">relacionar_nueva_moneda_con_efectivo() (en el módulo medios_pago.models)</a>
+</li>
       <li><a href="usuarios.html#usuarios.views.remover_cliente">remover_cliente() (en el módulo usuarios.views)</a>
 </li>
       <li><a href="usuarios.html#usuarios.views.remover_rol">remover_rol() (en el módulo usuarios.views)</a>
 </li>
-      <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.requiere_tauser">requiere_tauser (medios_pago.models.MedioPago propiedad)</a>
 </li>
-      <li><a href="roles.html#roles.models.Roles">Roles (clase en roles.models)</a>
+      <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="roles.html#roles.models.Roles">Roles (clase en roles.models)</a>
+</li>
       <li><a href="roles.html#roles.models.Roles.DoesNotExist">Roles.DoesNotExist</a>
 </li>
       <li>
@@ -613,6 +699,8 @@
       <li><a href="clientes.html#clientes.models.Cliente.save">save() (método de clientes.models.Cliente)</a>
 
       <ul>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.save">(método de medios_pago.models.MedioPago)</a>
+</li>
         <li><a href="monedas.html#monedas.models.Moneda.save">(método de monedas.models.Moneda)</a>
 </li>
         <li><a href="roles.html#roles.forms.RolForm.save">(método de roles.forms.RolForm)</a>
@@ -630,6 +718,8 @@
 </li>
       <li><a href="monedas.html#monedas.models.Moneda.simbolo">simbolo (atributo de monedas.models.Moneda)</a>
 </li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.solo_compra_extranjera">solo_compra_extranjera (atributo de medios_pago.models.MedioPago)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -646,15 +736,23 @@
         <li><a href="usuarios.html#usuarios.views.tiene_algun_permiso">(en el módulo usuarios.views)</a>
 </li>
       </ul></li>
-      <li><a href="usuarios.html#usuarios.models.Usuario.tipo_cedula">tipo_cedula (atributo de usuarios.models.Usuario)</a>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.tipo">tipo (atributo de medios_pago.models.MedioPago)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.tipo_billetera">tipo_billetera (atributo de medios_pago.models.MedioPago)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.TIPO_BILLETERA_CHOICES">TIPO_BILLETERA_CHOICES (atributo de medios_pago.models.MedioPago)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.tipo_cedula">tipo_cedula (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="usuarios.html#usuarios.models.Usuario.TIPO_CEDULA_CHOICES">TIPO_CEDULA_CHOICES (atributo de usuarios.models.Usuario)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.TIPO_CLIENTE_CHOICES">TIPO_CLIENTE_CHOICES (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES">TIPO_DOCUMENTO_CHOICES (atributo de clientes.models.Cliente)</a>
+</li>
+      <li><a href="medios_pago.html#medios_pago.models.MedioPago.TIPO_MEDIO_CHOICES">TIPO_MEDIO_CHOICES (atributo de medios_pago.models.MedioPago)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.tipoCliente">tipoCliente (atributo de clientes.models.Cliente)</a>
 </li>
@@ -667,7 +765,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.updated_at">updated_at (atributo de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="medios_pago.html#medios_pago.models.MedioPago.updated_at">(atributo de medios_pago.models.MedioPago)</a>
 </li>
+      </ul></li>
       <li><a href="usuarios.html#usuarios.models.Usuario.user_permissions">user_permissions (atributo de usuarios.models.Usuario)</a>
 </li>
       <li><a href="usuarios.html#usuarios.models.Usuario.username">username (atributo de usuarios.models.Usuario)</a>
@@ -688,10 +790,10 @@
 </li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.usuario_id">usuario_id (atributo de clientes.models.UsuarioCliente)</a>
 </li>
-      <li><a href="clientes.html#clientes.models.UsuarioCliente">UsuarioCliente (clase en clientes.models)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="clientes.html#clientes.models.UsuarioCliente">UsuarioCliente (clase en clientes.models)</a>
+</li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.DoesNotExist">UsuarioCliente.DoesNotExist</a>
 </li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.MultipleObjectsReturned">UsuarioCliente.MultipleObjectsReturned</a>
@@ -771,6 +873,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medios_pago.html">Medios de Pago</a></li>
 </ul>
 
 <div class="relations">
