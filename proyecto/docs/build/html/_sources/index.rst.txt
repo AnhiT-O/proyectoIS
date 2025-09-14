@@ -17,6 +17,8 @@ documentation for details.
    
    clientes
    usuarios
+   roles
+   
 
 
 

@@ -81,6 +81,8 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm.base_fields">base_fields (atributo de clientes.forms.ClienteForm)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.RolForm.base_fields">(atributo de roles.forms.RolForm)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.base_fields">(atributo de usuarios.forms.AsignarClienteForm)</a>
 </li>
         <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.base_fields">(atributo de usuarios.forms.AsignarRolForm)</a>
@@ -140,10 +142,10 @@
 </li>
       <li><a href="clientes.html#clientes.views.cliente_crear">cliente_crear() (en el módulo clientes.views)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.views.cliente_detalle">cliente_detalle() (en el módulo clientes.views)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.views.cliente_editar">cliente_editar() (en el módulo clientes.views)</a>
 </li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.cliente_id">cliente_id (atributo de clientes.models.UsuarioCliente)</a>
@@ -179,6 +181,12 @@
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.correoElecCliente">correoElecCliente (atributo de clientes.models.Cliente)</a>
 </li>
+      <li><a href="roles.html#roles.views.crear_rol">crear_rol() (en el módulo roles.views)</a>
+</li>
+      <li><a href="roles.html#roles.models.crear_roles_predefinidos">crear_roles_predefinidos() (en el módulo roles.models)</a>
+</li>
+      <li><a href="roles.html#roles.forms.PermissionCheckboxSelectMultiple.create_option">create_option() (método de roles.forms.PermissionCheckboxSelectMultiple)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.created_at">created_at (atributo de clientes.models.Cliente)</a>
 
       <ul>
@@ -198,6 +206,8 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm.declared_fields">declared_fields (atributo de clientes.forms.ClienteForm)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.RolForm.declared_fields">(atributo de roles.forms.RolForm)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.declared_fields">(atributo de usuarios.forms.AsignarClienteForm)</a>
 </li>
         <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.declared_fields">(atributo de usuarios.forms.AsignarRolForm)</a>
@@ -211,7 +221,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="roles.html#roles.models.Roles.descripcion">descripcion (atributo de roles.models.Roles)</a>
+</li>
       <li><a href="usuarios.html#usuarios.views.detalle_cliente">detalle_cliente() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="roles.html#roles.views.detalle_rol">detalle_rol() (en el módulo roles.views)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.direccion">direccion (atributo de clientes.models.Cliente)</a>
 </li>
@@ -223,12 +237,14 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="usuarios.html#usuarios.models.Usuario.email">email (atributo de usuarios.models.Usuario)</a>
+      <li><a href="roles.html#roles.views.editar_rol">editar_rol() (en el módulo roles.views)</a>
 </li>
-      <li><a href="usuarios.html#usuarios.views.enviar_email_confirmacion">enviar_email_confirmacion() (en el módulo usuarios.views)</a>
+      <li><a href="usuarios.html#usuarios.models.Usuario.email">email (atributo de usuarios.models.Usuario)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.enviar_email_confirmacion">enviar_email_confirmacion() (en el módulo usuarios.views)</a>
+</li>
       <li><a href="usuarios.html#usuarios.views.enviar_email_recuperacion">enviar_email_recuperacion() (en el módulo usuarios.views)</a>
 </li>
       <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm">EstablecerPasswordForm (clase en usuarios.forms)</a>
@@ -242,6 +258,8 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta.fields">fields (atributo de clientes.forms.ClienteForm.Meta)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.RolForm.Meta.fields">(atributo de roles.forms.RolForm.Meta)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta.fields">(atributo de usuarios.forms.RegistroUsuarioForm.Meta)</a>
 </li>
       </ul></li>
@@ -273,10 +291,10 @@
         <li><a href="clientes.html#clientes.models.UsuarioCliente.get_previous_by_created_at">(método de clientes.models.UsuarioCliente)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.models.Usuario.get_previous_by_date_joined">get_previous_by_date_joined() (método de usuarios.models.Usuario)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.get_previous_by_updated_at">get_previous_by_updated_at() (método de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_segmento_display">get_segmento_display() (método de clientes.models.Cliente)</a>
@@ -286,6 +304,10 @@
       <li><a href="clientes.html#clientes.models.Cliente.get_tipoCliente_display">get_tipoCliente_display() (método de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_tipoDocCliente_display">get_tipoDocCliente_display() (método de clientes.models.Cliente)</a>
+</li>
+      <li><a href="roles.html#roles.models.Roles.group_ptr">group_ptr (atributo de roles.models.Roles)</a>
+</li>
+      <li><a href="roles.html#roles.models.Roles.group_ptr_id">group_ptr_id (atributo de roles.models.Roles)</a>
 </li>
       <li><a href="usuarios.html#usuarios.models.Usuario.groups">groups (atributo de usuarios.models.Usuario)</a>
 </li>
@@ -321,6 +343,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.models.Usuario.last_name">last_name (atributo de usuarios.models.Usuario)</a>
 </li>
+      <li><a href="roles.html#roles.views.listar_roles">listar_roles() (en el módulo roles.views)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -330,6 +354,10 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm.media">media (clientes.forms.ClienteForm propiedad)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.PermissionCheckboxSelectMultiple.media">(roles.forms.PermissionCheckboxSelectMultiple propiedad)</a>
+</li>
+        <li><a href="roles.html#roles.forms.RolForm.media">(roles.forms.RolForm propiedad)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.media">(usuarios.forms.AsignarClienteForm propiedad)</a>
 </li>
         <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.media">(usuarios.forms.AsignarRolForm propiedad)</a>
@@ -346,6 +374,8 @@
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta.model">model (atributo de clientes.forms.ClienteForm.Meta)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.RolForm.Meta.model">(atributo de roles.forms.RolForm.Meta)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta.model">(atributo de usuarios.forms.RegistroUsuarioForm.Meta)</a>
 </li>
       </ul></li>
@@ -361,6 +391,12 @@
 </li>
         <li><a href="clientes.html#module-clientes.views">clientes.views</a>
 </li>
+        <li><a href="roles.html#module-roles.forms">roles.forms</a>
+</li>
+        <li><a href="roles.html#module-roles.models">roles.models</a>
+</li>
+        <li><a href="roles.html#module-roles.views">roles.views</a>
+</li>
         <li><a href="usuarios.html#module-usuarios.forms">usuarios.forms</a>
 </li>
         <li><a href="usuarios.html#module-usuarios.models">usuarios.models</a>
@@ -375,7 +411,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.nombre">nombre (atributo de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="roles.html#roles.models.Roles.nombre">(roles.models.Roles propiedad)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -408,6 +448,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.views.perfil">perfil() (en el módulo usuarios.views)</a>
 </li>
+      <li><a href="roles.html#roles.forms.PermissionCheckboxSelectMultiple">PermissionCheckboxSelectMultiple (clase en roles.forms)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -422,8 +464,6 @@
 </li>
       <li><a href="usuarios.html#usuarios.views.registro_usuario">registro_usuario() (en el módulo usuarios.views)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm">RegistroUsuarioForm (clase en usuarios.forms)</a>
 </li>
       <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta">RegistroUsuarioForm.Meta (clase en usuarios.forms)</a>
@@ -434,6 +474,39 @@
 </li>
       <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
 </li>
+      <li><a href="roles.html#roles.models.Roles">Roles (clase en roles.models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="roles.html#roles.models.Roles.DoesNotExist">Roles.DoesNotExist</a>
+</li>
+      <li>
+    roles.forms
+
+      <ul>
+        <li><a href="roles.html#module-roles.forms">module</a>
+</li>
+      </ul></li>
+      <li>
+    roles.models
+
+      <ul>
+        <li><a href="roles.html#module-roles.models">module</a>
+</li>
+      </ul></li>
+      <li><a href="roles.html#roles.models.Roles.MultipleObjectsReturned">Roles.MultipleObjectsReturned</a>
+</li>
+      <li>
+    roles.views
+
+      <ul>
+        <li><a href="roles.html#module-roles.views">module</a>
+</li>
+      </ul></li>
+      <li><a href="roles.html#roles.forms.RolForm">RolForm (clase en roles.forms)</a>
+</li>
+      <li><a href="roles.html#roles.forms.RolForm.Meta">RolForm.Meta (clase en roles.forms)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -443,6 +516,8 @@
       <li><a href="clientes.html#clientes.models.Cliente.save">save() (método de clientes.models.Cliente)</a>
 
       <ul>
+        <li><a href="roles.html#roles.forms.RolForm.save">(método de roles.forms.RolForm)</a>
+</li>
         <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.save">(método de usuarios.forms.RegistroUsuarioForm)</a>
 </li>
       </ul></li>
@@ -586,7 +661,8 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usuarios.html">USUARIOS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 </ul>
 
 <div class="relations">

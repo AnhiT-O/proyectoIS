@@ -1,7 +1,9 @@
 Clientes
 ========
 
-Documentación del módulo de clientes
+Documentación del módulo de clientes.
+Un cliente es aquel que puede realizar operaciones de compra y venta en el sistema.
+
 
 .. automodule:: clientes.models
     :members:

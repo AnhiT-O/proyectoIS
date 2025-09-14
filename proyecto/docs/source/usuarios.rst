@@ -1,4 +1,4 @@
-USUARIOS
+Usuarios
 =========
 Documentación del módulo Usuario.
 Usuario es aquel que puede iniciar sesión en el sistema.
