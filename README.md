@@ -245,3 +245,23 @@ sudo systemctl restart nginx
     - Contraseña: qweqweqwe.1
     - Rol: Operador
     - Clientes asignados al azar
+
+## Documetación del proyecto
+- Para ejecutar el html de  la documentación
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs/build/html
+  proyecto/docs/build/html$ python -m http.server 8080 para ejecutar el html
+```
+- Para limpiar los build creados 
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs
+  proyecto/docs$ make clean
+```
+- Generar nueva documentación 
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs
+  proyecto/docs$ make html
+```
