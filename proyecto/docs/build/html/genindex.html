@@ -35,30 +35,72 @@
 <h1 id="index">Índice</h1>
 
 <div class="genindex-jumpbox">
- <a href="#B"><strong>B</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.activar_cuenta">activar_cuenta() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.administrar_usuarios">administrar_usuarios() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.asignar_clientes">asignar_clientes() (en el módulo usuarios.views)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.asignar_rol">asignar_rol() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm">AsignarClienteForm (clase en usuarios.forms)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.AsignarRolForm">AsignarRolForm (clase en usuarios.forms)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.forms.ClienteForm.base_fields">base_fields (atributo de clientes.forms.ClienteForm)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.base_fields">(atributo de usuarios.forms.AsignarClienteForm)</a>
 </li>
+        <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.base_fields">(atributo de usuarios.forms.AsignarRolForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm.base_fields">(atributo de usuarios.forms.EstablecerPasswordForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RecuperarPasswordForm.base_fields">(atributo de usuarios.forms.RecuperarPasswordForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.base_fields">(atributo de usuarios.forms.RegistroUsuarioForm)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.beneficio_segmento">beneficio_segmento (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.BENEFICIOS_SEGMENTO">BENEFICIOS_SEGMENTO (atributo de clientes.models.Cliente)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.bloqueado">bloqueado (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.bloquear_usuario">bloquear_usuario() (en el módulo usuarios.views)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -66,9 +108,21 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.cedula_identidad">cedula_identidad (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.clean">clean() (método de clientes.models.Cliente)</a>
 </li>
+      <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.clean_cedula_identidad">clean_cedula_identidad() (método de usuarios.forms.RegistroUsuarioForm)</a>
+</li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.clean_docCliente">clean_docCliente() (método de clientes.forms.ClienteForm)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.RecuperarPasswordForm.clean_email">clean_email() (método de usuarios.forms.RecuperarPasswordForm)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm.clean_new_password1">clean_new_password1() (método de usuarios.forms.EstablecerPasswordForm)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.clean_password1">clean_password1() (método de usuarios.forms.RegistroUsuarioForm)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.clean_password2">clean_password2() (método de usuarios.forms.RegistroUsuarioForm)</a>
 </li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.clean_telefono">clean_telefono() (método de clientes.forms.ClienteForm)</a>
 </li>
@@ -80,16 +134,20 @@
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.MultipleObjectsReturned">Cliente.MultipleObjectsReturned</a>
 </li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.cliente_activo">cliente_activo (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.cliente_activo_id">cliente_activo_id (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.views.cliente_crear">cliente_crear() (en el módulo clientes.views)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.views.cliente_detalle">cliente_detalle() (en el módulo clientes.views)</a>
 </li>
       <li><a href="clientes.html#clientes.views.cliente_editar">cliente_editar() (en el módulo clientes.views)</a>
 </li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.cliente_id">cliente_id (atributo de clientes.models.UsuarioCliente)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.views.cliente_lista">cliente_lista() (en el módulo clientes.views)</a>
 </li>
       <li><a href="clientes.html#clientes.forms.ClienteForm">ClienteForm (clase en clientes.forms)</a>
@@ -117,6 +175,8 @@
         <li><a href="clientes.html#module-clientes.views">module</a>
 </li>
       </ul></li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.clientes_operados">clientes_operados (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.correoElecCliente">correoElecCliente (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.created_at">created_at (atributo de clientes.models.Cliente)</a>
@@ -131,15 +191,47 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.date_joined">date_joined (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.declaracion_jurada">declaracion_jurada (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.declared_fields">declared_fields (atributo de clientes.forms.ClienteForm)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.declared_fields">(atributo de usuarios.forms.AsignarClienteForm)</a>
 </li>
+        <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.declared_fields">(atributo de usuarios.forms.AsignarRolForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm.declared_fields">(atributo de usuarios.forms.EstablecerPasswordForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RecuperarPasswordForm.declared_fields">(atributo de usuarios.forms.RecuperarPasswordForm)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.declared_fields">(atributo de usuarios.forms.RegistroUsuarioForm)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.detalle_cliente">detalle_cliente() (en el módulo usuarios.views)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.direccion">direccion (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.docCliente">docCliente (atributo de clientes.models.Cliente)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.email">email (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.enviar_email_confirmacion">enviar_email_confirmacion() (en el módulo usuarios.views)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.enviar_email_recuperacion">enviar_email_recuperacion() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm">EstablecerPasswordForm (clase en usuarios.forms)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -148,6 +240,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta.fields">fields (atributo de clientes.forms.ClienteForm.Meta)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta.fields">(atributo de usuarios.forms.RegistroUsuarioForm.Meta)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.first_name">first_name (atributo de usuarios.models.Usuario)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -155,12 +255,16 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.get_full_name">get_full_name() (método de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.get_next_by_created_at">get_next_by_created_at() (método de clientes.models.Cliente)</a>
 
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.get_next_by_created_at">(método de clientes.models.UsuarioCliente)</a>
 </li>
       </ul></li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.get_next_by_date_joined">get_next_by_date_joined() (método de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.get_next_by_updated_at">get_next_by_updated_at() (método de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_previous_by_created_at">get_previous_by_created_at() (método de clientes.models.Cliente)</a>
@@ -171,13 +275,19 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.get_previous_by_date_joined">get_previous_by_date_joined() (método de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.get_previous_by_updated_at">get_previous_by_updated_at() (método de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_segmento_display">get_segmento_display() (método de clientes.models.Cliente)</a>
 </li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.get_tipo_cedula_display">get_tipo_cedula_display() (método de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.get_tipoCliente_display">get_tipoCliente_display() (método de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_tipoDocCliente_display">get_tipoDocCliente_display() (método de clientes.models.Cliente)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.groups">groups (atributo de usuarios.models.Usuario)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -190,7 +300,27 @@
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.id">(atributo de clientes.models.UsuarioCliente)</a>
 </li>
+        <li><a href="usuarios.html#usuarios.models.Usuario.id">(atributo de usuarios.models.Usuario)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.is_active">is_active (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.is_superuser">is_superuser (atributo de usuarios.models.Usuario)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.last_login">last_login (atributo de usuarios.models.Usuario)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.last_name">last_name (atributo de usuarios.models.Usuario)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -198,11 +328,27 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.forms.ClienteForm.media">media (clientes.forms.ClienteForm propiedad)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.AsignarClienteForm.media">(usuarios.forms.AsignarClienteForm propiedad)</a>
 </li>
+        <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.media">(usuarios.forms.AsignarRolForm propiedad)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.EstablecerPasswordForm.media">(usuarios.forms.EstablecerPasswordForm propiedad)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RecuperarPasswordForm.media">(usuarios.forms.RecuperarPasswordForm propiedad)</a>
+</li>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.media">(usuarios.forms.RegistroUsuarioForm propiedad)</a>
+</li>
+      </ul></li>
       <li><a href="clientes.html#clientes.models.Cliente.medios_pago">medios_pago (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.forms.ClienteForm.Meta.model">model (atributo de clientes.forms.ClienteForm.Meta)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta.model">(atributo de usuarios.forms.RegistroUsuarioForm.Meta)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
@@ -214,6 +360,12 @@
         <li><a href="clientes.html#module-clientes.models">clientes.models</a>
 </li>
         <li><a href="clientes.html#module-clientes.views">clientes.views</a>
+</li>
+        <li><a href="usuarios.html#module-usuarios.forms">usuarios.forms</a>
+</li>
+        <li><a href="usuarios.html#module-usuarios.models">usuarios.models</a>
+</li>
+        <li><a href="usuarios.html#module-usuarios.views">usuarios.views</a>
 </li>
       </ul></li>
   </ul></td>
@@ -235,10 +387,52 @@
       <ul>
         <li><a href="clientes.html#clientes.models.UsuarioCliente.objects">(atributo de clientes.models.UsuarioCliente)</a>
 </li>
+        <li><a href="usuarios.html#usuarios.models.Usuario.objects">(atributo de usuarios.models.Usuario)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.obtener_roles">obtener_roles() (método de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.ocupacion">ocupacion (atributo de clientes.models.Cliente)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.models.Usuario.password">password (atributo de usuarios.models.Usuario)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.perfil">perfil() (en el módulo usuarios.views)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.recuperar_password">recuperar_password() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.RecuperarPasswordForm">RecuperarPasswordForm (clase en usuarios.forms)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.registro_exitoso">registro_exitoso() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.registro_usuario">registro_usuario() (en el módulo usuarios.views)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm">RegistroUsuarioForm (clase en usuarios.forms)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.Meta">RegistroUsuarioForm.Meta (clase en usuarios.forms)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.remover_cliente">remover_cliente() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.remover_rol">remover_rol() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -247,12 +441,18 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.save">save() (método de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.forms.RegistroUsuarioForm.save">(método de usuarios.forms.RegistroUsuarioForm)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.segmento">segmento (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.SEGMENTO_CHOICES">SEGMENTO_CHOICES (atributo de clientes.models.Cliente)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.seleccionar_cliente_activo">seleccionar_cliente_activo() (en el módulo usuarios.views)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -262,10 +462,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.telefono">telefono (atributo de clientes.models.Cliente)</a>
 </li>
-      <li><a href="clientes.html#clientes.models.Cliente.TIPO_CLIENTE_CHOICES">TIPO_CLIENTE_CHOICES (atributo de clientes.models.Cliente)</a>
+      <li><a href="usuarios.html#usuarios.views.tiene_algun_permiso">tiene_algun_permiso() (en el módulo usuarios.views)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.tipo_cedula">tipo_cedula (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.TIPO_CEDULA_CHOICES">TIPO_CEDULA_CHOICES (atributo de usuarios.models.Usuario)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="clientes.html#clientes.models.Cliente.TIPO_CLIENTE_CHOICES">TIPO_CLIENTE_CHOICES (atributo de clientes.models.Cliente)</a>
+</li>
       <li><a href="clientes.html#clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES">TIPO_DOCUMENTO_CHOICES (atributo de clientes.models.Cliente)</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.tipoCliente">tipoCliente (atributo de clientes.models.Cliente)</a>
@@ -280,7 +486,23 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.updated_at">updated_at (atributo de clientes.models.Cliente)</a>
 </li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.user_permissions">user_permissions (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.username">username (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.USERNAME_FIELD">USERNAME_FIELD (atributo de usuarios.models.Usuario)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.username_validator">username_validator (atributo de usuarios.models.Usuario)</a>
+</li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.usuario">usuario (atributo de clientes.models.UsuarioCliente)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario">Usuario (clase en usuarios.models)</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.DoesNotExist">Usuario.DoesNotExist</a>
+</li>
+      <li><a href="usuarios.html#usuarios.models.Usuario.MultipleObjectsReturned">Usuario.MultipleObjectsReturned</a>
+</li>
+      <li><a href="usuarios.html#usuarios.views.usuario_detalle">usuario_detalle() (en el módulo usuarios.views)</a>
 </li>
       <li><a href="clientes.html#clientes.models.UsuarioCliente.usuario_id">usuario_id (atributo de clientes.models.UsuarioCliente)</a>
 </li>
@@ -293,10 +515,43 @@
       <li><a href="clientes.html#clientes.models.UsuarioCliente.MultipleObjectsReturned">UsuarioCliente.MultipleObjectsReturned</a>
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.usuariocliente_set">usuariocliente_set (atributo de clientes.models.Cliente)</a>
+
+      <ul>
+        <li><a href="usuarios.html#usuarios.models.Usuario.usuariocliente_set">(atributo de usuarios.models.Usuario)</a>
 </li>
+      </ul></li>
       <li><a href="clientes.html#clientes.models.Cliente.usuarios">usuarios (atributo de clientes.models.Cliente)</a>
 </li>
+      <li>
+    usuarios.forms
+
+      <ul>
+        <li><a href="usuarios.html#module-usuarios.forms">module</a>
+</li>
+      </ul></li>
+      <li>
+    usuarios.models
+
+      <ul>
+        <li><a href="usuarios.html#module-usuarios.models">module</a>
+</li>
+      </ul></li>
+      <li>
+    usuarios.views
+
+      <ul>
+        <li><a href="usuarios.html#module-usuarios.views">module</a>
+</li>
+      </ul></li>
       <li><a href="clientes.html#clientes.models.Cliente.usuarios_activos">usuarios_activos (atributo de clientes.models.Cliente)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.ver_clientes_asociados">ver_clientes_asociados() (en el módulo usuarios.views)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -331,6 +586,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">USUARIOS</a></li>
 </ul>
 
 <div class="relations">
