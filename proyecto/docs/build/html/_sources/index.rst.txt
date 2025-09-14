@@ -20,6 +20,7 @@ documentation for details.
    roles
    monedas
    medios_pago
+   proyecto
    
 
 
