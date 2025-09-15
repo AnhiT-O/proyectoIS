@@ -12,24 +12,92 @@ class MedioPago(models.Model):
         ('billetera_electronica', 'Billetera Electrónica'),
         ('cheque', 'Cheque'),
     ]
+
+    tipo = models.CharField(
+        max_length=25,
+        choices=TIPO_MEDIO_CHOICES,
+        unique=True,
+        verbose_name='Tipo de Medio de Pago'
+    )
+    
+    # Relación many-to-many usando modelo intermedio
+    clientes = models.ManyToManyField(
+        'clientes.Cliente',
+        through='MedioPagoCliente',
+        related_name='medios_pago',
+        verbose_name='Clientes',
+        help_text='Clientes que pueden usar este medio de pago'
+    )
+    
+    # Relación many-to-many directa con monedas (sigue igual)
+    monedas = models.ManyToManyField(
+        'monedas.Moneda',
+        related_name='medios_pago',
+        verbose_name='Monedas',
+        help_text='Monedas soportadas por este medio de pago'
+    )
+
+    
+    # Campos de estado y auditoría
+    activo = models.BooleanField(
+        default=True,
+        verbose_name='Activo',
+        help_text='Determina si este medio de pago está activo y disponible para usar'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de Actualización')
+
+    def __str__(self):
+        return f"{self.get_tipo_display()}"
+    
+    @property
+    def es_efectivo(self):
+        """Retorna True si el medio de pago es efectivo"""
+        return self.tipo == 'efectivo'
+    
+    @property
+    def permite_moneda_extranjera(self):
+        """Retorna True si el medio de pago permite operaciones en moneda extranjera"""
+        return self.tipo in ['efectivo', 'cheque']
+    
+    @property
+    def requiere_tauser(self):
+        """Retorna True si el medio de pago requiere un tauser para procesar"""
+        return self.tipo == 'efectivo'
+
+    class Meta:
+        db_table = 'medios_pago'
+        verbose_name = 'Medio de Pago'
+        verbose_name_plural = 'Medios de Pago'
+        default_permissions = []  # Deshabilita permisos predeterminados
+        ordering = ['tipo']
+
+
+class MedioPagoCliente(models.Model):
+    """
+    Modelo intermedio que almacena la relación entre medios de pago y clientes,
+    junto con todos los datos específicos de configuración del medio de pago
+    para cada cliente.
+    """
     
     MONEDA_CHOICES = [
         ('PYG', 'Guaraníes'),
         ('USD', 'Dólares'),
     ]
     
-    TIPO_BILLETERA_CHOICES = [
-        ('tigo_money', 'Tigo Money'),
-        ('billetera_personal', 'Billetera Personal'),
-    ]
-
-    tipo = models.CharField(
-        max_length=25,
-        choices=TIPO_MEDIO_CHOICES,
-        verbose_name='Tipo de Medio de Pago'
+    # Relaciones
+    medio_pago = models.ForeignKey(
+        MedioPago,
+        on_delete=models.CASCADE,
+        verbose_name='Medio de Pago'
+    )
+    cliente = models.ForeignKey(
+        'clientes.Cliente',
+        on_delete=models.CASCADE,
+        verbose_name='Cliente'
     )
     
-    # Campos específicos para tarjeta de crédito 'TC'
+    # Campos específicos para tarjeta de crédito
     moneda_tc = models.CharField(
         max_length=3,
         choices=MONEDA_CHOICES,
@@ -38,8 +106,6 @@ class MedioPago(models.Model):
         verbose_name='Moneda para Tarjeta de Crédito',
         help_text='Solo aplicable para tarjetas de crédito. Debe ser PYG o USD'
     )
-    
-    # Campos adicionales para tarjeta de crédito (cuando un usuario la agrega)
     numero_tarjeta = models.CharField(
         max_length=20,
         blank=True,
@@ -61,11 +127,12 @@ class MedioPago(models.Model):
         verbose_name='Nombre del Titular de la Tarjeta',
         help_text='Nombre completo del titular como aparece en la tarjeta'
     )
-    fecha_vencimiento_tc = models.DateField(
+    fecha_vencimiento_tc = models.CharField(
+        max_length=7,
         blank=True,
         null=True,
         verbose_name='Fecha de Vencimiento',
-        help_text='Fecha de vencimiento de la tarjeta de crédito'
+        help_text='Fecha de vencimiento de la tarjeta de crédito (MM/AA)'
     )
     descripcion_tarjeta = models.CharField(
         max_length=100,
@@ -73,21 +140,6 @@ class MedioPago(models.Model):
         null=True,
         verbose_name='Descripción de la Tarjeta',
         help_text='Descripción breve para identificar la tarjeta (ej: "Tarjeta personal", "Tarjeta de empresa")'
-    )
-    
-    # Campos específicos para billeteras electrónicas
-    tipo_billetera = models.CharField(
-        max_length=25,
-        choices=TIPO_BILLETERA_CHOICES,
-        blank=True,
-        null=True,
-        verbose_name='Tipo de Billetera Electrónica'
-    )
-    numero_billetera = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        verbose_name='Número de Billetera Electrónica'
     )
     
     # Campos específicos para cuentas bancarias (transferencias)
@@ -104,8 +156,6 @@ class MedioPago(models.Model):
         null=True,
         verbose_name='Número de Cuenta'
     )
-    
-    # Campos adicionales para cuenta bancaria (cuando un usuario la agrega)
     banco = models.CharField(
         max_length=100,
         blank=True,
@@ -135,20 +185,6 @@ class MedioPago(models.Model):
         help_text='Tipo de cuenta bancaria (corriente, ahorro, etc.)'
     )
     
-    # Relaciones many-to-many
-    clientes = models.ManyToManyField(
-        'clientes.Cliente',
-        related_name='medios_pago',
-        verbose_name='Clientes',
-        help_text='Clientes que pueden usar este medio de pago'
-    )
-    monedas = models.ManyToManyField(
-        'monedas.Moneda',
-        related_name='medios_pago',
-        verbose_name='Monedas',
-        help_text='Monedas soportadas por este medio de pago'
-    )
-    
     # Campos específicos para cheques
     solo_compra_extranjera = models.BooleanField(
         default=False,
@@ -168,19 +204,19 @@ class MedioPago(models.Model):
     activo = models.BooleanField(
         default=True,
         verbose_name='Activo',
-        help_text='Determina si este medio de pago está activo y disponible para usar'
+        help_text='Determina si este medio de pago está activo para este cliente'
     )
     is_deleted = models.BooleanField(
         default=False,
         verbose_name='Eliminado',
-        help_text='Indica si este medio de pago fue eliminado lógicamente'
+        help_text='Indica si esta configuración fue eliminada lógicamente'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de Actualización')
 
     def save(self, *args, **kwargs):
         """
-        #Sobrescribir save para ejecutar validaciones
+        Sobrescribir save para ejecutar validaciones
         """
         self.full_clean()
         super().save(*args, **kwargs)
@@ -192,7 +228,7 @@ class MedioPago(models.Model):
         from django.core.exceptions import ValidationError
         
         # Validar campos específicos de tarjeta de crédito
-        if self.tipo == 'tarjeta_credito':
+        if self.medio_pago.tipo == 'tarjeta_credito':
             if self.numero_tarjeta and len(self.numero_tarjeta) != 16:
                 raise ValidationError({
                     'numero_tarjeta': 'El número de tarjeta debe tener exactamente 16 dígitos'
@@ -210,23 +246,22 @@ class MedioPago(models.Model):
                     'numero_tarjeta': 'El número de tarjeta debe contener solo números'
                 })
             
-            # Validar límite de tarjetas por cliente si se están configurando datos
-            if self.numero_tarjeta and self.pk:  # Solo si ya existe el objeto
-                cliente_tarjetas = self.clientes.first()
-                if cliente_tarjetas:
-                    tarjetas_configuradas = MedioPago.objects.filter(
-                        tipo='tarjeta_credito',
-                        clientes=cliente_tarjetas,
-                        numero_tarjeta__isnull=False
-                    ).exclude(pk=self.pk).count()
-                    
-                    if tarjetas_configuradas >= 3:
-                        raise ValidationError({
-                            'numero_tarjeta': 'Un cliente no puede tener más de 3 tarjetas de crédito configuradas'
-                        })
+            # Validar límite de tarjetas por cliente
+            if self.numero_tarjeta and self.cliente:
+                tarjetas_configuradas = MedioPagoCliente.objects.filter(
+                    medio_pago__tipo='tarjeta_credito',
+                    cliente=self.cliente,
+                    numero_tarjeta__isnull=False,
+                    is_deleted=False
+                ).exclude(pk=self.pk).count()
+                
+                if tarjetas_configuradas >= 3:
+                    raise ValidationError({
+                        'numero_tarjeta': 'Un cliente no puede tener más de 3 tarjetas de crédito configuradas'
+                    })
         
         # Validar campos específicos de transferencia bancaria
-        if self.tipo == 'transferencia':
+        if self.medio_pago.tipo == 'transferencia':
             if self.cedula_ruc_cuenta and len(self.cedula_ruc_cuenta) < 6:
                 raise ValidationError({
                     'cedula_ruc_cuenta': 'La cédula o RUC debe tener al menos 6 caracteres'
@@ -235,41 +270,25 @@ class MedioPago(models.Model):
         super().clean()
 
     def __str__(self):
-        return f"{self.get_tipo_display()}"
+        return f"{self.cliente.nombre} - {self.medio_pago.get_tipo_display()}"
     
     def get_descripcion_completa(self):
         """Retorna una descripción detallada del medio de pago para mostrar en el frontend"""
-        if self.tipo == 'tarjeta_credito' and self.numero_tarjeta:
+        if self.medio_pago.tipo == 'tarjeta_credito' and self.numero_tarjeta:
             descripcion = self.descripcion_tarjeta or f"Tarjeta terminada en ****{self.numero_tarjeta[-4:]}"
             return descripcion
-        elif self.tipo == 'transferencia' and self.numero_cuenta:
+        elif self.medio_pago.tipo == 'transferencia' and self.numero_cuenta:
             banco_info = f" - {self.banco}" if self.banco else ""
             return f"Cuenta {self.numero_cuenta}{banco_info}"
-        elif self.tipo == 'billetera_electronica' and self.numero_billetera:
-            tipo_billetera = self.get_tipo_billetera_display() if self.tipo_billetera else "Billetera"
-            return f"{tipo_billetera} - {self.numero_billetera}"
+        elif self.medio_pago.tipo == 'billetera_electronica':
+            return f"Billetera"
         else:
-            return self.get_tipo_display()
-    
-    @property
-    def es_efectivo(self):
-        """Retorna True si el medio de pago es efectivo"""
-        return self.tipo == 'efectivo'
-    
-    @property
-    def permite_moneda_extranjera(self):
-        """Retorna True si el medio de pago permite operaciones en moneda extranjera"""
-        return self.tipo in ['efectivo', 'cheque']
-    
-    @property
-    def requiere_tauser(self):
-        """Retorna True si el medio de pago requiere un tauser para procesar"""
-        return self.tipo == 'efectivo'
+            return self.medio_pago.get_tipo_display()
     
     @property
     def tarjeta_credito_completa(self):
         """Retorna True si la tarjeta de crédito tiene todos los datos necesarios"""
-        if self.tipo != 'tarjeta_credito':
+        if self.medio_pago.tipo != 'tarjeta_credito':
             return False
         return all([
             self.numero_tarjeta,
@@ -282,7 +301,7 @@ class MedioPago(models.Model):
     @property
     def cuenta_bancaria_completa(self):
         """Retorna True si la cuenta bancaria tiene todos los datos necesarios"""
-        if self.tipo != 'transferencia':
+        if self.medio_pago.tipo != 'transferencia':
             return False
         return all([
             self.numero_cuenta,
@@ -294,20 +313,26 @@ class MedioPago(models.Model):
     @property
     def puede_procesar_transacciones(self):
         """Retorna True si el medio de pago puede procesar transacciones"""
-        if self.tipo in ['efectivo', 'cheque', 'billetera_electronica']:
+        if self.medio_pago.tipo in ['efectivo', 'cheque', 'billetera_electronica']:
             return True
-        elif self.tipo == 'tarjeta_credito':
+        elif self.medio_pago.tipo == 'tarjeta_credito':
             return self.tarjeta_credito_completa
-        elif self.tipo == 'transferencia':
+        elif self.medio_pago.tipo == 'transferencia':
             return self.cuenta_bancaria_completa
         return False
 
     class Meta:
-        db_table = 'medios_pago'
-        verbose_name = 'Medio de Pago'
-        verbose_name_plural = 'Medios de Pago'
+        db_table = 'medios_pago_clientes'
+        verbose_name = 'Medio de Pago del Cliente'
+        verbose_name_plural = 'Medios de Pago de los Clientes'
         default_permissions = []  # Deshabilita permisos predeterminados
-        ordering = ['tipo']
+        ordering = ['cliente__nombre', 'medio_pago__tipo']
+        unique_together = [
+            ('medio_pago', 'cliente', 'numero_tarjeta'),  # Evita duplicados de tarjeta por cliente
+            ('medio_pago', 'cliente', 'numero_cuenta'),   # Evita duplicados de cuenta por cliente
+        ]
+
+
 
 
 @receiver(post_migrate)
@@ -352,12 +377,12 @@ def crear_medios_pago_iniciales(sender, **kwargs):
         
         for medio_data in medios_pago_data:
             # Verificar si ya existe el medio de pago
-            if not MedioPago.objects.filter(tipo=medio_data['tipo']).exists():
-                # Crear el medio de pago
-                medio_pago = MedioPago.objects.create(
-                    tipo=medio_data['tipo']
-                )
-                
+            medio_pago, created = MedioPago.objects.get_or_create(
+                tipo=medio_data['tipo'],
+                defaults={'activo': True}
+            )
+            
+            if created:
                 # Relacionar con monedas según las reglas
                 if medio_data.get('relacionar_todas_monedas', False):
                     # Relacionar con todas las monedas existentes
@@ -397,7 +422,7 @@ def relacionar_nueva_moneda_con_efectivo(sender, instance, created, **kwargs):
 def asociar_medios_pago_basicos_a_todos_los_clientes(sender, **kwargs):
     """
     Asocia automáticamente los medios de pago básicos ('efectivo', 'cheque', 'billetera_electronica', 'transferencia') 
-    a todos los clientes existentes
+    a todos los clientes existentes usando el modelo intermedio MedioPagoCliente
     """
     # Solo ejecutar si la migración es de la app medios_pago o clientes
     if kwargs['app_config'].name in ['medios_pago', 'clientes']:
@@ -406,23 +431,29 @@ def asociar_medios_pago_basicos_a_todos_los_clientes(sender, **kwargs):
             from clientes.models import Cliente
             
             # Definir los medios de pago básicos que se asocian automáticamente
-            medios_basicos = ['efectivo', 'cheque', 'billetera_electronica', 'transferencia']
+            medios_basicos = ['efectivo', 'cheque', 'billetera_electronica']
             
             for tipo_medio in medios_basicos:
                 try:
                     # Buscar el medio de pago
                     medio_pago = MedioPago.objects.get(tipo=tipo_medio)
                     
-                    # Obtener todos los clientes que no tienen este medio asociado
-                    clientes_sin_medio = Cliente.objects.exclude(medios_pago=medio_pago)
+                    # Obtener todos los clientes
+                    clientes = Cliente.objects.all()
                     
-                    # Asociar el medio de pago a todos los clientes que no lo tienen
-                    for cliente in clientes_sin_medio:
-                        cliente.medios_pago.add(medio_pago)
-                        print(f"✓ {medio_pago.get_tipo_display()} asociado automáticamente al cliente {cliente.nombre}")
+                    # Crear relaciones en MedioPagoCliente para clientes que no tienen este medio
+                    for cliente in clientes:
+                        medio_cliente, created = MedioPagoCliente.objects.get_or_create(
+                            medio_pago=medio_pago,
+                            cliente=cliente,
+                            defaults={
+                                'activo': True,
+                                'is_deleted': False
+                            }
+                        )
                         
-                    if clientes_sin_medio.count() == 0:
-                        print(f"✓ Todos los clientes ya tienen {medio_pago.get_tipo_display()} asociado")
+                        if created:
+                            print(f"✓ {medio_pago.get_tipo_display()} asociado automáticamente al cliente {cliente.nombre}")
                         
                 except MedioPago.DoesNotExist:
                     print(f"⚠ Medio de pago {tipo_medio} no encontrado para asociar a clientes")
@@ -435,18 +466,23 @@ def asociar_medios_pago_basicos_a_todos_los_clientes(sender, **kwargs):
 def asociar_medios_pago_basicos_a_nuevo_cliente(sender, instance, created, **kwargs):
     """
     Cuando se crea un nuevo cliente, automáticamente le asocia los medios de pago básicos
-    ('efectivo', 'cheque', 'billetera_electronica', 'transferencia')
+    usando el modelo intermedio MedioPagoCliente
     """
     if created:
         # Definir los medios de pago básicos que se asocian automáticamente
-        medios_basicos = ['efectivo', 'cheque', 'billetera_electronica', 'transferencia']
+        medios_basicos = ['efectivo', 'cheque', 'billetera_electronica']
         
         for tipo_medio in medios_basicos:
             try:
                 # Buscar el medio de pago
                 medio_pago = MedioPago.objects.get(tipo=tipo_medio)
-                # Asociar el medio al nuevo cliente
-                instance.medios_pago.add(medio_pago)
+                # Crear la relación con el nuevo cliente
+                MedioPagoCliente.objects.create(
+                    medio_pago=medio_pago,
+                    cliente=instance,
+                    activo=True,
+                    is_deleted=False
+                )
                 print(f"✓ {medio_pago.get_tipo_display()} asociado automáticamente al nuevo cliente {instance.nombre}")
             except MedioPago.DoesNotExist:
                 print(f"⚠ Medio de pago {tipo_medio} no encontrado para asociar al nuevo cliente")

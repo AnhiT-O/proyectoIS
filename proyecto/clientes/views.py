@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from .models import Cliente
 from .forms import ClienteForm
-from medios_pago.models import MedioPago
+from medios_pago.models import MedioPago, MedioPagoCliente
 from medios_pago.forms import TarjetaCreditoForm, CuentaBancariaForm
 
 def verificar_acceso_cliente(user, cliente):
@@ -46,66 +46,73 @@ def procesar_medios_pago_cliente(cliente, usuario):
     # Determinar si es administrador
     es_administrador = usuario.has_perm('clientes.gestion')
     
-    # Obtener medios de pago según el rol del usuario
+    # Obtener medios de pago según el rol del usuario (usando el modelo intermedio)
     if es_administrador:
         # Administradores ven todos los medios (activos e inactivos)
-        medios_pago = cliente.medios_pago.all().order_by('tipo')
+        medios_pago_cliente = MedioPagoCliente.objects.filter(
+            cliente=cliente
+        ).select_related('medio_pago').order_by('medio_pago__tipo')
     else:
         # Operadores solo ven medios activos
-        medios_pago = cliente.medios_pago.filter(activo=True).order_by('tipo')
+        medios_pago_cliente = MedioPagoCliente.objects.filter(
+            cliente=cliente, 
+            activo=True, 
+            is_deleted=False
+        ).select_related('medio_pago').order_by('medio_pago__tipo')
     
     # Aplicar ocultación de datos sensibles para operadores
     if not es_administrador:
-        for medio in medios_pago:
-            if medio.tipo == 'tarjeta_credito':
+        for medio_cliente in medios_pago_cliente:
+            if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
                 # Ocultar datos sensibles de tarjeta
-                if medio.numero_tarjeta:
-                    medio.numero_tarjeta_oculto = '**** **** **** ' + medio.numero_tarjeta[-4:]
+                if medio_cliente.numero_tarjeta:
+                    medio_cliente.numero_tarjeta_oculto = '**** **** **** ' + medio_cliente.numero_tarjeta[-4:]
                 else:
-                    medio.numero_tarjeta_oculto = '****'
-                medio.cvv_tarjeta_oculto = '***'
-            elif medio.tipo == 'transferencia':
+                    medio_cliente.numero_tarjeta_oculto = '****'
+                medio_cliente.cvv_tarjeta_oculto = '***'
+            elif medio_cliente.medio_pago.tipo == 'transferencia':
                 # Ocultar datos sensibles de cuenta bancaria
-                if medio.numero_cuenta:
-                    medio.numero_cuenta_oculto = '****' + medio.numero_cuenta[-4:] if len(medio.numero_cuenta) > 4 else '****'
+                if medio_cliente.numero_cuenta:
+                    medio_cliente.numero_cuenta_oculto = '****' + medio_cliente.numero_cuenta[-4:] if len(medio_cliente.numero_cuenta) > 4 else '****'
                 else:
-                    medio.numero_cuenta_oculto = '****'
+                    medio_cliente.numero_cuenta_oculto = '****'
     else:
         # Administradores ven datos completos
-        for medio in medios_pago:
-            if medio.tipo == 'tarjeta_credito':
-                medio.numero_tarjeta_oculto = medio.numero_tarjeta
-                medio.cvv_tarjeta_oculto = medio.cvv_tarjeta
-            elif medio.tipo == 'transferencia':
-                medio.numero_cuenta_oculto = medio.numero_cuenta
+        for medio_cliente in medios_pago_cliente:
+            if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
+                medio_cliente.numero_tarjeta_oculto = medio_cliente.numero_tarjeta
+                medio_cliente.cvv_tarjeta_oculto = medio_cliente.cvv_tarjeta
+            elif medio_cliente.medio_pago.tipo == 'transferencia':
+                medio_cliente.numero_cuenta_oculto = medio_cliente.numero_cuenta
     
     # Separar por tipo para mostrar en la interfaz
     medios_por_tipo = {}
-    for medio in medios_pago:
-        if medio.tipo not in medios_por_tipo:
-            medios_por_tipo[medio.tipo] = []
-        medios_por_tipo[medio.tipo].append(medio)
+    for medio_cliente in medios_pago_cliente:
+        tipo = medio_cliente.medio_pago.tipo
+        if tipo not in medios_por_tipo:
+            medios_por_tipo[tipo] = []
+        medios_por_tipo[tipo].append(medio_cliente)
     
     # Verificar si hay medios configurados por tipo
     tiene_tarjetas_configuradas = any(
-        medio.tarjeta_credito_completa 
-        for medio in medios_por_tipo.get('tarjeta_credito', [])
+        medio_cliente.tarjeta_credito_completa 
+        for medio_cliente in medios_por_tipo.get('tarjeta_credito', [])
     )
     
     tiene_cuentas_configuradas = any(
-        medio.cuenta_bancaria_completa 
-        for medio in medios_por_tipo.get('transferencia', [])
+        medio_cliente.cuenta_bancaria_completa 
+        for medio_cliente in medios_por_tipo.get('transferencia', [])
     )
     
     # Verificar si se pueden agregar más tarjetas (máximo 3)
     tarjetas_configuradas = sum(
-        1 for medio in medios_por_tipo.get('tarjeta_credito', [])
-        if medio.tarjeta_credito_completa
+        1 for medio_cliente in medios_por_tipo.get('tarjeta_credito', [])
+        if medio_cliente.tarjeta_credito_completa
     )
     puede_agregar_tarjeta = tarjetas_configuradas < 3
     
     return {
-        'medios_pago': medios_pago,
+        'medios_pago': medios_pago_cliente,  # Ahora son objetos MedioPagoCliente
         'medios_por_tipo': medios_por_tipo,
         'tiene_tarjetas_configuradas': tiene_tarjetas_configuradas,
         'tiene_cuentas_configuradas': tiene_cuentas_configuradas,
@@ -212,11 +219,12 @@ def cliente_agregar_tarjeta(request, pk):
         return redirect('inicio')
     
     # Verificar límite de tarjetas configuradas activas (máximo 3)
-    tarjetas_configuradas = MedioPago.objects.filter(
-        tipo='tarjeta_credito',
-        clientes=cliente,
+    tarjetas_configuradas = MedioPagoCliente.objects.filter(
+        cliente=cliente,
+        medio_pago__tipo='tarjeta_credito',
         numero_tarjeta__isnull=False,
-        activo=True
+        activo=True,
+        is_deleted=False
     ).count()
     
     if tarjetas_configuradas >= 3:
@@ -229,22 +237,22 @@ def cliente_agregar_tarjeta(request, pk):
             numero_tarjeta = form.cleaned_data['numero_tarjeta']
             
             # Buscar si existe una tarjeta con EXACTAMENTE los mismos datos
-            tarjeta_existente = MedioPago.objects.filter(
-                tipo='tarjeta_credito',
+            tarjeta_existente = MedioPagoCliente.objects.filter(
+                cliente=cliente,
+                medio_pago__tipo='tarjeta_credito',
                 numero_tarjeta=numero_tarjeta,
                 cvv_tarjeta=form.cleaned_data['cvv'],
                 nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
                 fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
                 descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                moneda_tc=form.cleaned_data['moneda_tc'],
-                clientes=cliente
+                moneda_tc=form.cleaned_data['moneda_tc']
             ).first()
             
             if tarjeta_existente:
                 # Si existe con exactamente los mismos datos pero está inactiva, reactivarla
-                if not tarjeta_existente.activo:
+                if not tarjeta_existente.activo or tarjeta_existente.is_deleted:
                     tarjeta_existente.activo = True
-                    tarjeta_existente.is_deleted = False  # Restaurar si estaba eliminada
+                    tarjeta_existente.is_deleted = False
                     tarjeta_existente.save()
                     
                     messages.success(request, f'Tarjeta de crédito "{tarjeta_existente.descripcion_tarjeta}" agregada exitosamente.')
@@ -252,10 +260,10 @@ def cliente_agregar_tarjeta(request, pk):
                     messages.warning(request, 'Esta tarjeta ya está activa y asociada al cliente.')
             else:
                 # Verificar si existe una tarjeta con el mismo número pero datos diferentes
-                tarjeta_mismo_numero = MedioPago.objects.filter(
-                    tipo='tarjeta_credito',
-                    numero_tarjeta=numero_tarjeta,
-                    clientes=cliente
+                tarjeta_mismo_numero = MedioPagoCliente.objects.filter(
+                    cliente=cliente,
+                    medio_pago__tipo='tarjeta_credito',
+                    numero_tarjeta=numero_tarjeta
                 ).first()
                 
                 if tarjeta_mismo_numero:
@@ -267,21 +275,27 @@ def cliente_agregar_tarjeta(request, pk):
                         'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
                     })
                 
-                # Crear un nuevo medio de pago tipo tarjeta de crédito
-                tarjeta = MedioPago.objects.create(
+                # Obtener o crear el medio de pago tipo tarjeta de crédito
+                medio_pago_tc, created = MedioPago.objects.get_or_create(
                     tipo='tarjeta_credito',
+                    defaults={'activo': True}
+                )
+                
+                # Crear un nuevo registro en la tabla intermedia
+                MedioPagoCliente.objects.create(
+                    cliente=cliente,
+                    medio_pago=medio_pago_tc,
                     numero_tarjeta=numero_tarjeta,
                     cvv_tarjeta=form.cleaned_data['cvv'],
                     nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
                     fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
                     descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                    moneda_tc=form.cleaned_data['moneda_tc']
+                    moneda_tc=form.cleaned_data['moneda_tc'],
+                    activo=True,
+                    is_deleted=False
                 )
                 
-                # Asociar la tarjeta al cliente
-                cliente.medios_pago.add(tarjeta)
-                
-                messages.success(request, f'Tarjeta de crédito "{tarjeta.descripcion_tarjeta}" agregada exitosamente.')
+                messages.success(request, f'Tarjeta de crédito "{form.cleaned_data["descripcion_tarjeta"]}" agregada exitosamente.')
             
             return get_cliente_detalle_redirect(request, cliente.pk)
     else:
@@ -312,21 +326,21 @@ def cliente_agregar_cuenta(request, pk):
             numero_cuenta = form.cleaned_data['numero_cuenta']
             
             # Buscar si existe una cuenta con EXACTAMENTE los mismos datos
-            cuenta_existente = MedioPago.objects.filter(
-                tipo='transferencia',
+            cuenta_existente = MedioPagoCliente.objects.filter(
+                cliente=cliente,
+                medio_pago__tipo='transferencia',
                 numero_cuenta=numero_cuenta,
                 nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
                 banco=form.cleaned_data.get('banco', ''),
                 tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
-                cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', ''),
-                clientes=cliente
+                cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', '')
             ).first()
             
             if cuenta_existente:
                 # Si existe con exactamente los mismos datos pero está inactiva, reactivarla
-                if not cuenta_existente.activo:
+                if not cuenta_existente.activo or cuenta_existente.is_deleted:
                     cuenta_existente.activo = True
-                    cuenta_existente.is_deleted = False  # Restaurar si estaba eliminada
+                    cuenta_existente.is_deleted = False
                     cuenta_existente.save()
                     
                     messages.success(request, 'Cuenta bancaria agregada exitosamente.')
@@ -334,10 +348,10 @@ def cliente_agregar_cuenta(request, pk):
                     messages.warning(request, 'Esta cuenta bancaria ya está activa y asociada al cliente.')
             else:
                 # Verificar si existe una cuenta con el mismo número pero datos diferentes
-                cuenta_mismo_numero = MedioPago.objects.filter(
-                    tipo='transferencia',
-                    numero_cuenta=numero_cuenta,
-                    clientes=cliente
+                cuenta_mismo_numero = MedioPagoCliente.objects.filter(
+                    cliente=cliente,
+                    medio_pago__tipo='transferencia',
+                    numero_cuenta=numero_cuenta
                 ).first()
                 
                 if cuenta_mismo_numero:
@@ -349,25 +363,24 @@ def cliente_agregar_cuenta(request, pk):
                         'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
                     })
                 
-                # Buscar el medio de pago transferencia básico del cliente
-                transferencia_basica = cliente.medios_pago.filter(
+                # Obtener o crear el medio de pago tipo transferencia
+                medio_pago_transferencia, created = MedioPago.objects.get_or_create(
                     tipo='transferencia',
-                    numero_cuenta__isnull=True
-                ).first()
+                    defaults={'activo': True}
+                )
                 
-                if transferencia_basica:
-                    # Crear una nueva transferencia con datos específicos
-                    transferencia = MedioPago.objects.create(
-                        tipo='transferencia',
-                        numero_cuenta=numero_cuenta,
-                        nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
-                        banco=form.cleaned_data.get('banco', ''),
-                        tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
-                        cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', '')
-                    )
-                    
-                    # Asociar la cuenta al cliente
-                    cliente.medios_pago.add(transferencia)
+                # Crear un nuevo registro en la tabla intermedia
+                MedioPagoCliente.objects.create(
+                    cliente=cliente,
+                    medio_pago=medio_pago_transferencia,
+                    numero_cuenta=numero_cuenta,
+                    nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
+                    banco=form.cleaned_data.get('banco', ''),
+                    tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
+                    cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', ''),
+                    activo=True,
+                    is_deleted=False
+                )
                 
                 messages.success(request, 'Cuenta bancaria agregada exitosamente.')
             
@@ -398,18 +411,13 @@ def cliente_cambiar_estado_medio_pago(request, pk, medio_id):
         messages.error(request, 'No tienes permisos para gestionar este cliente.')
         return redirect('inicio')
     
-    medio_pago = get_object_or_404(MedioPago, id=medio_id)
-    
-    # Verificar que el medio de pago pertenece al cliente
-    if not cliente.medios_pago.filter(id=medio_id).exists():
-        messages.error(request, 'El medio de pago no está asociado a este cliente.')
-        return redirect('clientes:cliente_detalle', pk=pk)
+    medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
     
     # Cambiar el estado
-    medio_pago.activo = not medio_pago.activo
-    medio_pago.save()
+    medio_pago_cliente.activo = not medio_pago_cliente.activo
+    medio_pago_cliente.save()
     
-    estado = 'activado' if medio_pago.activo else 'desactivado'
+    estado = 'activado' if medio_pago_cliente.activo else 'desactivado'
     messages.success(request, f'Medio de pago {estado} exitosamente.')
     
     return redirect('clientes:cliente_detalle', pk=pk)
@@ -425,33 +433,30 @@ def cliente_eliminar_medio_pago(request, pk, medio_id):
         messages.error(request, 'No tienes permisos para gestionar este cliente.')
         return redirect('inicio')
     
-    medio_pago = get_object_or_404(MedioPago, id=medio_id)
-    
-    # Verificar que el medio de pago pertenece al cliente
-    if not cliente.medios_pago.filter(id=medio_id).exists():
-        messages.error(request, 'No tienes permisos para eliminar este medio de pago.')
-        return redirect('clientes:cliente_detalle', pk=pk)
+    medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
     
     # No permitir eliminar medios de pago básicos (efectivo, cheque sin configurar)
     medios_basicos = ['efectivo', 'cheque']
-    if medio_pago.tipo in medios_basicos and not any([
-        medio_pago.numero_tarjeta, medio_pago.numero_cuenta, medio_pago.numero_billetera
+    if medio_pago_cliente.medio_pago.tipo in medios_basicos and not any([
+        medio_pago_cliente.numero_tarjeta, 
+        medio_pago_cliente.numero_cuenta, 
+        medio_pago_cliente.numero_billetera
     ]):
-        messages.error(request, f'No se puede eliminar el medio de pago {medio_pago.get_tipo_display()} básico.')
+        messages.error(request, f'No se puede eliminar el medio de pago {medio_pago_cliente.medio_pago.get_tipo_display()} básico.')
         return redirect('clientes:cliente_detalle', pk=pk)
     
     # Permitir eliminar transferencias solo si están configuradas
-    if medio_pago.tipo == 'transferencia' and not medio_pago.numero_cuenta:
+    if medio_pago_cliente.medio_pago.tipo == 'transferencia' and not medio_pago_cliente.numero_cuenta:
         messages.error(request, f'No se puede eliminar la transferencia básica sin configurar.')
         return redirect('clientes:cliente_detalle', pk=pk)
     
     if request.method == 'POST':
-        descripcion_completa = medio_pago.get_descripcion_completa()
+        descripcion_completa = medio_pago_cliente.get_descripcion_completa()
         
         # Solo desactivar el medio de pago, no marcarlo como eliminado
         # Esto permite que aparezca en el panel de administración como inactivo
-        medio_pago.activo = False
-        medio_pago.save()
+        medio_pago_cliente.activo = False
+        medio_pago_cliente.save()
         
         # Si es una petición AJAX, devolver JSON para mostrar modal de éxito
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

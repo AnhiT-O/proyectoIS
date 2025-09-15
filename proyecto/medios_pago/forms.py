@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import MedioPago
+from .models import MedioPago, MedioPagoCliente
+import re
 
 
 class TarjetaCreditoForm(forms.Form):
@@ -44,14 +45,24 @@ class TarjetaCreditoForm(forms.Form):
         help_text='Nombre completo como aparece en la tarjeta'
     )
     
-    fecha_vencimiento_tc = forms.DateField(
-        widget=forms.DateInput(attrs={
+    fecha_vencimiento_tc = forms.CharField(
+        max_length=7,
+        min_length=7,
+        widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'type': 'date'
+            'placeholder': 'MM/AAAA',
+            'pattern': '(0[1-9]|1[0-2])\/[0-9]{4}',
+            'title': 'Ingrese el mes y año en formato MM/AAAA'
         }),
         label='Fecha de Vencimiento',
-        help_text='Fecha de vencimiento de la tarjeta'
+        help_text='Ingrese el mes y año de vencimiento (MM/AAAA)'
     )
+
+    def clean_fecha_vencimiento_tc(self):
+        fecha = self.cleaned_data.get('fecha_vencimiento_tc')
+        if fecha and not re.match(r'^(0[1-9]|1[0-2])\/[0-9]{4}$', fecha):
+            raise ValidationError('Ingrese la fecha en formato MM/AAAA')
+        return fecha
     
     descripcion_tarjeta = forms.CharField(
         max_length=100,
@@ -64,7 +75,7 @@ class TarjetaCreditoForm(forms.Form):
     )
     
     moneda_tc = forms.ChoiceField(
-        choices=MedioPago.MONEDA_CHOICES,
+        choices=MedioPagoCliente.MONEDA_CHOICES,
         widget=forms.Select(attrs={
             'class': 'form-select'
         }),
@@ -176,35 +187,3 @@ class CuentaBancariaForm(forms.Form):
             if len(banco) < 3:
                 raise ValidationError('El nombre del banco debe tener al menos 3 caracteres')
         return banco
-
-
-class BilleteraElectronicaForm(forms.Form):
-    """
-    Formulario para configurar una billetera electrónica
-    """
-    tipo_billetera = forms.ChoiceField(
-        choices=MedioPago.TIPO_BILLETERA_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        }),
-        label='Tipo de Billetera',
-        help_text='Seleccione el tipo de billetera electrónica'
-    )
-    
-    numero_billetera = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ej: 0981234567',
-        }),
-        label='Número de Billetera',
-        help_text='Número de teléfono o identificador de la billetera'
-    )
-
-    def clean_numero_billetera(self):
-        numero = self.cleaned_data.get('numero_billetera')
-        if numero:
-            numero = numero.strip()
-            if len(numero) < 6:
-                raise ValidationError('El número de billetera debe tener al menos 6 caracteres')
-        return numero
