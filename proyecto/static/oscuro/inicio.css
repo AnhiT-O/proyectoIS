@@ -1,0 +1,223 @@
+.cuerpo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 1rem;
+}
+
+.contenido {
+    background: #1f2937;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    max-width: 800px;
+    width: 95%;
+    margin: 0 auto;
+    border: 1px solid #374151;
+}
+
+.comprimido {
+    max-width: 600px;
+}
+
+.logo {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #8b5cf6;
+    margin-bottom: 1rem;
+}
+
+.subtitulo {
+    color: #9ca3af;
+    font-size: 1.1rem;
+    margin-left: 4rem;
+    margin-right: 4rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.funcionalidades {
+    margin: 2rem 0;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.funcionalidad {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+    width: 100%;
+    max-width: 400px;
+}
+
+.icono-funcionalidad {
+    background: #8b5cf6;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-weight: bold;
+}
+
+.zona-cotizaciones {
+    margin: 2rem 0;
+}
+
+.zona-cotizaciones h2 {
+    color: #f3f4f6;
+    margin-bottom: 1rem;
+}
+
+.tabla-cotizaciones {
+    width: 100%;
+    max-width: 100%;
+    table-layout: auto;
+    margin-top: 0;
+    background-color: #374151;
+    border-radius: 10px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tabla-cotizaciones th {
+    background: linear-gradient(135deg, #2d3748 0%, #374151 100%);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    border-bottom: 2px solid #4b5563;
+    min-width: 120px;
+    max-width: 300px;
+    overflow-x: auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tabla-cotizaciones td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #4b5563;
+    min-width: 120px;
+    max-width: 300px;
+    overflow-x: auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #d1d5db;
+}
+
+.tabla-cotizaciones th:not(:last-child),
+.tabla-cotizaciones td:not(:last-child) {
+    border-right: 1px solid #4b5563;
+}
+
+.tabla-cotizaciones tbody tr {
+    transition: all 0.3s ease;
+    background: #374151;
+}
+
+.tabla-cotizaciones tbody tr:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+    transform: scale(1.01);
+    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
+}
+
+.sin-cotizaciones {
+    color: #6b7280;
+    font-style: italic;
+    margin: 2rem 0;
+}
+
+.moneda-simbolo {
+    display: inline-block;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.acciones-rapidas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.zona-segmento {
+    background: linear-gradient(135deg, #2d3748 0%, #374151 100%);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4b5563;
+}
+
+.segmento-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.select-filtro {
+    width: auto;
+    padding: 0.75rem 1rem;
+    border: 2px solid #4b5563;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: #374151;
+    color: #d1d5db;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    height: 44px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.select-filtro:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+/* ESTILOS PARA LA SECCIÓN DE CLIENTE ACTIVO */
+
+.info-cliente {
+    background: #1f2937;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #0ea5e9;
+    display:inline-block;
+    background-color: #064e3b;
+    border: 1px solid #10b981;
+}
+
+.info-titulo {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-valor {
+    color: #f3f4f6;
+    font-size: 1rem;
+}

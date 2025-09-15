@@ -4,7 +4,8 @@
 {% block title %}Asignar Clientes - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'formularios.css' %}">
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -13,7 +14,8 @@
         <h2>Asignar Clientes a Usuario</h2>
     </div>
     <div class="info-usuario">
-        <p><strong>Nombre del Usuario:</strong> {{ usuario.get_full_name }}</p>
+        <div class="info-titulo">Nombre del Usuario:</div>
+        <div class="info-valor">{{ usuario.get_full_name }}</div>
     </div>
 
     <form method="post" novalidate>
@@ -27,7 +29,7 @@
                     <div class="tarjeta">
                             <input class="form-casilla" type="checkbox" name="clientes" value="{{ cliente.pk }}" id="cliente_{{ cliente.pk }}">
                             <label class="form-casilla-label" for="cliente_{{ cliente.pk }}">
-                                <strong>{{ cliente.nombre }} {{ cliente.apellido }} ({{ cliente.docCliente }})</strong>
+                                <strong>{{ cliente.nombre }} ({{ cliente.docCliente }})</strong>
                             </label>
                         <div class="tarjeta-detalles">
                             Email: {{ cliente.correoElecCliente }}<br>
@@ -40,27 +42,9 @@
 
             <div class="zona-botones">
                     <button type="submit" class="btn-enviar">Asignar</button>
-                    <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-atras">Cancelar</a>
+                    <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
             </div>
         {% endif %}
     </form>
 </div>
-
-<script>
-    // Agregar efecto visual al seleccionar clientes
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const card = this.closest('.tarjeta');
-                if (this.checked) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

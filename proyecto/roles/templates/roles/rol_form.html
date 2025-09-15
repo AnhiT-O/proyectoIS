@@ -4,17 +4,8 @@
 {% block title %}{{ titulo }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'formularios.css' %}">
-<style>
-    .permissions-container {
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 1rem;
-        max-height: 300px;
-        overflow-y: auto;
-        background: #f8f9fa;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -55,8 +46,8 @@
             {% endif %}
         </div>
         <div class="form-campo">
-            <label class="form-label">Permisos</label>
-            <div class="permissions-container">
+            <label>Permisos</label>
+            <div class="seccion-permisos">
                 {{ form.permisos }}
             </div>
             {% if form.permisos.errors %}

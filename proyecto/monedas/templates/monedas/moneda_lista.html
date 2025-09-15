@@ -5,7 +5,8 @@
 {% block title %}Gestionar Monedas - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'gestion.css' %}">
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -61,7 +62,7 @@
                 <table class="gestion-tabla">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">Estado</th>
+                            <th style="width: 30%;">Estado</th>
                             <th style="width: 30%;">Decimales a mostrar</th>
                             <th style="width: 30%;">Tasa base</th>
                             <th style="width: 30%;">Comisión de compra</th>
@@ -71,27 +72,27 @@
                     <tbody>
                         <tr>
                             <td>
-                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-inactivo{% endif %}">
+                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
                                     {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
                                 </span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">{{ moneda.decimales }}</span>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.decimales }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; color:#333; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             <div class="zona-acciones" style="justify-content: flex-end">
-                {% if perms.monedas.gestion or perms.monedas.cambiar_tasa or perms.monedas.cambiar_decimales %}
+                {% if perms.monedas.gestion or perms.monedas.cotizacion %}
                 <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-editar" title="Editar moneda">
                     Editar
                 </a>
@@ -127,89 +128,5 @@
             {% endif %}
         {% endfor %}
     </div>
-    <!-- Distinguir entre no hay monedas en el sistema vs no se encontraron resultados -->
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const grid = document.getElementById('monedasGrid');
-    
-    if (searchInput && grid) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const cards = grid.getElementsByClassName('moneda-card');
-            
-            // Primero aplicamos la búsqueda a todas las cartas
-            for (let card of cards) {
-                const searchData = card.getAttribute('data-search');
-                if (searchData.includes(searchTerm)) {
-                    card.setAttribute('data-search-visible', 'true');
-                } else {
-                    card.setAttribute('data-search-visible', 'false');
-                }
-            }
-            
-            // Luego aplicamos tanto el filtro actual como la búsqueda
-            aplicarFiltrosYBusqueda();
-        });
-    }
-});
-
-function aplicarFiltrosYBusqueda() {
-    const cards = document.getElementsByClassName('moneda-card');
-    const activeFilterBtn = document.querySelector('.filter-btn.active');
-    let currentFilter = 'todas';
-    
-    if (activeFilterBtn) {
-        if (activeFilterBtn.id === 'btn-activas') currentFilter = 'activas';
-        else if (activeFilterBtn.id === 'btn-inactivas') currentFilter = 'inactivas';
-    }
-    
-    for (let card of cards) {
-        const searchVisible = card.getAttribute('data-search-visible') !== 'false';
-        let filterVisible = true;
-        
-        // Aplicar filtro por estado
-        switch (currentFilter) {
-            case 'activas':
-                filterVisible = !card.classList.contains('inactiva');
-                break;
-            case 'inactivas':
-                filterVisible = card.classList.contains('inactiva');
-                break;
-            case 'todas':
-            default:
-                filterVisible = true;
-                break;
-        }
-        
-        // Mostrar solo si coincide tanto con búsqueda como con filtro
-        if (searchVisible && filterVisible) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    }
-}
-
-function filtrarMonedas(tipo) {
-    const btnTodas = document.getElementById('btn-todas');
-    const btnActivas = document.getElementById('btn-activas');
-    const btnInactivas = document.getElementById('btn-inactivas');
-    
-    // Remover clase active de todos los botones
-    [btnTodas, btnActivas, btnInactivas].forEach(btn => {
-        if (btn) btn.classList.remove('active');
-    });
-    
-    // Agregar clase active al botón correspondiente
-    if (tipo === 'todas' && btnTodas) btnTodas.classList.add('active');
-    else if (tipo === 'activas' && btnActivas) btnActivas.classList.add('active');
-    else if (tipo === 'inactivas' && btnInactivas) btnInactivas.classList.add('active');
-    
-    // Aplicar filtros y búsqueda
-    aplicarFiltrosYBusqueda();
-}
-</script>
 {% endblock %}

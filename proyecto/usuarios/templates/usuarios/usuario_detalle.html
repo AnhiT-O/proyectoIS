@@ -4,7 +4,8 @@
 {% block title %}{{ usuario.get_full_name }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'detalles.css' %}">
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -105,7 +106,7 @@
                                     <div class="cliente">
                                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                             <div style="flex: 1;">
-                                                <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>
+                                                <strong>{{ cliente.nombre }}</strong>
                                                 <br>
                                                 <small style="color: #6c757d;">
                                                     {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }} 
@@ -117,7 +118,7 @@
                                                     {% csrf_token %}
                                                     <input type="hidden" name="next" value="{% url 'usuarios:usuario_detalle' usuario.pk %}">
                                                     <button type="submit" class="btn-desactivar" 
-                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} {{ cliente.apellido }} de {{ usuario.get_full_name }}?')"
+                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} de {{ usuario.get_full_name }}?')"
                                                             title="Desasignar cliente"
                                                             style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
                                                         Desasignar

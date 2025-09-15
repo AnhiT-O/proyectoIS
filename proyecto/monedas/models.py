@@ -2,6 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
+from django.utils import timezone
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -17,10 +18,22 @@ class Moneda(models.Model):
         null=False
     )
     activa = models.BooleanField(default=True)
-    tasa_base = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Tasa base')
-    comision_compra = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Comisión de compra')
-    comision_venta = models.DecimalField(default=0, max_digits=15, decimal_places=2, verbose_name='Comisión de venta')
+    tasa_base = models.IntegerField(default=0)
+    comision_compra = models.IntegerField(default=0)
+    comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
+    fecha_cotizacion = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old = Moneda.objects.get(pk=self.pk)
+            if (
+                self.tasa_base != old.tasa_base or
+                self.comision_compra != old.comision_compra or
+                self.comision_venta != old.comision_venta
+            ):
+                self.fecha_cotizacion = timezone.now()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Moneda'
@@ -30,10 +43,47 @@ class Moneda(models.Model):
         permissions = [
             ("gestion", "Puede gestionar monedas (crear y editar)"),
             ("activacion", "Puede activar/desactivar monedas"),
-            ("cambiar_tasa", "Puede cambiar la tasa base de una moneda"),
-            ("cambiar_decimales", "Puede cambiar el número de decimales de una moneda"),    
-            ("cambiar_comisiones", "Puede cambiar las comisiones de compra y venta de una moneda")
+            ("cotizacion", "Puede actualizar cotización de monedas")
         ]
+
+    def calcular_precio_venta(self, porcentaje_beneficio=0):
+        """
+        Calcula el precio de venta aplicando el beneficio del cliente.
+        precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)
+        """
+        tasa_base = self.tasa_base
+        comision_venta = self.comision_venta
+        beneficio = porcentaje_beneficio / 100
+        
+        precio = int(tasa_base + comision_venta - (comision_venta * beneficio))
+        return precio
+
+    def calcular_precio_compra(self, porcentaje_beneficio=0):
+        """
+        Calcula el precio de compra aplicando el beneficio del cliente.
+        precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)
+        """
+        tasa_base = self.tasa_base
+        comision_compra = self.comision_compra
+        beneficio = porcentaje_beneficio / 100
+
+        precio = int(tasa_base - comision_compra + (comision_compra * beneficio))
+        return precio
+
+    def get_precios_cliente(self, cliente):
+        """
+        Obtiene los precios de compra y venta para un cliente específico
+        aplicando su porcentaje de beneficio.
+        """
+        # Si hay un cliente, usamos su beneficio_segmento
+        porcentaje_beneficio = 0
+        if cliente:
+            porcentaje_beneficio = cliente.beneficio_segmento
+        
+        return {
+            'precio_venta': self.calcular_precio_venta(porcentaje_beneficio),
+            'precio_compra': self.calcular_precio_compra(porcentaje_beneficio)
+        }
 
     def clean(self):
         super().clean()
@@ -54,7 +104,7 @@ def crear_moneda_usd(sender, **kwargs):
         # Verificar si ya existe la moneda USD
         if not Moneda.objects.filter(simbolo='USD').exists():
             Moneda.objects.create(
-                nombre='Dólar Estadounidense',
+                nombre='Dólar estadounidense',
                 simbolo='USD',
                 activa=True,
                 tasa_base=7400,

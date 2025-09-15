@@ -17,6 +17,7 @@ from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
 from roles.models import Roles
 from django.db.models import Q
+from django.contrib.sessions.models import Session
 
 def tiene_algun_permiso(view_func):
     """
@@ -343,7 +344,11 @@ def bloquear_usuario(request, pk):
         # Cambiar estado de bloqueo del usuario
         usuario.bloqueado = not usuario.bloqueado
         usuario.save()
-        
+        if usuario.is_authenticated and usuario.bloqueado:
+            for session in Session.objects.all():
+                data = session.get_decoded()
+                if data.get('_auth_user_id') == str(usuario.pk):
+                    session.delete()
         estado = 'desbloqueado' if not usuario.bloqueado else 'bloqueado'
         messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
         
@@ -496,6 +501,9 @@ def remover_cliente(request, pk, cliente_id):
     try:
         relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
         relacion.delete()
+        if usuario.cliente_activo == cliente:
+            usuario.cliente_activo = None
+            usuario.save()
         messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.get_full_name()}.')
     except UsuarioCliente.DoesNotExist:
         messages.error(request, 'La asignación no existe.')
@@ -531,7 +539,7 @@ def seleccionar_cliente_activo(request, cliente_id):
         request.user.cliente_activo = cliente
         request.user.save()
         
-        messages.success(request, f'Cliente "{cliente.nombre} {cliente.apellido}" seleccionado como cliente activo.')
+        messages.success(request, f'Cliente "{cliente.nombre}" seleccionado como cliente activo.')
         
     except Cliente.DoesNotExist:
         messages.error(request, 'Cliente no encontrado o no autorizado.')
@@ -554,4 +562,3 @@ def detalle_cliente(request, cliente_id):
     except Cliente.DoesNotExist:
         messages.error(request, 'Cliente no encontrado o no autorizado.')
         return redirect('usuarios:mis_clientes')
-

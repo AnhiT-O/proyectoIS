@@ -1,72 +1,25 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Acceso Denegado - Global Exchange{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
 {% block content %}
-<style>
-    .error-container {
-        max-width: 600px;
-        margin: 0 auto;
-        text-align: center;
-        padding: 3rem 2rem;
-    }
-
-    .error-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        padding: 3rem 2rem;
-    }
-
-    .error-icon {
-        font-size: 4rem;
-        color: #dc3545;
-        margin-bottom: 1.5rem;
-    }
-
-    .error-title {
-        color: #dc3545;
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-
-    .error-message {
-        color: #6c757d;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-        line-height: 1.6;
-    }
-
-    @media (max-width: 768px) {
-        .error-container {
-            padding: 2rem 1rem;
-        }
-
-        .error-card {
-            padding: 2rem 1rem;
-        }
-
-        .error-icon {
-            font-size: 3rem;
-        }
-
-        .error-title {
-            font-size: 1.5rem;
-        }
-    }
-</style>
-
-<div class="error-container">
-    <div class="error-card">
-        <div class="error-icon">🚫</div>
-        <h1 class="error-title">Acceso Denegado</h1>
-        <p class="error-message">
-            Lo sentimos, no tienes permiso para acceder a esta página. 
-            Esta sección está reservada para usuarios con permisos adecuados.
-        </p>
-        <a href="{% url 'inicio' %}" class="btn-enviar">
+<div class="contenido comprimido">
+    <div class="logo">🚫</div>
+    <h1 class="logo">Acceso Denegado</h1>
+    <p class="subtitulo">
+        Lo sentimos, no tienes permiso para acceder a esta página. 
+        Esta sección está reservada para usuarios con permisos adecuados.
+    </p>
+    <div class="acciones-rapidas">
+        <a href="{% url 'inicio' %}" class="btn-primario">
             Volver al Inicio
         </a>
     </div>
+</div>
 {% endblock %}

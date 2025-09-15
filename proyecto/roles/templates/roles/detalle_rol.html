@@ -4,7 +4,8 @@
 {% block title %}Detalle {{ rol.name }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'detalles.css' %}">
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -36,7 +37,7 @@
     </div>
 
     <div class="zona-acciones">
-        <div class="actions-section">
+        <div class="acciones-contenido">
             {% if perms.auth.change_group %}
             <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-primario">
                  Editar Rol

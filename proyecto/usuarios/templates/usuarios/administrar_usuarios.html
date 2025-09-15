@@ -4,7 +4,8 @@
 {% block title %}Gestionar Usuarios - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'gestion.css' %}">
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -52,96 +53,91 @@
             <span style="margin-left: 0.5rem;">Bloqueados: <span class="conteo" style="background: #dc3545;">{{ usuarios_bloqueados }}</span></span>
         </div>
     </div>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th style="width: 20%">Nombre Completo</th>
+                <th style="width: 15%">Usuario</th>
+                <th style="width: 10%">Roles</th>
+                <th style="width: 9%">Estado</th>
+                <th style="width: 10%">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.get_full_name }}</td>
+                <td>{{ usuario.username }}</td>
 
-    <div class="contenedor-tabla">
-        <table class="gestion-tabla">
-            <thead>
-                <tr>
-                    <th style="width: 20%">Nombre Completo</th>
-                    <th style="width: 15%">Usuario</th>
-                    <th style="width: 10%">Roles</th>
-                    <th style="width: 9%">Estado</th>
-                    <th style="width: 10%">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for usuario in usuarios %}
-                <tr>
-                    <td>{{ usuario.get_full_name }}</td>
-                    <td>{{ usuario.username }}</td>
-
-                    <td>
-                        {% if usuario.groups.exists %}
-                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                                {% for group in usuario.groups.all %}
-                                    <div>
-                                        <span class="{% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
-                                            {{ group.name|title }}
-                                            {% if perms.usuarios.asignacion_roles %}
-                                                <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn-remover-rol" 
-                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
-                                                            title="Desasignar rol">×</button>
-                                                </form>
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <span style="color: #6c757d; font-style: italic;">Sin roles</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="{% if not usuario.bloqueado %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
-                            {% if not usuario.bloqueado %}Activo{% else %}Bloqueado{% endif %}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="zona-acciones">
-                            <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-ver" title="Ver detalles del usuario">
-                                Detalles
-                            </a>
-
-                            {% if perms.usuarios.bloqueo %}
-                                <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                    {% if not usuario.bloqueado %}
-                                        <button type="submit" class="btn-desactivar"
-                                                title="Bloquear usuario"
-                                                onclick="return confirm('¿Estás seguro de que deseas bloquear al usuario {{ usuario.get_full_name }}?')">
-                                            Bloquear
-                                        </button>
-                                    {% else %}
-                                        <button type="submit" class="btn-activar"
-                                                title="Desbloquear usuario"
-                                                onclick="return confirm('¿Estás seguro de que deseas desbloquear al usuario {{ usuario.get_full_name }}?')">
-                                            Desbloquear
-                                        </button>
+                <td>
+                    {% if usuario.groups.exists %}
+                        {% for group in usuario.groups.all %}
+                            <div>
+                                <span class="{% if group.name == 'Administrador' %}rol-admin{% elif group.name == 'Analista cambiario' %}rol-analista{% elif group.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
+                                    {{ group.name|title }}
+                                    {% if perms.usuarios.asignacion_roles %}
+                                        <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-remover-rol" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
+                                                    title="Desasignar rol">×</button>
+                                        </form>
                                     {% endif %}
-                                </form>
-                            {% endif %}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: #6c757d; font-style: italic;">Sin roles</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="{% if not usuario.bloqueado %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
+                        {% if not usuario.bloqueado %}Activo{% else %}Bloqueado{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="zona-acciones">
+                        <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-detalles" title="Ver detalles del usuario">
+                            Detalles
+                        </a>
 
-                            {% if not perms.usuarios.bloqueo and not perms.usuarios.asignacion_roles %}
-                                <span style="color: #6c757d; font-style: italic; font-size: 0.8rem;">Sin permisos</span>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center">
-                        {% if busqueda or roles_filtro %}
-                            No se encontraron otros usuarios que coincidan con los filtros aplicados.
-                        {% else %}
-                            No hay otros usuarios registrados.
+                        {% if perms.usuarios.bloqueo %}
+                            <form action="{% url 'usuarios:bloquear_usuario' usuario.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                {% if not usuario.bloqueado %}
+                                    <button type="submit" class="btn-desactivar"
+                                            title="Bloquear usuario"
+                                            onclick="return confirm('¿Estás seguro de que deseas bloquear al usuario {{ usuario.get_full_name }}?')">
+                                        Bloquear
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn-activar"
+                                            title="Desbloquear usuario"
+                                            onclick="return confirm('¿Estás seguro de que deseas desbloquear al usuario {{ usuario.get_full_name }}?')">
+                                        Desbloquear
+                                    </button>
+                                {% endif %}
+                            </form>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+                        {% if not perms.usuarios.bloqueo and not perms.usuarios.asignacion_roles %}
+                            <span style="color: #6c757d; font-style: italic; font-size: 0.8rem;">Sin permisos</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">
+                    {% if busqueda or roles_filtro %}
+                        No se encontraron otros usuarios que coincidan con los filtros aplicados.
+                    {% else %}
+                        No hay otros usuarios registrados.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

@@ -4,7 +4,8 @@
 {% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Moneda - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'formularios.css' %}">
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -55,7 +56,7 @@
             </div>
         {% endif %}
 
-        {% if not form.instance.pk or perms.monedas.cambiar_tasa or perms.monedas.gestion %}
+        {% if not form.instance.pk or perms.monedas.cotizacion or perms.monedas.gestion %}
             <div class="form-campo">
                 <label for="{{ form.tasa_base.id_for_label }}">Tasa base</label>
                 {{ form.tasa_base }}
@@ -69,7 +70,7 @@
             </div>
         {% endif %}
 
-        {% if not form.instance.pk or perms.monedas.cambiar_comisiones or perms.monedas.gestion %}
+        {% if not form.instance.pk or perms.monedas.cotizacion or perms.monedas.gestion %}
             <div class="form-campo">
                 <label for="{{ form.comision_compra.id_for_label }}">Comisión de compra</label>
                 {{ form.comision_compra }}
@@ -94,7 +95,7 @@
             </div>
         {% endif %}
 
-        {% if not form.instance.pk or perms.monedas.cambiar_decimales or perms.monedas.gestion %}
+        {% if not form.instance.pk or perms.monedas.gestion %}
             <div class="form-campo">
                 <label for="{{ form.decimales.id_for_label }}">Decimales</label>
                 {{ form.decimales }}

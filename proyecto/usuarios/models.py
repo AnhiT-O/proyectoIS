@@ -6,8 +6,8 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     TIPO_CEDULA_CHOICES = [
-        ('RUC', 'Registro Único de Contribuyente'),
         ('CI', 'Cédula de Identidad'),
+        ('RUC', 'Registro Único de Contribuyente')
     ]
     
     username_validator = UnicodeUsernameValidator()

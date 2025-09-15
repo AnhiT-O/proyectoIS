@@ -198,7 +198,7 @@ class AsignarRolForm(forms.Form):
 class AsignarClienteForm(forms.Form):
     """Formulario para asignar clientes a usuarios"""
     clientes = forms.ModelMultipleChoiceField(
-        queryset=Cliente.objects.all().order_by('nombre', 'apellido'),
+        queryset=Cliente.objects.all().order_by('nombre'),
         widget=forms.CheckboxSelectMultiple(attrs={
             'class': 'form-check-input'
         }),
@@ -217,7 +217,7 @@ class AsignarClienteForm(forms.Form):
             clientes_asignados = usuario.clientes_operados.all()
             self.fields['clientes'].queryset = Cliente.objects.exclude(
                 id__in=clientes_asignados.values_list('id', flat=True)
-            ).order_by('nombre', 'apellido')
+            ).order_by('nombre')
             
             # Personalizar la etiqueta de cada cliente
-            self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} {obj.apellido} ({obj.docCliente})"
+            self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.docCliente})"
