@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve myproject
+After=network.target
+
+[Service]
+User=nombre #poner tu nombre de usuario de tu directorio en 'home'
+Group=nombre #lo mismo que arriba
+WorkingDirectory=/home/aylen/Documentos/IS2/proyectoIS/proyecto #colocar tu directorio del proyecto
+ExecStart="/home/aylen/Documentos/IS2/proyectoIS/proyecto/pvenv/bin/gunicorn" --workers 3 --bind "unix:/home/aylen/Documentos/IS2/proyectoIS/proyecto/proyecto.sock" proyecto.wsgi:application #acá lo mismo
+
+[Install]
+WantedBy=multi-user.target
