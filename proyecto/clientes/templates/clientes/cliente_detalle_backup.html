@@ -1,0 +1,746 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cliente.nombre }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h1 class="detalle-nombre">
+                {{ cliente.nombre }}
+        </h1>
+        <div class="detalle-tipo">
+            {{ cliente.get_tipoCliente_display }}
+        </div>
+    </div>
+
+    <div class="zona-detalle">
+        <div class="seccion-info">
+            <!-- Información Personal -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono"></span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Tipo de Documento</div>
+                        <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🔢</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Número de Documento</div>
+                        <div class="info-valor">{{ cliente.docCliente }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🏷️</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Segmento</div>
+                        <div class="info-valor">{{ cliente.get_segmento_display }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🎁</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Beneficio aplicado</div>
+                        <div class="info-valor">
+                            {% if cliente.beneficio_segmento > 0 %}
+                                {{ cliente.beneficio_segmento }}%
+                            {% else %}
+                                Ninguno
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📧</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Correo Electrónico</div>
+                        <div class="info-valor">{{ cliente.correoElecCliente }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📞</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Teléfono</div>
+                        <div class="info-valor">{{ cliente.telefono }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🏠</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Domicilio</div>
+                        <div class="info-valor">{{ cliente.direccion|default:"No especificado" }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">💼</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Ocupación</div>
+                        <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado de Declaración Jurada -->
+        <div class="info-columna" style="grid-column: 1 / -1;">
+            <div class="info-celda">
+                <span class="info-icono">📝</span>
+                <div class="info-contenido">
+                    <div class="info-titulo">Estado de Declaración Jurada</div>
+                    <div class="info-valor">
+                        {% if cliente.declaracion_jurada %}
+                            <span class="etiqueta-activo">
+                                Declaración Firmada
+                            </span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">
+                                Declaración Pendiente
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Medios de Pago -->
+    <div class="zona-detalle" style="margin-top: 2rem;">
+        <div class="detalle-cabecera" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; color: var(--color-texto-principal); font-size: 1.5rem;">Medios de Pago Asociados</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                {% if puede_agregar_tarjeta %}
+                    <a href="{% url 'clientes:cliente_agregar_tarjeta' cliente.pk %}" class="btn-secundario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        Agregar Tarjeta
+                    </a>
+                {% endif %}
+                {% if not medios_por_tipo.transferencia.0.cuenta_bancaria_completa %}
+                    <a href="{% url 'clientes:cliente_agregar_cuenta' cliente.pk %}" class="btn-secundario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        Agregar Cuenta
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if medios_pago %}
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <!-- Efectivo -->
+                {% for medio in medios_por_tipo.efectivo %}
+                <div class="info-celda" style="border-left: 4px solid #28a745; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">💵</span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Efectivo</div>
+                            {% if medio.activo %}
+                                <span class="etiqueta-activo">Disponible</span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Inactivo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    <small style="color: var(--color-texto-secundario);">Para todas las monedas</small>
+                </div>
+                {% endfor %}
+
+                <!-- Cheques -->
+                {% for medio in medios_por_tipo.cheque %}
+                <div class="info-celda" style="border-left: 4px solid #17a2b8; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">📄</span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Cheque</div>
+                            {% if medio.activo %}
+                                <span class="etiqueta-activo">Disponible</span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Inactivo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    <small style="color: var(--color-texto-secundario);">Para pagos con cheque</small>
+                </div>
+                {% endfor %}
+
+                <!-- Transferencias -->
+                {% for medio in medios_por_tipo.transferencia %}
+                    {# Solo mostrar medios básicos de transferencia si no hay cuentas configuradas #}
+                    {% if medio.cuenta_bancaria_completa or not tiene_cuentas_configuradas %}
+                <div class="info-celda" style="border-left: 4px solid #007bff; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Transferencia Bancaria</div>
+                            {% if medio.cuenta_bancaria_completa %}
+                                {% if medio.activo %}
+                                    <span class="etiqueta-activo">Configurada</span>
+                                {% else %}
+                                    <span class="etiqueta-bloqueado">Inactiva</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Sin configurar</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if medio.cuenta_bancaria_completa %}
+                        <div style="margin-bottom: 0.5rem;">
+                            <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                        style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                                    {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                        <small style="color: var(--color-texto-secundario);">
+                            Cuenta: ****{{ medio.numero_cuenta|slice:"-4:" }}<br>
+                            Titular: {{ medio.nombre_titular_cuenta }}
+                        </small>
+                        <div style="margin-top: 0.5rem;">
+                            <button onclick="mostrarModalEliminar('{{ medio.id }}', '{{ medio.tipo }}', '{{ medio.get_descripcion_completa|escapejs }}')" 
+                                    style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer;">
+                                Eliminar
+                            </button>
+                        </div>
+                    {% else %}
+                        <small style="color: var(--color-texto-secundario);">Necesita agregar cuenta bancaria</small>
+                    {% endif %}
+                </div>
+                    {% endif %}
+                {% endfor %}
+
+                                <!-- Billeteras Electrónicas -->
+                {% for medio in medios_por_tipo.billetera_electronica %}
+                <div class="info-celda" style="border-left: 4px solid #ffc107; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">📱</span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Billetera Electrónica</div>
+                            {% if medio.activo %}
+                                <span class="etiqueta-activo">Activa</span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Inactiva</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    <small style="color: var(--color-texto-secundario);">
+                        {{ medio.get_tipo_billetera_display }}<br>
+                        {{ medio.numero_telefono }}<br>
+                        {{ medio.get_moneda_be_display }}
+                    </small>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="mostrarModalEliminar('{{ medio.id }}', '{{ medio.tipo }}', '{{ medio.get_descripcion_completa|escapejs }}')" 
+                                style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer;">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Tarjetas de Crédito -->
+                {% for medio in medios_por_tipo.tarjeta_credito %}
+                <div class="info-celda" style="border-left: 4px solid #6c757d; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Tarjeta de Crédito</div>
+                            {% if medio.activo %}
+                                <span class="etiqueta-activo">Activa</span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Inactiva</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                    <small style="color: var(--color-texto-secundario);">
+                        ****-****-****-{{ medio.numero_tarjeta|slice:"-4:" }}<br>
+                        {{ medio.nombre_titular_tarjeta }}<br>
+                        {{ medio.get_moneda_tc_display }}
+                    </small>
+                    <div style="margin-top: 0.5rem;">
+                        <button onclick="mostrarModalEliminar('{{ medio.id }}', '{{ medio.tipo }}', '{{ medio.get_descripcion_completa|escapejs }}')" 
+                                style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer;">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
+                <span style="font-size: 3rem; opacity: 0.5;"></span>
+                <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de pago</h3>
+                <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de pago asociados.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">
+                Editar Cliente
+            </a>
+            <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Eliminar -->
+<div id="modalEliminar" class="modal-overlay">
+    <div class="modal-contenido">
+        <div class="modal-cabecera">
+            <h3 class="modal-titulo">
+                🗑️ Confirmar eliminación
+            </h3>
+            <button onclick="cerrarModal()" class="modal-cerrar">
+                ✕
+            </button>
+        </div>
+        
+        <div class="modal-cuerpo">
+            <p class="modal-texto">
+                ¿Estás seguro de que deseas eliminar este medio de pago?
+            </p>
+            
+            <div class="modal-info">
+                <div class="modal-info-contenido">
+                    <span class="modal-icono"></span>
+                    <div class="modal-detalles">
+                        <div class="modal-tipo">
+                            <span id="modalTipoMedio"></span>
+                        </div>
+                        <div class="modal-descripcion">
+                            <span id="modalDescripcionMedio"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-advertencia">
+                ⚠️ Esta acción no se puede deshacer
+            </div>
+        </div>
+        
+        <div class="modal-pie">
+            <button onclick="cerrarModal()" class="btn-secundario">
+                Cancelar
+            </button>
+            <button onclick="confirmarEliminacion()" class="btn-peligro">
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div id="modalExito" class="modal-overlay">
+    <div class="modal-contenido">
+        <div class="modal-cabecera modal-cabecera-exito">
+            <h3 class="modal-titulo">
+                ✅ Eliminación exitosa
+            </h3>
+            <button onclick="cerrarModalExito()" class="modal-cerrar">
+                ✕
+            </button>
+        </div>
+        
+        <div class="modal-cuerpo">
+            <p class="modal-texto">
+                El medio de pago ha sido eliminado correctamente.
+            </p>
+            
+            <div class="modal-info modal-info-exito">
+                <div class="modal-info-contenido">
+                    <span class="modal-icono">🗑️</span>
+                    <div class="modal-detalles">
+                        <div class="modal-descripcion">
+                            <span id="modalExitoDescripcion"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-nota">
+                La página se recargará automáticamente...
+            </div>
+        </div>
+        
+        <div class="modal-pie">
+            <button onclick="cerrarModalExito()" class="btn-primario">
+                ✓ Entendido
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Token CSRF para el modal -->
+{% csrf_token %}
+
+<style>
+/* Estilos del Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-contenido {
+    background: var(--color-fondo-tarjeta, white);
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.modal-cabecera {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-borde, #dee2e6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-cerrar {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-texto-secundario, #6c757d);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-cerrar:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--color-texto-principal, #212529);
+}
+
+.modal-titulo {
+    margin: 0;
+    color: var(--color-texto-principal, #212529);
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-cuerpo {
+    padding: 1.5rem;
+}
+
+.modal-texto {
+    margin: 0 0 1.5rem 0;
+    color: var(--color-texto-principal, #495057);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.modal-info {
+    background: var(--color-fondo-input, #f8f9fa);
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.modal-info-contenido {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.modal-icono {
+    font-size: 1.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.modal-detalles {
+    flex: 1;
+}
+
+.modal-tipo {
+    font-weight: 600;
+    color: var(--color-texto-principal, #495057);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.modal-descripcion {
+    color: var(--color-texto-secundario, #6c757d);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.modal-advertencia {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    padding: 0.875rem;
+    color: #856404;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-pie {
+    background: var(--color-fondo-input, #f8f9fa);
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-borde, #dee2e6);
+}
+
+.btn-peligro {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-peligro:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.btn-peligro:active {
+    transform: translateY(0);
+}
+
+/* Estilos para Modal de Éxito */
+.modal-cabecera-exito {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-bottom: 1px solid #c3e6cb;
+}
+
+.modal-cabecera-exito .modal-titulo {
+    color: #155724;
+}
+
+.modal-info-exito {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+}
+
+.modal-nota {
+    background: var(--color-fondo-input, #f8f9fa);
+    border: 1px solid var(--color-borde, #dee2e6);
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: var(--color-texto-secundario, #6c757d);
+    font-size: 0.9rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-contenido {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-pie {
+        flex-direction: column;
+    }
+    
+    .modal-pie button {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+let medioIdAEliminar = null;
+
+function mostrarModalEliminar(medioId, tipoMedio, descripcionMedio) {
+    medioIdAEliminar = medioId;
+    
+    // Traducir tipo de medio a español
+    const tiposTraducidos = {
+        'tarjeta_credito': 'Tarjeta de Crédito',
+        'transferencia': 'Cuenta Bancaria',
+        'efectivo': 'Efectivo',
+        'cheque': 'Cheque',
+        'billetera_electronica': 'Billetera Electrónica'
+    };
+    
+    document.getElementById('modalTipoMedio').textContent = tiposTraducidos[tipoMedio] || tipoMedio;
+    document.getElementById('modalDescripcionMedio').textContent = descripcionMedio || 'Sin descripción';
+    document.getElementById('modalEliminar').style.display = 'flex';
+    
+    // Prevenir scroll del body
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+    document.getElementById('modalEliminar').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    medioIdAEliminar = null;
+}
+
+function mostrarModalExito(descripcion) {
+    document.getElementById('modalExitoDescripcion').textContent = descripcion;
+    document.getElementById('modalExito').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalExito() {
+    document.getElementById('modalExito').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    // Refrescar la página para mostrar los cambios
+    window.location.reload();
+}
+
+function confirmarEliminacion() {
+    if (medioIdAEliminar) {
+        // Crear FormData para envío AJAX
+        const formData = new FormData();
+        
+        // Agregar token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+        }
+        
+        // Enviar petición AJAX
+        fetch(`{% url 'clientes:cliente_eliminar_medio_pago' cliente.pk 0 %}`.replace('0', medioIdAEliminar), {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            cerrarModal();
+            
+            if (data.success) {
+                // Mostrar modal de éxito sin redirección automática
+                mostrarModalExito(data.descripcion);
+            } else {
+                alert('Error al eliminar el medio de pago');
+            }
+        })
+        .catch(error => {
+            cerrarModal();
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+
+// Cerrar modal al hacer clic fuera de él
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('modalEliminar').addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModal();
+        }
+    });
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+});
+</script>
+
+{% endblock %}
