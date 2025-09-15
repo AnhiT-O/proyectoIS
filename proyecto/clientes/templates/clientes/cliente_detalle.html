@@ -114,6 +114,241 @@
         </div>
     </div>
 
+    <!-- Sección de Medios de Pago -->
+    <div class="zona-detalle" style="margin-top: 2rem;">
+        <div class="detalle-cabecera" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; color: var(--color-texto-principal); font-size: 1.5rem;">Medios de Pago Asociados</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                {% if puede_agregar_tarjeta %}
+                    <a href="{% url 'clientes:cliente_agregar_tarjeta' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+                        Agregar Tarjeta
+                    </a>
+                {% endif %}
+                {% if not medios_por_tipo.transferencia.0.cuenta_bancaria_completa %}
+                    <a href="{% url 'clientes:cliente_agregar_cuenta' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+                        Agregar Cuenta
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if medios_pago %}
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <!-- Efectivo -->
+                {% for medio in medios_por_tipo.efectivo %}
+                <div class="info-celda" style="border-left: 4px solid #28a745; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;"></span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo" style="margin-bottom: 8px;">Efectivo</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div style="margin-bottom: 1rem;">
+                        {% if medio.activo %}
+                            <span class="etiqueta-activo">Disponible</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Inactivo</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
+                        Para todas las monedas
+                    </div>
+                    
+                    <!-- Botón Activar/Desactivar -->
+                    <div>
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Cheques -->
+                {% for medio in medios_por_tipo.cheque %}
+                <div class="info-celda" style="border-left: 4px solid #17a2b8; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;"></span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo" style="margin-bottom: 8px;">Cheque</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div style="margin-bottom: 1rem;">
+                        {% if medio.activo %}
+                            <span class="etiqueta-activo">Disponible</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Inactivo</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
+                        Para pagos con cheque
+                    </div>
+                    
+                    <!-- Botón Activar/Desactivar -->
+                    <div>
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Transferencias -->
+                {% for medio in medios_por_tipo.transferencia %}
+                    {% if medio.cuenta_bancaria_completa or not tiene_cuentas_configuradas %}
+                <div class="info-celda" style="border-left: 4px solid #007bff; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;"></span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Transferencia Bancaria</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div style="margin-bottom: 1rem;">
+                        {% if medio.cuenta_bancaria_completa %}
+                            {% if medio.activo %}
+                                <span class="etiqueta-activo">Disponible</span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">Inactiva</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Sin configurar</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if medio.cuenta_bancaria_completa %}
+                        <!-- Información detallada -->
+                        <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
+                            <div style="margin-bottom: 0.25rem;">Cuenta: {{ medio.numero_cuenta_oculto }}</div>
+                            <div>Titular: {{ medio.nombre_titular_cuenta }}</div>
+                        </div>
+                        
+                        <!-- Botones -->
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                        style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                                    {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <!-- Solo información para cuentas sin configurar -->
+                        <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4;">
+                            Necesita agregar cuenta bancaria
+                        </div>
+                    {% endif %}
+                </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Tarjetas de Crédito -->
+                {% for medio in medios_por_tipo.tarjeta_credito %}
+                <div class="info-celda" style="border-left: 4px solid #6c757d; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;"></span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo">Tarjeta de Crédito</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div style="margin-bottom: 1rem;">
+                        {% if medio.activo %}
+                            <span class="etiqueta-activo">Activa</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Inactiva</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.25rem;">{{ medio.numero_tarjeta_oculto }}</div>
+                        <div style="margin-bottom: 0.25rem;">{{ medio.nombre_titular_tarjeta }}</div>
+                        <div>{{ medio.get_moneda_tc_display }}</div>
+                        {% if es_administrador and medio.cvv_tarjeta_oculto %}
+                            <div style="margin-top: 0.25rem;">CVV: {{ medio.cvv_tarjeta_oculto }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Billeteras Electrónicas -->
+                {% for medio in medios_por_tipo.billetera_electronica %}
+                <div class="info-celda" style="border-left: 4px solid #ffc107; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;"></span>
+                        <div style="flex: 1;">
+                            <div class="info-titulo" style="margin-bottom: 8px;">Billetera Electrónica</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div style="margin-bottom: 1rem;">
+                        {% if medio.activo %}
+                            <span class="etiqueta-activo">Activa</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Inactiva</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
+                        Desde todas las Telefonías
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
+                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                                {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
+                <span style="font-size: 3rem; opacity: 0.5;"></span>
+                <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de pago</h3>
+                <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de pago asociados.</p>
+            </div>
+        {% endif %}
+    </div>
+
     <div class="zona-acciones">
         <div class="acciones-contenido">
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">
@@ -125,4 +360,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
