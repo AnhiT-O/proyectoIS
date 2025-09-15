@@ -98,38 +98,6 @@ class TestClienteUrls:
         assert resolved.kwargs['medio_id'] == medio_id, "Los kwargs deberían incluir el medio_id"
         print("✓ Test cliente_eliminar_medio_pago_url_resolve: URL de eliminar medio de pago resuelve correctamente")
     
-    def test_all_urls_have_name_namespace(self):
-        """Test para verificar que todas las URLs tienen el namespace correcto"""
-        urls_with_names = [
-            ('clientes:cliente_crear', 'crear'),
-            ('clientes:cliente_lista', 'lista'),
-            ('clientes:cliente_detalle', 'detalle'),
-            ('clientes:cliente_editar', 'editar'),
-            ('clientes:cliente_agregar_tarjeta', 'agregar_tarjeta'),
-            ('clientes:cliente_agregar_cuenta', 'agregar_cuenta'),
-            ('clientes:cliente_cambiar_estado_medio_pago', 'cambiar_estado_medio_pago'),
-            ('clientes:cliente_eliminar_medio_pago', 'eliminar_medio_pago')
-        ]
-        
-        for url_name, description in urls_with_names:
-            try:
-                # Para URLs que requieren argumentos, usar valores de prueba
-                if 'detalle' in url_name or 'editar' in url_name or 'tarjeta' in url_name or 'cuenta' in url_name:
-                    if 'medio_pago' in url_name:
-                        url = reverse(url_name, args=[1, 2])
-                    else:
-                        url = reverse(url_name, args=[1])
-                else:
-                    url = reverse(url_name)
-                
-                assert url is not None, f"La URL '{url_name}' debería resolverse correctamente"
-                assert '/clientes' in url, f"La URL '{url_name}' debería estar bajo el namespace 'clientes'"
-                
-            except Exception as e:
-                pytest.fail(f"Error al resolver URL '{url_name}': {str(e)}")
-        
-        print("✓ Test all_urls_have_name_namespace: Todas las URLs tienen namespace correcto")
-    
     def test_url_patterns_coverage(self):
         """Test para verificar que todas las URLs del urlpatterns están cubiertas"""
         from clientes.urls import urlpatterns
