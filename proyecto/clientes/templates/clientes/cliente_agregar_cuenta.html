@@ -12,7 +12,7 @@
 <div class="cuerpo">
     <div class="contenido extendido">
         <div class="form-cabecera">
-            <div class="logo">🏦 Registrar Cuenta Bancaria</div>
+            <div class="logo">🏦 Agregar Cuenta Bancaria</div>
             <p class="subtitulo">Para {{ cliente.nombre }} {{ cliente.apellido }}</p>
         </div>
 
@@ -95,15 +95,13 @@
                 <small style="color: #666; font-size: 0.85rem;">Tipo de cuenta bancaria</small>
             </div>
 
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-                <a href="{{ cancelar_url }}" 
-                   style="padding: 0.75rem 1.5rem; border: 2px solid #ddd; border-radius: 8px; text-decoration: none; color: #666; background: white; transition: all 0.2s ease;">
+            <div class="zona-botones">
+                <button type="submit" class="btn-enviar">
+                    Agregar Tarjeta
+                </button>
+                <a href="{{ cancelar_url }}" class="btn-atras">
                     Cancelar
                 </a>
-                <button type="submit" 
-                        style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: transform 0.2s ease;">
-                    Registrar Cuenta
-                </button>
             </div>
         </form>
     </div>

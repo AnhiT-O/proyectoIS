@@ -149,21 +149,15 @@
                         {% if medio.activo %}
                             <span class="etiqueta-activo">Disponible</span>
                         {% else %}
-                            <span class="etiqueta-bloqueado">Inactivo</span>
+                            <span class="etiqueta-bloqueado">Desactivado</span>
                         {% endif %}
-                    </div>
-                    
-                    <!-- Información detallada -->
-                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        Para todas las monedas
                     </div>
                     
                     <!-- Botón Activar/Desactivar -->
                     <div>
                         <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
-                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;">
+                            <button type="submit" class="{% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}">
                                 {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
                             </button>
                         </form>
@@ -190,17 +184,11 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Información detallada -->
-                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        Para pagos con cheque
-                    </div>
-                    
                     <!-- Botón Activar/Desactivar -->
                     <div>
                         <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
-                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;">
+                            <button type="submit" class="{% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}">
                                 {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
                             </button>
                         </form>
@@ -243,16 +231,10 @@
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
-                                        style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                                <button type="submit" class="{% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}">
                                     {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
                                 </button>
                             </form>
-                        </div>
-                    {% else %}
-                        <!-- Solo información para cuentas sin configurar -->
-                        <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4;">
-                            Necesita agregar cuenta bancaria
                         </div>
                     {% endif %}
                 </div>
@@ -292,8 +274,7 @@
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
-                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                            <button type="submit" class="{% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}">
                                 {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
                             </button>
                         </form>
@@ -320,22 +301,14 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Información detallada -->
-                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        Desde todas las Telefonías
-                    </div>
-                    
                     <!-- Botones -->
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <form method="post" action="{% url 'clientes:cliente_cambiar_estado_medio_pago' cliente.pk medio.id %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-action {% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}" 
-                                    style="background: {% if medio.activo %}#6c757d{% else %}#28a745{% endif %}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; min-width: 100px;">
+                            <button type="submit" class="{% if medio.activo %}btn-desactivar{% else %}btn-activar{% endif %}">
                                 {% if medio.activo %}Desactivar{% else %}Activar{% endif %}
                             </button>
-                        </form>
-                    </div>
-                        </form>
+                        </form> 
                     </div>
                 </div>
                 {% endfor %}
