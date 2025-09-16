@@ -32,7 +32,7 @@
           <div class="body" role="main">
             
   <h1>Código fuente para usuarios.views</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">get_object_or_404</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">login</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">permission_required</span>
@@ -49,6 +49,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistroUsuarioForm</span><span class="p">,</span> <span class="n">RecuperarPasswordForm</span><span class="p">,</span> <span class="n">EstablecerPasswordForm</span><span class="p">,</span> <span class="n">AsignarRolForm</span><span class="p">,</span> <span class="n">AsignarClienteForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usuario</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span><span class="p">,</span> <span class="n">UsuarioCliente</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">clientes.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">procesar_medios_pago_cliente</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">roles.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Roles</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.sessions.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
@@ -643,8 +644,12 @@
         <span class="c1"># Verificar que el cliente existe y está asociado al usuario</span>
         <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">clientes_operados</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">cliente_id</span><span class="p">)</span>
         
+        <span class="c1"># Usar función auxiliar para procesar medios de pago</span>
+        <span class="n">medios_data</span> <span class="o">=</span> <span class="n">procesar_medios_pago_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        
         <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span>
+            <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">medios_data</span>
         <span class="p">}</span>
         
         <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;usuarios/detalle_cliente.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>

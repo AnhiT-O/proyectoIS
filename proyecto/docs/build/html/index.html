@@ -44,10 +44,18 @@ documentation for details.</p>
 <li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.models.Cliente"><code class="docutils literal notranslate"><span class="pre">Cliente</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.models.UsuarioCliente"><code class="docutils literal notranslate"><span class="pre">UsuarioCliente</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_agregar_cuenta"><code class="docutils literal notranslate"><span class="pre">cliente_agregar_cuenta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_agregar_tarjeta"><code class="docutils literal notranslate"><span class="pre">cliente_agregar_tarjeta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_cambiar_estado_medio_pago"><code class="docutils literal notranslate"><span class="pre">cliente_cambiar_estado_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_crear"><code class="docutils literal notranslate"><span class="pre">cliente_crear()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_detalle"><code class="docutils literal notranslate"><span class="pre">cliente_detalle()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_editar"><code class="docutils literal notranslate"><span class="pre">cliente_editar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_eliminar_medio_pago"><code class="docutils literal notranslate"><span class="pre">cliente_eliminar_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.cliente_lista"><code class="docutils literal notranslate"><span class="pre">cliente_lista()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.get_cliente_detalle_redirect"><code class="docutils literal notranslate"><span class="pre">get_cliente_detalle_redirect()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.get_cliente_detalle_url"><code class="docutils literal notranslate"><span class="pre">get_cliente_detalle_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.procesar_medios_pago_cliente"><code class="docutils literal notranslate"><span class="pre">procesar_medios_pago_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.views.verificar_acceso_cliente"><code class="docutils literal notranslate"><span class="pre">verificar_acceso_cliente()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.forms.ClienteForm"><code class="docutils literal notranslate"><span class="pre">ClienteForm</span></code></a></li>
 </ul>
 </li>
@@ -103,12 +111,11 @@ documentation for details.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="medios_pago.html">Medios de Pago</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.MedioPago"><code class="docutils literal notranslate"><span class="pre">MedioPago</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.MedioPagoCliente"><code class="docutils literal notranslate"><span class="pre">MedioPagoCliente</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.asociar_medios_pago_basicos_a_nuevo_cliente"><code class="docutils literal notranslate"><span class="pre">asociar_medios_pago_basicos_a_nuevo_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.asociar_medios_pago_basicos_a_todos_los_clientes"><code class="docutils literal notranslate"><span class="pre">asociar_medios_pago_basicos_a_todos_los_clientes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.crear_medios_pago_iniciales"><code class="docutils literal notranslate"><span class="pre">crear_medios_pago_iniciales()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.models.relacionar_nueva_moneda_con_efectivo"><code class="docutils literal notranslate"><span class="pre">relacionar_nueva_moneda_con_efectivo()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.views.medio_pago_cambiar_estado"><code class="docutils literal notranslate"><span class="pre">medio_pago_cambiar_estado()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.views.medio_pago_detalle"><code class="docutils literal notranslate"><span class="pre">medio_pago_detalle()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.views.medio_pago_lista"><code class="docutils literal notranslate"><span class="pre">medio_pago_lista()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_pago.html#medios_pago.views.obtener_campos_por_tipo"><code class="docutils literal notranslate"><span class="pre">obtener_campos_por_tipo()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="proyecto.html">Configuración Proyecto</a><ul>

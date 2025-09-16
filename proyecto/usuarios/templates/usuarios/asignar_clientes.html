@@ -9,19 +9,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="contenido">
-    <div class="form-cabecera">
+<div class="contenido extendido">
+    <div class="form-cabecera" style="margin-bottom: 1rem;">
         <h2>Asignar Clientes a Usuario</h2>
-    </div>
-    <div class="info-usuario">
-        <div class="info-titulo">Nombre del Usuario:</div>
-        <div class="info-valor">{{ usuario.get_full_name }}</div>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Nombre del Usuario:</div>
+            <div class="info-valor">{{ usuario.get_full_name }}</div>
+        </div>
     </div>
 
     <form method="post" novalidate>
         {% csrf_token %}
         
-        <p class="subtitulo">Marca los clientes que deseas asignar a este usuario:</p>
+        <p class="subtitulo" style="text-align: center;">Marca los clientes que deseas asignar a este usuario:</p>
 
         {% if form.clientes.field.queryset.exists %}
             <div class="zona-tarjetas">

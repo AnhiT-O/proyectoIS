@@ -332,8 +332,7 @@ def cliente_agregar_cuenta(request, pk):
                 numero_cuenta=numero_cuenta,
                 nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
                 banco=form.cleaned_data.get('banco', ''),
-                tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
-                cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', '')
+                tipo_cuenta=form.cleaned_data.get('tipo_cuenta', '')
             ).first()
             
             if cuenta_existente:
@@ -377,7 +376,6 @@ def cliente_agregar_cuenta(request, pk):
                     nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
                     banco=form.cleaned_data.get('banco', ''),
                     tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
-                    cedula_ruc_cuenta=form.cleaned_data.get('cedula_ruc_cuenta', ''),
                     activo=True,
                     is_deleted=False
                 )

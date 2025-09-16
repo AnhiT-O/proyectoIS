@@ -1,0 +1,21 @@
+Pruebas unitarias a crear:
+1. ClienteForm: creación exitosa de cliente con datos válidos. 
+2. ClienteForm: error si el documento o teléfono no son numéricos. 
+3. ClienteForm: error si el documento o correo ya existen (únicos). 
+4. ClienteForm: error si algún campo requerido está vacío o excede el máximo de caracteres. 
+5. ClienteForm: error si el tipo de documento no corresponde al tipo de cliente (ej: jurídica sin RUC). 
+6. Modelo Cliente: método save actualiza correctamente el beneficio según el segmento. 
+7. Modelo Cliente: método clean valida coherencia entre tipoCliente y tipoDocCliente. 
+8. Modelo Cliente: método __str__ retorna el nombre correctamente. 
+9. Vista cliente_crear: solo usuarios con permiso pueden crear clientes. 
+10. Vista cliente_crear: muestra errores si los datos del formulario son inválidos. 
+11. Vista cliente_lista: filtra correctamente por segmento y búsqueda. 
+12. Vista cliente_detalle: solo usuarios asociados o con permiso pueden ver el detalle. 
+13. Vista cliente_agregar_tarjeta: no permite agregar más de 3 tarjetas activas por cliente. 
+14. Vista cliente_agregar_cuenta: no permite duplicar cuentas bancarias para el mismo cliente. 
+15. Vista cliente_cambiar_estado_medio_pago: activa/desactiva correctamente el medio de pago del cliente.
+
+Ten en cuenta:
+- Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
+- Cada error debe mostrar su mensaje de error correspondiente
+- No crear más pruebas unitarias de lo necesario

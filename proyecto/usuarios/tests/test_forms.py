@@ -1,301 +1,393 @@
 import pytest
-from django.core.exceptions import ValidationError
+from django.test import TestCase
 from django.contrib.auth.models import Group
-from usuarios.forms import (
-    RegistroUsuarioForm, 
-    RecuperarPasswordForm, 
-    EstablecerPasswordForm,
-    AsignarRolForm,
-    AsignarClienteForm
-)
+from django.core.exceptions import ValidationError
+from usuarios.forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from usuarios.models import Usuario
 from clientes.models import Cliente
 
 
-@pytest.mark.django_db
 class TestRegistroUsuarioForm:
-    """Pruebas unitarias para el formulario RegistroUsuarioForm"""
-
-    def test_formulario_valido_con_datos_correctos(self):
-        """Test que verifica que el formulario es válido con datos correctos"""
-        form_data = {
+    """Pruebas para el formulario de registro de usuario"""
+    
+    @pytest.fixture
+    def datos_validos(self):
+        """Datos válidos para el formulario de registro"""
+        return {
             'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
+            'first_name': 'Test',
+            'last_name': 'User',
             'email': 'test@example.com',
             'tipo_cedula': 'CI',
             'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
+            'password1': 'ComplexPass123!',
+            'password2': 'ComplexPass123!'
         }
-        form = RegistroUsuarioForm(data=form_data)
+    
+    @pytest.fixture
+    def usuario_existente(self, db):
+        """Usuario existente para probar duplicados"""
+        return Usuario.objects.create(
+            username='existing',
+            email='existing@example.com',
+            first_name='Existing',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='87654321'
+        )
+    
+    @pytest.mark.django_db
+    def test_registro_exitoso_con_datos_validos(self, datos_validos):
+        """Prueba 1: Registro exitoso con datos válidos"""
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert form.is_valid(), f"El formulario debería ser válido. Errores: {form.errors}"
-
-    def test_username_requerido(self):
-        """Test que verifica que username es requerido"""
-        form_data = {
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert form.is_valid()
+        usuario = form.save()
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin username"
-        assert 'username' in form.errors, "Debería haber un error en el campo username"
-        assert 'El nombre de usuario es obligatorio.' in str(form.errors['username']), "El mensaje de error no es el esperado"
-
-    def test_email_requerido(self):
-        """Test que verifica que email es requerido"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert usuario.username == datos_validos['username']
+        assert usuario.email == datos_validos['email']
+        assert usuario.cedula_identidad == datos_validos['cedula_identidad']
+        assert usuario.first_name == datos_validos['first_name']
+        assert usuario.last_name == datos_validos['last_name']
+        assert usuario.tipo_cedula == datos_validos['tipo_cedula']
+    
+    @pytest.mark.django_db
+    def test_error_cedula_no_numerica(self, datos_validos):
+        """Prueba 2a: Error si la cédula no es numérica"""
+        datos_validos['cedula_identidad'] = 'abc123'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin email"
-        assert 'email' in form.errors, "Debería haber un error en el campo email"
-        assert 'El correo electrónico es obligatorio.' in str(form.errors['email']), "El mensaje de error no es el esperado"
-
-    def test_email_formato_invalido(self):
-        """Test que verifica validación de formato de email"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'email_invalido',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'cedula_identidad' in form.errors
+        assert 'La cédula de identidad debe ser numérica.' in str(form.errors['cedula_identidad'])
+    
+    @pytest.mark.django_db
+    def test_error_cedula_muy_corta(self, datos_validos):
+        """Prueba 2b: Error si la cédula es muy corta"""
+        datos_validos['cedula_identidad'] = '123'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido con email inválido"
-        assert 'email' in form.errors, "Debería haber un error en el campo email"
-        assert 'Introduce un correo electrónico válido.' in str(form.errors['email']), "El mensaje de error no es el esperado"
-
-    def test_first_name_requerido(self):
-        """Test que verifica que first_name es requerido"""
-        form_data = {
-            'username': 'testuser',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'cedula_identidad' in form.errors
+        assert 'La cédula de identidad debe tener al menos 4 dígitos.' in str(form.errors['cedula_identidad'])
+    
+    @pytest.mark.django_db
+    def test_error_cedula_ya_existe(self, datos_validos, usuario_existente):
+        """Prueba 2c: Error si la cédula ya existe"""
+        datos_validos['cedula_identidad'] = usuario_existente.cedula_identidad
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin first_name"
-        assert 'first_name' in form.errors, "Debería haber un error en el campo first_name"
-        assert 'El nombre es obligatorio.' in str(form.errors['first_name']), "El mensaje de error no es el esperado"
-
-    def test_last_name_requerido(self):
-        """Test que verifica que last_name es requerido"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'cedula_identidad' in form.errors
+    
+    @pytest.mark.django_db
+    def test_error_email_ya_registrado(self, datos_validos, usuario_existente):
+        """Prueba 3a: Error si el email ya está registrado"""
+        datos_validos['email'] = usuario_existente.email
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin last_name"
-        assert 'last_name' in form.errors, "Debería haber un error en el campo last_name"
-        assert 'El apellido es obligatorio.' in str(form.errors['last_name']), "El mensaje de error no es el esperado"
-
-    def test_cedula_identidad_requerida(self):
-        """Test que verifica que cedula_identidad es requerida"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+    
+    @pytest.mark.django_db
+    def test_error_email_invalido(self, datos_validos):
+        """Prueba 3b: Error si el email es inválido"""
+        datos_validos['email'] = 'email_invalido'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin cedula_identidad"
-        assert 'cedula_identidad' in form.errors, "Debería haber un error en el campo cedula_identidad"
-        assert 'La cédula de identidad es obligatoria.' in str(form.errors['cedula_identidad']), "El mensaje de error no es el esperado"
-
-    def test_cedula_identidad_solo_numeros(self):
-        """Test que verifica que cedula_identidad debe ser numérica"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': 'abc123',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+    
+    @pytest.mark.django_db
+    def test_error_contrasenas_no_coinciden(self, datos_validos):
+        """Prueba 4a: Error si las contraseñas no coinciden"""
+        datos_validos['password2'] = 'DiferentePass123!'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido con cedula no numérica"
-        assert 'cedula_identidad' in form.errors, "Debería haber un error en el campo cedula_identidad"
-        assert 'La cédula de identidad debe ser numérica.' in str(form.errors['cedula_identidad']), "El mensaje de error no es el esperado"
-
-    def test_cedula_identidad_minimo_digitos(self):
-        """Test que verifica que cedula_identidad debe tener al menos 4 dígitos"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '123',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'password2' in form.errors
+        assert 'Las contraseñas no coinciden.' in str(form.errors['password2'])
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_muy_corta(self, datos_validos):
+        """Prueba 4b: Error si contraseña no tiene más de 8 caracteres"""
+        datos_validos['password1'] = 'Short1!'
+        datos_validos['password2'] = 'Short1!'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido con cedula muy corta"
-        assert 'cedula_identidad' in form.errors, "Debería haber un error en el campo cedula_identidad"
-        assert 'La cédula de identidad debe tener al menos 4 dígitos.' in str(form.errors['cedula_identidad']), "El mensaje de error no es el esperado"
-
-    def test_password_longitud_minima(self):
-        """Test que verifica que password1 debe tener más de 8 caracteres"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'pass123!',
-            'password2': 'pass123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'password1' in form.errors
+        assert 'La contraseña debe tener más de 8 caracteres.' in str(form.errors['password1'])
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_sin_numero(self, datos_validos):
+        """Prueba 4c: Error si contraseña no tiene número"""
+        datos_validos['password1'] = 'ComplexPass!'
+        datos_validos['password2'] = 'ComplexPass!'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido con password muy corta"
-        assert 'password1' in form.errors, "Debería haber un error en el campo password1"
-        assert 'La contraseña debe tener más de 8 caracteres.' in str(form.errors['password1']), "El mensaje de error no es el esperado"
-
-    def test_password_sin_caracter_especial(self):
-        """Test que verifica que password1 debe contener un caracter especial"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123',
-            'password2': 'password123'
-        }
-        form = RegistroUsuarioForm(data=form_data)
+        assert not form.is_valid()
+        assert 'password1' in form.errors
+        assert 'La contraseña debe contener al menos un número.' in str(form.errors['password1'])
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_sin_caracter_especial(self, datos_validos):
+        """Prueba 4d: Error si contraseña no tiene carácter especial"""
+        datos_validos['password1'] = 'ComplexPass123'
+        datos_validos['password2'] = 'ComplexPass123'
+        form = RegistroUsuarioForm(data=datos_validos)
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin caracter especial"
-        assert 'password1' in form.errors, "Debería haber un error en el campo password1"
-        assert 'La contraseña debe contener al menos un caracter especial.' in str(form.errors['password1']), "El mensaje de error no es el esperado"
-
-    def test_password_sin_numero(self):
-        """Test que verifica que password1 debe contener un número"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password!',
-            'password2': 'password!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
-        
-        assert not form.is_valid(), "El formulario no debería ser válido sin número"
-        assert 'password1' in form.errors, "Debería haber un error en el campo password1"
-        assert 'La contraseña debe contener al menos un número.' in str(form.errors['password1']), "El mensaje de error no es el esperado"
-
-    def test_passwords_no_coinciden(self):
-        """Test que verifica que password1 y password2 deben coincidir"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password456!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
-        
-        assert not form.is_valid(), "El formulario no debería ser válido con passwords diferentes"
-        assert 'password2' in form.errors, "Debería haber un error en el campo password2"
-        assert 'Las contraseñas no coinciden.' in str(form.errors['password2']), "El mensaje de error no es el esperado"
-
-    def test_save_method(self):
-        """Test que verifica que el método save funciona correctamente"""
-        form_data = {
-            'username': 'testuser',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'email': 'test@example.com',
-            'tipo_cedula': 'CI',
-            'cedula_identidad': '12345678',
-            'password1': 'password123!',
-            'password2': 'password123!'
-        }
-        form = RegistroUsuarioForm(data=form_data)
-        
-        assert form.is_valid(), f"El formulario debería ser válido. Errores: {form.errors}"
-        
-        user = form.save()
-        
-        assert user.username == 'testuser', "El username no se guardó correctamente"
-        assert user.email == 'test@example.com', "El email no se guardó correctamente"
-        assert user.first_name == 'Juan', "El first_name no se guardó correctamente"
-        assert user.last_name == 'Perez', "El last_name no se guardó correctamente"
-        assert user.tipo_cedula == 'CI', "El tipo_cedula no se guardó correctamente"
-        assert user.cedula_identidad == '12345678', "La cedula_identidad no se guardó correctamente"
+        assert not form.is_valid()
+        assert 'password1' in form.errors
+        assert 'La contraseña debe contener al menos un caracter especial.' in str(form.errors['password1'])
 
 
-@pytest.mark.django_db
 class TestRecuperarPasswordForm:
-    """Pruebas unitarias para el formulario RecuperarPasswordForm"""
-
-    def test_email_requerido(self):
-        """Test que verifica que email es requerido"""
-        form_data = {}
-        form = RecuperarPasswordForm(data=form_data)
+    """Pruebas para el formulario de recuperación de contraseña"""
+    
+    @pytest.fixture
+    def usuario_activo(self, db):
+        """Usuario activo para pruebas"""
+        return Usuario.objects.create(
+            username='activo',
+            email='activo@example.com',
+            first_name='Usuario',
+            last_name='Activo',
+            tipo_cedula='CI',
+            cedula_identidad='12345678',
+            is_active=True
+        )
+    
+    @pytest.fixture
+    def usuario_inactivo(self, db):
+        """Usuario inactivo para pruebas"""
+        return Usuario.objects.create(
+            username='inactivo',
+            email='inactivo@example.com',
+            first_name='Usuario',
+            last_name='Inactivo',
+            tipo_cedula='CI',
+            cedula_identidad='87654321',
+            is_active=False
+        )
+    
+    @pytest.mark.django_db
+    def test_error_email_no_existe(self):
+        """Prueba 5a: Error si el email no existe"""
+        form = RecuperarPasswordForm(data={'email': 'noexiste@example.com'})
         
-        assert not form.is_valid(), "El formulario no debería ser válido sin email"
-        assert 'email' in form.errors, "Debería haber un error en el campo email"
-        assert 'El correo electrónico es obligatorio.' in str(form.errors['email']), "El mensaje de error no es el esperado"
-
-    def test_email_formato_invalido(self):
-        """Test que verifica validación de formato de email"""
-        form_data = {'email': 'email_invalido'}
-        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa asociada a este correo electrónico.' in str(form.errors['email'])
+    
+    @pytest.mark.django_db
+    def test_error_usuario_inactivo(self, usuario_inactivo):
+        """Prueba 5b: Error si el usuario está inactivo"""
+        form = RecuperarPasswordForm(data={'email': usuario_inactivo.email})
         
-        assert not form.is_valid(), "El formulario no debería ser válido con email inválido"
-        assert 'email' in form.errors, "Debería haber un error en el campo email"
-        assert 'Ingrese un correo electrónico válido.' in str(form.errors['email']), "El mensaje de error no es el esperado"
-
-    def test_email_usuario_inexistente(self):
-        """Test que verifica validación para usuario inexistente"""
-        form_data = {'email': 'noexiste@example.com'}
-        form = RecuperarPasswordForm(data=form_data)
+        assert not form.is_valid()
+        assert 'email' in form.errors
+        assert 'No existe una cuenta activa asociada a este correo electrónico.' in str(form.errors['email'])
+    
+    @pytest.mark.django_db
+    def test_formulario_valido_usuario_activo(self, usuario_activo):
+        """Prueba 5c: Formulario válido si el usuario existe y está activo"""
+        form = RecuperarPasswordForm(data={'email': usuario_activo.email})
         
-        assert not form.is_valid(), "El formulario no debería ser válido con email inexistente"
-        assert 'email' in form.errors, "Debería haber un error en el campo email"
-        assert 'No existe una cuenta activa asociada a este correo electrónico.' in str(form.errors['email']), "El mensaje de error no es el esperado"
+        assert form.is_valid()
+
+
+class TestEstablecerPasswordForm:
+    """Pruebas para el formulario de establecer nueva contraseña"""
+    
+    @pytest.fixture
+    def usuario(self, db):
+        """Usuario para las pruebas"""
+        return Usuario.objects.create(
+            username='testuser',
+            email='test@example.com',
+            first_name='Test',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678'
+        )
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_muy_corta(self, usuario):
+        """Prueba 6a: Error si la nueva contraseña es muy corta"""
+        form = EstablecerPasswordForm(
+            user=usuario,
+            data={
+                'new_password1': 'Short1!',
+                'new_password2': 'Short1!'
+            }
+        )
+        
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe tener más de 8 caracteres.' in str(form.errors['new_password1'])
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_sin_numero(self, usuario):
+        """Prueba 6b: Error si la nueva contraseña no tiene número"""
+        form = EstablecerPasswordForm(
+            user=usuario,
+            data={
+                'new_password1': 'ComplexPass!',
+                'new_password2': 'ComplexPass!'
+            }
+        )
+        
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe contener al menos un número.' in str(form.errors['new_password1'])
+    
+    @pytest.mark.django_db
+    def test_error_contrasena_sin_caracter_especial(self, usuario):
+        """Prueba 6c: Error si la nueva contraseña no tiene carácter especial"""
+        form = EstablecerPasswordForm(
+            user=usuario,
+            data={
+                'new_password1': 'ComplexPass123',
+                'new_password2': 'ComplexPass123'
+            }
+        )
+        
+        assert not form.is_valid()
+        assert 'new_password1' in form.errors
+        assert 'La contraseña debe contener al menos un caracter especial.' in str(form.errors['new_password1'])
+    
+    @pytest.mark.django_db
+    def test_contrasena_valida(self, usuario):
+        """Prueba 6d: Contraseña válida cumple todos los requisitos"""
+        form = EstablecerPasswordForm(
+            user=usuario,
+            data={
+                'new_password1': 'ComplexPass123!',
+                'new_password2': 'ComplexPass123!'
+            }
+        )
+        
+        assert form.is_valid()
+
+
+class TestAsignarRolForm:
+    """Pruebas para el formulario de asignación de roles"""
+    
+    @pytest.fixture
+    def grupos(self, db):
+        """Crear grupos para las pruebas"""
+        admin, _ = Group.objects.get_or_create(name='Administrador')
+        operador, _ = Group.objects.get_or_create(name='Operador')
+        supervisor, _ = Group.objects.get_or_create(name='Supervisor')
+        return {'admin': admin, 'operador': operador, 'supervisor': supervisor}
+    
+    @pytest.fixture
+    def usuario_con_rol(self, db, grupos):
+        """Usuario con rol asignado"""
+        usuario = Usuario.objects.create(
+            username='test',
+            email='test@example.com',
+            first_name='Test',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678'
+        )
+        usuario.groups.add(grupos['operador'])
+        return usuario
+    
+    @pytest.mark.django_db
+    def test_no_muestra_rol_administrador(self, grupos):
+        """Prueba 7a: No permite asignar rol Administrador"""
+        form = AsignarRolForm()
+        
+        # Verificar que el queryset no incluye el grupo Administrador
+        assert not form.fields['rol'].queryset.filter(name='Administrador').exists()
+    
+    @pytest.mark.django_db
+    def test_solo_muestra_roles_no_asignados(self, grupos, usuario_con_rol):
+        """Prueba 7b: Solo muestra roles no asignados al usuario"""
+        form = AsignarRolForm(usuario=usuario_con_rol)
+        
+        # El formulario no debe mostrar el rol 'Operador' que ya tiene el usuario
+        queryset_names = list(form.fields['rol'].queryset.values_list('name', flat=True))
+        assert 'Operador' not in queryset_names
+        assert 'Supervisor' in queryset_names
+        assert 'Administrador' not in queryset_names
+    
+    @pytest.mark.django_db
+    def test_formulario_valido_con_roles_disponibles(self, grupos, usuario_con_rol):
+        """Prueba 7c: Formulario válido con roles disponibles"""
+        form = AsignarRolForm(
+            data={'rol': [grupos['supervisor'].id]},
+            usuario=usuario_con_rol
+        )
+        
+        assert form.is_valid()
+
+
+class TestAsignarClienteForm:
+    """Pruebas para el formulario de asignación de clientes"""
+    
+    @pytest.fixture
+    def clientes(self, db):
+        """Crear clientes para las pruebas"""
+        cliente1 = Cliente.objects.create(
+            nombre='Cliente 1',
+            tipoDocCliente='CI',
+            docCliente='12345678',
+            correoElecCliente='cliente1@example.com',
+            telefono='+595981123456',
+            tipoCliente='F',
+            direccion='Dirección 1',
+            ocupacion='Ocupación 1'
+        )
+        cliente2 = Cliente.objects.create(
+            nombre='Cliente 2',
+            tipoDocCliente='RUC',
+            docCliente='87654321',
+            correoElecCliente='cliente2@example.com',
+            telefono='+595981654321',
+            tipoCliente='J',
+            direccion='Dirección 2',
+            ocupacion='Ocupación 2'
+        )
+        return [cliente1, cliente2]
+    
+    @pytest.fixture
+    def usuario_con_cliente(self, db, clientes):
+        """Usuario con cliente asignado"""
+        from clientes.models import UsuarioCliente
+        usuario = Usuario.objects.create(
+            username='test',
+            email='test@example.com',
+            first_name='Test',
+            last_name='User',
+            tipo_cedula='CI',
+            cedula_identidad='12345678'
+        )
+        UsuarioCliente.objects.create(usuario=usuario, cliente=clientes[0])
+        return usuario
+    
+    @pytest.mark.django_db
+    def test_solo_muestra_clientes_no_asignados(self, clientes, usuario_con_cliente):
+        """Prueba 8a: Solo muestra clientes no asignados al usuario"""
+        form = AsignarClienteForm(usuario=usuario_con_cliente)
+        
+        queryset_ids = list(form.fields['clientes'].queryset.values_list('id', flat=True))
+        # No debe mostrar el cliente ya asignado
+        assert clientes[0].id not in queryset_ids
+        # Debe mostrar el cliente no asignado
+        assert clientes[1].id in queryset_ids
+    
+    @pytest.mark.django_db
+    def test_etiqueta_personalizada(self, clientes, usuario_con_cliente):
+        """Prueba 8b: Etiqueta personalizada muestra nombre y documento"""
+        form = AsignarClienteForm(usuario=usuario_con_cliente)
+        
+        # Verificar que la función label_from_instance existe y funciona correctamente
+        label_func = form.fields['clientes'].label_from_instance
+        label = label_func(clientes[1])
+        expected_label = f"{clientes[1].nombre} ({clientes[1].docCliente})"
+        
+        assert label == expected_label

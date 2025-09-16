@@ -251,7 +251,7 @@ sudo systemctl restart nginx
 ```bash
   proyecto$ source dvenv/bin/activate
   proyecto$ cd docs/build/html
-  proyecto/docs/build/html$ python -m http.server 8080 para ejecutar el html
+  proyecto/docs/build/html$ python -m http.server 8080
 ```
 - Para limpiar los build creados 
 ```bash

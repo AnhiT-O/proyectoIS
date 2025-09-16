@@ -165,6 +165,21 @@ object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="clientes.models.Cliente.mediopagocliente_set">
+<span class="sig-name descname"><span class="pre">mediopagocliente_set</span></span><a class="headerlink" href="#clientes.models.Cliente.mediopagocliente_set" title="Link to this definition">¶</a></dt>
+<dd><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Parent.children</span></code> is a <code class="docutils literal notranslate"><span class="pre">ReverseManyToOneDescriptor</span></code> instance.</p>
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code class="docutils literal notranslate"><span class="pre">create_forward_many_to_many_manager()</span></code> defined below.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="clientes.models.Cliente.medios_pago">
 <span class="sig-name descname"><span class="pre">medios_pago</span></span><a class="headerlink" href="#clientes.models.Cliente.medios_pago" title="Link to this definition">¶</a></dt>
 <dd><p>Accessor to the related objects manager on the forward and reverse sides of
@@ -372,6 +387,24 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
 </dd></dl>
 
 <dl class="py function" id="module-clientes.views">
+<dt class="sig sig-object py" id="clientes.views.cliente_agregar_cuenta">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_agregar_cuenta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_agregar_cuenta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_agregar_cuenta" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para agregar una cuenta bancaria al cliente - Acceso híbrido</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.cliente_agregar_tarjeta">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_agregar_tarjeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_agregar_tarjeta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_agregar_tarjeta" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para agregar una tarjeta de crédito al cliente - Acceso híbrido</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.cliente_cambiar_estado_medio_pago">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_cambiar_estado_medio_pago</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medio_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_cambiar_estado_medio_pago"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_cambiar_estado_medio_pago" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para activar/desactivar un medio de pago específico del cliente - Acceso híbrido</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="clientes.views.cliente_crear">
 <span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_crear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_crear"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_crear" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -379,7 +412,8 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="clientes.views.cliente_detalle">
 <span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_detalle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_detalle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_detalle" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Vista de detalle del cliente - Acceso híbrido</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="clientes.views.cliente_editar">
@@ -387,9 +421,42 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.cliente_eliminar_medio_pago">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_eliminar_medio_pago</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">medio_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_eliminar_medio_pago"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_eliminar_medio_pago" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para desactivar un medio de pago del cliente - Solo POST con modal</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="clientes.views.cliente_lista">
 <span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">cliente_lista</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#cliente_lista"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.cliente_lista" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.get_cliente_detalle_redirect">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">get_cliente_detalle_redirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#get_cliente_detalle_redirect"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.get_cliente_detalle_redirect" title="Link to this definition">¶</a></dt>
+<dd><p>Determina la URL correcta para redirigir según el tipo de usuario</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.get_cliente_detalle_url">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">get_cliente_detalle_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#get_cliente_detalle_url"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.get_cliente_detalle_url" title="Link to this definition">¶</a></dt>
+<dd><p>Determina la URL correcta de detalle del cliente según el tipo de usuario (para templates)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.procesar_medios_pago_cliente">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">procesar_medios_pago_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cliente</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#procesar_medios_pago_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.procesar_medios_pago_cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Función auxiliar para procesar los medios de pago de un cliente
+con la lógica de ocultación de datos sensibles según el tipo de usuario</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clientes.views.verificar_acceso_cliente">
+<span class="sig-prename descclassname"><span class="pre">clientes.views.</span></span><span class="sig-name descname"><span class="pre">verificar_acceso_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/views.html#verificar_acceso_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.views.verificar_acceso_cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica si el usuario tiene acceso al cliente mediante:
+1. Permisos de administración (clientes.gestion)
+2. Asociación directa como usuario operador</p>
+</dd></dl>
 
 <dl class="py class" id="module-clientes.forms">
 <dt class="sig sig-object py" id="clientes.forms.ClienteForm">
@@ -475,10 +542,18 @@ one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Clientes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.models.Cliente"><code class="docutils literal notranslate"><span class="pre">Cliente</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.models.UsuarioCliente"><code class="docutils literal notranslate"><span class="pre">UsuarioCliente</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_agregar_cuenta"><code class="docutils literal notranslate"><span class="pre">cliente_agregar_cuenta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_agregar_tarjeta"><code class="docutils literal notranslate"><span class="pre">cliente_agregar_tarjeta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_cambiar_estado_medio_pago"><code class="docutils literal notranslate"><span class="pre">cliente_cambiar_estado_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_crear"><code class="docutils literal notranslate"><span class="pre">cliente_crear()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_detalle"><code class="docutils literal notranslate"><span class="pre">cliente_detalle()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_editar"><code class="docutils literal notranslate"><span class="pre">cliente_editar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_eliminar_medio_pago"><code class="docutils literal notranslate"><span class="pre">cliente_eliminar_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.views.cliente_lista"><code class="docutils literal notranslate"><span class="pre">cliente_lista()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.get_cliente_detalle_redirect"><code class="docutils literal notranslate"><span class="pre">get_cliente_detalle_redirect()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.get_cliente_detalle_url"><code class="docutils literal notranslate"><span class="pre">get_cliente_detalle_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.procesar_medios_pago_cliente"><code class="docutils literal notranslate"><span class="pre">procesar_medios_pago_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clientes.views.verificar_acceso_cliente"><code class="docutils literal notranslate"><span class="pre">verificar_acceso_cliente()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clientes.forms.ClienteForm"><code class="docutils literal notranslate"><span class="pre">ClienteForm</span></code></a></li>
 </ul>
 </li>

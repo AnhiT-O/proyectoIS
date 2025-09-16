@@ -1,413 +1,302 @@
 import pytest
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.contrib.messages import get_messages
-from django.http import Http404
-from unittest.mock import patch, MagicMock
 from clientes.models import Cliente, UsuarioCliente
-from clientes.views import verificar_acceso_cliente, get_cliente_detalle_redirect, get_cliente_detalle_url
-from usuarios.models import Usuario
-from roles.models import Rol
+from medios_pago.models import MedioPago, MedioPagoCliente
+
+User = get_user_model()
 
 
 @pytest.mark.django_db
 class TestClienteViews:
-    """
-    Tests para las vistas de clientes
-    """
     
-    @pytest.fixture(autouse=True)
     def setup_method(self):
-        """Configuración inicial para los tests"""
+        """Configuración inicial para cada test"""
         self.client = Client()
         
-        # Crear rol de administrador
-        self.rol_admin = Rol.objects.create(
-            nombre='Administrador',
-            descripcion='Administrador del sistema'
-        )
-        
-        # Crear usuario administrador con permisos
-        self.usuario_admin = Usuario.objects.create_user(
+        # Crear usuario con permisos de gestión de clientes
+        self.user_admin = User(
             username='admin',
             email='admin@example.com',
-            password='testpass123',
             first_name='Admin',
             last_name='User',
             tipo_cedula='CI',
-            cedula_identidad='1111111111',
-            rol=self.rol_admin
+            cedula_identidad='1234567',
+            is_active=True
         )
+        self.user_admin.set_password('testpass123')
+        self.user_admin.save()
         
-        # Crear usuario operador sin permisos especiales
-        self.usuario_operador = Usuario.objects.create_user(
+        # Crear usuario sin permisos
+        self.user_operador = User(
             username='operador',
             email='operador@example.com',
-            password='testpass123',
             first_name='Operador',
             last_name='User',
             tipo_cedula='CI',
-            cedula_identidad='2222222222'
+            cedula_identidad='7654321',
+            is_active=True
         )
+        self.user_operador.set_password('testpass123')
+        self.user_operador.save()
+        
+        # Asignar permiso de gestión de clientes al admin
+        from django.contrib.contenttypes.models import ContentType
+        cliente_content_type = ContentType.objects.get_for_model(Cliente)
+        perm_gestion, created = Permission.objects.get_or_create(
+            codename='gestion',
+            name='Puede gestionar clientes (crear y editar)',
+            content_type=cliente_content_type
+        )
+        self.user_admin.user_permissions.add(perm_gestion)
         
         # Crear cliente de prueba
         self.cliente = Cliente.objects.create(
-            nombre='Juan Pérez',
+            nombre='Cliente Prueba',
             tipoDocCliente='CI',
-            docCliente='1234567890',
-            correoElecCliente='juan@example.com',
+            docCliente='1111111',
+            correoElecCliente='cliente@example.com',
             telefono='0981123456',
             tipoCliente='F',
-            direccion='Asunción, Paraguay',
-            ocupacion='Ingeniero',
-            declaracion_jurada=True,
+            direccion='Asunción',
+            ocupacion='Empleado',
             segmento='minorista'
         )
+
+    def test_vista_cliente_crear_solo_usuarios_con_permiso_pueden_crear(self):
+        """Prueba 9: Vista cliente_crear: solo usuarios con permiso pueden crear clientes."""
         
-        # Crear segundo cliente
-        self.cliente2 = Cliente.objects.create(
-            nombre='María García',
-            tipoDocCliente='CI',
-            docCliente='0987654321',
-            correoElecCliente='maria@example.com',
-            telefono='0985555555',
-            tipoCliente='F',
-            direccion='Luque, Paraguay',
-            ocupacion='Doctora',
-            declaracion_jurada=True,
-            segmento='vip'
-        )
-    
-    def test_cliente_crear_get_sin_login(self):
-        """Test para verificar redirección al login si no está autenticado"""
+        # Usuario sin permisos intenta acceder
+        self.client.login(username='operador', password='testpass123')
         response = self.client.get(reverse('clientes:cliente_crear'))
+        assert response.status_code == 403  # Forbidden
         
-        assert response.status_code == 302, "Debería redirigir al login si no está autenticado"
-        assert '/login/' in response.url, "Debería redirigir a la página de login"
-        print("✓ Test cliente_crear_get_sin_login: Redirección correcta sin autenticación")
-    
-    def test_cliente_crear_get_con_login(self):
-        """Test para verificar que usuarios autenticados pueden acceder al formulario de creación"""
+        # Usuario con permisos puede acceder
         self.client.login(username='admin', password='testpass123')
         response = self.client.get(reverse('clientes:cliente_crear'))
+        assert response.status_code == 200
+        assert 'form' in response.context
+
+    def test_vista_cliente_crear_muestra_errores_si_datos_invalidos(self):
+        """Prueba 10: Vista cliente_crear: muestra errores si los datos del formulario son inválidos."""
         
-        assert response.status_code == 200, "Debería mostrar el formulario de creación"
-        assert 'form' in response.context, "Debería incluir el formulario en el contexto"
-        assert 'clientes/cliente_form.html' in [t.name for t in response.templates], "Debería usar el template correcto"
-        print("✓ Test cliente_crear_get_con_login: Acceso al formulario de creación correcto")
-    
-    def test_cliente_crear_post_datos_validos(self):
-        """Test para crear cliente con datos válidos"""
         self.client.login(username='admin', password='testpass123')
         
-        datos_cliente = {
-            'nombre': 'Carlos López',
+        # Datos inválidos (documento no numérico)
+        form_data = {
+            'nombre': 'Test Cliente',
             'tipoDocCliente': 'CI',
-            'docCliente': '5555555555',
-            'correoElecCliente': 'carlos@example.com',
-            'telefono': '0987777777',
+            'docCliente': '123ABC',  # Inválido
+            'correoElecCliente': 'test@example.com',
+            'telefono': '0981123456',
             'tipoCliente': 'F',
-            'direccion': 'San Lorenzo, Paraguay',
-            'ocupacion': 'Contador',
-            'segmento': 'corporativo',
-            'declaracion_jurada': True
+            'direccion': 'Test Address',
+            'ocupacion': 'Test Job',
+            'segmento': 'minorista',
         }
         
-        response = self.client.post(reverse('clientes:cliente_crear'), data=datos_cliente)
+        response = self.client.post(reverse('clientes:cliente_crear'), data=form_data)
         
-        # Verificar que se creó el cliente
-        assert Cliente.objects.filter(docCliente='5555555555').exists(), "El cliente debería haberse creado"
-        cliente_creado = Cliente.objects.get(docCliente='5555555555')
+        # Debe volver al formulario con errores
+        assert response.status_code == 200
+        assert 'form' in response.context
+        assert not response.context['form'].is_valid()
+        assert 'docCliente' in response.context['form'].errors
+
+    def test_vista_cliente_lista_filtra_correctamente_por_segmento(self):
+        """Prueba 11: Vista cliente_lista: filtra correctamente por segmento."""
+        
+        self.client.login(username='admin', password='testpass123')
+        
+        # Crear clientes con diferentes segmentos
+        Cliente.objects.create(
+            nombre='Cliente VIP',
+            tipoDocCliente='CI',
+            docCliente='2222222',
+            correoElecCliente='vip@example.com',
+            telefono='0981111111',
+            tipoCliente='F',
+            direccion='Asunción',
+            ocupacion='Ejecutivo',
+            segmento='vip'
+        )
+        
+        Cliente.objects.create(
+            nombre='Cliente Corporativo',
+            tipoDocCliente='RUC',
+            docCliente='80012345-1',
+            correoElecCliente='corp@example.com',
+            telefono='0981222222',
+            tipoCliente='J',
+            direccion='Asunción',
+            ocupacion='Empresa',
+            segmento='corporativo'
+        )
+        
+        # Filtrar por segmento VIP
+        response = self.client.get(reverse('clientes:cliente_lista') + '?segmento=vip')
+        assert response.status_code == 200
+        clientes = response.context['clientes']
+        assert clientes.count() == 1
+        assert clientes.first().segmento == 'vip'
+
+    def test_vista_cliente_lista_filtra_correctamente_por_busqueda(self):
+        """Prueba 11: Vista cliente_lista: filtra correctamente por búsqueda."""
+        
+        self.client.login(username='admin', password='testpass123')
+        
+        # Búsqueda por nombre
+        response = self.client.get(reverse('clientes:cliente_lista') + '?busqueda=Cliente Prueba')
+        assert response.status_code == 200
+        clientes = response.context['clientes']
+        assert clientes.count() == 1
+        assert 'Cliente Prueba' in clientes.first().nombre
+
+    def test_vista_cliente_detalle_usuarios_asociados_pueden_ver_detalle(self):
+        """Prueba 12: Vista cliente_detalle: usuarios asociados pueden ver el detalle."""
+        
+        # Asociar usuario operador al cliente
+        UsuarioCliente.objects.create(
+            usuario=self.user_operador,
+            cliente=self.cliente
+        )
+        
+        self.client.login(username='operador', password='testpass123')
+        response = self.client.get(reverse('clientes:cliente_detalle', kwargs={'pk': self.cliente.pk}))
+        assert response.status_code == 200
+        assert response.context['cliente'] == self.cliente
+
+    def test_vista_cliente_detalle_usuarios_con_permiso_pueden_ver_detalle(self):
+        """Prueba 12: Vista cliente_detalle: usuarios con permiso pueden ver el detalle."""
+        
+        self.client.login(username='admin', password='testpass123')
+        response = self.client.get(reverse('clientes:cliente_detalle', kwargs={'pk': self.cliente.pk}))
+        assert response.status_code == 200
+        assert response.context['cliente'] == self.cliente
+
+    def test_vista_cliente_agregar_tarjeta_limite_maximo_3_tarjetas(self):
+        """Prueba 13: Vista cliente_agregar_tarjeta: no permite agregar más de 3 tarjetas activas por cliente."""
+        
+        self.client.login(username='admin', password='testpass123')
+        
+        # Crear medio de pago tarjeta
+        medio_tarjeta, _ = MedioPago.objects.get_or_create(
+            tipo='tarjeta_credito',
+            defaults={'activo': True}
+        )
+        
+        # Crear 3 tarjetas para el cliente
+        for i in range(3):
+            MedioPagoCliente.objects.create(
+                medio_pago=medio_tarjeta,
+                cliente=self.cliente,
+                numero_tarjeta=f'123456789012345{i}',
+                cvv_tarjeta='123',
+                nombre_titular_tarjeta='Test User',
+                fecha_vencimiento_tc='12/25',
+                descripcion_tarjeta=f'Tarjeta {i+1}',
+                activo=True,
+                is_deleted=False
+            )
+        
+        # Intentar agregar una cuarta tarjeta
+        response = self.client.get(reverse('clientes:cliente_agregar_tarjeta', kwargs={'pk': self.cliente.pk}))
+        
+        # Debe redirigir con mensaje de error
+        assert response.status_code == 302
+        messages = list(get_messages(response.wsgi_request))
+        assert any('máximo de 3 tarjetas' in str(message) for message in messages)
+
+    def test_vista_cliente_agregar_cuenta_no_duplica_cuentas(self):
+        """Prueba 14: Vista cliente_agregar_cuenta: no permite duplicar cuentas bancarias para el mismo cliente."""
+        
+        self.client.login(username='admin', password='testpass123')
+        
+        # Crear medio de pago transferencia
+        medio_transferencia, _ = MedioPago.objects.get_or_create(
+            tipo='transferencia',
+            defaults={'activo': True}
+        )
+        
+        # Crear cuenta existente
+        MedioPagoCliente.objects.create(
+            medio_pago=medio_transferencia,
+            cliente=self.cliente,
+            numero_cuenta='1234567890',
+            nombre_titular_cuenta='TEST USER',  # El formulario convierte a mayúsculas
+            banco='Banco Test',  # El formulario convierte a Title Case
+            tipo_cuenta='ahorro',
+            activo=True,
+            is_deleted=False
+        )
+        
+        # Intentar crear cuenta con datos idénticos
+        form_data = {
+            'numero_cuenta': '1234567890',
+            'nombre_titular_cuenta': 'Test User',
+            'banco': 'Banco Test',
+            'tipo_cuenta': 'ahorro',
+        }
+        
+        response = self.client.post(
+            reverse('clientes:cliente_agregar_cuenta', kwargs={'pk': self.cliente.pk}),
+            data=form_data
+        )
+        
+        # Debe redirigir con mensaje de advertencia sobre cuenta existente
+        assert response.status_code == 302
+        messages = list(get_messages(response.wsgi_request))
+        assert any('ya está activa' in str(message) for message in messages)
+
+    def test_vista_cliente_cambiar_estado_medio_pago_activa_desactiva(self):
+        """Prueba 15: Vista cliente_cambiar_estado_medio_pago: activa/desactiva correctamente el medio de pago del cliente."""
+        
+        self.client.login(username='admin', password='testpass123')
+        
+        # Crear medio de pago
+        medio_efectivo, _ = MedioPago.objects.get_or_create(
+            tipo='efectivo',
+            defaults={'activo': True}
+        )
+        
+        # Crear medio de pago para cliente (activo inicialmente)
+        medio_cliente = MedioPagoCliente.objects.create(
+            medio_pago=medio_efectivo,
+            cliente=self.cliente,
+            activo=True,
+            is_deleted=False
+        )
+        
+        # Cambiar estado a inactivo
+        response = self.client.post(
+            reverse('clientes:cliente_cambiar_estado_medio_pago', 
+                   kwargs={'pk': self.cliente.pk, 'medio_id': medio_cliente.id})
+        )
         
         # Verificar redirección
-        assert response.status_code == 302, "Debería redirigir después de crear"
-        assert response.url == reverse('clientes:cliente_detalle', args=[cliente_creado.pk]), "Debería redirigir al detalle del cliente"
+        assert response.status_code == 302
+        
+        # Verificar que el estado cambió
+        medio_cliente.refresh_from_db()
+        assert not medio_cliente.activo
         
         # Verificar mensaje de éxito
         messages = list(get_messages(response.wsgi_request))
-        assert len(messages) > 0, "Debería haber mensajes"
-        assert 'Cliente creado exitosamente' in str(messages[0]), "Debería mostrar mensaje de éxito"
+        assert any('desactivado exitosamente' in str(message) for message in messages)
         
-        print("✓ Test cliente_crear_post_datos_validos: Creación de cliente exitosa")
-    
-    def test_cliente_crear_post_datos_invalidos(self):
-        """Test para crear cliente con datos inválidos"""
-        self.client.login(username='admin', password='testpass123')
+        # Cambiar estado de vuelta a activo
+        response = self.client.post(
+            reverse('clientes:cliente_cambiar_estado_medio_pago', 
+                   kwargs={'pk': self.cliente.pk, 'medio_id': medio_cliente.id})
+        )
         
-        datos_invalidos = {
-            'nombre': '',  # Campo requerido vacío
-            'tipoDocCliente': 'CI',
-            'docCliente': 'abc123',  # Documento inválido
-            'correoElecCliente': 'email_invalido',  # Email inválido
-            'telefono': '',  # Campo requerido vacío
-            'tipoCliente': 'X',  # Choice inválido
-            'direccion': '',  # Campo requerido vacío
-            'ocupacion': '',  # Campo requerido vacío
-            'segmento': 'premium'  # Choice inválido
-        }
+        # Verificar que el estado cambió de nuevo
+        medio_cliente.refresh_from_db()
+        assert medio_cliente.activo
         
-        response = self.client.post(reverse('clientes:cliente_crear'), data=datos_invalidos)
-        
-        # Verificar que no se creó el cliente
-        assert not Cliente.objects.filter(docCliente='abc123').exists(), "No debería haberse creado el cliente con datos inválidos"
-        
-        # Verificar que se muestra el formulario con errores
-        assert response.status_code == 200, "Debería mostrar el formulario con errores"
-        assert 'form' in response.context, "Debería incluir el formulario en el contexto"
-        assert response.context['form'].errors, "El formulario debería tener errores"
-        
-        print("✓ Test cliente_crear_post_datos_invalidos: Validación de datos inválidos correcta")
-    
-    def test_cliente_lista_sin_login(self):
-        """Test para verificar que la lista requiere login"""
-        response = self.client.get(reverse('clientes:cliente_lista'))
-        
-        assert response.status_code == 302, "Debería redirigir al login si no está autenticado"
-        assert '/login/' in response.url, "Debería redirigir a la página de login"
-        print("✓ Test cliente_lista_sin_login: Redirección correcta sin autenticación")
-    
-    @patch('clientes.views.permission_required')
-    def test_cliente_lista_sin_permisos(self, mock_permission):
-        """Test para verificar que la lista requiere permisos específicos"""
-        # Configurar el mock para simular falta de permisos
-        mock_permission.side_effect = Exception("Sin permisos")
-        
-        self.client.login(username='operador', password='testpass123')
-        
-        with pytest.raises(Exception, match="Sin permisos"):
-            self.client.get(reverse('clientes:cliente_lista'))
-        
-        print("✓ Test cliente_lista_sin_permisos: Verificación de permisos correcta")
-    
-    def test_cliente_lista_con_permisos(self):
-        """Test para verificar que usuarios con permisos pueden ver la lista"""
-        # Asignar permiso al usuario admin
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        self.client.login(username='admin', password='testpass123')
-        response = self.client.get(reverse('clientes:cliente_lista'))
-        
-        assert response.status_code == 200, "Debería mostrar la lista de clientes"
-        assert 'clientes' in response.context, "Debería incluir los clientes en el contexto"
-        assert self.cliente in response.context['clientes'], "Debería incluir el cliente de prueba"
-        assert self.cliente2 in response.context['clientes'], "Debería incluir el segundo cliente"
-        
-        print("✓ Test cliente_lista_con_permisos: Acceso a lista con permisos correcto")
-    
-    def test_cliente_lista_filtro_segmento(self):
-        """Test para verificar filtrado por segmento"""
-        # Asignar permiso
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        self.client.login(username='admin', password='testpass123')
-        
-        # Filtrar por segmento VIP
-        response = self.client.get(reverse('clientes:cliente_lista'), {'segmento': 'vip'})
-        
-        assert response.status_code == 200, "Debería mostrar la lista filtrada"
-        clientes_filtrados = list(response.context['clientes'])
-        
-        assert len(clientes_filtrados) == 1, "Debería mostrar solo un cliente VIP"
-        assert clientes_filtrados[0] == self.cliente2, "Debería mostrar solo el cliente VIP"
-        assert self.cliente not in clientes_filtrados, "No debería mostrar clientes no VIP"
-        
-        print("✓ Test cliente_lista_filtro_segmento: Filtrado por segmento correcto")
-    
-    def test_cliente_lista_busqueda(self):
-        """Test para verificar funcionalidad de búsqueda"""
-        # Asignar permiso
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        self.client.login(username='admin', password='testpass123')
-        
-        # Buscar por nombre
-        response = self.client.get(reverse('clientes:cliente_lista'), {'busqueda': 'Juan'})
-        
-        assert response.status_code == 200, "Debería mostrar los resultados de búsqueda"
-        clientes_encontrados = list(response.context['clientes'])
-        
-        assert len(clientes_encontrados) == 1, "Debería encontrar un cliente"
-        assert clientes_encontrados[0] == self.cliente, "Debería encontrar a Juan Pérez"
-        
-        # Buscar por documento
-        response = self.client.get(reverse('clientes:cliente_lista'), {'busqueda': '0987654321'})
-        
-        clientes_encontrados = list(response.context['clientes'])
-        assert len(clientes_encontrados) == 1, "Debería encontrar un cliente por documento"
-        assert clientes_encontrados[0] == self.cliente2, "Debería encontrar a María García"
-        
-        print("✓ Test cliente_lista_busqueda: Búsqueda funcionando correctamente")
-    
-    def test_cliente_detalle_sin_login(self):
-        """Test para verificar que el detalle requiere login"""
-        response = self.client.get(reverse('clientes:cliente_detalle', args=[self.cliente.pk]))
-        
-        assert response.status_code == 302, "Debería redirigir al login si no está autenticado"
-        assert '/login/' in response.url, "Debería redirigir a la página de login"
-        print("✓ Test cliente_detalle_sin_login: Redirección correcta sin autenticación")
-    
-    def test_cliente_detalle_sin_acceso(self):
-        """Test para verificar que usuarios sin acceso no pueden ver el detalle"""
-        self.client.login(username='operador', password='testpass123')
-        response = self.client.get(reverse('clientes:cliente_detalle', args=[self.cliente.pk]))
-        
-        # Debería redirigir porque no tiene acceso
-        assert response.status_code == 302, "Debería redirigir si no tiene acceso"
-        
-        # Verificar mensaje de error
+        # Verificar mensaje de éxito
         messages = list(get_messages(response.wsgi_request))
-        assert any('No tienes permisos' in str(msg) for msg in messages), "Debería mostrar mensaje de error de permisos"
-        
-        print("✓ Test cliente_detalle_sin_acceso: Verificación de acceso correcta")
-    
-    def test_cliente_detalle_con_acceso_admin(self):
-        """Test para verificar que admin puede ver cualquier cliente"""
-        # Asignar permiso de gestión
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        self.client.login(username='admin', password='testpass123')
-        response = self.client.get(reverse('clientes:cliente_detalle', args=[self.cliente.pk]))
-        
-        assert response.status_code == 200, "Admin debería poder ver el detalle del cliente"
-        assert response.context['cliente'] == self.cliente, "Debería mostrar el cliente correcto"
-        
-        print("✓ Test cliente_detalle_con_acceso_admin: Acceso de admin correcto")
-    
-    def test_cliente_detalle_con_acceso_operador_asociado(self):
-        """Test para verificar que operador asociado puede ver el cliente"""
-        # Asociar operador al cliente
-        self.cliente.usuarios.add(self.usuario_operador)
-        
-        self.client.login(username='operador', password='testpass123')
-        response = self.client.get(reverse('clientes:cliente_detalle', args=[self.cliente.pk]))
-        
-        assert response.status_code == 200, "Operador asociado debería poder ver el detalle del cliente"
-        assert response.context['cliente'] == self.cliente, "Debería mostrar el cliente correcto"
-        
-        print("✓ Test cliente_detalle_con_acceso_operador_asociado: Acceso de operador asociado correcto")
-    
-    def test_cliente_detalle_cliente_inexistente(self):
-        """Test para verificar manejo de cliente inexistente"""
-        self.client.login(username='admin', password='testpass123')
-        
-        response = self.client.get(reverse('clientes:cliente_detalle', args=[9999]))
-        
-        assert response.status_code == 404, "Debería devolver 404 para cliente inexistente"
-        print("✓ Test cliente_detalle_cliente_inexistente: Manejo de 404 correcto")
-    
-    def test_cliente_editar_sin_permisos(self):
-        """Test para verificar que editar requiere permisos específicos"""
-        self.client.login(username='operador', password='testpass123')
-        response = self.client.get(reverse('clientes:cliente_editar', args=[self.cliente.pk]))
-        
-        # Verificar que se niega el acceso (puede ser 403 o redirección dependiendo de la configuración)
-        assert response.status_code in [302, 403], "Debería negar el acceso sin permisos"
-        print("✓ Test cliente_editar_sin_permisos: Verificación de permisos para edición correcta")
-    
-    def test_verificar_acceso_cliente_function(self):
-        """Test para la función helper verificar_acceso_cliente"""
-        # Asignar permiso de gestión al admin
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        # Test admin tiene acceso
-        assert verificar_acceso_cliente(self.usuario_admin, self.cliente), "Admin debería tener acceso"
-        
-        # Test operador sin asociación no tiene acceso
-        assert not verificar_acceso_cliente(self.usuario_operador, self.cliente), "Operador sin asociación no debería tener acceso"
-        
-        # Test operador con asociación tiene acceso
-        self.cliente.usuarios.add(self.usuario_operador)
-        assert verificar_acceso_cliente(self.usuario_operador, self.cliente), "Operador asociado debería tener acceso"
-        
-        print("✓ Test verificar_acceso_cliente_function: Función de verificación de acceso correcta")
-    
-    def test_get_cliente_detalle_redirect_function(self):
-        """Test para la función helper get_cliente_detalle_redirect"""
-        # Crear request mock
-        request_mock = MagicMock()
-        request_mock.META = {'HTTP_REFERER': '/usuarios/cliente/1/'}
-        request_mock.user = self.usuario_operador
-        
-        # Test redirección para operador
-        response = get_cliente_detalle_redirect(request_mock, self.cliente.pk)
-        assert response.status_code == 302, "Debería redirigir"
-        assert f'/usuarios/cliente/{self.cliente.pk}/' in response.url, "Debería redirigir a la vista de usuario"
-        
-        print("✓ Test get_cliente_detalle_redirect_function: Función de redirección correcta")
-    
-    def test_get_cliente_detalle_url_function(self):
-        """Test para la función helper get_cliente_detalle_url"""
-        # Crear request mock para operador
-        request_mock = MagicMock()
-        request_mock.META = {'HTTP_REFERER': '/usuarios/cliente/1/'}
-        request_mock.user = self.usuario_operador
-        
-        url = get_cliente_detalle_url(request_mock, self.cliente.pk)
-        assert url == f'/usuarios/cliente/{self.cliente.pk}/', "Debería devolver URL de usuario para operador"
-        
-        # Asignar permiso de gestión al admin
-        from django.contrib.contenttypes.models import ContentType
-        from django.contrib.auth.models import Permission
-        
-        content_type = ContentType.objects.get_for_model(Cliente)
-        permission = Permission.objects.get_or_create(
-            codename='gestion',
-            name='Puede gestionar clientes',
-            content_type=content_type,
-        )[0]
-        self.usuario_admin.user_permissions.add(permission)
-        
-        # Test para admin
-        request_mock.user = self.usuario_admin
-        request_mock.META = {'HTTP_REFERER': '/clientes/'}
-        
-        url = get_cliente_detalle_url(request_mock, self.cliente.pk)
-        assert url == f'/clientes/{self.cliente.pk}/', "Debería devolver URL de admin para admin"
-        
-        print("✓ Test get_cliente_detalle_url_function: Función de URL correcta")
+        assert any('activado exitosamente' in str(message) for message in messages)
