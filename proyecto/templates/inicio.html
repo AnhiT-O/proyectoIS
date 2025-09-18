@@ -68,6 +68,33 @@
             <a href="{% url 'simular' %}" class="btn-primario">
                 Simular conversiones
             </a>
+            <a href="#" class="btn-primario" onclick="mostrarPopupOperaciones(event)">
+                Operar con divisas
+            </a>
+        </div>
+
+        <!-- Pop-up para operaciones -->
+        <div id="popup-operaciones" class="popup-overlay">
+            <div class="popup-contenido">
+                <div class="popup-cabecera">
+                    <h3>¿Qué operación deseas realizar?</h3>
+                </div>
+                <div class="popup-cuerpo">
+                    <p>Selecciona el tipo de operación que quieres realizar:</p>
+                    <div class="popup-opciones">
+                        <button class="btn-opcion-comprar" onclick="seleccionarOperacion('comprar')">
+                            <span class="icono-opcion">💰</span>
+                            <span class="texto-opcion">Comprar Monedas</span>
+                            <span class="descripcion-opcion">Adquirir divisas extranjeras</span>
+                        </button>
+                        <button class="btn-opcion-vender" onclick="seleccionarOperacion('vender')">
+                            <span class="icono-opcion">💸</span>
+                            <span class="texto-opcion">Vender Monedas</span>
+                            <span class="descripcion-opcion">Vender tus divisas extranjeras</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     {% else %}
         <!-- Contenido para usuarios no autenticados -->

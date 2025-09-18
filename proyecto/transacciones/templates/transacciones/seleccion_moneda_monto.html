@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Comprar Monedas - {{ titulo_paso }}{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="barra-progreso-container">
+        <div class="barra-progreso">
+            <div class="paso {% if paso_actual == 1 %}activo{% endif %}">
+                <div class="paso-numero">1</div>
+                <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
+            </div>
+            <div class="paso {% if paso_actual == 2 %}activo{% endif %}">
+                <div class="paso-numero">2</div>
+                <div class="paso-titulo">Medio de<br>Pago</div>
+            </div>
+            <div class="paso {% if paso_actual == 3 %}activo{% endif %}">
+                <div class="paso-numero">3</div>
+                <div class="paso-titulo">Medio de<br>Cobro</div>
+            </div>
+            <div class="paso {% if paso_actual == 4 %}activo{% endif %}">
+                <div class="paso-numero">4</div>
+                <div class="paso-titulo">Confirmación de<br>Compra</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-cabecera">
+        <h2>{{ titulo_paso }}</h2>
+        <p class="subtitulo">Complete la información requerida para continuar con su operación de compra.</p>
+    </div>
+    <form method="post" id="formSeleccion" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-campo">
+            <label for="{{ form.moneda.id_for_label }}">{{ form.moneda.label }}</label>
+            {{ form.moneda }}
+            {% if form.moneda.errors %}
+                <div class="form-errores">
+                    {% for error in form.moneda.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.monto.id_for_label }}">{{ form.monto.label }}</label>
+            {{ form.monto }}
+            {% if form.monto.errors %}
+                <div class="form-errores">
+                    {% for error in form.monto.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Siguiente Paso
+            </button>
+            <a href="{% url 'inicio' %}" class="btn-atras">
+                Cancelar Operación
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const montoInput = document.getElementById('id_monto');
+    const monedaSelect = document.getElementById('id_moneda');
+    
+    // Función para obtener los decimales de una moneda
+    function getDecimalesMoneda(monedaId) {
+        // Intentar obtener los datos de las monedas del atributo data
+        try {
+            const monedasData = JSON.parse(monedaSelect.getAttribute('data-monedas') || '{}');
+            return monedasData[monedaId]?.decimales || 2;
+        } catch (e) {
+            console.error('Error parsing monedas data:', e);
+            return 2; // Por defecto 2 decimales si hay error
+        }
+    }
+    
+    // Función para obtener el símbolo de una moneda
+    function getSimboloMoneda(monedaId) {
+        try {
+            const monedasData = JSON.parse(monedaSelect.getAttribute('data-monedas') || '{}');
+            return monedasData[monedaId]?.simbolo || '';
+        } catch (e) {
+            console.error('Error parsing monedas data:', e);
+            return '';
+        }
+    }
+
+    // Función para actualizar el step y placeholder del input según la moneda
+    function actualizarStepMonto() {
+        const monedaSeleccionada = monedaSelect.value;
+        
+        console.log('Moneda seleccionada:', monedaSeleccionada); // Debug
+        
+        if (monedaSeleccionada) {
+            const decimales = getDecimalesMoneda(monedaSeleccionada);
+            const simbolo = getSimboloMoneda(monedaSeleccionada);
+            
+            console.log('Decimales:', decimales, 'Simbolo:', simbolo); // Debug
+            
+            // Calcular step y min basado en los decimales (igual que modo venta del simulador)
+            const stepValue = Math.pow(10, -decimales);
+            montoInput.step = stepValue.toFixed(decimales);
+            montoInput.min = montoInput.step;
+            
+            // Actualizar placeholder con información específica de la moneda
+            const montoMinFormatted = stepValue.toFixed(decimales);
+            montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMinFormatted} ${simbolo})`;
+            
+            console.log('Step:', montoInput.step, 'Placeholder:', montoInput.placeholder); // Debug
+        } else {
+            // Sin moneda seleccionada - valores por defecto
+            montoInput.step = '0.01';
+            montoInput.min = '0.01';
+            montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+        }
+        
+        // Limpiar el valor actual cuando cambien las reglas
+        montoInput.value = '';
+    }
+
+    // Event listener para cambio de moneda
+    if (monedaSelect) {
+        monedaSelect.addEventListener('change', actualizarStepMonto);
+        console.log('Event listener agregado'); // Debug
+    } else {
+        console.error('No se encontró el elemento monedaSelect'); // Debug
+    }
+
+    // Inicializar el comportamiento al cargar la página
+    actualizarStepMonto();
+});
+</script>
+{% endblock %}

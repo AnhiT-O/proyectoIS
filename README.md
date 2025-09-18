@@ -69,6 +69,7 @@ pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
 pip install gunicorn #para despliegue de la página
+pip install stripe #pasarela de pagos
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
@@ -80,6 +81,7 @@ pip install python-dotenv #variables de entorno
 pip install pytest #para pruebas unitarias
 pip install pytest-django #integración de pruebas con django
 pip install sphinx #para documentación automática de código
+pip install stripe #pasarela de pagos
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 

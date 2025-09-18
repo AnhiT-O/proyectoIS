@@ -508,3 +508,146 @@ body {
     min-height: 100vh;
     color: #e0e6ed;
 }
+
+/* ESTILOS PARA EL POP-UP DE OPERACIONES */
+
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.popup-contenido {
+    background: #2d3748;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+    border: 1px solid #4a5568;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.popup-cabecera {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #4a5568;
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.popup-cabecera h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.popup-cerrar:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.popup-cuerpo {
+    padding: 2rem 1.5rem;
+}
+
+.popup-cuerpo p {
+    margin-bottom: 1.5rem;
+    color: #a0aec0;
+    font-size: 1rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.popup-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn-opcion-comprar,
+.btn-opcion-vender {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #4a5568;
+    border-radius: 12px;
+    background: #1a202c;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    gap: 0.5rem;
+    color: #e0e6ed;
+}
+
+.btn-opcion-comprar:hover {
+    border-color: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(56, 161, 105, 0.3);
+    background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+    color: white;
+}
+
+.btn-opcion-vender:hover {
+    border-color: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3);
+    background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+    color: white;
+}
+
+.icono-opcion {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.texto-opcion {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.descripcion-opcion {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+.btn-opcion-comprar:hover .descripcion-opcion,
+.btn-opcion-vender:hover .descripcion-opcion {
+    opacity: 0.9;
+}
