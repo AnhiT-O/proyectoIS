@@ -68,10 +68,14 @@
             <a href="{% url 'simular' %}" class="btn-primario">
                 Simular conversiones
             </a>
+        </div>
+        {% if user.cliente_activo %}
+        <div class="acciones-rapidas"></div>
             <a href="#" class="btn-primario" onclick="mostrarPopupOperaciones(event)">
                 Operar con divisas
             </a>
         </div>
+        {% endif %}
 
         <!-- Pop-up para operaciones -->
         <div id="popup-operaciones" class="popup-overlay">

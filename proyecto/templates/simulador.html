@@ -154,7 +154,7 @@
                     const decimales = getDecimalesMoneda(monedaSeleccionada.value);
                     const montoMin = Math.pow(10, -decimales).toFixed(decimales);
                     const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (min. ${montoMin} ${simbolo})`;
                 } else {
                     montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
                 }
@@ -182,7 +182,7 @@
                     const decimales = getDecimalesMoneda(monedaSeleccionada.value);
                     const montoMin = Math.pow(10, -decimales).toFixed(decimales);
                     const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (min. ${montoMin} ${simbolo})`;
                 }
             }
             

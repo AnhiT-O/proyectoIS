@@ -11,20 +11,20 @@
 {% block content %}
 <div class="contenido extendido">
     <div class="barra-progreso-container">
-        <div class="barra-progreso">
-            <div class="paso completado">
+        <div class="barra-progreso" data-progreso="{{ paso_actual }}">
+            <div class="paso {% if paso_actual == 1 %}activo{% elif paso_actual > 1 %}completado{% endif %}">
                 <div class="paso-numero">1</div>
                 <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
             </div>
-            <div class="paso {% if paso_actual == 2 %}activo{% endif %}">
+            <div class="paso {% if paso_actual == 2 %}activo{% elif paso_actual > 2 %}completado{% endif %}">
                 <div class="paso-numero">2</div>
                 <div class="paso-titulo">Medio de<br>Pago</div>
             </div>
-            <div class="paso {% if paso_actual == 3 %}activo{% endif %}">
+            <div class="paso {% if paso_actual == 3 %}activo{% elif paso_actual > 3 %}completado{% endif %}">
                 <div class="paso-numero">3</div>
                 <div class="paso-titulo">Medio de<br>Cobro</div>
             </div>
-            <div class="paso {% if paso_actual == 4 %}activo{% endif %}">
+            <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
                 <div class="paso-numero">4</div>
                 <div class="paso-titulo">Confirmación de<br>Compra</div>
             </div>
