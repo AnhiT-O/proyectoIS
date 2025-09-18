@@ -34,7 +34,7 @@
     <div class="form-cabecera">
         <h2>{{ titulo_paso }}</h2>
         <div style="margin: 2rem;">
-        <div class="info-usuario" style="width: auto; background-color: #f0fdf3">
+        <div class="info-cliente">
             <div class="info-titulo">Cliente seleccionado:</div>
             <div class="info-valor">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
             <div style="margin-top: 0.5rem;"></div>
@@ -130,14 +130,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Actualizar placeholder con información específica de la moneda
             const montoMinFormatted = stepValue.toFixed(decimales);
-            montoInput.placeholder = `Ingrese el monto en ${simbolo} (min. ${montoMinFormatted} ${simbolo})`;
+            montoInput.placeholder = `Monto mínimo: ${montoMinFormatted} ${simbolo}`;
             
             console.log('Step:', montoInput.step, 'Placeholder:', montoInput.placeholder); // Debug
         } else {
             // Sin moneda seleccionada - valores por defecto
             montoInput.step = '0.01';
             montoInput.min = '0.01';
-            montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+            montoInput.placeholder = 'Ingresar monto en la moneda extranjera';
         }
         
         // Limpiar el valor actual cuando cambien las reglas

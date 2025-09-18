@@ -254,6 +254,16 @@
     border: 1px solid #4b5563;
 }
 
+.info-cliente {
+    background: #1f2937;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #0ea5e9;
+    display:inline-block;
+    background-color: #064e3b;
+}
+
 .info-titulo {
     font-weight: 600;
     color: #9ca3af;
@@ -304,7 +314,7 @@
     top: 20px;
     left: 60px;
     height: 4px;
-    background: linear-gradient(90deg, #8b5cf6 0%, #10b981 100%);
+    background: #8b5cf6;
     z-index: 2;
     border-radius: 2px;
     width: 0%;
@@ -352,10 +362,10 @@
 }
 
 .paso.completado .paso-numero {
-    background: #10b981;
-    border-color: #10b981;
+    background: #8b5cf6;
+    border-color: #8b5cf6;
     color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
 .paso.completado .paso-numero::before {
@@ -378,6 +388,6 @@
 }
 
 .paso.completado .paso-titulo {
-    color: #10b981;
+    color: #8b5cf6;
     font-weight: 600;
 }

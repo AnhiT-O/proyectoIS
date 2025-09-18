@@ -127,7 +127,7 @@ def simular(request):
             
             # Validar monto requerido y mínimo
             if not monto_str:
-                errores['monto'] = ['El monto es obligatorio.']
+                errores['monto'] = ['Debes ingresar un monto numérico.']
             else:
                 try:
                     monto = Decimal(monto_str)

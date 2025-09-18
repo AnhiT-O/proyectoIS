@@ -16,7 +16,8 @@ class SeleccionMonedaMontoForm(forms.Form):
             'id': 'id_moneda'
         }),
         label='Moneda a comprar',
-        required=False
+        required=True,
+        error_messages={'required': 'Debe seleccionar una moneda.'}
     )
 
     monto = forms.DecimalField(
@@ -28,7 +29,8 @@ class SeleccionMonedaMontoForm(forms.Form):
             'min': '0.01'
         }),
         label='Monto a comprar',
-        required=False
+        required=True,
+        error_messages={'required': 'Debes ingresar un monto numérico.'}
     )
 
     def clean(self):
@@ -38,33 +40,24 @@ class SeleccionMonedaMontoForm(forms.Form):
         """
         cleaned_data = super().clean()
         moneda = cleaned_data.get('moneda')
-        monto = cleaned_data.get('monto', None)
-
-        # Validar moneda requerida
-        if not moneda:
-            self.add_error('moneda', 'Debe seleccionar una moneda.')
-            return cleaned_data
+        monto = cleaned_data.get('monto')
         
-        # Validar monto requerido y mínimo
-        if not monto:
-            self.add_error('monto', 'El monto es obligatorio.')
-            return cleaned_data
-        
-        try:
-            monto = Decimal(monto)
-            if monto <= 0:
-                self.add_error('monto', 'El monto debe ser mayor a 0.')
-                return cleaned_data
-            
-            # Para monto en moneda extranjera, usar los decimales de la moneda seleccionada
-            monto_minimo = Decimal('1') / (Decimal('10') ** moneda.decimales)
-            if monto < monto_minimo:
-                self.add_error('monto', f'El monto mínimo para {moneda.nombre} es {monto_minimo} {moneda.simbolo}.')
-                return cleaned_data
+        if monto is not None:
+            try:
+                monto = Decimal(monto)
+                if monto <= 0:
+                    self.add_error('monto', 'El monto debe ser mayor a 0.')
+                    return cleaned_data
                 
-        except (ValueError, TypeError):
-            self.add_error('monto', 'Por favor, ingrese un monto válido.')
-            return cleaned_data
+                # Para monto en moneda extranjera, usar los decimales de la moneda seleccionada
+                monto_minimo = Decimal('1') / (Decimal('10') ** moneda.decimales)
+                if monto < monto_minimo:
+                    self.add_error('monto', f'El monto mínimo para {moneda.nombre} es {monto_minimo} {moneda.simbolo}.')
+                    return cleaned_data
+                    
+            except (ValueError, TypeError):
+                self.add_error('monto', 'Por favor, ingrese un monto válido.')
+                return cleaned_data
         
         # Agregar el monto convertido a los datos limpios
         cleaned_data['monto_decimal'] = monto
