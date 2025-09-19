@@ -23,7 +23,8 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
-
+    stock = models.IntegerField(default=0)
+    
     def save(self, *args, **kwargs):
         if self.pk:
             old = Moneda.objects.get(pk=self.pk)
