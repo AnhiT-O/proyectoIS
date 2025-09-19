@@ -48,9 +48,9 @@
                         id="monto" 
                         name="monto" 
                         class="form-control" 
-                        step="1" 
-                        min="1"
-                        placeholder="Ingrese el monto en guaraníes"
+                        step="0.01" 
+                        min="0.01"
+                        placeholder="Seleccione primero una moneda"
                         required>
                 <div id="monto-errors" class="form-errores" style="display: none;"></div>
             </div>
@@ -100,22 +100,15 @@
 
         // Función para actualizar el step y min del input según la operación y moneda
         function actualizarStepMonto() {
-            if (tipoOperacion === 'compra') {
-                // Para compra: solo números enteros en guaraníes
-                montoInput.step = '1';
-                montoInput.min = '1'; // Monto mínimo de 1000 guaraníes
+            // Tanto compra como venta ahora usan decimales según la moneda seleccionada (moneda extranjera)
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
+                montoInput.min = montoInput.step;
             } else {
-                // Para venta: decimales según la moneda seleccionada
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    // Obtener decimales de la moneda desde el backend o usar un valor por defecto
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
-                    montoInput.min = montoInput.step; // Monto mínimo igual al step mínimo
-                } else {
-                    montoInput.step = '0.01'; // Valor por defecto
-                    montoInput.min = '0.01'; // Monto mínimo por defecto
-                }
+                montoInput.step = '0.01';
+                montoInput.min = '0.01';
             }
         }
 
@@ -146,18 +139,19 @@
             tipoOperacion = btn.dataset.operacion;
             
             // Actualizar placeholder según operación
-            if (tipoOperacion === 'compra') {
-                montoInput.placeholder = 'Ingrese el monto en guaraníes';
-            } else {
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (min. ${montoMin} ${simbolo})`;
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                
+                if (tipoOperacion === 'compra') {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 } else {
-                    montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 }
+            } else {
+                montoInput.placeholder = 'Seleccione primero una moneda';
             }
                 
             // Actualizar step del input
@@ -175,14 +169,17 @@
         monedaSelect.addEventListener('change', function() {
             actualizarStepMonto();
             
-            // Actualizar placeholder si estamos en modo venta
-            if (tipoOperacion === 'venta') {
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (min. ${montoMin} ${simbolo})`;
+            // Actualizar placeholder para cualquier operación
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                
+                if (tipoOperacion === 'compra') {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
+                } else {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 }
             }
             
