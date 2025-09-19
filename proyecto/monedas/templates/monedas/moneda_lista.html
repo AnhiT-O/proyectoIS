@@ -67,6 +67,7 @@
                             <th style="width: 30%;">Tasa base</th>
                             <th style="width: 30%;">Comisión de compra</th>
                             <th style="width: 30%;">Comisión de venta</th>
+                            <th style="width: 30%;">Stock</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,6 +88,9 @@
                             </td>
                             <td>
                                 <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|intcomma }}</span>
                             </td>
                         </tr>
                     </tbody>
