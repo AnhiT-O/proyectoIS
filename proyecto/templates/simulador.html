@@ -27,12 +27,12 @@
             </div>
 
             <div class="form-campo">
-                <label for="moneda">Seleccione la moneda:</label>
+                <label for="moneda">Seleccionar moneda:</label>
                 <select id="moneda" 
                         name="moneda" 
                         class="form-control" 
                         required>
-                    <option value="">Seleccione una moneda</option>
+                    <option value="" disabled selected hidden>Selecciona una moneda</option>
                     {% for moneda in monedas %}
                         <option value="{{ moneda.id }}" data-simbolo="{{ moneda.simbolo }}">
                             {{ moneda.simbolo }} - {{ moneda.nombre }}

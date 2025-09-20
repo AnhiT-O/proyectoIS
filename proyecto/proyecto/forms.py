@@ -36,7 +36,7 @@ class SimuladorForm(forms.Form):
     moneda = forms.ModelChoiceField(
         queryset=Moneda.objects.filter(activa=True),
         empty_label="Selecciona una moneda",
-        error_messages={'required': 'Debe seleccionar una moneda.'}
+        error_messages={'required': 'Debes seleccionar una moneda.'}
     )
     monto = forms.DecimalField(
         error_messages={
@@ -46,7 +46,7 @@ class SimuladorForm(forms.Form):
     )
     operacion = forms.ChoiceField(
         choices=OPERACION_CHOICES,
-        error_messages={'required': 'Debe seleccionar una operación.'}
+        error_messages={'required': 'Debes seleccionar una operación.'}
     )
     
     def __init__(self, *args, **kwargs):

@@ -17,14 +17,14 @@ class SeleccionMonedaMontoForm(forms.Form):
         }),
         label='Moneda a comprar',
         required=True,
-        error_messages={'required': 'Debe seleccionar una moneda.'}
+        error_messages={'required': 'Debes seleccionar una moneda.'}
     )
 
     monto = forms.DecimalField(
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'id': 'id_monto',
-            'placeholder': 'Ingrese el monto en la moneda extranjera',
+            'placeholder': 'Ingresa el monto en la moneda extranjera',
             'step': '0.01',
             'min': '0.01'
         }),
@@ -77,8 +77,22 @@ class SeleccionMonedaMontoForm(forms.Form):
                 'decimales': moneda.decimales
             }
         
-        self.fields['moneda'].choices = [('', 'Seleccione una moneda')] + monedas_choices
-        
+        self.fields['moneda'].choices = [('', 'Selecciona una moneda')] + monedas_choices
+
+        # Modificar el widget para que la opción inicial sea disabled, selected y hidden
+        self.fields['moneda'].widget.choices = self.fields['moneda'].choices
+        self.fields['moneda'].widget.attrs['onchange'] = "this.options[0].setAttribute('hidden', 'hidden');"
+        # Usar render_option para agregar los atributos (solo para Select, no para ModelChoiceField)
+        original_create_option = self.fields['moneda'].widget.create_option
+        def custom_create_option(*args, **kwargs):
+            option_dict = original_create_option(*args, **kwargs)
+            if option_dict['value'] == '':
+                option_dict['attrs']['disabled'] = True
+                option_dict['attrs']['selected'] = True
+                option_dict['attrs']['hidden'] = True
+            return option_dict
+        self.fields['moneda'].widget.create_option = custom_create_option
+
         # Agregar atributos data para JavaScript dinámico
         import json
         self.fields['moneda'].widget.attrs.update({

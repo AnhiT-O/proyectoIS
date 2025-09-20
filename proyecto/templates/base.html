@@ -65,7 +65,7 @@
                         <!-- Mostrar Ver Clientes solo si el usuario tiene clientes asociados -->
                         {% if user.clientes_operados.exists %}
                             <a href="{% url 'usuarios:mis_clientes' %}" class="btn-panel">
-                                👥 Ver Clientes
+                                👥 Mis Clientes
                             </a>
                         {% endif %}
                         
