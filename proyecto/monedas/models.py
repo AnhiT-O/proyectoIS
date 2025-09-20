@@ -112,6 +112,15 @@ class Moneda(models.Model):
         if self.simbolo and not self.simbolo.isupper():
             raise ValidationError({'simbolo': 'El símbolo debe contener solo letras en mayúsculas.'})
 
+    def actualizar_stock(self, cantidad):
+        """
+        Actualiza el stock de la moneda.
+        Usar cantidad positiva para sumar (venta de divisa), negativa para restar (compra de divisa).
+        """
+        self.stock += cantidad
+        self.save()
+        return self.stock
+
     def __str__(self):
         return f"{self.nombre} ({self.simbolo})"
 
