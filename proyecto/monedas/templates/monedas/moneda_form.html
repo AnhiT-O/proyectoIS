@@ -119,6 +119,57 @@
                     </div>
                 {% endif %}
             </div>
+
+            <!-- Sección de Limitaciones por Segmentación -->
+            <div class="form-seccion">
+                <h3>Limitaciones por Segmentación de Cliente</h3>
+                <p class="subtitulo">Establece el porcentaje máximo del stock que puede comprar/vender cada tipo de cliente</p>
+                
+                <div class="form-campo">
+                    <label for="{{ form.limite_vip.id_for_label }}">{{ form.limite_vip.label }}</label>
+                    {{ form.limite_vip }}
+                    {% if form.limite_vip.help_text %}
+                        <small class="form-ayuda">{{ form.limite_vip.help_text }}</small>
+                    {% endif %}
+                    {% if form.limite_vip.errors %}
+                        <div class="form-errores">
+                            {% for error in form.limite_vip.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                    <label for="{{ form.limite_corporativo.id_for_label }}">{{ form.limite_corporativo.label }}</label>
+                    {{ form.limite_corporativo }}
+                    {% if form.limite_corporativo.help_text %}
+                        <small class="form-ayuda">{{ form.limite_corporativo.help_text }}</small>
+                    {% endif %}
+                    {% if form.limite_corporativo.errors %}
+                        <div class="form-errores">
+                            {% for error in form.limite_corporativo.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                    <label for="{{ form.limite_minorista.id_for_label }}">{{ form.limite_minorista.label }}</label>
+                    {{ form.limite_minorista }}
+                    {% if form.limite_minorista.help_text %}
+                        <small class="form-ayuda">{{ form.limite_minorista.help_text }}</small>
+                    {% endif %}
+                    {% if form.limite_minorista.errors %}
+                        <div class="form-errores">
+                            {% for error in form.limite_minorista.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
 
                 <div class="zona-botones">

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Moneda
+from .models import Moneda, Limitacion
 
 class MonedaForm(forms.ModelForm):
 
@@ -87,13 +87,71 @@ class MonedaForm(forms.ModelForm):
             'min': '0',
             'type': 'number'
         })
+    )
 
+    # Campos para limitaciones por segmentación
+    limite_vip = forms.DecimalField(
+        required=False,
+        max_digits=5,
+        decimal_places=2,
+        label='Límite VIP (%)',
+        help_text='Porcentaje del stock que pueden comprar/vender clientes VIP',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'max': '100',
+            'step': '0.01',
+            'placeholder': '0.00'
+        })
+    )
+
+    limite_corporativo = forms.DecimalField(
+        required=False,
+        max_digits=5,
+        decimal_places=2,
+        label='Límite Corporativo (%)',
+        help_text='Porcentaje del stock que pueden comprar/vender clientes Corporativos',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'max': '100',
+            'step': '0.01',
+            'placeholder': '0.00'
+        })
+    )
+
+    limite_minorista = forms.DecimalField(
+        required=False,
+        max_digits=5,
+        decimal_places=2,
+        label='Límite Minorista (%)',
+        help_text='Porcentaje del stock que pueden comprar/vender clientes Minoristas',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'max': '100',
+            'step': '0.01',
+            'placeholder': '0.00'
+        })
     )
 
 
     class Meta:
         model = Moneda
         fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'stock']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si estamos editando una moneda existente, cargar las limitaciones
+        if self.instance and self.instance.pk:
+            limitaciones = Limitacion.objects.filter(moneda=self.instance)
+            for limitacion in limitaciones:
+                if limitacion.segmentacion == 'VIP':
+                    self.fields['limite_vip'].initial = limitacion.porcentaje_limite
+                elif limitacion.segmentacion == 'CORPORATIVO':
+                    self.fields['limite_corporativo'].initial = limitacion.porcentaje_limite
+                elif limitacion.segmentacion == 'MINORISTA':
+                    self.fields['limite_minorista'].initial = limitacion.porcentaje_limite
 
     def clean_simbolo(self):
         """
@@ -139,3 +197,53 @@ class MonedaForm(forms.ModelForm):
         if comision_venta is not None and comision_venta < 0:
             raise ValidationError('La comisión de venta debe ser un número positivo.')
         return comision_venta
+
+    def clean_limite_vip(self):
+        """Valida que el límite VIP esté entre 0 y 100"""
+        limite = self.cleaned_data.get('limite_vip')
+        if limite is not None and (limite < 0 or limite > 100):
+            raise ValidationError('El límite debe estar entre 0 y 100%.')
+        return limite
+
+    def clean_limite_corporativo(self):
+        """Valida que el límite Corporativo esté entre 0 y 100"""
+        limite = self.cleaned_data.get('limite_corporativo')
+        if limite is not None and (limite < 0 or limite > 100):
+            raise ValidationError('El límite debe estar entre 0 y 100%.')
+        return limite
+
+    def clean_limite_minorista(self):
+        """Valida que el límite Minorista esté entre 0 y 100"""
+        limite = self.cleaned_data.get('limite_minorista')
+        if limite is not None and (limite < 0 or limite > 100):
+            raise ValidationError('El límite debe estar entre 0 y 100%.')
+        return limite
+
+    def save(self, commit=True):
+        """Guarda la moneda y sus limitaciones"""
+        moneda = super().save(commit=commit)
+        
+        if commit:
+            # Guardar limitaciones
+            limitaciones_data = [
+                ('VIP', self.cleaned_data.get('limite_vip')),
+                ('CORPORATIVO', self.cleaned_data.get('limite_corporativo')),
+                ('MINORISTA', self.cleaned_data.get('limite_minorista')),
+            ]
+            
+            for segmentacion, porcentaje in limitaciones_data:
+                if porcentaje is not None:
+                    # Actualizar o crear la limitación
+                    Limitacion.objects.update_or_create(
+                        moneda=moneda,
+                        segmentacion=segmentacion,
+                        defaults={'porcentaje_limite': porcentaje}
+                    )
+                else:
+                    # Si no se especifica porcentaje, eliminar la limitación si existe
+                    Limitacion.objects.filter(
+                        moneda=moneda,
+                        segmentacion=segmentacion
+                    ).delete()
+        
+        return moneda

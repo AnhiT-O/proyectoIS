@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -46,6 +47,73 @@ class Moneda(models.Model):
             ("activacion", "Puede activar/desactivar monedas"),
             ("cotizacion", "Puede actualizar cotización de monedas")
         ]
+
+    def get_limite_por_segmentacion(self, segmentacion):
+        """Obtiene el porcentaje límite para una segmentación específica"""
+        try:
+            limitacion = self.limitaciones.get(segmentacion=segmentacion)
+            return limitacion.porcentaje_limite
+        except:
+            return None
+
+    def get_cantidad_maxima_por_segmentacion(self, segmentacion):
+        """Calcula la cantidad máxima que puede comprar/vender una segmentación"""
+        limite = self.get_limite_por_segmentacion(segmentacion)
+        if limite:
+            return (self.stock * limite) / 100
+        return 0
+
+    def tiene_stock_disponible(self, cantidad_solicitada, segmentacion):
+        """Verifica si hay stock suficiente para una operación considerando las limitaciones"""
+        cantidad_maxima = self.get_cantidad_maxima_por_segmentacion(segmentacion)
+        return cantidad_solicitada <= cantidad_maxima
+
+    def __str__(self):
+        return f"{self.nombre} ({self.simbolo})"
+
+class Limitacion(models.Model):
+    SEGMENTACION_CHOICES = [
+        ('VIP', 'VIP'),
+        ('CORPORATIVO', 'Corporativo'),
+        ('MINORISTA', 'Minorista'),
+    ]
+
+    moneda = models.ForeignKey(
+        Moneda,
+        on_delete=models.CASCADE,
+        related_name='limitaciones',
+        verbose_name='Moneda'
+    )
+    segmentacion = models.CharField(
+        max_length=20,
+        choices=SEGMENTACION_CHOICES,
+        verbose_name='Segmentación'
+    )
+    porcentaje_limite = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(100)
+        ],
+        verbose_name='Porcentaje límite'
+    )
+
+    class Meta:
+        verbose_name = 'Limitación'
+        verbose_name_plural = 'Limitaciones'
+        db_table = 'limitaciones'
+        unique_together = ['moneda', 'segmentacion']  # No puede haber duplicados de moneda-segmentación
+
+    def __str__(self):
+        return f"{self.moneda.nombre} - {self.segmentacion}: {self.porcentaje_limite}%"
+
+    def calcular_cantidad_maxima(self):
+        """Calcula la cantidad máxima que se puede comprar/vender según el stock y el porcentaje"""
+        return (self.moneda.stock * self.porcentaje_limite) / 100
+        verbose_name_plural = 'Limitaciones'
+        db_table = 'limitaciones'
+        unique_together = ['moneda', 'segmentacion']  # No puede haber duplicados de moneda-segmentación
 
     def calcular_precio_venta(self, porcentaje_beneficio=0):
         """
