@@ -126,6 +126,28 @@ def moneda_lista(request):
     return render(request, 'monedas/moneda_lista.html', context)
 
 @login_required
+@tiene_algun_permiso
+def moneda_detalle(request, pk):
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Manejar cambio de estado si se envía POST
+    if request.method == 'POST' and 'cambiar_estado' in request.POST:
+        try:
+            # Cambiar el estado de la moneda
+            moneda.activa = not moneda.activa
+            moneda.save()
+            
+            estado_texto = "activada" if moneda.activa else "desactivada"
+            messages.success(request, f'Moneda "{moneda.nombre}" {estado_texto} exitosamente.')
+        except Exception as e:
+            messages.error(request, 'Error al cambiar el estado de la moneda.')
+    
+    context = {
+        'moneda': moneda,
+    }
+    return render(request, 'monedas/moneda_detalles.html', context)
+
+@login_required
 @puede_editar
 def moneda_editar(request, pk):
     moneda = get_object_or_404(Moneda, pk=pk)
