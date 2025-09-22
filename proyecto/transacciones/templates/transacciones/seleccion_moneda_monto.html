@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Comprar Monedas - {{ titulo_paso }}{% endblock %}
+{% block title %}
+    {% if tipo_transaccion == 'venta' %}
+        Vender Monedas - {{ titulo_paso }}
+    {% else %}
+        Comprar Monedas - {{ titulo_paso }}
+    {% endif %}
+{% endblock %}
 
 {% block extra_css %}
 {% load static %}
@@ -26,7 +32,9 @@
             </div>
             <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
                 <div class="paso-numero">4</div>
-                <div class="paso-titulo">Confirmación de<br>Compra</div>
+                <div class="paso-titulo">Confirmación de<br>
+                    {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -41,13 +49,16 @@
             <div class="info-titulo">Segmento:</div>
             <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
         </div>
-        <p class="subtitulo">Complete la información requerida para continuar con su operación de compra.</p>
+        <p class="subtitulo">
+            Complete la información requerida para continuar con su operación de 
+            {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %}.
+        </p>
     </div>
     <form method="post" id="formSeleccion" novalidate>
         {% csrf_token %}
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.moneda.id_for_label }}">{{ form.moneda.label }}</label>
+                <label for="{{ form.moneda.id_for_label }}">{% if tipo_transaccion == 'venta' %}Moneda a vender{% else %}Moneda a comprar{% endif %}</label>
                 {{ form.moneda }}
                 {% if form.moneda.errors %}
                     <div class="form-errores">
@@ -59,7 +70,7 @@
             </div>
 
             <div class="form-campo">
-                <label for="{{ form.monto.id_for_label }}">{{ form.monto.label }}</label>
+                <label for="{{ form.monto.id_for_label }}">{% if tipo_transaccion == 'venta' %}Monto a vender{% else %}Monto a comprar{% endif %}</label>
                 {{ form.monto }}
                 {% if form.monto.errors %}
                     <div class="form-errores">
@@ -75,7 +86,7 @@
                 Siguiente Paso
             </button>
             <a href="{% url 'inicio' %}" class="btn-atras">
-                Cancelar Compra
+                Cancelar {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
             </a>
         </div>
     </form>

@@ -54,7 +54,6 @@ function seleccionarOperacion(tipo) {
     if (tipo === 'comprar') {
         window.location.href = '/operaciones/comprar/';
     } else if (tipo === 'vender') {
-        alert('Redirigiendo a la página de venta de monedas...');
         window.location.href = '/operaciones/vender/';
     }
     cerrarPopupOperaciones();

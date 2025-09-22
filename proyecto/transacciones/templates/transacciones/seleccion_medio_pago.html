@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Comprar Monedas - Medio de Pago - Global Exchange{% endblock %}
+{% block title %}
+    {% if tipo_transaccion == 'venta' %}
+        Vender Monedas - Medio de Pago - Global Exchange
+    {% else %}
+        Comprar Monedas - Medio de Pago - Global Exchange
+    {% endif %}
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
@@ -29,7 +35,9 @@
             </div>
             <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
                 <div class="paso-numero">4</div>
-                <div class="paso-titulo">Confirmación de<br>Compra</div>
+                <div class="paso-titulo">Confirmación de<br>
+                    {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -44,7 +52,10 @@
             <div class="info-titulo">Segmento:</div>
             <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
         </div>
-        <p class="subtitulo">Complete la información requerida para continuar con su operación de compra.</p>
+        <p class="subtitulo">
+            Complete la información requerida para continuar con su operación de 
+            {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %}.
+        </p>
     </div>
 
         {% if medios_pago %}
@@ -63,7 +74,7 @@
                                 <input type="hidden" name="accion" value="seleccionar_medio">
                                 <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
                                 <button type="submit" class="btn-activar" 
-                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente.get_tipo_display }} como medio de pago?')">
+                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente.get_tipo_display }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
                                     Seleccionar
                                 </button>
                             </form>
@@ -91,7 +102,7 @@
             Siguiente Paso
             </button>
         {% endif %}
-        <a href="{% url 'transacciones:compra_monto_moneda' %}" class="btn-atras">
+        <a href="{% if tipo_transaccion == 'venta' %}{% url 'transacciones:venta_monto_moneda' %}{% else %}{% url 'transacciones:compra_monto_moneda' %}{% endif %}" class="btn-atras">
             Paso Anterior
         </a>
     </div>

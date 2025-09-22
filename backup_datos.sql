@@ -63,9 +63,17 @@ Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Ven
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
 Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03
 Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03
-Peso argentino	ARP	t	5	1	0	5	2025-09-20 12:22:28.974217-03
+Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03
 \.
 
+-- Data for Name: medios_pago_monedas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.medios_pago_monedas (mediopago_id, moneda_id) FROM stdin;
+1	2
+1	3
+1	4
+\.
 
 --
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres

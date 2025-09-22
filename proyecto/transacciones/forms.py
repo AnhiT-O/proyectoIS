@@ -15,7 +15,6 @@ class SeleccionMonedaMontoForm(forms.Form):
             'class': 'form-control',
             'id': 'id_moneda'
         }),
-        label='Moneda a comprar',
         required=True,
         error_messages={'required': 'Debes seleccionar una moneda.'}
     )
@@ -28,7 +27,6 @@ class SeleccionMonedaMontoForm(forms.Form):
             'step': '0.01',
             'min': '0.01'
         }),
-        label='Monto a comprar',
         required=True,
         error_messages={'required': 'Debes ingresar un monto numérico.'}
     )
