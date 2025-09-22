@@ -13,14 +13,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import stripe
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde el archivo .env en el directorio del proyecto Django
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-h7ll7v=(-+-galb%dh7_ev1ig+3is*a30q2wv%moa@1f3-cv9y'
@@ -157,3 +159,10 @@ HANDLER403 = 'proyecto.views.custom_permission_denied_view'
 
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Configuración de Stripe
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_ENDPOINT_SECRET = os.getenv('STRIPE_ENDPOINT_SECRET')
+
+stripe.api_key = STRIPE_SECRET_KEY

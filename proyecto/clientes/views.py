@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
+from django.conf import settings
 from .models import Cliente
 from .forms import ClienteForm
 from medios_pago.models import MedioPago, MedioPagoCliente
@@ -65,8 +66,18 @@ def procesar_medios_pago_cliente(cliente, usuario):
         for medio_cliente in medios_pago_cliente:
             if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
                 # Ocultar datos sensibles de tarjeta
-                if medio_cliente.numero_tarjeta:
-                    medio_cliente.numero_tarjeta_oculto = '**** **** **** ' + medio_cliente.numero_tarjeta[-4:]
+                if medio_cliente.stripe_payment_method_id:
+                    # Para tarjetas de Stripe, obtener info desde Stripe
+                    try:
+                        import stripe
+                        stripe.api_key = settings.STRIPE_SECRET_KEY
+                        payment_method = stripe.PaymentMethod.retrieve(medio_cliente.stripe_payment_method_id)
+                        card = payment_method.card
+                        medio_cliente.numero_tarjeta_oculto = f'**** **** **** {card.last4}'
+                        medio_cliente.marca_tarjeta = card.brand.upper()
+                    except:
+                        medio_cliente.numero_tarjeta_oculto = '****'
+                        medio_cliente.marca_tarjeta = 'STRIPE'
                 else:
                     medio_cliente.numero_tarjeta_oculto = '****'
                 medio_cliente.cvv_tarjeta_oculto = '***'
@@ -77,11 +88,24 @@ def procesar_medios_pago_cliente(cliente, usuario):
                 else:
                     medio_cliente.numero_cuenta_oculto = '****'
     else:
-        # Administradores ven datos completos
+        # Administradores ven datos completos (pero no datos sensibles de Stripe)
         for medio_cliente in medios_pago_cliente:
             if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
-                medio_cliente.numero_tarjeta_oculto = medio_cliente.numero_tarjeta
-                medio_cliente.cvv_tarjeta_oculto = medio_cliente.cvv_tarjeta
+                if medio_cliente.stripe_payment_method_id:
+                    # Para tarjetas de Stripe, mostrar info disponible
+                    try:
+                        import stripe
+                        stripe.api_key = settings.STRIPE_SECRET_KEY
+                        payment_method = stripe.PaymentMethod.retrieve(medio_cliente.stripe_payment_method_id)
+                        card = payment_method.card
+                        medio_cliente.numero_tarjeta_oculto = f'**** **** **** {card.last4}'
+                        medio_cliente.marca_tarjeta = card.brand.upper()
+                    except:
+                        medio_cliente.numero_tarjeta_oculto = '****'
+                        medio_cliente.marca_tarjeta = 'STRIPE'
+                else:
+                    medio_cliente.numero_tarjeta_oculto = '****'
+                medio_cliente.cvv_tarjeta_oculto = '***'  # Nunca mostrar CVV
             elif medio_cliente.medio_pago.tipo == 'transferencia':
                 medio_cliente.numero_cuenta_oculto = medio_cliente.numero_cuenta
     
@@ -210,7 +234,7 @@ def cliente_editar(request, pk):
 
 @login_required
 def cliente_agregar_tarjeta(request, pk):
-    """Vista para agregar una tarjeta de crédito al cliente - Acceso híbrido"""
+    """Vista para agregar una tarjeta de crédito usando Stripe - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
@@ -222,7 +246,7 @@ def cliente_agregar_tarjeta(request, pk):
     tarjetas_configuradas = MedioPagoCliente.objects.filter(
         cliente=cliente,
         medio_pago__tipo='tarjeta_credito',
-        numero_tarjeta__isnull=False,
+        stripe_payment_method_id__isnull=False,  # Solo contar las de Stripe
         activo=True,
         is_deleted=False
     ).count()
@@ -231,79 +255,11 @@ def cliente_agregar_tarjeta(request, pk):
         messages.error(request, f'El cliente {cliente.nombre} ya tiene el máximo de 3 tarjetas de crédito configuradas.')
         return get_cliente_detalle_redirect(request, cliente.pk)
     
-    if request.method == 'POST':
-        form = TarjetaCreditoForm(request.POST)
-        if form.is_valid():
-            numero_tarjeta = form.cleaned_data['numero_tarjeta']
-            
-            # Buscar si existe una tarjeta con EXACTAMENTE los mismos datos
-            tarjeta_existente = MedioPagoCliente.objects.filter(
-                cliente=cliente,
-                medio_pago__tipo='tarjeta_credito',
-                numero_tarjeta=numero_tarjeta,
-                cvv_tarjeta=form.cleaned_data['cvv'],
-                nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
-                fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
-                descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                moneda_tc=form.cleaned_data['moneda_tc']
-            ).first()
-            
-            if tarjeta_existente:
-                # Si existe con exactamente los mismos datos pero está inactiva, reactivarla
-                if not tarjeta_existente.activo or tarjeta_existente.is_deleted:
-                    tarjeta_existente.activo = True
-                    tarjeta_existente.is_deleted = False
-                    tarjeta_existente.save()
-                    
-                    messages.success(request, f'Tarjeta de crédito "{tarjeta_existente.descripcion_tarjeta}" agregada exitosamente.')
-                else:
-                    messages.warning(request, 'Esta tarjeta ya está activa y asociada al cliente.')
-            else:
-                # Verificar si existe una tarjeta con el mismo número pero datos diferentes
-                tarjeta_mismo_numero = MedioPagoCliente.objects.filter(
-                    cliente=cliente,
-                    medio_pago__tipo='tarjeta_credito',
-                    numero_tarjeta=numero_tarjeta
-                ).first()
-                
-                if tarjeta_mismo_numero:
-                    messages.error(request, 'Ya existe una tarjeta con este número pero con datos diferentes. Si desea cambiar los datos, primero debe eliminar la tarjeta anterior.')
-                    return render(request, 'clientes/cliente_agregar_tarjeta.html', {
-                        'form': form,
-                        'cliente': cliente,
-                        'titulo': 'Agregar Tarjeta de Crédito',
-                        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
-                    })
-                
-                # Obtener o crear el medio de pago tipo tarjeta de crédito
-                medio_pago_tc, created = MedioPago.objects.get_or_create(
-                    tipo='tarjeta_credito',
-                    defaults={'activo': True}
-                )
-                
-                # Crear un nuevo registro en la tabla intermedia
-                MedioPagoCliente.objects.create(
-                    cliente=cliente,
-                    medio_pago=medio_pago_tc,
-                    numero_tarjeta=numero_tarjeta,
-                    cvv_tarjeta=form.cleaned_data['cvv'],
-                    nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
-                    fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
-                    descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                    moneda_tc=form.cleaned_data['moneda_tc'],
-                    activo=True,
-                    is_deleted=False
-                )
-                
-                messages.success(request, f'Tarjeta de crédito "{form.cleaned_data["descripcion_tarjeta"]}" agregada exitosamente.')
-            
-            return get_cliente_detalle_redirect(request, cliente.pk)
-    else:
-        form = TarjetaCreditoForm()
-    
+    # Esta vista solo renderiza el template con Stripe Elements
+    # El procesamiento se hace via AJAX con las vistas de medios_pago
     context = {
-        'form': form,
         'cliente': cliente,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
         'titulo': 'Agregar Tarjeta de Crédito',
         'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
     }
@@ -433,14 +389,18 @@ def cliente_eliminar_medio_pago(request, pk, medio_id):
     
     medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
     
-    # No permitir eliminar medios de pago básicos (efectivo, cheque sin configurar)
-    medios_basicos = ['efectivo', 'cheque']
-    if medio_pago_cliente.medio_pago.tipo in medios_basicos and not any([
-        medio_pago_cliente.numero_tarjeta, 
-        medio_pago_cliente.numero_cuenta, 
-        medio_pago_cliente.numero_billetera
-    ]):
-        messages.error(request, f'No se puede eliminar el medio de pago {medio_pago_cliente.medio_pago.get_tipo_display()} básico.')
+    # No permitir eliminar medios de pago básicos sin configuración específica
+    if medio_pago_cliente.medio_pago.tipo == 'efectivo':
+        # Efectivo es básico, no se puede eliminar
+        messages.error(request, f'No se puede eliminar el medio de pago Efectivo básico.')
+        return redirect('clientes:cliente_detalle', pk=pk)
+    elif medio_pago_cliente.medio_pago.tipo == 'cheque':
+        # Cheque básico sin configuración específica no se puede eliminar
+        messages.error(request, f'No se puede eliminar el medio de pago Cheque básico.')
+        return redirect('clientes:cliente_detalle', pk=pk)
+    elif medio_pago_cliente.medio_pago.tipo == 'billetera_electronica':
+        # Billetera electrónica básica no se puede eliminar
+        messages.error(request, f'No se puede eliminar el medio de pago Billetera Electrónica básico.')
         return redirect('clientes:cliente_detalle', pk=pk)
     
     # Permitir eliminar transferencias solo si están configuradas

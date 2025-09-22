@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
+import os
 
 
 class MedioPago(models.Model):
@@ -97,7 +98,7 @@ class MedioPagoCliente(models.Model):
         verbose_name='Cliente'
     )
     
-    # Campos específicos para tarjeta de crédito
+    # Campos específicos para tarjeta de crédito (eliminados para usar Stripe)
     moneda_tc = models.CharField(
         max_length=3,
         choices=MONEDA_CHOICES,
@@ -106,40 +107,28 @@ class MedioPagoCliente(models.Model):
         verbose_name='Moneda para Tarjeta de Crédito',
         help_text='Solo aplicable para tarjetas de crédito. Debe ser PYG o USD'
     )
-    numero_tarjeta = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name='Número de Tarjeta',
-        help_text='Número de la tarjeta de crédito (16 dígitos)'
-    )
-    cvv_tarjeta = models.CharField(
-        max_length=3,
-        blank=True,
-        null=True,
-        verbose_name='CVV',
-        help_text='Código de verificación de la tarjeta (3 dígitos)'
-    )
-    nombre_titular_tarjeta = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name='Nombre del Titular de la Tarjeta',
-        help_text='Nombre completo del titular como aparece en la tarjeta'
-    )
-    fecha_vencimiento_tc = models.CharField(
-        max_length=7,
-        blank=True,
-        null=True,
-        verbose_name='Fecha de Vencimiento',
-        help_text='Fecha de vencimiento de la tarjeta de crédito (MM/AA)'
-    )
     descripcion_tarjeta = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name='Descripción de la Tarjeta',
         help_text='Descripción breve para identificar la tarjeta (ej: "Tarjeta personal", "Tarjeta de empresa")'
+    )
+    
+    # Campos para integración con Stripe
+    stripe_customer_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Stripe Customer ID',
+        help_text='ID del customer en Stripe para asociar métodos de pago'
+    )
+    stripe_payment_method_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Stripe Payment Method ID',
+        help_text='ID del método de pago guardado en Stripe'
     )
     
     # Campos específicos para cuentas bancarias (transferencias)
@@ -227,37 +216,25 @@ class MedioPagoCliente(models.Model):
         """
         from django.core.exceptions import ValidationError
         
-        # Validar campos específicos de tarjeta de crédito
+        # Validar campos específicos de tarjeta de crédito con Stripe
         if self.medio_pago.tipo == 'tarjeta_credito':
-            if self.numero_tarjeta and len(self.numero_tarjeta) != 16:
-                raise ValidationError({
-                    'numero_tarjeta': 'El número de tarjeta debe tener exactamente 16 dígitos'
-                })
-            if self.cvv_tarjeta and len(self.cvv_tarjeta) != 3:
-                raise ValidationError({
-                    'cvv_tarjeta': 'El CVV debe tener exactamente 3 dígitos'
-                })
-            if self.cvv_tarjeta and not self.cvv_tarjeta.isdigit():
-                raise ValidationError({
-                    'cvv_tarjeta': 'El CVV debe contener solo números'
-                })
-            if self.numero_tarjeta and not self.numero_tarjeta.isdigit():
-                raise ValidationError({
-                    'numero_tarjeta': 'El número de tarjeta debe contener solo números'
-                })
+            # Para tarjetas con Stripe, solo validamos que tenga customer_id
+            if not self.stripe_customer_id and not self.pk:
+                # Solo requerir customer_id para nuevas tarjetas
+                pass  # Se creará automáticamente en las vistas
             
-            # Validar límite de tarjetas por cliente
-            if self.numero_tarjeta and self.cliente:
+            # Validar límite de tarjetas por cliente (ahora basado en stripe_payment_method_id)
+            if self.stripe_payment_method_id and self.cliente:
                 tarjetas_configuradas = MedioPagoCliente.objects.filter(
                     medio_pago__tipo='tarjeta_credito',
                     cliente=self.cliente,
-                    numero_tarjeta__isnull=False,
+                    stripe_payment_method_id__isnull=False,
                     is_deleted=False
                 ).exclude(pk=self.pk).count()
                 
                 if tarjetas_configuradas >= 3:
                     raise ValidationError({
-                        'numero_tarjeta': 'Un cliente no puede tener más de 3 tarjetas de crédito configuradas'
+                        'stripe_payment_method_id': 'Un cliente no puede tener más de 3 tarjetas de crédito configuradas'
                     })
         
         # Validar campos específicos de transferencia bancaria
@@ -274,9 +251,20 @@ class MedioPagoCliente(models.Model):
     
     def get_descripcion_completa(self):
         """Retorna una descripción detallada del medio de pago para mostrar en el frontend"""
-        if self.medio_pago.tipo == 'tarjeta_credito' and self.numero_tarjeta:
-            descripcion = self.descripcion_tarjeta or f"Tarjeta terminada en ****{self.numero_tarjeta[-4:]}"
-            return descripcion
+        if self.medio_pago.tipo == 'tarjeta_credito':
+            if self.stripe_payment_method_id:
+                # Obtener información de la tarjeta desde Stripe
+                try:
+                    import stripe
+                    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+                    payment_method = stripe.PaymentMethod.retrieve(self.stripe_payment_method_id)
+                    card = payment_method.card
+                    brand = card.brand.upper()
+                    last4 = card.last4
+                    return f"{brand} terminada en ****{last4}"
+                except:
+                    pass
+            return self.descripcion_tarjeta or "Tarjeta de crédito"
         elif self.medio_pago.tipo == 'transferencia' and self.numero_cuenta:
             banco_info = f" - {self.banco}" if self.banco else ""
             return f"Cuenta {self.numero_cuenta}{banco_info}"
@@ -290,13 +278,8 @@ class MedioPagoCliente(models.Model):
         """Retorna True si la tarjeta de crédito tiene todos los datos necesarios"""
         if self.medio_pago.tipo != 'tarjeta_credito':
             return False
-        return all([
-            self.numero_tarjeta,
-            self.cvv_tarjeta,
-            self.nombre_titular_tarjeta,
-            self.fecha_vencimiento_tc,
-            self.descripcion_tarjeta
-        ])
+        # Con Stripe, solo necesitamos el payment_method_id
+        return bool(self.stripe_payment_method_id)
     
     @property
     def cuenta_bancaria_completa(self):
@@ -328,7 +311,7 @@ class MedioPagoCliente(models.Model):
         default_permissions = []  # Deshabilita permisos predeterminados
         ordering = ['cliente__nombre', 'medio_pago__tipo']
         unique_together = [
-            ('medio_pago', 'cliente', 'numero_tarjeta'),  # Evita duplicados de tarjeta por cliente
+            ('medio_pago', 'cliente', 'stripe_payment_method_id'),  # Evita duplicados de tarjeta por cliente
             ('medio_pago', 'cliente', 'numero_cuenta'),   # Evita duplicados de cuenta por cliente
         ]
 
