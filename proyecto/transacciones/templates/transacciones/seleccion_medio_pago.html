@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comprar Monedas - Medio de Pago - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <!-- Barra de progreso -->
+    <div class="barra-progreso-container">
+        <div class="barra-progreso" data-progreso="{{ paso_actual }}">
+            <div class="paso {% if paso_actual == 1 %}activo{% elif paso_actual > 1 %}completado{% endif %}">
+                <div class="paso-numero">1</div>
+                <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
+            </div>
+            <div class="paso {% if paso_actual == 2 %}activo{% elif paso_actual > 2 %}completado{% endif %}">
+                <div class="paso-numero">2</div>
+                <div class="paso-titulo">Medio de<br>Pago</div>
+            </div>
+            <div class="paso {% if paso_actual == 3 %}activo{% elif paso_actual > 3 %}completado{% endif %}">
+                <div class="paso-numero">3</div>
+                <div class="paso-titulo">Medio de<br>Cobro</div>
+            </div>
+            <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
+                <div class="paso-numero">4</div>
+                <div class="paso-titulo">Confirmación de<br>Compra</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-cabecera">
+        <h2>{{ titulo_paso }}</h2>
+        <div style="margin: 2rem;">
+        <div class="info-cliente">
+            <div class="info-titulo">Cliente seleccionado:</div>
+            <div class="info-valor">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Segmento:</div>
+            <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
+        </div>
+        <p class="subtitulo">Complete la información requerida para continuar con su operación de compra.</p>
+    </div>
+
+        {% if medios_pago %}
+        <div class="info-campos">
+            {% for medio_cliente in medios_pago %}
+                <div class="info-usuario {% if medio_cliente == medio_pago_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: end; margin-bottom: 1rem;">
+                        <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cliente.get_tipo_display }}</div>
+                    
+                    <!-- Botón de acción alineado a la derecha -->
+                    <div style="margin-left: 1rem; align-self: center;">
+                        {% if medio_cliente == medio_pago_seleccionado %}
+                            <span class="etiqueta-activo">Seleccionado</span>
+                        {% else %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="seleccionar_medio">
+                                <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
+                                <button type="submit" class="btn-activar" 
+                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente.get_tipo_display }} como medio de pago?')">
+                                    Seleccionar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="form-cabecera">
+                <p style="text-align: center; color: #666;">
+                    No hay medios de pago disponibles que soporten {{ moneda.nombre }}.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Botones de navegación -->
+    <form method="post">
+    {% csrf_token %}
+    <div class="zona-botones">
+        {% if medio_pago_seleccionado %}
+            <input type="hidden" name="accion" value="continuar">
+            <button type="submit" class="btn-enviar">
+            Siguiente Paso
+            </button>
+        {% endif %}
+        <a href="{% url 'transacciones:compra_monto_moneda' %}" class="btn-atras">
+            Paso Anterior
+        </a>
+    </div>
+    </form>
+</div>
+{% endblock %}
