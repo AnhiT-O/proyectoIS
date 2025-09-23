@@ -1,5 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.conf import settings
+import stripe
+import logging
+
+# Configurar Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 class Cliente(models.Model):
     TIPO_CLIENTE_CHOICES = [
@@ -85,6 +92,30 @@ class Cliente(models.Model):
 
     def __str__(self):
         return f"{self.nombre}"
+
+    def tiene_tarjetas_activas(self):
+        """
+        Verifica si un cliente tiene tarjetas de crédito activas en Stripe.
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return False
+        
+        try:
+            # Obtener los métodos de pago del cliente desde Stripe
+            payment_methods = stripe.PaymentMethod.list(
+                customer=self.id_stripe,
+                type='card'
+            )
+            
+            # Verificar si hay al menos una tarjeta activa
+            return len(payment_methods.data) > 0
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al consultar tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            return False
+        except Exception as e:
+            logger.error(f"Error inesperado al verificar tarjetas para cliente {self.nombre}: {str(e)}")
+            return False
         
     class Meta:
         db_table = 'clientes'

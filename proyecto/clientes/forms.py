@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Cliente
+import stripe
 
 class ClienteForm(forms.ModelForm):
 
@@ -118,3 +119,18 @@ class ClienteForm(forms.ModelForm):
                 raise ValidationError('El documento debe contener solo números')
         
         return doc_cliente
+    
+    def clean_id_stripe(self):
+        """
+        Valida que el ID de Stripe tenga el formato correcto si se proporciona.
+        """
+        id_stripe = self.cleaned_data.get('id_stripe')
+        if id_stripe:
+            try:
+                # Intentar recuperar el cliente de Stripe para validar el ID
+                stripe.Customer.retrieve(id_stripe)
+            except stripe.error.InvalidRequestError:
+                raise ValidationError('El ID de Stripe no es válido.')
+            except Exception as e:
+                raise ValidationError(f'Error al validar el ID de Stripe: {str(e)}')
+        return id_stripe

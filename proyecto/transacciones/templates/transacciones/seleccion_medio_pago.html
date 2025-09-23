@@ -61,8 +61,8 @@
         {% if medios_pago %}
         <div class="info-campos">
             {% for medio_cliente in medios_pago %}
-                <div class="info-usuario {% if medio_cliente == medio_pago_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: end; margin-bottom: 1rem;">
-                        <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cliente.get_tipo_display }}</div>
+                <div class="info-usuario {% if medio_cliente == medio_pago_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cliente }}</div>
                     
                     <!-- Botón de acción alineado a la derecha -->
                     <div style="margin-left: 1rem; align-self: center;">
@@ -74,7 +74,7 @@
                                 <input type="hidden" name="accion" value="seleccionar_medio">
                                 <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
                                 <button type="submit" class="btn-activar" 
-                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente.get_tipo_display }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
+                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
                                     Seleccionar
                                 </button>
                             </form>
