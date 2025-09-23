@@ -157,3 +157,13 @@ HANDLER403 = 'proyecto.views.custom_permission_denied_view'
 
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Configuración de monedas del sistema
+# Moneda base del sistema (Guaraní paraguayo)
+MONEDA_BASE_GUARANIES = {
+    'nombre': 'Guaraní',
+    'simbolo': 'PYG',
+    'codigo_iso': 'PYG',
+    'decimales': 0,  # El guaraní no utiliza decimales
+    'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
+}

@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from .models import Moneda
 
 class MonedaForm(forms.ModelForm):
@@ -139,3 +140,17 @@ class MonedaForm(forms.ModelForm):
         if comision_venta is not None and comision_venta < 0:
             raise ValidationError('La comisión de venta debe ser un número positivo.')
         return comision_venta
+
+    def es_moneda_base(self):
+        """
+        Verifica si la moneda actual es la moneda base del sistema (Guaraní).
+        """
+        simbolo = self.cleaned_data.get('simbolo', '').upper()
+        moneda_base = settings.MONEDA_BASE_GUARANIES
+        return simbolo == moneda_base['simbolo']
+
+    def get_moneda_base_info(self):
+        """
+        Retorna la información de la moneda base del sistema.
+        """
+        return settings.MONEDA_BASE_GUARANIES
