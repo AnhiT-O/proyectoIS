@@ -92,22 +92,42 @@
             </div>
         </div>
 
-        <!-- Estado de Declaración Jurada -->
-        <div class="info-columna" style="grid-column: 1 / -1;">
-            <div class="info-celda">
-                <span class="info-icono">📝</span>
-                <div class="info-contenido">
-                    <div class="info-titulo">Estado de Declaración Jurada</div>
-                    <div class="info-valor">
-                        {% if cliente.declaracion_jurada %}
-                            <span class="etiqueta-activo">
-                                Declaración Firmada
-                            </span>
-                        {% else %}
-                            <span class="etiqueta-bloqueado">
-                                Declaración Pendiente
-                            </span>
-                        {% endif %}
+        <div class="seccion-info">
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📝</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Estado de Declaración Jurada</div>
+                        <div class="info-valor">
+                            {% if cliente.declaracion_jurada %}
+                                <span class="etiqueta-activo">
+                                    Declaración Firmada
+                                </span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    Declaración Pendiente
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">💳</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">ID de Stripe</div>
+                        <div class="info-valor">
+                            {% if cliente.id_stripe %}
+                                <div class="info-valor">
+                                    {{ cliente.id_stripe }}
+                                </div>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    No Vinculado
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

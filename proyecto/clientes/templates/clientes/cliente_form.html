@@ -139,6 +139,17 @@
                     </div>
                 {% endif %}
             </div>
+            <div class="form-campo">
+                <label for="{{ form.id_stripe.id_for_label }}">ID de Stripe</label>
+                {{ form.id_stripe }}
+                {% if form.id_stripe.errors %}
+                    <div class="form-errores">
+                        {% for error in form.id_stripe.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
         <div class="zona-declaracion">

@@ -43,17 +43,17 @@ COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
 -- Data for Name: clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, created_at, updated_at) FROM stdin;
-Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
-Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	2025-09-20 12:27:38.687681-03	2025-09-20 12:27:38.687718-03
-Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	2025-09-20 12:29:50.697586-03	2025-09-20 12:29:50.697627-03
-Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	2025-09-20 12:30:54.408672-03	2025-09-20 12:30:54.408708-03
-Miguel Torres	CI	5675675	miguel.torres@example.com	0985675675	F	Luque, Paraguay	Contador	t	minorista	0	2025-09-20 12:31:53.579782-03	2025-09-20 12:31:53.579816-03
-Sofía Martínez	RUC	6786786	sofia.martinez@example.com	0986786786	F	Capiatá, Paraguay	Médica	t	vip	10	2025-09-20 12:33:32.910055-03	2025-09-20 12:33:32.910098-03
-Diego Alonso	CI	7897897	diego.alonso@example.com	0987897897	F	Fernando de la Mora, Paraguay	Arquitecto	t	minorista	0	2025-09-20 12:34:33.754898-03	2025-09-20 12:34:33.754934-03
-Valentina Rivas	CI	8908908	valentina.rivas@example.com	0988908908	F	Lambaré, Paraguay	Diseñadora	t	corporativo	5	2025-09-20 12:35:39.80619-03	2025-09-20 12:35:39.806227-03
-Camila Acosta	RUC	1234567	camila_acosta@example.com	0981234567	F	Areguá, Paraguay	Psicóloga	t	vip	10	2025-09-20 12:36:39.958919-03	2025-09-20 12:36:39.958954-03
-Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Venta de artículos	t	corporativo	5	2025-09-20 12:38:01.427257-03	2025-09-20 12:38:01.427291-03
+COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, id_stripe, created_at, updated_at) FROM stdin;
+Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	\N	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
+Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	\N	2025-09-20 12:27:38.687681-03	2025-09-20 12:27:38.687718-03
+Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	\N	2025-09-20 12:29:50.697586-03	2025-09-20 12:29:50.697627-03
+Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	\N	2025-09-20 12:30:54.408672-03	2025-09-20 12:30:54.408708-03
+Miguel Torres	CI	5675675	miguel.torres@example.com	0985675675	F	Luque, Paraguay	Contador	t	minorista	0	\N	2025-09-20 12:31:53.579782-03	2025-09-20 12:31:53.579816-03
+Sofía Martínez	RUC	6786786	sofia.martinez@example.com	0986786786	F	Capiatá, Paraguay	Médica	t	vip	10	\N	2025-09-20 12:33:32.910055-03	2025-09-20 12:33:32.910098-03
+Diego Alonso	CI	7897897	diego.alonso@example.com	0987897897	F	Fernando de la Mora, Paraguay	Arquitecto	t	minorista	0	\N	2025-09-20 12:34:33.754898-03	2025-09-20 12:34:33.754934-03
+Valentina Rivas	CI	8908908	valentina.rivas@example.com	0988908908	F	Lambaré, Paraguay	Diseñadora	t	corporativo	5	\N	2025-09-20 12:35:39.80619-03	2025-09-20 12:35:39.806227-03
+Camila Acosta	RUC	1234567	camila_acosta@example.com	0981234567	F	Areguá, Paraguay	Psicóloga	t	vip	10	\N	2025-09-20 12:36:39.958919-03	2025-09-20 12:36:39.958954-03
+Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Venta de artículos	t	corporativo	5	\N	2025-09-20 12:38:01.427257-03	2025-09-20 12:38:01.427291-03
 \.
 
 --
@@ -93,7 +93,7 @@ COPY public.usuarios (password, last_login, is_superuser, username, first_name, 
 pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	CI	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
 pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	CI	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
 pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	CI	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
-pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	CI	5167191	f	t	2025-09-20 12:56:51.22464-03	3
+pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	CI	5167191	f	t	2025-09-20 12:56:51.22464-03	1
 pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	CI	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
 

@@ -37,11 +37,7 @@
                     <div class="info-valor">{{ cliente.telefono }}</div>
                 </div>
                 <div class="info-campo">
-                    <div class="info-titulo">Tipo de Documento</div>
-                    <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
-                </div>
-                <div class="info-campo">
-                    <div class="info-titulo">Número de Documento</div>
+                    <div class="info-titulo">{{ cliente.get_tipoDocCliente_display }}</div>
                     <div class="info-valor">{{ cliente.docCliente }}</div>
                 </div>
                 <div class="info-campo">
@@ -55,6 +51,16 @@
                 <div class="info-campo">
                     <div class="info-titulo">Segmento</div>
                     <div class="info-valor">{{ cliente.get_segmento_display }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Stripe</div>
+                    <div class="info-valor">
+                        {% if cliente.id_stripe %}
+                            <span class="etiqueta-activo">Conectado</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">No conectado</span>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Declaración Jurada</div>

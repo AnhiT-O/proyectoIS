@@ -69,6 +69,10 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    id_stripe = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     declaracion_jurada = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
@@ -86,6 +90,7 @@ class ClienteForm(forms.ModelForm):
             'direccion',
             'ocupacion',
             'segmento',
+            'id_stripe',
             'declaracion_jurada'
         ]
 

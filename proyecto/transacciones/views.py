@@ -22,9 +22,7 @@ def compra_monto_moneda(request):
             
             # Guardar los datos en la sesión
             request.session['compra_datos'] = {
-                'moneda_id': moneda.id,
-                'moneda_nombre': moneda.nombre,
-                'moneda_simbolo': moneda.simbolo,
+                'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
                 'paso_actual': 2
             }
@@ -68,7 +66,7 @@ def compra_medio_pago(request):
     
     # Recuperar los datos de la sesión
     try:
-        moneda = Moneda.objects.get(id=compra_datos['moneda_id'])
+        moneda = Moneda.objects.get(id=compra_datos['moneda'])
         monto = Decimal(compra_datos['monto'])
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
@@ -91,9 +89,7 @@ def compra_medio_pago(request):
                     
                     # Actualizar los datos de la sesión (sin cambiar el paso_actual)
                     compra_datos.update({
-                        'medio_pago_id': medio_pago.id,
-                        'medio_pago_nombre': medio_pago.get_tipo_display(),
-                        'medio_pago_tipo': medio_pago.tipo
+                        'medio_pago': medio_pago.id
                     })
                     request.session['compra_datos'] = compra_datos
 
@@ -106,7 +102,7 @@ def compra_medio_pago(request):
         
         elif accion == 'continuar':
             # Verificar que hay un medio de pago seleccionado
-            if not compra_datos.get('medio_pago_id'):
+            if not compra_datos.get('medio_pago'):
                 messages.error(request, 'Debe seleccionar un medio de pago antes de continuar.')
                 return redirect('transacciones:compra_medio_pago')
             
@@ -119,18 +115,24 @@ def compra_medio_pago(request):
             # return redirect('transacciones:compra_medio_cobro')
             return redirect('transacciones:compra_medio_pago')  # Por ahora redirijo al mismo paso
     
-    # Obtener los medios de pago que soportan la moneda seleccionada
+    # Obtener los medios de pago disponibles
     from medios_pago.models import MedioPago
-    medios_pago_disponibles = MedioPago.objects.filter(
-        activo=True
-    ).distinct()
+    # Filtrar tarjeta de crédito solo si el cliente tiene id_stripe
+    if not getattr(request.user.cliente_activo, 'id_stripe', None):
+        medios_pago_disponibles = MedioPago.objects.filter(
+            activo=True
+        ).exclude(tipo='tarjeta_credito')
+    else:
+        medios_pago_disponibles = MedioPago.objects.filter(
+            activo=True
+        )
     
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
-    if compra_datos.get('medio_pago_id'):
+    if compra_datos.get('medio_pago'):
         try:
             medio_pago_seleccionado = MedioPago.objects.get(
-                id=compra_datos['medio_pago_id']
+                id=compra_datos['medio_pago']
             )
         except MedioPago.DoesNotExist:
             pass
@@ -165,9 +167,7 @@ def venta_monto_moneda(request):
             
             # Guardar los datos en la sesión
             request.session['venta_datos'] = {
-                'moneda_id': moneda.id,
-                'moneda_nombre': moneda.nombre,
-                'moneda_simbolo': moneda.simbolo,
+                'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
                 'paso_actual': 2
             }
@@ -210,7 +210,7 @@ def venta_medio_pago(request):
     
     # Recuperar los datos de la sesión
     try:
-        moneda = Moneda.objects.get(id=venta_datos['moneda_id'])
+        moneda = Moneda.objects.get(id=venta_datos['moneda'])
         monto = Decimal(venta_datos['monto'])
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
@@ -233,9 +233,7 @@ def venta_medio_pago(request):
                     
                     # Actualizar los datos de la sesión (sin cambiar el paso_actual)
                     venta_datos.update({
-                        'medio_pago_id': medio_pago.id,
-                        'medio_pago_nombre': medio_pago.get_tipo_display(),
-                        'medio_pago_tipo': medio_pago.tipo
+                        'medio_pago': medio_pago.id
                     })
                     request.session['venta_datos'] = venta_datos
 
@@ -248,7 +246,7 @@ def venta_medio_pago(request):
         
         elif accion == 'continuar':
             # Verificar que hay un medio de pago seleccionado
-            if not venta_datos.get('medio_pago_id'):
+            if not venta_datos.get('medio_pago'):
                 messages.error(request, 'Debe seleccionar un medio de pago antes de continuar.')
                 return redirect('transacciones:venta_medio_pago')
             
@@ -263,17 +261,24 @@ def venta_medio_pago(request):
     
     # Obtener los medios de pago que soportan la moneda seleccionada
     from medios_pago.models import MedioPago
-    medios_pago_disponibles = MedioPago.objects.filter(
-        activo=True,
-        monedas=moneda  # Filtrar solo los medios de pago que soportan esta moneda
-    ).distinct()
+    # Filtrar tarjeta de crédito solo si el cliente tiene id_stripe
+    if not getattr(request.user.cliente_activo, 'id_stripe', None):
+        medios_pago_disponibles = MedioPago.objects.filter(
+            activo=True,
+            monedas=moneda  # Filtrar solo los medios de pago que soportan esta moneda
+        ).exclude(tipo='tarjeta_credito')
+    else:
+        medios_pago_disponibles = MedioPago.objects.filter(
+            activo=True,
+            monedas=moneda  # Filtrar solo los medios de pago que soportan esta moneda
+        )
     
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
-    if venta_datos.get('medio_pago_id'):
+    if venta_datos.get('medio_pago'):
         try:
             medio_pago_seleccionado = MedioPago.objects.get(
-                id=venta_datos['medio_pago_id']
+                id=venta_datos['medio_pago']
             )
         except MedioPago.DoesNotExist:
             pass
