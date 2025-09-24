@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from .models import Moneda
+from .models import Moneda, LimiteGlobal
 
 class MonedaForm(forms.ModelForm):
 
@@ -154,3 +154,108 @@ class MonedaForm(forms.ModelForm):
         Retorna la información de la moneda base del sistema.
         """
         return settings.MONEDA_BASE_GUARANIES
+
+
+class LimiteGlobalForm(forms.ModelForm):
+    """
+    Formulario para gestionar los límites globales de transacciones
+    """
+    
+    limite_diario = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '1',
+            'step': '1000',
+        }),
+        error_messages={
+            'required': 'Debes ingresar el límite diario.',
+            'invalid': 'El límite diario debe ser un número entero.',
+            'min_value': 'El límite diario debe ser mayor a 0.',
+        },
+        help_text='Límite diario en guaraníes'
+    )
+    
+    limite_mensual = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '1',
+            'step': '1000',
+        }),
+        error_messages={
+            'required': 'Debes ingresar el límite mensual.',
+            'invalid': 'El límite mensual debe ser un número entero.',
+            'min_value': 'El límite mensual debe ser mayor a 0.',
+        },
+        help_text='Límite mensual en guaraníes'
+    )
+    
+    fecha_inicio = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        }),
+        error_messages={
+            'required': 'Debes seleccionar la fecha de inicio.',
+            'invalid': 'Formato de fecha inválido.',
+        },
+        help_text='Fecha desde cuando rige este límite'
+    )
+    
+    fecha_fin = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        }),
+        error_messages={
+            'invalid': 'Formato de fecha inválido.',
+        },
+        help_text='Fecha hasta cuando rige este límite (opcional)'
+    )
+    
+    activo = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        }),
+        help_text='Marcar si este límite está vigente'
+    )
+
+    class Meta:
+        model = LimiteGlobal
+        fields = ['limite_diario', 'limite_mensual', 'fecha_inicio', 'fecha_fin', 'activo']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        limite_diario = cleaned_data.get('limite_diario')
+        limite_mensual = cleaned_data.get('limite_mensual')
+        fecha_inicio = cleaned_data.get('fecha_inicio')
+        fecha_fin = cleaned_data.get('fecha_fin')
+
+        # Validar que el límite diario no sea mayor al mensual
+        if limite_diario and limite_mensual:
+            if limite_diario > limite_mensual:
+                raise ValidationError(
+                    'El límite diario no puede ser mayor al límite mensual.'
+                )
+
+        # Validar fechas
+        if fecha_inicio and fecha_fin:
+            if fecha_fin <= fecha_inicio:
+                raise ValidationError(
+                    'La fecha de fin debe ser posterior a la fecha de inicio.'
+                )
+
+        return cleaned_data
+
+    def clean_limite_diario(self):
+        limite_diario = self.cleaned_data.get('limite_diario')
+        if limite_diario and limite_diario <= 0:
+            raise ValidationError('El límite diario debe ser mayor a 0.')
+        return limite_diario
+
+    def clean_limite_mensual(self):
+        limite_mensual = self.cleaned_data.get('limite_mensual')
+        if limite_mensual and limite_mensual <= 0:
+            raise ValidationError('El límite mensual debe ser mayor a 0.')
+        return limite_mensual
