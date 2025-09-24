@@ -54,6 +54,9 @@ class Billetera(models.Model):
         max_length=30,
         choices=TIPO_BILLETERA_CHOICES
     )
+    numero_billetera = models.CharField(max_length=30)
+    nombre_titular = models.CharField(max_length=100)
+    ci = models.CharField(max_length=20)
     cliente = models.ForeignKey(
         'clientes.Cliente',
         on_delete=models.CASCADE,
