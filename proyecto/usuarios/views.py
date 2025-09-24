@@ -15,7 +15,7 @@ from functools import wraps
 from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
 from clientes.models import Cliente, UsuarioCliente
-from clientes.views import procesar_medios_pago_cliente
+from clientes.views import procesar_medios_acreditacion_cliente
 from roles.models import Roles
 from django.db.models import Q
 from django.contrib.sessions.models import Session
@@ -554,8 +554,8 @@ def detalle_cliente(request, cliente_id):
         # Verificar que el cliente existe y está asociado al usuario
         cliente = request.user.clientes_operados.get(pk=cliente_id)
         
-        # Usar función auxiliar para procesar medios de pago
-        medios_data = procesar_medios_pago_cliente(cliente, request.user)
+        # Usar función auxiliar para procesar medios de acreditación
+        medios_data = procesar_medios_acreditacion_cliente(cliente, request.user)
         
         context = {
             'cliente': cliente,

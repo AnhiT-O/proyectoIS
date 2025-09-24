@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'clientes',
     'roles',
     'monedas',
-    'medios_pago'
+    'medios_pago',
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [

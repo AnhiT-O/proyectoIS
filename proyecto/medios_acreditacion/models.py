@@ -1,10 +1,6 @@
 from django.db import models
 
 class CuentaBancaria(models.Model):
-    TIPO_CUENTA_CHOICES = [
-        ('cuenta_corriente', 'Cuenta Corriente'),
-        ('cuenta_ahorro', 'Cuenta de Ahorro'),
-    ]
     BANCO_CHOICES = [
         ('ATLAS', 'Banco Atlas'),
         ('BANCOP', 'BANCOP'),
@@ -27,10 +23,7 @@ class CuentaBancaria(models.Model):
         ('COOP_SAGRADOS_CORAZONES', 'Cooperativa Sagrados Corazones'),
         ('COOP_CHORTITZER', 'Cooperativa Chortitzer'),
     ]
-    tipo_cuenta = models.CharField(
-        max_length=30,
-        choices=TIPO_CUENTA_CHOICES
-    )
+    
     banco = models.CharField(
         max_length=30,
         choices=BANCO_CHOICES
