@@ -27,7 +27,7 @@
         </div>
 
         <div class="form-campo">
-            <label for="{{ form.numero_billetera.id_for_label }}">Número de Billetera:</label>
+            <label for="{{ form.numero_billetera.id_for_label }}">Número de Teléfono:</label>
             {{ form.numero_billetera }}
             {% if form.numero_billetera.errors %}
                 <div class="form-errores">{{ form.numero_billetera.errors.0 }}</div>
@@ -51,7 +51,7 @@
         </div>
 
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <button type="submit" class="btn-enviar">Guardar Billetera</button>
+            <button type="submit" class="btn-enviar">Guardar</button>
             <a href="{{ cancelar_url }}" class="btn-atras">Cancelar</a>
         </div>
     </form>

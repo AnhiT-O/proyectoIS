@@ -93,12 +93,13 @@
                             <div style="flex: 1;">
                                 <div class="info-titulo">Cuenta Bancaria</div>
                             </div>
-                            <a href="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta_bancaria' cuenta.id %}" 
-                               class="btn-desactivar" 
-                               style="font-size: 0.8rem; padding: 0.3rem 0.8rem;"
-                               onclick="return confirm('¿Estás seguro de eliminar esta cuenta bancaria?')">
-                                Eliminar
-                            </a>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta' cuenta.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta cuenta bancaria?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
                         </div>
                         <div class="info-valor">
                             <strong>Banco:</strong> {{ cuenta.get_banco_display }}<br>
@@ -116,12 +117,13 @@
                             <div style="flex: 1;">
                                 <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
                             </div>
-                            <a href="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" 
-                               class="btn-desactivar" 
-                               style="font-size: 0.8rem; padding: 0.3rem 0.8rem;"
-                               onclick="return confirm('¿Estás seguro de eliminar esta billetera?')">
-                                Eliminar
-                            </a>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta billetera?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
                         </div>
                         <div class="info-valor">
                             <strong>Número:</strong> {{ billetera.numero_billetera }}<br>
