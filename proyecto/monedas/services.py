@@ -110,11 +110,7 @@ class LimiteService:
         if nuevo_consumo_diario > limite.limite_diario:
             disponible_diario = limite.limite_diario - consumo.consumo_diario
             raise ValidationError(
-                f"La transacción supera el límite diario. "
-                f"Límite: {limite.limite_diario:,} PYG, "
-                f"Consumo actual: {consumo.consumo_diario:,} PYG, "
-                f"Disponible: {disponible_diario:,} PYG, "
-                f"Intentado: {monto_guaranies:,} PYG"
+                f"La transacción supera el límite diario. Se intenta operar con Gs. {monto_guaranies:,}".replace(',', '.')
             )
         
         # Validar límite mensual
@@ -122,11 +118,7 @@ class LimiteService:
         if nuevo_consumo_mensual > limite.limite_mensual:
             disponible_mensual = limite.limite_mensual - consumo.consumo_mensual
             raise ValidationError(
-                f"La transacción supera el límite mensual. "
-                f"Límite: {limite.limite_mensual:,} PYG, "
-                f"Consumo actual: {consumo.consumo_mensual:,} PYG, "
-                f"Disponible: {disponible_mensual:,} PYG, "
-                f"Intentado: {monto_guaranies:,} PYG"
+                f"La transacción supera el límite mensual. Se intenta operar con Gs. {monto_guaranies:,}".replace(',', '.')
             )
         
         return True

@@ -2,10 +2,54 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
 from monedas.models import Moneda
+from monedas.services import LimiteService
 from .forms import SeleccionMonedaMontoForm
 from decimal import Decimal
 from clientes.models import Cliente
+
+def extraer_mensaje_error(validation_error):
+    """
+    Función auxiliar para extraer el mensaje de error de un ValidationError
+    sin los corchetes que Django puede agregar.
+    """
+    if hasattr(validation_error, 'message'):
+        return validation_error.message
+    elif hasattr(validation_error, 'messages') and validation_error.messages:
+        # Si hay múltiples mensajes, tomar el primero
+        return validation_error.messages[0]
+    else:
+        # Fallback a conversión string
+        mensaje = str(validation_error)
+        # Remover corchetes si están presentes
+        if mensaje.startswith("['") and mensaje.endswith("']"):
+            return mensaje[2:-2]
+        return mensaje
+
+def obtener_contexto_limites(cliente):
+    """
+    Función auxiliar para obtener información de límites del cliente
+    para mostrar en las plantillas.
+    """
+    try:
+        limites_info = LimiteService.obtener_limites_disponibles(cliente)
+        if 'error' not in limites_info:
+            return {
+                'limites_disponibles': {
+                    'diario': limites_info['disponible_diario'],
+                    'mensual': limites_info['disponible_mensual'],
+                    'limite_diario_total': limites_info['limite_diario'],
+                    'limite_mensual_total': limites_info['limite_mensual'],
+                    'consumo_diario': limites_info['consumo_diario'],
+                    'consumo_mensual': limites_info['consumo_mensual'],
+                    'porcentaje_uso_diario': limites_info['porcentaje_uso_diario'],
+                    'porcentaje_uso_mensual': limites_info['porcentaje_uso_mensual']
+                }
+            }
+    except Exception:
+        pass
+    return {}
 
 # PROCESO DE COMPRA
 
@@ -21,7 +65,46 @@ def compra_monto_moneda(request):
             moneda = form.cleaned_data['moneda']
             monto = form.cleaned_data['monto_decimal']
             
-            # Guardar los datos en la sesión
+            # Verificar límites de transacción para compras
+            try:
+                cliente_activo = request.user.cliente_activo
+                
+                # Convertir el monto a guaraníes para verificar límites
+                monto_guaranies = LimiteService.convertir_a_guaranies(
+                    int(monto), moneda, 'COMPRA', cliente_activo
+                )
+                
+                # Validar que no supere los límites (sin actualizar consumo aún)
+                LimiteService.validar_limite_transaccion(cliente_activo, monto_guaranies)
+                
+            except ValidationError as e:
+                # Si hay error de límites, mostrar mensaje y no proceder
+                messages.error(request, extraer_mensaje_error(e))
+                context = {
+                    'form': form,
+                    'paso_actual': 1,
+                    'total_pasos': 4,
+                    'titulo_paso': 'Selección de Moneda y Monto',
+                    'tipo_transaccion': 'compra'
+                }
+                # Agregar información de límites al contexto de error
+                context.update(obtener_contexto_limites(cliente_activo))
+                return render(request, 'transacciones/seleccion_moneda_monto.html', context)
+            except Exception as e:
+                # Error general del sistema de límites
+                messages.error(request, 'Error al verificar límites de transacción. Inténtelo nuevamente.')
+                context = {
+                    'form': form,
+                    'paso_actual': 1,
+                    'total_pasos': 4,
+                    'titulo_paso': 'Selección de Moneda y Monto',
+                    'tipo_transaccion': 'compra'
+                }
+                # Agregar información de límites al contexto de error
+                context.update(obtener_contexto_limites(cliente_activo))
+                return render(request, 'transacciones/seleccion_moneda_monto.html', context)
+            
+            # Si pasa las validaciones, guardar los datos en la sesión
             request.session['compra_datos'] = {
                 'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
@@ -44,6 +127,10 @@ def compra_monto_moneda(request):
         'titulo_paso': 'Selección de Moneda y Monto',
         'tipo_transaccion': 'compra'  # Agregar contexto para diferenciar en plantilla
     }
+    
+    # Agregar información de límites si hay cliente activo
+    if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+        context.update(obtener_contexto_limites(request.user.cliente_activo))
     
     return render(request, 'transacciones/seleccion_moneda_monto.html', context)
 
@@ -213,7 +300,46 @@ def venta_monto_moneda(request):
             moneda = form.cleaned_data['moneda']
             monto = form.cleaned_data['monto_decimal']
             
-            # Guardar los datos en la sesión
+            # Verificar límites de transacción para ventas
+            try:
+                cliente_activo = request.user.cliente_activo
+                
+                # Convertir el monto a guaraníes para verificar límites
+                monto_guaranies = LimiteService.convertir_a_guaranies(
+                    int(monto), moneda, 'VENTA', cliente_activo
+                )
+                
+                # Validar que no supere los límites (sin actualizar consumo aún)
+                LimiteService.validar_limite_transaccion(cliente_activo, monto_guaranies)
+                
+            except ValidationError as e:
+                # Si hay error de límites, mostrar mensaje y no proceder
+                messages.error(request, extraer_mensaje_error(e))
+                context = {
+                    'form': form,
+                    'paso_actual': 1,
+                    'total_pasos': 4,
+                    'titulo_paso': 'Selección de Moneda y Monto',
+                    'tipo_transaccion': 'venta'
+                }
+                # Agregar información de límites al contexto de error
+                context.update(obtener_contexto_limites(cliente_activo))
+                return render(request, 'transacciones/seleccion_moneda_monto.html', context)
+            except Exception as e:
+                # Error general del sistema de límites
+                messages.error(request, 'Error al verificar límites de transacción. Inténtelo nuevamente.')
+                context = {
+                    'form': form,
+                    'paso_actual': 1,
+                    'total_pasos': 4,
+                    'titulo_paso': 'Selección de Moneda y Monto',
+                    'tipo_transaccion': 'venta'
+                }
+                # Agregar información de límites al contexto de error
+                context.update(obtener_contexto_limites(cliente_activo))
+                return render(request, 'transacciones/seleccion_moneda_monto.html', context)
+            
+            # Si pasa las validaciones, guardar los datos en la sesión
             request.session['venta_datos'] = {
                 'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
@@ -236,6 +362,10 @@ def venta_monto_moneda(request):
         'titulo_paso': 'Selección de Moneda y Monto',
         'tipo_transaccion': 'venta'  # Agregar contexto para diferenciar en plantilla
     }
+    
+    # Agregar información de límites si hay cliente activo
+    if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+        context.update(obtener_contexto_limites(request.user.cliente_activo))
     
     return render(request, 'transacciones/seleccion_moneda_monto.html', context)
 
@@ -386,3 +516,97 @@ def venta_exito(request):
         del request.session['venta_datos']
 
     return render(request, 'transacciones/exito.html')
+
+@login_required
+def obtener_limites_cliente(request):
+    """
+    Vista AJAX para obtener información de límites del cliente activo.
+    Útil para mostrar información dinámica en las plantillas.
+    """
+    if not request.user.cliente_activo:
+        return JsonResponse({
+            'error': 'No hay cliente activo'
+        }, status=400)
+    
+    try:
+        limites_info = LimiteService.obtener_limites_disponibles(request.user.cliente_activo)
+        
+        if 'error' in limites_info:
+            return JsonResponse({
+                'error': limites_info['error']
+            }, status=500)
+        
+        return JsonResponse({
+            'limite_diario': limites_info['limite_diario'],
+            'limite_mensual': limites_info['limite_mensual'],
+            'consumo_diario': limites_info['consumo_diario'],
+            'consumo_mensual': limites_info['consumo_mensual'],
+            'disponible_diario': limites_info['disponible_diario'],
+            'disponible_mensual': limites_info['disponible_mensual'],
+            'porcentaje_uso_diario': limites_info['porcentaje_uso_diario'],
+            'porcentaje_uso_mensual': limites_info['porcentaje_uso_mensual']
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': 'Error al obtener información de límites'
+        }, status=500)
+
+@login_required
+def simular_transaccion_limites(request):
+    """
+    Vista AJAX para simular una transacción y verificar límites sin procesarla.
+    Útil para validaciones en tiempo real.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    if not request.user.cliente_activo:
+        return JsonResponse({'error': 'No hay cliente activo'}, status=400)
+    
+    try:
+        moneda_id = request.POST.get('moneda_id')
+        monto = request.POST.get('monto')
+        tipo_transaccion = request.POST.get('tipo_transaccion', '').upper()
+        
+        if not all([moneda_id, monto, tipo_transaccion]):
+            return JsonResponse({
+                'error': 'Faltan parámetros requeridos'
+            }, status=400)
+        
+        if tipo_transaccion not in ['COMPRA', 'VENTA']:
+            return JsonResponse({
+                'error': 'Tipo de transacción inválido'
+            }, status=400)
+        
+        moneda = Moneda.objects.get(id=moneda_id)
+        monto_decimal = Decimal(monto)
+        
+        # Convertir a guaraníes
+        monto_guaranies = LimiteService.convertir_a_guaranies(
+            int(monto_decimal), moneda, tipo_transaccion, request.user.cliente_activo
+        )
+        
+        # Validar límites
+        LimiteService.validar_limite_transaccion(request.user.cliente_activo, monto_guaranies)
+        
+        # Si llega aquí, la transacción es válida
+        return JsonResponse({
+            'valida': True,
+            'monto_guaranies': monto_guaranies,
+            'mensaje': 'La transacción es válida según los límites establecidos'
+        })
+        
+    except Moneda.DoesNotExist:
+        return JsonResponse({
+            'error': 'Moneda no encontrada'
+        }, status=404)
+    except ValidationError as e:
+        return JsonResponse({
+            'valida': False,
+            'error': str(e)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'error': 'Error interno del servidor'
+        }, status=500)

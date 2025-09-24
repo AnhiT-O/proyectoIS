@@ -112,7 +112,8 @@ def crear_moneda_usd(sender, **kwargs):
                 tasa_base=7400,
                 comision_compra=200,
                 comision_venta=250,
-                decimales=2
+                decimales=2,
+                stock=1000000
             )
             print("✓ Moneda USD creada automáticamente")
 
@@ -233,3 +234,16 @@ def crear_limite_global_inicial(sender, **kwargs):
                 activo=True
             )
             print("Límite global inicial creado automáticamente")
+
+@receiver(models.signals.post_save, sender='clientes.Cliente')
+def crear_consumo_limite_cliente(sender, instance, created, **kwargs):
+    """
+    Crea automáticamente un registro de ConsumoLimiteCliente cuando se crea un nuevo cliente
+    """
+    if created:
+        ConsumoLimiteCliente.objects.create(
+            cliente=instance,
+            fecha=date.today(),
+            consumo_diario=0,
+            consumo_mensual=0
+        )
