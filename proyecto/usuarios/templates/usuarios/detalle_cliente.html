@@ -89,7 +89,7 @@
                     {% for cuenta in cuentas_bancarias %}
                     <div class="info-campo">
                         <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
                             <div style="flex: 1;">
                                 <div class="info-titulo">Cuenta Bancaria</div>
                             </div>
@@ -114,7 +114,7 @@
                     {% for billetera in billeteras %}
                     <div class="info-campo">
                         <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
                             <div style="flex: 1;">
                                 <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
                             </div>
@@ -136,7 +136,7 @@
                 </div>
             {% else %}
                 <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
-                    <span style="font-size: 3rem; opacity: 0.5;">🏦</span>
+                    <span style="font-size: 3rem; opacity: 0.5;">💰</span>
                     <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de acreditación</h3>
                     <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de acreditación asociados.</p>
                 </div>

@@ -135,7 +135,7 @@
                 {% for cuenta in cuentas_bancarias %}
                 <div class="info-celda" style="border-left: 4px solid #007bff; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
                     <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>
+                        <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
                         <div style="flex: 1;">
                             <div class="info-titulo">Cuenta Bancaria</div>
                         </div>
@@ -165,15 +165,14 @@
                 {% for billetera in billeteras %}
                 <div class="info-celda" style="border-left: 4px solid #ffc107; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
                     <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>
+                        <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
                         <div style="flex: 1;">
-                            <div class="info-titulo">Billetera Electrónica</div>
+                            <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
                         </div>
                     </div>
                     
                     <!-- Información detallada -->
                     <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        <div style="margin-bottom: 0.25rem;"><strong>Tipo:</strong> {{ billetera.get_tipo_billetera_display }}</div>
                         <div style="margin-bottom: 0.25rem;"><strong>Teléfono:</strong> {{ billetera.telefono }}</div>
                         <div style="margin-bottom: 0.25rem;"><strong>Titular:</strong> {{ billetera.nombre_titular }}</div>
                         <div><strong>Documento:</strong> {{ billetera.nro_documento }}</div>
