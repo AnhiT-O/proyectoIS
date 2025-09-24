@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Detalle del Cliente - Global Exchange{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
@@ -53,16 +56,6 @@
                     <div class="info-valor">{{ cliente.get_segmento_display }}</div>
                 </div>
                 <div class="info-campo">
-                    <div class="info-titulo">Stripe</div>
-                    <div class="info-valor">
-                        {% if cliente.id_stripe %}
-                            <span class="etiqueta-activo">Conectado</span>
-                        {% else %}
-                            <span class="etiqueta-bloqueado">No conectado</span>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="info-campo">
                     <div class="info-titulo">Declaración Jurada</div>
                     <div class="info-valor">
                         {% if cliente.declaracion_jurada %}
@@ -74,6 +67,30 @@
                 </div>
             </div>
         </div>
+        {% if tarjetas_stripe %}
+        <div class="perfil-info">
+            <h2 class="perfil-titulo">Tarjetas de crédito</h2>
+            <div class="lista-clientes">
+                {% for tarjeta in tarjetas_stripe %}
+                    <div class="cliente">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <strong>**** **** **** {{ tarjeta.last4 }}</strong>
+                                <br>
+                                <small style="color: #6c757d;">
+                                    Marca: {{ tarjeta.brand|title }} 
+                                    | Expira: {{ tarjeta.exp_month }}/{{ tarjeta.exp_year }}
+                                </small>
+                            </div>
+                            {% if tarjeta.default %}
+                            <span class="etiqueta-activo" style="align-self: center; margin-left: 10px;">Predeterminada</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         <div class="zona-acciones">
         <a href="{% url 'usuarios:mis_clientes' %}" class="btn-secundario">
             Volver a Mis Clientes

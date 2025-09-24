@@ -48,6 +48,10 @@ class SimuladorForm(forms.Form):
         choices=OPERACION_CHOICES,
         error_messages={'required': 'Debes seleccionar una operación.'}
     )
+    tarjeta_credito = forms.BooleanField(
+        required=False,
+        help_text='Marque si realizará el pago con tarjeta de crédito (recargo del 5%)'
+    )
     
     def __init__(self, *args, **kwargs):
         self.cliente = kwargs.pop('cliente', None)
@@ -118,6 +122,7 @@ class SimuladorForm(forms.Form):
         moneda = self.cleaned_data['moneda']
         monto = self.cleaned_data['monto']
         operacion = self.cleaned_data['operacion']
+        tarjeta_credito = self.cleaned_data.get('tarjeta_credito', False)
         
         # Obtener precios según la segmentación del cliente
         if self.cliente:
@@ -132,16 +137,17 @@ class SimuladorForm(forms.Form):
         if operacion == 'compra':
             # Compra: moneda extranjera a PYG (cuántos guaraníes necesito para comprar X moneda extranjera)
             resultado = monto * precios['precio_venta']
-            return {
-                'success': True,
-                'resultado_numerico': int(resultado),
-                'tipo_resultado': 'guaranies'
-            }
         else:  # venta
             # Venta: moneda extranjera a PYG (cuántos guaraníes recibo por X moneda extranjera)
             resultado = monto * precios['precio_compra']
-            return {
-                'success': True,
-                'resultado_numerico': int(resultado),
-                'tipo_resultado': 'guaranies'
-            }
+        
+        # Aplicar recargo del 5% si se usa tarjeta de crédito (solo en compras)
+        if tarjeta_credito and operacion == 'compra':
+            resultado = resultado * Decimal('1.05')  # Incremento del 5%
+        
+        return {
+            'success': True,
+            'resultado_numerico': int(resultado),
+            'tipo_resultado': 'guaranies',
+            'recargo_aplicado': tarjeta_credito and operacion == 'compra'
+        }

@@ -15,7 +15,7 @@
         <div class="gestion-cabecera">
             <h2><i class="fas fa-chart-line"></i> {{ title }}</h2>
             <a href="{% url 'monedas:crear_limite' %}" class="btn-primario">
-                <i class="fas fa-plus"></i> Crear Nuevo Límite
+                <i class="fas fa-plus"></i> Nuevo Límite
             </a>  
         </div>
 
@@ -47,13 +47,13 @@
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
                     <div style="text-align: center;">
                         <strong>Límite Diario:</strong><br>
-                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem">
                             {{ limite_vigente.limite_diario|format_number }} PYG
                         </span>
                     </div>
                     <div style="text-align: center;">
                         <strong>Límite Mensual:</strong><br>
-                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem">
                             {{ limite_vigente.limite_mensual|format_number }} PYG
                         </span>
                     </div>

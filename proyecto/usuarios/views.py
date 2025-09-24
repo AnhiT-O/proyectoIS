@@ -553,8 +553,13 @@ def detalle_cliente(request, cliente_id):
         # Verificar que el cliente existe y está asociado al usuario
         cliente = request.user.clientes_operados.get(pk=cliente_id)
         
+        # Obtener las tarjetas de Stripe del cliente
+        tarjetas_stripe = cliente.obtener_tarjetas_stripe()
+        
         context = {
-            'cliente': cliente
+            'cliente': cliente,
+            'tarjetas_stripe': tarjetas_stripe,
+            'total_tarjetas': len(tarjetas_stripe)
         }
         
         return render(request, 'usuarios/detalle_cliente.html', context)

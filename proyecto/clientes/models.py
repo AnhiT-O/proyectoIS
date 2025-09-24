@@ -116,6 +116,44 @@ class Cliente(models.Model):
         except Exception as e:
             logger.error(f"Error inesperado al verificar tarjetas para cliente {self.nombre}: {str(e)}")
             return False
+
+    def obtener_tarjetas_stripe(self):
+        """
+        Obtiene las tarjetas de crédito del cliente desde Stripe.
+        Retorna una lista de diccionarios con la información de las tarjetas.
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return []
+        
+        try:
+            # Obtener los métodos de pago del cliente desde Stripe
+            payment_methods = stripe.PaymentMethod.list(
+                customer=self.id_stripe,
+                type='card'
+            )
+            
+            tarjetas = []
+            for payment_method in payment_methods.data:
+                card = payment_method.card
+                tarjeta_info = {
+                    'id': payment_method.id,
+                    'brand': card.brand.upper(),
+                    'last4': card.last4,
+                    'exp_month': card.exp_month,
+                    'exp_year': card.exp_year,
+                    'funding': card.funding,
+                    'created': payment_method.created,
+                }
+                tarjetas.append(tarjeta_info)
+            
+            return tarjetas
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al obtener tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            return []
+        except Exception as e:
+            logger.error(f"Error inesperado al obtener tarjetas para cliente {self.nombre}: {str(e)}")
+            return []
         
     class Meta:
         db_table = 'clientes'

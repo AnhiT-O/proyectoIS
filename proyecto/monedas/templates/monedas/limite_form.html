@@ -128,12 +128,12 @@
             {% endif %}
 
             <div class="zona-botones">
-                <a href="{% url 'monedas:lista_limites' %}" class="btn-atras">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
                 <button type="submit" class="btn-enviar">
                     <i class="fas fa-save"></i> {{ accion }}
                 </button>
+                <a href="{% url 'monedas:lista_limites' %}" class="btn-atras">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
         </form>
     </div>
