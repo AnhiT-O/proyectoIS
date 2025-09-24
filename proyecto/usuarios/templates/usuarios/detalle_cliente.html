@@ -6,6 +6,26 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+<style>
+    .perfil-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--color-borde, #667eea); 
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    }
+
+    .perfil-header .perfil-titulo {
+    margin: 0;
+    }
+
+    .perfil-header .acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: -0.3rem; 
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -71,9 +91,9 @@
 
         <!-- Sección de Medios de Acreditación -->
         <div class="perfil-info" style="margin-top: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 class="perfil-titulo">Medios de Acreditación</h2>
-                <div style="display: flex; gap: 0.5rem;">
+            <div class="perfil-header" style="align-items: end">
+                <h2 class="perfil-titulo" style="border-bottom: none">Medios de Acreditación</h2>
+                <div class="acciones">
                     <a href="{% url 'clientes:cliente_agregar_cuenta_bancaria' cliente.pk %}" class="btn-secundario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                         Agregar Cuenta Bancaria
                     </a>

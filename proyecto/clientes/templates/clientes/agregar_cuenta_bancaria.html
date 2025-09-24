@@ -47,7 +47,9 @@
             <label for="{{ form.nombre_titular.id_for_label }}">Nombre del Titular:</label>
             {{ form.nombre_titular }}
             {% if form.nombre_titular.errors %}
-                <div class="form-errores">{{ form.nombre_titular.errors.0 }}</div>
+                {% for error in form.nombre_titular.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
             {% endif %}
         </div>
 
@@ -55,7 +57,9 @@
             <label for="{{ form.nro_documento.id_for_label }}">Número de Documento:</label>
             {{ form.nro_documento }}
             {% if form.nro_documento.errors %}
-                <div class="form-errores">{{ form.nro_documento.errors.0 }}</div>
+                {% for error in form.nro_documento.errors %}
+                    <div class="mensaje-error">{{ error }}</div>
+                {% endfor %}
             {% endif %}
         </div>
 

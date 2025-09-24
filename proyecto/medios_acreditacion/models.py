@@ -43,8 +43,9 @@ class CuentaBancaria(models.Model):
 
 class Billetera(models.Model):
     TIPO_BILLETERA_CHOICES = [
-        ('tigo_money', 'Tigo Money'),
-        ('billetera_personal', 'Billetera Personal'),
+        ('-------', 'Seleccione un tipo de billetera'),
+        ('tigo', 'Tigo Money'),
+        ('personal', 'Billetera Personal'),
         ('zimple', 'Zimple'),
     ]
     
