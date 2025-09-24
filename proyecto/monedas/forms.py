@@ -77,9 +77,23 @@ class MonedaForm(forms.ModelForm):
         })
     )
 
+    stock = forms.IntegerField(
+        required= True,
+        error_messages={
+            'required': 'Debe ingresar una cantidad de stock'
+        },
+        widget= forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',
+            'type': 'number'
+        })
+
+    )
+
+
     class Meta:
         model = Moneda
-        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta']
+        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'stock']
 
     def clean_simbolo(self):
         """

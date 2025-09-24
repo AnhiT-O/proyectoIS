@@ -167,3 +167,13 @@ STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5500",  # URL donde se sirve tu HTML de pasarela
 ]
+
+# Configuración de monedas del sistema
+# Moneda base del sistema (Guaraní paraguayo)
+MONEDA_BASE_GUARANIES = {
+    'nombre': 'Guaraní',
+    'simbolo': 'PYG',
+    'codigo_iso': 'PYG',
+    'decimales': 0,  # El guaraní no utiliza decimales
+    'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
+}
