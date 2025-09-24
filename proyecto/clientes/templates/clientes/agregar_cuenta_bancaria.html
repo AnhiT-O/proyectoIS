@@ -15,14 +15,19 @@
         <p>Cliente: <strong>{{ cliente.nombre }}</strong></p>
     </div>
 
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
         
         <div class="form-campo">
             <label for="{{ form.banco.id_for_label }}">Banco:</label>
             {{ form.banco }}
+            
             {% if form.banco.errors %}
-                <div class="form-errores">{{ form.banco.errors.0 }}</div>
+                <div class="form-errores">
+                    {% for error in form.banco.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
 
@@ -30,7 +35,11 @@
             <label for="{{ form.numero_cuenta.id_for_label }}">Número de Cuenta:</label>
             {{ form.numero_cuenta }}
             {% if form.numero_cuenta.errors %}
-                <div class="form-errores">{{ form.numero_cuenta.errors.0 }}</div>
+                <div class="form-errores">
+                    {% for error in form.numero_cuenta.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
 

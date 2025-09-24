@@ -6,10 +6,12 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
-<div class="contenido">
+<div class="contenido" style="max-width: 1000px;">
     <div class="detalle-cabecera">
         <h1 class="detalle-nombre">
                 {{ cliente.nombre }}
@@ -133,62 +135,52 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
                 <!-- Cuentas Bancarias -->
                 {% for cuenta in cuentas_bancarias %}
-                <div class="info-celda" style="border-left: 4px solid #007bff; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
-                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                        <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
-                        <div style="flex: 1;">
-                            <div class="info-titulo">Cuenta Bancaria</div>
+                <div class="info-campo">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">Cuenta Bancaria</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta' cuenta.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta cuenta bancaria?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Banco:</strong> {{ cuenta.get_banco_display }}<br>
+                            <strong>Número:</strong> {{ cuenta.numero_cuenta }}<br>
+                            <strong>Titular:</strong> {{ cuenta.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ cuenta.nro_documento }}
                         </div>
                     </div>
-                    
-                    <!-- Información detallada -->
-                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        <div style="margin-bottom: 0.25rem;"><strong>Banco:</strong> {{ cuenta.get_banco_display }}</div>
-                        <div style="margin-bottom: 0.25rem;"><strong>Cuenta:</strong> {{ cuenta.numero_cuenta }}</div>
-                        <div style="margin-bottom: 0.25rem;"><strong>Titular:</strong> {{ cuenta.nombre_titular }}</div>
-                        <div><strong>Documento:</strong> {{ cuenta.nro_documento }}</div>
-                    </div>
-                    
-                    <!-- Botón Eliminar -->
-                    <div>
-                        <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta' cuenta.id %}" onsubmit="return confirm('¿Está seguro de que desea eliminar esta cuenta bancaria?');" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                Eliminar
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <!-- Billeteras -->
-                {% for billetera in billeteras %}
-                <div class="info-celda" style="border-left: 4px solid #ffc107; background: var(--color-fondo-tarjeta); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
-                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                        <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
-                        <div style="flex: 1;">
-                            <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
+                    <!-- Billeteras -->
+                    {% for billetera in billeteras %}
+                    <div class="info-campo" style="border-left: 4px solid #f0de3c;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta billetera?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Teléfono:</strong> {{ billetera.telefono }}<br>
+                            <strong>Titular:</strong> {{ billetera.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ billetera.nro_documento }}
                         </div>
                     </div>
-                    
-                    <!-- Información detallada -->
-                    <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
-                        <div style="margin-bottom: 0.25rem;"><strong>Teléfono:</strong> {{ billetera.telefono }}</div>
-                        <div style="margin-bottom: 0.25rem;"><strong>Titular:</strong> {{ billetera.nombre_titular }}</div>
-                        <div><strong>Documento:</strong> {{ billetera.nro_documento }}</div>
-                    </div>
-                    
-                    <!-- Botón Eliminar -->
-                    <div>
-                        <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" onsubmit="return confirm('¿Está seguro de que desea eliminar esta billetera?');" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                                Eliminar
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
             </div>
         {% else %}
             <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">

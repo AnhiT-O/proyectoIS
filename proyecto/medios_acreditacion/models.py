@@ -2,6 +2,7 @@ from django.db import models
 
 class CuentaBancaria(models.Model):
     BANCO_CHOICES = [
+        ('-------', 'Seleccione un banco'),
         ('ATLAS', 'Banco Atlas'),
         ('BANCOP', 'BANCOP'),
         ('BASA', 'Banco Basa'),
