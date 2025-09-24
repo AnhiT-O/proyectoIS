@@ -94,6 +94,12 @@ def moneda_lista(request):
             
             estado_texto = "activada" if moneda.activa else "desactivada"
             messages.success(request, f'Moneda "{moneda.nombre}" {estado_texto} exitosamente.')
+            
+            # Comprobar si hay un parámetro next para redirección
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
+                
         except Exception as e:
             messages.error(request, 'Error al cambiar el estado de la moneda.')
     
@@ -153,6 +159,22 @@ def moneda_editar(request, pk):
         else:
             messages.error(request, 'Error al actualizar la moneda.')
     return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})
+
+@login_required
+@tiene_algun_permiso
+def moneda_detalle(request, pk):
+    """Vista para mostrar los detalles completos de una moneda"""
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Calcular precios sin beneficios (cliente None)
+    precios = moneda.get_precios_cliente(None)
+    
+    context = {
+        'moneda': moneda,
+        'precio_compra': precios['precio_compra'],
+        'precio_venta': precios['precio_venta'],
+    }
+    return render(request, 'monedas/moneda_detalles.html', context)
 
 
 # ============================================================================

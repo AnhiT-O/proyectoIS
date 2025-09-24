@@ -72,7 +72,7 @@
                             <form method="post" style="display: inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="accion" value="seleccionar_medio">
-                                <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
+                                <input type="hidden" name="medio_pago_id" value="{{ medio_cliente }}">
                                 <button type="submit" class="btn-activar" 
                                         onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
                                     Seleccionar
