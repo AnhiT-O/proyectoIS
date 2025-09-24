@@ -42,6 +42,14 @@
             {% endif %}
         </div>
 
+        <div class="form-campo">
+            <label for="{{ form.nro_documento.id_for_label }}">Número de Documento:</label>
+            {{ form.nro_documento }}
+            {% if form.nro_documento.errors %}
+                <div class="form-errores">{{ form.nro_documento.errors.0 }}</div>
+            {% endif %}
+        </div>
+
         <div style="display: flex; gap: 1rem; margin-top: 2rem;">
             <button type="submit" class="btn-enviar">Guardar</button>
             <a href="{{ cancelar_url }}" class="btn-atras">Cancelar</a>

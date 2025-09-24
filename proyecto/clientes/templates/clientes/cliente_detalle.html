@@ -145,7 +145,8 @@
                     <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
                         <div style="margin-bottom: 0.25rem;"><strong>Banco:</strong> {{ cuenta.get_banco_display }}</div>
                         <div style="margin-bottom: 0.25rem;"><strong>Cuenta:</strong> {{ cuenta.numero_cuenta }}</div>
-                        <div><strong>Titular:</strong> {{ cuenta.nombre_titular }}</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>Titular:</strong> {{ cuenta.nombre_titular }}</div>
+                        <div><strong>Documento:</strong> {{ cuenta.nro_documento }}</div>
                     </div>
                     
                     <!-- Botón Eliminar -->
@@ -173,9 +174,9 @@
                     <!-- Información detallada -->
                     <div style="color: var(--color-texto-secundario); font-size: 0.875rem; line-height: 1.4; margin-bottom: 1rem;">
                         <div style="margin-bottom: 0.25rem;"><strong>Tipo:</strong> {{ billetera.get_tipo_billetera_display }}</div>
-                        <div style="margin-bottom: 0.25rem;"><strong>Número:</strong> {{ billetera.numero_billetera }}</div>
+                        <div style="margin-bottom: 0.25rem;"><strong>Teléfono:</strong> {{ billetera.telefono }}</div>
                         <div style="margin-bottom: 0.25rem;"><strong>Titular:</strong> {{ billetera.nombre_titular }}</div>
-                        <div><strong>CI:</strong> {{ billetera.ci }}</div>
+                        <div><strong>Documento:</strong> {{ billetera.nro_documento }}</div>
                     </div>
                     
                     <!-- Botón Eliminar -->

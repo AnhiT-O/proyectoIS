@@ -30,11 +30,15 @@ class CuentaBancaria(models.Model):
     )
     numero_cuenta = models.CharField(max_length=30)
     nombre_titular = models.CharField(max_length=100)
+    nro_documento = models.CharField(max_length=20)
     cliente = models.ForeignKey(
         'clientes.Cliente',
         on_delete=models.CASCADE,
         related_name='cuentas_bancarias'
     )
+    class Meta:
+        db_table = 'cuenta_bancaria'
+
 
 class Billetera(models.Model):
     TIPO_BILLETERA_CHOICES = [
@@ -47,11 +51,13 @@ class Billetera(models.Model):
         max_length=30,
         choices=TIPO_BILLETERA_CHOICES
     )
-    numero_billetera = models.CharField(max_length=30)
+    telefono = models.CharField(max_length=30)
     nombre_titular = models.CharField(max_length=100)
-    ci = models.CharField(max_length=20)
+    nro_documento = models.CharField(max_length=20)
     cliente = models.ForeignKey(
         'clientes.Cliente',
         on_delete=models.CASCADE,
         related_name='billeteras'
     )
+    class Meta:
+        db_table = 'billetera'

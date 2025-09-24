@@ -104,7 +104,8 @@
                         <div class="info-valor">
                             <strong>Banco:</strong> {{ cuenta.get_banco_display }}<br>
                             <strong>Número:</strong> {{ cuenta.numero_cuenta }}<br>
-                            <strong>Titular:</strong> {{ cuenta.nombre_titular }}
+                            <strong>Titular:</strong> {{ cuenta.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ cuenta.nro_documento }}
                         </div>
                     </div>
                     {% endfor %}
@@ -126,9 +127,9 @@
                             </form>
                         </div>
                         <div class="info-valor">
-                            <strong>Número:</strong> {{ billetera.numero_billetera }}<br>
+                            <strong>Teléfono:</strong> {{ billetera.telefono }}<br>
                             <strong>Titular:</strong> {{ billetera.nombre_titular }}<br>
-                            <strong>CI:</strong> {{ billetera.ci }}
+                            <strong>Documento:</strong> {{ billetera.nro_documento }}
                         </div>
                     </div>
                     {% endfor %}

@@ -204,9 +204,9 @@ def cliente_agregar_billetera(request, pk):
             billetera_existente = Billetera.objects.filter(
                 cliente=cliente,
                 tipo_billetera=billetera.tipo_billetera,
-                numero_billetera=billetera.numero_billetera,
+                telefono=billetera.telefono,
                 nombre_titular=billetera.nombre_titular,
-                ci=billetera.ci
+                nro_documento=billetera.nro_documento
             ).first()
             
             if billetera_existente:
@@ -244,7 +244,7 @@ def cliente_eliminar_medio_acreditacion(request, pk, tipo, medio_id):
             descripcion = f'Cuenta {medio.banco} - {medio.numero_cuenta}'
         elif tipo == 'billetera':
             medio = get_object_or_404(Billetera, id=medio_id, cliente=cliente)
-            descripcion = f'Billetera {medio.get_tipo_billetera_display()} - {medio.numero_billetera}'
+            descripcion = f'Billetera {medio.get_tipo_billetera_display()} - {medio.telefono}'
         else:
             messages.error(request, 'Tipo de medio de acreditación no válido.')
             return get_cliente_detalle_redirect(request, cliente.pk)

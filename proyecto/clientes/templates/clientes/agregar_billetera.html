@@ -27,10 +27,10 @@
         </div>
 
         <div class="form-campo">
-            <label for="{{ form.numero_billetera.id_for_label }}">Número de Teléfono:</label>
-            {{ form.numero_billetera }}
-            {% if form.numero_billetera.errors %}
-                <div class="form-errores">{{ form.numero_billetera.errors.0 }}</div>
+            <label for="{{ form.telefono.id_for_label }}">Número de Teléfono:</label>
+            {{ form.telefono }}
+            {% if form.telefono.errors %}
+                <div class="form-errores">{{ form.telefono.errors.0 }}</div>
             {% endif %}
         </div>
 
@@ -43,10 +43,10 @@
         </div>
 
         <div class="form-campo">
-            <label for="{{ form.ci.id_for_label }}">CI del Titular:</label>
-            {{ form.ci }}
-            {% if form.ci.errors %}
-                <div class="form-errores">{{ form.ci.errors.0 }}</div>
+            <label for="{{ form.nro_documento.id_for_label }}">Número de Documento:</label>
+            {{ form.nro_documento }}
+            {% if form.nro_documento.errors %}
+                <div class="form-errores">{{ form.nro_documento.errors.0 }}</div>
             {% endif %}
         </div>
 
