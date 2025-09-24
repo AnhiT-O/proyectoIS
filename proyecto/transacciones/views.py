@@ -105,11 +105,7 @@ def compra_medio_pago(request):
             # Actualizar el paso actual y continuar al siguiente paso
             compra_datos['paso_actual'] = 3
             request.session['compra_datos'] = compra_datos
-            
-            messages.success(request, 'Continuando al siguiente paso...')
-            # Aquí redirigiríamos al siguiente paso (paso 3)
-            # return redirect('transacciones:compra_medio_cobro')
-            return redirect('transacciones:compra_medio_pago')  # Por ahora redirijo al mismo paso
+            return redirect('transacciones:compra_medio_cobro')
     
     medios_pago_disponibles = [
         'Efectivo',
@@ -139,6 +135,69 @@ def compra_medio_pago(request):
     }
     
     return render(request, 'transacciones/seleccion_medio_pago.html', context)
+
+@login_required
+def compra_medio_cobro(request):
+    """
+    Vista para el tercer paso del proceso de compra.
+    Permite seleccionar el medio de cobro del cliente activo para realizar el pago.
+    """
+    # Verificar que el usuario tenga un cliente activo
+    if not request.user.cliente_activo:
+        messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
+        return redirect('inicio')
+    # Verificar que existan datos del paso anterior
+    compra_datos = request.session.get('compra_datos')
+    if not compra_datos or compra_datos.get('paso_actual') != 3:
+        messages.error(request, 'Debe completar el segundo paso antes de continuar.')
+        return redirect('transacciones:compra_medio_pago')
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=compra_datos['moneda'])
+        monto = Decimal(compra_datos['monto'])
+        medio_pago = compra_datos['medio_pago']
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:compra_monto_moneda')
+    
+    return render(request, 'transacciones/seleccion_medio_cobro.html')
+
+@login_required
+def compra_confirmacion(request):
+    """
+    Vista para el último paso del proceso de compra.
+    Muestra un resumen de la transacción antes de confirmarla.
+    """
+    # Verificar que el usuario tenga un cliente activo
+    if not request.user.cliente_activo:
+        messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
+        return redirect('inicio')
+    # Verificar que existan datos del paso anterior
+    compra_datos = request.session.get('compra_datos')
+    if not compra_datos or compra_datos.get('paso_actual') != 3:
+        messages.error(request, 'Debe completar el tercer paso antes de continuar.')
+        return redirect('transacciones:compra_medio_cobro')
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=compra_datos['moneda'])
+        monto = Decimal(compra_datos['monto'])
+        medio_pago = compra_datos['medio_pago']
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:compra_monto_moneda')
+    
+    return render(request, 'transacciones/confirmacion.html')
+
+@login_required
+def compra_exito(request):
+    """
+    Vista que muestra el mensaje de éxito tras completar la compra.
+    """
+    # Limpiar los datos de la sesión relacionados con la compra
+    if 'compra_datos' in request.session:
+        del request.session['compra_datos']
+    
+    return render(request, 'transacciones/exito.html')
 
 # PROCESO DE VENTA
 
@@ -237,11 +296,7 @@ def venta_medio_pago(request):
             # Actualizar el paso actual y continuar al siguiente paso
             venta_datos['paso_actual'] = 3
             request.session['venta_datos'] = venta_datos
-            
-            messages.success(request, 'Continuando al siguiente paso...')
-            # Aquí redirigiríamos al siguiente paso (paso 3)
-            # return redirect('transacciones:venta_medio_cobro')
-            return redirect('transacciones:venta_medio_pago')  # Por ahora redirijo al mismo paso
+            return redirect('transacciones:venta_medio_cobro')
     
     medios_pago_disponibles = [
         'Efectivo',
@@ -268,3 +323,66 @@ def venta_medio_pago(request):
     }
     
     return render(request, 'transacciones/seleccion_medio_pago.html', context)
+
+@login_required
+def venta_medio_cobro(request):
+    """
+    Vista para el tercer paso del proceso de venta.
+    Permite seleccionar el medio de cobro del cliente activo para realizar el pago.
+    """
+    # Verificar que el usuario tenga un cliente activo
+    if not request.user.cliente_activo:
+        messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
+        return redirect('inicio')
+    # Verificar que existan datos del paso anterior
+    venta_datos = request.session.get('venta_datos')
+    if not venta_datos or venta_datos.get('paso_actual') != 3:
+        messages.error(request, 'Debe completar el segundo paso antes de continuar.')
+        return redirect('transacciones:venta_medio_pago')
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=venta_datos['moneda'])
+        monto = Decimal(venta_datos['monto'])
+        medio_pago = venta_datos['medio_pago']
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:venta_monto_moneda')
+    
+    return render(request, 'transacciones/seleccion_medio_cobro.html')
+
+@login_required
+def venta_confirmacion(request):
+    """
+    Vista para el último paso del proceso de venta.
+    Muestra un resumen de la transacción antes de confirmarla.
+    """
+    # Verificar que el usuario tenga un cliente activo
+    if not request.user.cliente_activo:
+        messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
+        return redirect('inicio')
+    # Verificar que existan datos del paso anterior
+    venta_datos = request.session.get('venta_datos')
+    if not venta_datos or venta_datos.get('paso_actual') != 3:
+        messages.error(request, 'Debe completar el tercer paso antes de continuar.')
+        return redirect('transacciones:venta_medio_cobro')
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=venta_datos['moneda'])
+        monto = Decimal(venta_datos['monto'])
+        medio_pago = venta_datos['medio_pago']
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:venta_monto_moneda')
+    
+    return render(request, 'transacciones/confirmacion.html')
+
+@login_required
+def venta_exito(request):
+    """
+    Vista que muestra el mensaje de éxito tras completar la venta.
+    """
+    # Limpiar los datos de la sesión relacionados con la venta
+    if 'venta_datos' in request.session:
+        del request.session['venta_datos']
+
+    return render(request, 'transacciones/exito.html')

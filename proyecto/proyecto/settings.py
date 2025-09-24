@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'clientes',
     'roles',
     'monedas',
-    'transacciones'
+    'transacciones',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
 
 # Configuración de internacionalización
@@ -160,3 +163,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2GvbbBBNVzYHjiA6YaF4KAXeSnvjsO2LY7d0VwJm00WsPp8Oxu'
 STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5500",  # URL donde se sirve tu HTML de pasarela
+]

@@ -44,7 +44,7 @@ COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
 --
 
 COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, id_stripe, created_at, updated_at) FROM stdin;
-Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	\N	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
+Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	cus_T6oluR2pptn5i1	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
 Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	\N	2025-09-20 12:27:38.687681-03	2025-09-20 12:27:38.687718-03
 Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	\N	2025-09-20 12:29:50.697586-03	2025-09-20 12:29:50.697627-03
 Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	\N	2025-09-20 12:30:54.408672-03	2025-09-20 12:30:54.408708-03
