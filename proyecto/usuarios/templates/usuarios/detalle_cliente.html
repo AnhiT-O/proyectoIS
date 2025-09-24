@@ -67,9 +67,14 @@
                 </div>
             </div>
         </div>
-        {% if tarjetas_stripe %}
         <div class="perfil-info">
-            <h2 class="perfil-titulo">Tarjetas de crédito</h2>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px">
+                <h2 class="perfil-titulo" style="margin: 0; border-bottom: none; padding-bottom: 0;">Tarjetas de Crédito</h2>
+                <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-primario" style="padding:0.5rem 1rem">
+                    Agregar Tarjeta
+                </a>
+            </div>
+            {% if tarjetas_stripe %}
             <div class="lista-clientes">
                 {% for tarjeta in tarjetas_stripe %}
                     <div class="cliente">
@@ -82,15 +87,24 @@
                                     | Expira: {{ tarjeta.exp_month }}/{{ tarjeta.exp_year }}
                                 </small>
                             </div>
-                            {% if tarjeta.default %}
-                            <span class="etiqueta-activo" style="align-self: center; margin-left: 10px;">Predeterminada</span>
-                            {% endif %}
+                            <div class="acciones-tarjeta" style="margin-left: 10px;">
+                                <form method="post" action="{% url 'usuarios:eliminar_tarjeta_cliente' cliente.pk tarjeta.id %}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-desactivar" title="Eliminar tarjeta">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <p style="color: #6c757d; margin-bottom: 15px;">Este cliente no tiene tarjetas registradas.</p>
+            {% endif %}
         </div>
-        {% endif %}
         <div class="zona-acciones">
         <a href="{% url 'usuarios:mis_clientes' %}" class="btn-secundario">
             Volver a Mis Clientes

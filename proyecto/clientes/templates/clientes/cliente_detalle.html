@@ -89,11 +89,6 @@
                         <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="seccion-info">
-            <div class="info-columna">
                 <div class="info-celda">
                     <span class="info-icono">📝</span>
                     <div class="info-contenido">
@@ -112,26 +107,35 @@
                     </div>
                 </div>
             </div>
-            <div class="info-columna">
-                <div class="info-celda">
-                    <span class="info-icono">💳</span>
-                    <div class="info-contenido">
-                        <div class="info-titulo">ID de Stripe</div>
-                        <div class="info-valor">
-                            {% if cliente.id_stripe %}
-                                <div class="info-valor">
-                                    {{ cliente.id_stripe }}
+        </div>
+        {% if tarjetas_stripe %}
+        <div class="info-columna" style="grid-column: 1 / -1;">
+            <div class="info-celda">
+                <span class="info-icono">💳</span>
+                <div class="info-contenido">
+                    <div class="info-titulo">Tarjetas de Crédito ({{ total_tarjetas }})</div>
+                    <div class="info-valor">
+                        <div class="lista-clientes">
+                            {% for tarjeta in tarjetas_stripe %}
+                                <div class="cliente">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div style="flex: 1;">
+                                            <strong>**** **** **** {{ tarjeta.last4 }}</strong>
+                                            <br>
+                                            <small style="color: #6c757d;">
+                                                Marca: {{ tarjeta.brand|title }} 
+                                                | Expira: {{ tarjeta.exp_month }}/{{ tarjeta.exp_year }}
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
-                            {% else %}
-                                <span class="etiqueta-bloqueado">
-                                    No Vinculado
-                                </span>
-                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>   
     <div class="zona-acciones">
         <div class="acciones-contenido">

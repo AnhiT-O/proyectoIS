@@ -1,7 +1,11 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Cliente
+from django.conf import settings
 import stripe
+
+# Configurar Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class ClienteForm(forms.ModelForm):
 
@@ -134,3 +138,69 @@ class ClienteForm(forms.ModelForm):
             except Exception as e:
                 raise ValidationError(f'Error al validar el ID de Stripe: {str(e)}')
         return id_stripe
+
+
+class AgregarTarjetaForm(forms.Form):
+    """
+    Formulario para agregar una tarjeta de crédito a un cliente usando Stripe Elements
+    """
+    stripe_token = forms.CharField(
+        widget=forms.HiddenInput(),
+        error_messages={
+            'required': 'Token de Stripe requerido.'
+        }
+    )
+    
+    def __init__(self, *args, **kwargs):
+        self.cliente = kwargs.pop('cliente', None)
+        super().__init__(*args, **kwargs)
+    
+    def clean_stripe_token(self):
+        """
+        Valida que el token de Stripe sea válido
+        """
+        token = self.cleaned_data.get('stripe_token')
+        if not token:
+            raise ValidationError('Token de Stripe inválido.')
+        return token
+    
+    def save(self):
+        """
+        Procesa el token y agrega la tarjeta al cliente en Stripe
+        """
+        if not self.cliente:
+            raise ValidationError('Cliente no especificado.')
+        
+        token = self.cleaned_data['stripe_token']
+        
+        try:
+            # Si el cliente no tiene ID de Stripe, crearlo primero
+            if not self.cliente.id_stripe:
+                stripe_customer = stripe.Customer.create(
+                    name=self.cliente.nombre,
+                    email=self.cliente.correoElecCliente,
+                    phone=self.cliente.telefono,
+                    description=f"Cliente {self.cliente.docCliente}"
+                )
+                self.cliente.id_stripe = stripe_customer.id
+                self.cliente.save()
+            
+            # Crear el método de pago desde el token
+            payment_method = stripe.PaymentMethod.create(
+                type='card',
+                card={'token': token}
+            )
+            
+            # Adjuntar el método de pago al cliente
+            payment_method.attach(customer=self.cliente.id_stripe)
+            
+            return payment_method
+            
+        except stripe.error.CardError as e:
+            raise ValidationError(f'Error con la tarjeta: {e.user_message}')
+        except stripe.error.InvalidRequestError as e:
+            raise ValidationError(f'Error en la solicitud: {str(e)}')
+        except stripe.error.StripeError as e:
+            raise ValidationError(f'Error de Stripe: {str(e)}')
+        except Exception as e:
+            raise ValidationError(f'Error inesperado: {str(e)}')

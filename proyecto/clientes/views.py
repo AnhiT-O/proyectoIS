@@ -4,8 +4,15 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
+from django.conf import settings
 from .models import Cliente
-from .forms import ClienteForm
+from .forms import ClienteForm, AgregarTarjetaForm
+import stripe
+import logging
+
+# Configurar Stripe y logging
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 def verificar_acceso_cliente(user, cliente):
     """
@@ -95,13 +102,16 @@ def cliente_detalle(request, pk):
     """Vista de detalle del cliente - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
+    tarjetas_stripe = cliente.obtener_tarjetas_stripe()
     # Verificar acceso híbrido (admin o usuario asociado)
     if not verificar_acceso_cliente(request.user, cliente):
         messages.error(request, 'No tienes permisos para ver este cliente.')
         return redirect('inicio')
     
     context = {
-        'cliente': cliente
+        'cliente': cliente,
+        'tarjetas_stripe': tarjetas_stripe,
+        'total_tarjetas': len(tarjetas_stripe)
     }
     return render(request, 'clientes/cliente_detalle.html', context)
 
@@ -118,3 +128,67 @@ def cliente_editar(request, pk):
     else:
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/cliente_form.html', {'form': form, 'cliente': cliente})
+
+
+@login_required
+def agregar_tarjeta(request, pk):
+    """Vista para agregar tarjeta de crédito a un cliente - Acceso híbrido"""
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar las tarjetas de este cliente.')
+        return redirect('inicio')
+    
+    if request.method == 'POST':
+        form = AgregarTarjetaForm(request.POST, cliente=cliente)
+        if form.is_valid():
+            try:
+                payment_method = form.save()
+                messages.success(request, 'Tarjeta agregada exitosamente.')
+                
+                # Determinar la URL de redirección según el tipo de usuario
+                return get_cliente_detalle_redirect(request, pk)
+                
+            except Exception as e:
+                messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
+    else:
+        form = AgregarTarjetaForm(cliente=cliente)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'clientes/agregar_tarjeta.html', context)
+
+
+@login_required
+def eliminar_tarjeta(request, pk, payment_method_id):
+    """Vista para eliminar tarjeta de crédito de un cliente - Acceso híbrido"""
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('inicio')
+    
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar las tarjetas de este cliente.')
+        return redirect('inicio')
+    
+    try:
+        # Desadjuntar el método de pago del cliente
+        stripe.PaymentMethod.detach(payment_method_id)
+        messages.success(request, 'Tarjeta eliminada exitosamente.')
+        
+    except stripe.error.InvalidRequestError:
+        messages.error(request, 'La tarjeta no existe o ya fue eliminada.')
+    except stripe.error.StripeError as e:
+        messages.error(request, f'Error al eliminar la tarjeta: {str(e)}')
+    except Exception as e:
+        logger.error(f"Error inesperado al eliminar tarjeta: {str(e)}")
+        messages.error(request, 'Error inesperado al eliminar la tarjeta.')
+    
+    # Determinar la URL de redirección según el tipo de usuario
+    return get_cliente_detalle_redirect(request, pk)

@@ -179,3 +179,36 @@
     color: #9ca3af;
     font-style: italic;
 }
+
+/* Estilos para botones de gestión de tarjetas */
+.btn-eliminar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+}
+
+.btn-eliminar:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-eliminar:active {
+    transform: translateY(0);
+}
+
+.acciones-tarjeta {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}

@@ -567,3 +567,72 @@ def detalle_cliente(request, cliente_id):
     except Cliente.DoesNotExist:
         messages.error(request, 'Cliente no encontrado o no autorizado.')
         return redirect('usuarios:mis_clientes')
+
+
+@login_required
+def agregar_tarjeta_cliente(request, pk):
+    """Vista para que un operador agregue tarjeta de crédito a su cliente asignado"""
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    # Importar el formulario aquí para evitar dependencia circular
+    from clientes.forms import AgregarTarjetaForm
+    
+    if request.method == 'POST':
+        form = AgregarTarjetaForm(request.POST, cliente=cliente)
+        if form.is_valid():
+            try:
+                payment_method = form.save()
+                messages.success(request, 'Tarjeta agregada exitosamente.')
+                return redirect('usuarios:detalle_cliente', cliente_id=pk)
+                
+            except Exception as e:
+                messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
+    else:
+        form = AgregarTarjetaForm(cliente=cliente)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'clientes/agregar_tarjeta.html', context)
+
+
+@login_required
+def eliminar_tarjeta_cliente(request, pk, payment_method_id):
+    """Vista para que un operador elimine tarjeta de crédito de su cliente asignado"""
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:mis_clientes')
+    
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    import stripe
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Desadjuntar el método de pago del cliente
+        stripe.PaymentMethod.detach(payment_method_id)
+        messages.success(request, 'Tarjeta eliminada exitosamente.')
+        
+    except stripe.error.InvalidRequestError:
+        messages.error(request, 'La tarjeta no existe o ya fue eliminada.')
+    except stripe.error.StripeError as e:
+        messages.error(request, f'Error al eliminar la tarjeta: {str(e)}')
+    except Exception as e:
+        logger.error(f"Error inesperado al eliminar tarjeta: {str(e)}")
+        messages.error(request, 'Error inesperado al eliminar la tarjeta.')
+    
+    return redirect('usuarios:detalle_cliente', cliente_id=pk)
