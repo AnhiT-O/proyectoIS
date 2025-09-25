@@ -642,10 +642,10 @@ def editar_recargos(request):
                         return redirect('transacciones:editar_recargos')
             
             if recargos_actualizados > 0:
-                messages.success(request, f'Se actualizaron {recargos_actualizados} recargos correctamente.')
+                messages.success(request, f'Se actualizaron los recargos correctamente.')
             else:
                 messages.warning(request, 'No se actualizó ningún recargo.')
-            return redirect('transacciones:editar_recargos')
+            return redirect('monedas:listar_limites')
             
         except Exception as e:
             messages.error(request, f'Error al procesar los recargos: {str(e)}')

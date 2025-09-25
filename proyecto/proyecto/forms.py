@@ -163,7 +163,12 @@ class SimuladorForm(forms.Form):
                 recargo_obj = Recargos.objects.get(id=recargo_id)
                 if recargo_obj.recargo > 0:
                     # Convertir porcentaje a decimal (ej: 1% -> 1.01, 2% -> 1.02)
-                    multiplicador_recargo = Decimal('1') + (Decimal(str(recargo_obj.recargo)) / Decimal('100'))
+                    if operacion == 'venta':
+                        # Para venta, el recargo reduce el monto recibido
+                        multiplicador_recargo = Decimal('1') - (Decimal(str(recargo_obj.recargo)) / Decimal('100'))
+                    else:  # compra
+                        # Para compra, el recargo aumenta el monto a pagar
+                        multiplicador_recargo = Decimal('1') + (Decimal(str(recargo_obj.recargo)) / Decimal('100'))
                     resultado = resultado * multiplicador_recargo
                     recargo_aplicado = True
                     porcentaje_recargo = float(recargo_obj.recargo)
