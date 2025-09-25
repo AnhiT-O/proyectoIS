@@ -13,14 +13,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import stripe
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde el archivo .env en el directorio del proyecto Django
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-h7ll7v=(-+-galb%dh7_ev1ig+3is*a30q2wv%moa@1f3-cv9y'
@@ -45,7 +47,8 @@ INSTALLED_APPS = [
     'roles',
     'monedas',
     'transacciones',
-    'corsheaders'
+    'corsheaders',
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [

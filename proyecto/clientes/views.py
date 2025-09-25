@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Q
-from django.http import JsonResponse
-from django.urls import reverse
 from django.conf import settings
 from .models import Cliente
 from .forms import ClienteForm, AgregarTarjetaForm
+from medios_acreditacion.models import CuentaBancaria, Billetera
+from medios_acreditacion.forms import CuentaBancariaForm, BilleteraForm
 import stripe
 import logging
 
@@ -42,6 +42,23 @@ def get_cliente_detalle_url(request, cliente_pk):
         return f'/usuarios/cliente/{cliente_pk}/'
     else:
         return f'/clientes/{cliente_pk}/'
+
+def procesar_medios_acreditacion_cliente(cliente, usuario):
+    """
+    Función auxiliar para procesar los medios de acreditación de un cliente
+    """
+    # Determinar si es administrador
+    es_administrador = usuario.has_perm('clientes.gestion')
+    
+    # Obtener medios de acreditación
+    cuentas_bancarias = cliente.cuentas_bancarias.all()
+    billeteras = cliente.billeteras.all()
+    
+    return {
+        'es_administrador': es_administrador,
+        'cuentas_bancarias': cuentas_bancarias,
+        'billeteras': billeteras,
+    }
 
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
@@ -108,6 +125,9 @@ def cliente_detalle(request, pk):
         messages.error(request, 'No tienes permisos para ver este cliente.')
         return redirect('inicio')
     
+    # Usar función auxiliar para procesar medios de acreditación
+    medios_data = procesar_medios_acreditacion_cliente(cliente, request.user)
+    
     context = {
         'cliente': cliente,
         'tarjetas_stripe': tarjetas_stripe,
@@ -143,15 +163,66 @@ def agregar_tarjeta(request, pk):
     if request.method == 'POST':
         form = AgregarTarjetaForm(request.POST, cliente=cliente)
         if form.is_valid():
-            try:
-                payment_method = form.save()
-                messages.success(request, 'Tarjeta agregada exitosamente.')
+            numero_cuenta = form.cleaned_data['numero_cuenta']
+            
+            # Buscar si existe una cuenta con EXACTAMENTE los mismos datos
+            cuenta_existente = MedioPagoCliente.objects.filter(
+                cliente=cliente,
+                medio_pago__tipo='transferencia',
+                numero_cuenta=numero_cuenta,
+                nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
+                banco=form.cleaned_data.get('banco', ''),
+                tipo_cuenta=form.cleaned_data.get('tipo_cuenta', '')
+            ).first()
+            
+            if cuenta_existente:
+                # Si existe con exactamente los mismos datos pero está inactiva, reactivarla
+                if not cuenta_existente.activo or cuenta_existente.is_deleted:
+                    cuenta_existente.activo = True
+                    cuenta_existente.is_deleted = False
+                    cuenta_existente.save()
+                    
+                    messages.success(request, 'Cuenta bancaria agregada exitosamente.')
+                else:
+                    messages.warning(request, 'Esta cuenta bancaria ya está activa y asociada al cliente.')
+            else:
+                # Verificar si existe una cuenta con el mismo número pero datos diferentes
+                cuenta_mismo_numero = MedioPagoCliente.objects.filter(
+                    cliente=cliente,
+                    medio_pago__tipo='transferencia',
+                    numero_cuenta=numero_cuenta
+                ).first()
                 
-                # Determinar la URL de redirección según el tipo de usuario
-                return get_cliente_detalle_redirect(request, pk)
+                if cuenta_mismo_numero:
+                    messages.error(request, 'Ya existe una cuenta con este número pero con datos diferentes. Si desea cambiar los datos, primero debe eliminar la cuenta anterior.')
+                    return render(request, 'clientes/cliente_agregar_cuenta.html', {
+                        'form': form,
+                        'cliente': cliente,
+                        'titulo': 'Agregar Cuenta Bancaria',
+                        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
+                    })
                 
-            except Exception as e:
-                messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
+                # Obtener o crear el medio de pago tipo transferencia
+                medio_pago_transferencia, created = MedioPago.objects.get_or_create(
+                    tipo='transferencia',
+                    defaults={'activo': True}
+                )
+                
+                # Crear un nuevo registro en la tabla intermedia
+                MedioPagoCliente.objects.create(
+                    cliente=cliente,
+                    medio_pago=medio_pago_transferencia,
+                    numero_cuenta=numero_cuenta,
+                    nombre_titular_cuenta=form.cleaned_data['nombre_titular_cuenta'],
+                    banco=form.cleaned_data.get('banco', ''),
+                    tipo_cuenta=form.cleaned_data.get('tipo_cuenta', ''),
+                    activo=True,
+                    is_deleted=False
+                )
+                
+                messages.success(request, 'Cuenta bancaria agregada exitosamente.')
+            
+            return get_cliente_detalle_redirect(request, cliente.pk)
     else:
         form = AgregarTarjetaForm(cliente=cliente)
     
@@ -160,8 +231,48 @@ def agregar_tarjeta(request, pk):
         'cliente': cliente,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
     }
-    return render(request, 'clientes/agregar_tarjeta.html', context)
+    return render(request, 'clientes/cliente_agregar_cuenta.html', context)
 
+def cliente_agregar_cuenta_bancaria(request, pk):
+    """Vista para agregar una cuenta bancaria al cliente - Acceso híbrido"""
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar este cliente.')
+        return redirect('inicio')
+    
+    if request.method == 'POST':
+        form = CuentaBancariaForm(request.POST)
+        if form.is_valid():
+            cuenta_bancaria = form.save(commit=False)
+            cuenta_bancaria.cliente = cliente
+            
+            # Verificar si ya existe una cuenta con los mismos datos
+            cuenta_existente = CuentaBancaria.objects.filter(
+                cliente=cliente,
+                banco=cuenta_bancaria.banco,
+                numero_cuenta=cuenta_bancaria.numero_cuenta,
+                nombre_titular=cuenta_bancaria.nombre_titular
+            ).first()
+            
+            if cuenta_existente:
+                messages.warning(request, 'Ya existe una cuenta bancaria con estos datos para este cliente.')
+            else:
+                cuenta_bancaria.save()
+                messages.success(request, 'Cuenta bancaria agregada exitosamente.')
+            
+            return get_cliente_detalle_redirect(request, cliente.pk)
+    else:
+        form = CuentaBancariaForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'titulo': 'Agregar Cuenta Bancaria',
+        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
+    }
+    return render(request, 'clientes/agregar_cuenta_bancaria.html', context)
 
 @login_required
 def eliminar_tarjeta(request, pk, payment_method_id):
@@ -170,25 +281,86 @@ def eliminar_tarjeta(request, pk, payment_method_id):
         messages.error(request, 'Método no permitido.')
         return redirect('inicio')
     
+    medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
+    
+    # Cambiar el estado
+    medio_pago_cliente.activo = not medio_pago_cliente.activo
+    medio_pago_cliente.save()
+    
+    estado = 'activado' if medio_pago_cliente.activo else 'desactivado'
+    messages.success(request, f'Medio de pago {estado} exitosamente.')
+    
+    return redirect('clientes:cliente_detalle', pk=pk)
+
+
+@login_required
+def cliente_eliminar_medio_acreditacion(request, pk, tipo, medio_id):
+    """Vista para eliminar un medio de acreditación (cuenta bancaria o billetera) - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
     if not verificar_acceso_cliente(request.user, cliente):
-        messages.error(request, 'No tienes permisos para gestionar las tarjetas de este cliente.')
+        messages.error(request, 'No tienes permisos para gestionar este cliente.')
         return redirect('inicio')
     
-    try:
-        # Desadjuntar el método de pago del cliente
-        stripe.PaymentMethod.detach(payment_method_id)
-        messages.success(request, 'Tarjeta eliminada exitosamente.')
+    if request.method == 'POST':
+        if tipo == 'cuenta':
+            medio = get_object_or_404(CuentaBancaria, id=medio_id, cliente=cliente)
+            descripcion = f'Cuenta {medio.banco} - {medio.numero_cuenta}'
+        elif tipo == 'billetera':
+            medio = get_object_or_404(Billetera, id=medio_id, cliente=cliente)
+            descripcion = f'Billetera {medio.get_tipo_billetera_display()} - {medio.telefono}'
+        else:
+            messages.error(request, 'Tipo de medio de acreditación no válido.')
+            return get_cliente_detalle_redirect(request, cliente.pk)
         
-    except stripe.error.InvalidRequestError:
-        messages.error(request, 'La tarjeta no existe o ya fue eliminada.')
-    except stripe.error.StripeError as e:
-        messages.error(request, f'Error al eliminar la tarjeta: {str(e)}')
-    except Exception as e:
-        logger.error(f"Error inesperado al eliminar tarjeta: {str(e)}")
-        messages.error(request, 'Error inesperado al eliminar la tarjeta.')
+        medio.delete()
+        messages.success(request, f'{descripcion} eliminado exitosamente.')
+        
+        return get_cliente_detalle_redirect(request, cliente.pk)
     
-    # Determinar la URL de redirección según el tipo de usuario
-    return get_cliente_detalle_redirect(request, pk)
+    # Solo aceptar POST
+    messages.error(request, 'Acción no permitida.')
+    return get_cliente_detalle_redirect(request, cliente.pk)
+
+def cliente_agregar_billetera(request, pk):
+    """Vista para agregar una billetera electrónica al cliente - Acceso híbrido"""
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar este cliente.')
+        return redirect('inicio')
+    
+    if request.method == 'POST':
+        form = BilleteraForm(request.POST)
+        if form.is_valid():
+            billetera = form.save(commit=False)
+            billetera.cliente = cliente
+            
+            # Verificar si ya existe una billetera con los mismos datos
+            billetera_existente = Billetera.objects.filter(
+                cliente=cliente,
+                tipo_billetera=billetera.tipo_billetera,
+                telefono=billetera.telefono,
+                nombre_titular=billetera.nombre_titular,
+                nro_documento=billetera.nro_documento
+            ).first()
+            
+            if billetera_existente:
+                messages.warning(request, 'Ya existe una billetera con estos datos para este cliente.')
+            else:
+                billetera.save()
+                messages.success(request, 'Billetera agregada exitosamente.')
+            
+            return get_cliente_detalle_redirect(request, cliente.pk)
+    else:
+        form = BilleteraForm()
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'titulo': 'Agregar Billetera Electrónica',
+        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
+    }
+    return render(request, 'clientes/agregar_billetera.html', context)
