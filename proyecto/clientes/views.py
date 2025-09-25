@@ -131,7 +131,8 @@ def cliente_detalle(request, pk):
     context = {
         'cliente': cliente,
         'tarjetas_stripe': tarjetas_stripe,
-        'total_tarjetas': len(tarjetas_stripe)
+        'total_tarjetas': len(tarjetas_stripe),
+        **medios_data
     }
     return render(request, 'clientes/cliente_detalle.html', context)
 

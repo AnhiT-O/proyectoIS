@@ -44,8 +44,8 @@ def crear_recargos(sender, **kwargs):
                 recargo=2
             )
 
-        if not Recargos.objects.filter(nombre='ZIMPLE').exists():
+        if not Recargos.objects.filter(nombre='Zimple').exists():
             Recargos.objects.create(
-                nombre='ZIMPLE',
+                nombre='Zimple',
                 recargo=3
             )

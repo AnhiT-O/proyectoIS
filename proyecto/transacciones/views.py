@@ -202,7 +202,8 @@ def compra_medio_pago(request):
     ]
     # Verificar si el cliente tiene tarjetas de crédito activas en Stripe
     if request.user.cliente_activo.tiene_tarjetas_activas():
-        medios_pago_disponibles.append('Tarjeta de Crédito')
+        for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
+            medios_pago_disponibles.append(f'Tarjeta de Crédito - **** {tarjeta["last4"]}')
     
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
@@ -247,7 +248,73 @@ def compra_medio_cobro(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
     
-    return render(request, 'transacciones/seleccion_medio_cobro.html')
+    if request.method == 'POST':
+        # Verificar si es selección de medio de cobro o avance al siguiente paso
+        accion = request.POST.get('accion')
+        
+        if accion == 'seleccionar_medio':
+            # Manejar la selección de medio de cobro
+            medio_cobro = request.POST.get('medio_cobro_id')
+            if medio_cobro:
+                try:
+                    # Actualizar los datos de la sesión (sin cambiar el paso_actual)
+                    compra_datos.update({
+                        'medio_cobro': medio_cobro
+                    })
+                    request.session['compra_datos'] = compra_datos
+
+                    messages.success(request, f'Medio de cobro {medio_cobro} seleccionado correctamente.')
+                    return redirect('transacciones:compra_medio_cobro')  # Permanecer en el mismo paso
+        
+                except Exception as e:
+                    messages.error(request, 'Error al seleccionar el medio de cobro. Intente nuevamente.')
+                    return redirect('transacciones:compra_medio_cobro')
+        
+        elif accion == 'continuar':
+            # Verificar que hay un medio de cobro seleccionado
+            if not compra_datos.get('medio_cobro'):
+                messages.error(request, 'Debe seleccionar un medio de cobro antes de continuar.')
+                return redirect('transacciones:compra_medio_cobro')
+            
+            # Actualizar el paso actual y continuar al siguiente paso
+            compra_datos['paso_actual'] = 4
+            request.session['compra_datos'] = compra_datos
+            return redirect('transacciones:compra_confirmacion')
+    
+    # Construir lista de medios de cobro disponibles
+    medios_cobro_disponibles = ['Efectivo']  # Opción fija
+    
+    # Agregar cuentas bancarias si las hay
+    cuentas_bancarias = request.user.cliente_activo.cuentas_bancarias.all()
+    for cuenta in cuentas_bancarias:
+        medio_descripcion = f"Cuenta bancaria - {cuenta.get_banco_display()} ({cuenta.numero_cuenta})"
+        medios_cobro_disponibles.append(medio_descripcion)
+    
+    # Agregar billeteras si las hay
+    billeteras = request.user.cliente_activo.billeteras.all()
+    for billetera in billeteras:
+        medio_descripcion = f"Billetera - {billetera.get_tipo_billetera_display()} ({billetera.telefono})"
+        medios_cobro_disponibles.append(medio_descripcion)
+
+    # Obtener el medio de cobro seleccionado actualmente (si hay uno)
+    medio_cobro_seleccionado = None
+    if compra_datos.get('medio_cobro'):
+        medio_cobro_seleccionado = compra_datos['medio_cobro']
+
+    context = {
+        'moneda': moneda,
+        'monto': monto,
+        'medio_pago': medio_pago,
+        'medios_cobro': medios_cobro_disponibles,
+        'medio_cobro_seleccionado': medio_cobro_seleccionado,
+        'cliente_activo': request.user.cliente_activo,
+        'paso_actual': 3,
+        'total_pasos': 4,
+        'titulo_paso': 'Selección de Medio de Cobro',
+        'tipo_transaccion': 'compra'
+    }
+    
+    return render(request, 'transacciones/seleccion_medio_cobro.html', context)
 
 @login_required
 def compra_confirmacion(request):
@@ -261,7 +328,7 @@ def compra_confirmacion(request):
         return redirect('inicio')
     # Verificar que existan datos del paso anterior
     compra_datos = request.session.get('compra_datos')
-    if not compra_datos or compra_datos.get('paso_actual') != 3:
+    if not compra_datos or compra_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:compra_medio_cobro')
     # Recuperar los datos de la sesión
@@ -269,11 +336,24 @@ def compra_confirmacion(request):
         moneda = Moneda.objects.get(id=compra_datos['moneda'])
         monto = Decimal(compra_datos['monto'])
         medio_pago = compra_datos['medio_pago']
+        medio_cobro = compra_datos.get('medio_cobro', 'No seleccionado')
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
     
-    return render(request, 'transacciones/confirmacion.html')
+    context = {
+        'moneda': moneda,
+        'monto': monto,
+        'medio_pago': medio_pago,
+        'medio_cobro': medio_cobro,
+        'cliente_activo': request.user.cliente_activo,
+        'paso_actual': 4,
+        'total_pasos': 4,
+        'titulo_paso': 'Confirmación de Compra',
+        'tipo_transaccion': 'compra'
+    }
+    
+    return render(request, 'transacciones/confirmacion.html', context)
 
 @login_required
 def compra_exito(request):
@@ -478,7 +558,73 @@ def venta_medio_cobro(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
-    return render(request, 'transacciones/seleccion_medio_cobro.html')
+    if request.method == 'POST':
+        # Verificar si es selección de medio de cobro o avance al siguiente paso
+        accion = request.POST.get('accion')
+        
+        if accion == 'seleccionar_medio':
+            # Manejar la selección de medio de cobro
+            medio_cobro = request.POST.get('medio_cobro_id')
+            if medio_cobro:
+                try:
+                    # Actualizar los datos de la sesión (sin cambiar el paso_actual)
+                    venta_datos.update({
+                        'medio_cobro': medio_cobro
+                    })
+                    request.session['venta_datos'] = venta_datos
+
+                    messages.success(request, f'Medio de cobro {medio_cobro} seleccionado correctamente.')
+                    return redirect('transacciones:venta_medio_cobro')  # Permanecer en el mismo paso
+        
+                except Exception as e:
+                    messages.error(request, 'Error al seleccionar el medio de cobro. Intente nuevamente.')
+                    return redirect('transacciones:venta_medio_cobro')
+        
+        elif accion == 'continuar':
+            # Verificar que hay un medio de cobro seleccionado
+            if not venta_datos.get('medio_cobro'):
+                messages.error(request, 'Debe seleccionar un medio de cobro antes de continuar.')
+                return redirect('transacciones:venta_medio_cobro')
+            
+            # Actualizar el paso actual y continuar al siguiente paso
+            venta_datos['paso_actual'] = 4
+            request.session['venta_datos'] = venta_datos
+            return redirect('transacciones:venta_confirmacion')
+    
+    # Construir lista de medios de cobro disponibles
+    medios_cobro_disponibles = ['Efectivo']  # Opción fija
+    
+    # Agregar cuentas bancarias si las hay
+    cuentas_bancarias = request.user.cliente_activo.cuentas_bancarias.all()
+    for cuenta in cuentas_bancarias:
+        medio_descripcion = f"Cuenta bancaria - {cuenta.get_banco_display()} ({cuenta.numero_cuenta})"
+        medios_cobro_disponibles.append(medio_descripcion)
+    
+    # Agregar billeteras si las hay
+    billeteras = request.user.cliente_activo.billeteras.all()
+    for billetera in billeteras:
+        medio_descripcion = f"Billetera - {billetera.get_tipo_billetera_display()} ({billetera.telefono})"
+        medios_cobro_disponibles.append(medio_descripcion)
+
+    # Obtener el medio de cobro seleccionado actualmente (si hay uno)
+    medio_cobro_seleccionado = None
+    if venta_datos.get('medio_cobro'):
+        medio_cobro_seleccionado = venta_datos['medio_cobro']
+
+    context = {
+        'moneda': moneda,
+        'monto': monto,
+        'medio_pago': medio_pago,
+        'medios_cobro': medios_cobro_disponibles,
+        'medio_cobro_seleccionado': medio_cobro_seleccionado,
+        'cliente_activo': request.user.cliente_activo,
+        'paso_actual': 3,
+        'total_pasos': 4,
+        'titulo_paso': 'Selección de Medio de Cobro',
+        'tipo_transaccion': 'venta'
+    }
+    
+    return render(request, 'transacciones/seleccion_medio_cobro.html', context)
 
 @login_required
 def venta_confirmacion(request):
@@ -492,7 +638,7 @@ def venta_confirmacion(request):
         return redirect('inicio')
     # Verificar que existan datos del paso anterior
     venta_datos = request.session.get('venta_datos')
-    if not venta_datos or venta_datos.get('paso_actual') != 3:
+    if not venta_datos or venta_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:venta_medio_cobro')
     # Recuperar los datos de la sesión
@@ -500,11 +646,24 @@ def venta_confirmacion(request):
         moneda = Moneda.objects.get(id=venta_datos['moneda'])
         monto = Decimal(venta_datos['monto'])
         medio_pago = venta_datos['medio_pago']
+        medio_cobro = venta_datos.get('medio_cobro', 'No seleccionado')
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
-    return render(request, 'transacciones/confirmacion.html')
+    context = {
+        'moneda': moneda,
+        'monto': monto,
+        'medio_pago': medio_pago,
+        'medio_cobro': medio_cobro,
+        'cliente_activo': request.user.cliente_activo,
+        'paso_actual': 4,
+        'total_pasos': 4,
+        'titulo_paso': 'Confirmación de Venta',
+        'tipo_transaccion': 'venta'
+    }
+    
+    return render(request, 'transacciones/confirmacion.html', context)
 
 @login_required
 def venta_exito(request):

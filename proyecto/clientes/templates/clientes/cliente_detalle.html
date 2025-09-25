@@ -136,6 +136,9 @@
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
+    </div>
         <!-- Sección de Medios de Acreditación -->
     <div class="zona-detalle" style="margin-top: 2rem;">
         <div class="detalle-cabecera" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -210,7 +213,6 @@
             </div>
         {% endif %}
     </div>
-    </div>   
     <div class="zona-acciones">
         <div class="acciones-contenido">
             <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">

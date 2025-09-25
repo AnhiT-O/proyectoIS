@@ -2,7 +2,11 @@
 {% load static %}
 
 {% block title %}
-    En construccion
+    {% if tipo_transaccion == 'venta' %}
+        Vender Monedas - Medio de Cobro - Global Exchange
+    {% else %}
+        Comprar Monedas - Medio de Cobro - Global Exchange
+    {% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -14,11 +18,94 @@
 
 {% block content %}
 <div class="contenido extendido">
-    <div class="form-cabecera">
-        <div class="logo">Página en construcción</div>
-        <p class="subtitulo">
-            Esta página está en construcción. Por favor, vuelva más tarde.
-        </p>
+    <!-- Barra de progreso -->
+    <div class="barra-progreso-container">
+        <div class="barra-progreso" data-progreso="{{ paso_actual }}">
+            <div class="paso {% if paso_actual == 1 %}activo{% elif paso_actual > 1 %}completado{% endif %}">
+                <div class="paso-numero">1</div>
+                <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
+            </div>
+            <div class="paso {% if paso_actual == 2 %}activo{% elif paso_actual > 2 %}completado{% endif %}">
+                <div class="paso-numero">2</div>
+                <div class="paso-titulo">Medio de<br>Pago</div>
+            </div>
+            <div class="paso {% if paso_actual == 3 %}activo{% elif paso_actual > 3 %}completado{% endif %}">
+                <div class="paso-numero">3</div>
+                <div class="paso-titulo">Medio de<br>Cobro</div>
+            </div>
+            <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
+                <div class="paso-numero">4</div>
+                <div class="paso-titulo">Confirmación de<br>
+                    {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="form-cabecera">
+        <h2>{{ titulo_paso }}</h2>
+        <div style="margin: 2rem;">
+            <div class="info-cliente">
+                <div class="info-titulo">Cliente seleccionado:</div>
+                <div class="info-valor">{{ user.cliente_activo.nombre }}</div>
+                <div style="margin-top: 0.5rem;"></div>
+                <div class="info-titulo">Segmento:</div>
+                <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
+            </div>
+            <p class="subtitulo">
+                Complete la información requerida para continuar con su operación de 
+            {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %}.
+            </p>
+        </div>
+
+        {% if medios_cobro %}
+        <div class="info-campos">
+            {% for medio_cobro in medios_cobro %}
+                <div class="info-usuario {% if medio_cobro == medio_cobro_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro }}</div>
+                
+                    <!-- Botón de acción alineado a la derecha -->
+                    <div style="margin-left: 1rem; align-self: center;">
+                        {% if medio_cobro == medio_cobro_seleccionado %}
+                            <span class="etiqueta-activo">Seleccionado</span>
+                        {% else %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="seleccionar_medio">
+                                <input type="hidden" name="medio_cobro_id" value="{{ medio_cobro }}">
+                                <button type="submit" class="btn-activar" 
+                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cobro }} como medio de cobro?')">
+                                    Seleccionar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="form-cabecera">
+                <p style="text-align: center; color: #666;">
+                    No hay medios de cobro disponibles. Contacte con el administrador.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Botones de navegación -->
+    <form method="post">
+    {% csrf_token %}
+    <div class="zona-botones">
+        {% if medio_cobro_seleccionado %}
+            <input type="hidden" name="accion" value="continuar">
+            <button type="submit" class="btn-enviar">
+                Siguiente Paso
+            </button>
+        {% endif %}
+        <a href="{% url 'inicio' %}" class="btn-atras">
+            Cancelar {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+        </a>
+    </div>
+    </form>
 </div>
 {% endblock %}

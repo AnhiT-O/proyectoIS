@@ -102,8 +102,8 @@
             Siguiente Paso
             </button>
         {% endif %}
-        <a href="{% if tipo_transaccion == 'venta' %}{% url 'transacciones:venta_monto_moneda' %}{% else %}{% url 'transacciones:compra_monto_moneda' %}{% endif %}" class="btn-atras">
-            Paso Anterior
+        <a href="{% url 'inicio' %}" class="btn-atras">
+            Cancelar {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
         </a>
     </div>
     </form>
