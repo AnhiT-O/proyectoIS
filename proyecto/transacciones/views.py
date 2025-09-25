@@ -6,8 +6,46 @@ from django.core.exceptions import ValidationError
 from monedas.models import Moneda
 from monedas.services import LimiteService
 from .forms import SeleccionMonedaMontoForm, RecargoForm
+from .models import Transaccion, Recargos
 from decimal import Decimal
 from clientes.models import Cliente
+import secrets
+import json
+import base64
+from datetime import datetime, timedelta
+
+def generar_token_transaccion(transaccion_id):
+    """
+    Genera un token único para transacciones con medios de pago Efectivo o Cheque.
+    
+    Args:
+        transaccion_id: ID de la transacción creada
+    
+    Returns:
+        dict con 'token' y 'expiracion'
+    """
+    # Generar token único
+    token = secrets.token_urlsafe(32)
+    
+    # Obtener la transacción
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+    except Transaccion.DoesNotExist:
+        raise ValueError("Transacción no encontrada")
+    
+    # Crear datos del token
+    datos_token = {
+        'token': token,
+        'transaccion_id': transaccion_id
+    }
+    
+    # Actualizar la transacción con el token y su expiración
+    transaccion.establecer_token_con_expiracion(token)
+    
+    return {
+        'token': token,
+        'datos': datos_token
+    }
 
 def extraer_mensaje_error(validation_error):
     """
@@ -203,7 +241,7 @@ def compra_medio_pago(request):
     # Verificar si el cliente tiene tarjetas de crédito activas en Stripe
     if request.user.cliente_activo.tiene_tarjetas_activas():
         for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
-            medios_pago_disponibles.append(f'Tarjeta de Crédito - **** {tarjeta["last4"]}')
+            medios_pago_disponibles.append(tarjeta)
     
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
@@ -283,18 +321,6 @@ def compra_medio_cobro(request):
     
     # Construir lista de medios de cobro disponibles
     medios_cobro_disponibles = ['Efectivo']  # Opción fija
-    
-    # Agregar cuentas bancarias si las hay
-    cuentas_bancarias = request.user.cliente_activo.cuentas_bancarias.all()
-    for cuenta in cuentas_bancarias:
-        medio_descripcion = f"Cuenta bancaria - {cuenta.get_banco_display()} ({cuenta.numero_cuenta})"
-        medios_cobro_disponibles.append(medio_descripcion)
-    
-    # Agregar billeteras si las hay
-    billeteras = request.user.cliente_activo.billeteras.all()
-    for billetera in billeteras:
-        medio_descripcion = f"Billetera - {billetera.get_tipo_billetera_display()} ({billetera.telefono})"
-        medios_cobro_disponibles.append(medio_descripcion)
 
     # Obtener el medio de cobro seleccionado actualmente (si hay uno)
     medio_cobro_seleccionado = None
@@ -341,12 +367,43 @@ def compra_confirmacion(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
     
+    # Crear la transacción en la base de datos
+    try:
+        transaccion = Transaccion.objects.create(
+            cliente=request.user.cliente_activo,
+            tipo='compra',
+            moneda=moneda,
+            monto=monto,
+            medio_pago=medio_pago,
+            medio_cobro=medio_cobro
+        )
+        # Generar token si el medio de pago es Efectivo o Cheque
+        if medio_pago in ['Efectivo', 'Cheque']:
+            try:
+                token_data = generar_token_transaccion(transaccion.id)
+                
+                # Guardar el token en la sesión para su posterior uso
+                request.session['token_transaccion'] = token_data
+
+                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
+
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:compra_medio_cobro')
+        else:
+            messages.success(request, 'Transacción creada exitosamente.')
+            
+    except Exception as e:
+        messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
+        return redirect('transacciones:compra_medio_cobro')
+    
     context = {
         'moneda': moneda,
         'monto': monto,
         'medio_pago': medio_pago,
         'medio_cobro': medio_cobro,
         'cliente_activo': request.user.cliente_activo,
+        'transaccion': transaccion,  # Agregar la transacción al contexto
         'paso_actual': 4,
         'total_pasos': 4,
         'titulo_paso': 'Confirmación de Compra',
@@ -513,7 +570,8 @@ def venta_medio_pago(request):
     ]
     # Para ventas, verificar tarjetas activas solo para USD
     if moneda.simbolo == 'USD' and request.user.cliente_activo.tiene_tarjetas_activas():
-        medios_pago_disponibles.append('Tarjeta de Crédito')
+        for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
+            medios_pago_disponibles.append(tarjeta)
 
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
@@ -651,12 +709,43 @@ def venta_confirmacion(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
+    # Crear la transacción en la base de datos
+    try:
+        transaccion = Transaccion.objects.create(
+            cliente=request.user.cliente_activo,
+            tipo='venta',
+            moneda=moneda,
+            monto=monto,
+            medio_pago=medio_pago,
+            medio_cobro=medio_cobro
+        )
+        
+        # Generar token si el medio de pago es Efectivo
+        if medio_pago == 'Efectivo':
+            try:
+                token_data = generar_token_transaccion(transaccion.id)
+                
+                # Guardar el token en la sesión para su posterior uso
+                request.session['token_transaccion'] = token_data
+                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
+
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:venta_medio_cobro')
+        else:
+            messages.success(request, 'Transacción creada exitosamente.')
+            
+    except Exception as e:
+        messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
+        return redirect('transacciones:venta_medio_cobro')
+    
     context = {
         'moneda': moneda,
         'monto': monto,
         'medio_pago': medio_pago,
         'medio_cobro': medio_cobro,
         'cliente_activo': request.user.cliente_activo,
+        'transaccion': transaccion,  # Agregar la transacción al contexto
         'paso_actual': 4,
         'total_pasos': 4,
         'titulo_paso': 'Confirmación de Venta',

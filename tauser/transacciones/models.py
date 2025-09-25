@@ -103,7 +103,7 @@ class Transaccion(models.Model):
         count = transacciones_expiradas.count()
         transacciones_expiradas.delete()
         return count
-
+    
     def save(self, *args, **kwargs):
         """
         Actualiza la fecha_hora cuando el estado cambia
