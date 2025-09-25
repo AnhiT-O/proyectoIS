@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from monedas.models import Moneda
 from monedas.services import LimiteService
 from .forms import SeleccionMonedaMontoForm, RecargoForm
@@ -12,7 +13,154 @@ from clientes.models import Cliente
 import secrets
 import json
 import base64
+import stripe
+import logging
 from datetime import datetime, timedelta
+
+# Configurar Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
+
+def realizar_conversion(transaccion_id):
+    precios = Moneda.objects.get(id=transaccion_id.moneda_id).get_precios_cliente(Cliente.objects.get(id=transaccion_id.cliente_id))
+    if transaccion_id.tipo == 'compra':
+        resultado = transaccion_id.monto * precios['precio_venta']
+    else:
+        resultado = transaccion_id.monto * precios['precio_compra']
+    return resultado
+
+def procesar_pago_stripe(transaccion_id, payment_method_id):
+    """
+    Procesa un pago con Stripe para una transacción dada.
+    
+    Args:
+        transaccion_id: ID de la transacción en la base de datos
+        payment_method_id: ID del método de pago de Stripe (tarjeta)
+        monto: Monto a cobrar en la moneda original
+        moneda_simbolo: Símbolo de la moneda (USD, EUR, etc.)
+    
+    Returns:
+        dict con resultado del procesamiento: {'success': bool, 'payment_intent_id': str, 'error': str}
+    """
+    try:
+        # Obtener la transacción
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+        if transaccion.tipo == 'venta':
+            monto_recargado = transaccion.monto * (Decimal('1') + (Decimal(str(Recargos.objects.get(nombre='Tarjeta de Crédito').recargo)) / Decimal('100')))
+            monto_centavos = int(monto_recargado * 100)
+            moneda_stripe = 'usd'  # Cambiar según la moneda
+        else:
+            a_guaranies = realizar_conversion(transaccion)
+            monto_recargado = a_guaranies * (Decimal('1') + (Decimal(str(Recargos.objects.get(nombre='Tarjeta de Crédito').recargo)) / Decimal('100')))
+            moneda_stripe = 'pyg'  # Cambiar según la moneda
+            monto_centavos = int(monto_recargado)
+            print(monto_centavos)
+            print(monto_recargado)
+            print(a_guaranies)
+        # Crear PaymentIntent
+        payment_intent = stripe.PaymentIntent.create(
+            amount=monto_centavos,
+            currency=moneda_stripe,
+            payment_method=payment_method_id,
+            customer=transaccion.cliente.id_stripe,
+            confirmation_method='manual',
+            confirm=True,
+            return_url='https://localhost:8000',  # URL de retorno (puedes personalizar)
+            metadata={
+                'transaccion_id': str(transaccion_id),
+                'tipo': transaccion.tipo,
+                'cliente_id': str(transaccion.cliente.id)
+            }
+        )
+
+        consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
+        consumo.consumo_diario += realizar_conversion(transaccion)
+        consumo.consumo_mensual += realizar_conversion(transaccion)
+        consumo.save()
+        transaccion.estado = 'Completada'
+        transaccion.save()
+        
+        logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion_id}. PaymentIntent: {payment_intent.id}")
+        
+        return {
+            'success': True,
+            'payment_intent_id': payment_intent.id,
+            'status': payment_intent.status,
+            'error': None
+        }
+        
+    except Transaccion.DoesNotExist:
+        error_msg = f"Transacción {transaccion_id} no encontrada"
+        logger.error(error_msg)
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.CardError as e:
+        # Error con la tarjeta (declined, insufficient funds, etc.)
+        error_msg = f"Error con la tarjeta: {e.user_message}"
+        logger.error(f"CardError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.RateLimitError as e:
+        error_msg = "Demasiadas solicitudes. Intente nuevamente en unos minutos."
+        logger.error(f"RateLimitError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.InvalidRequestError as e:
+        error_msg = "Parámetros inválidos en la solicitud de pago."
+        logger.error(f"InvalidRequestError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.AuthenticationError as e:
+        error_msg = "Error de autenticación con Stripe."
+        logger.error(f"AuthenticationError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.APIConnectionError as e:
+        error_msg = "Error de conexión con Stripe. Intente nuevamente."
+        logger.error(f"APIConnectionError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.StripeError as e:
+        error_msg = f"Error de Stripe: {str(e)}"
+        logger.error(f"StripeError en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except Exception as e:
+        error_msg = f"Error inesperado al procesar el pago: {str(e)}"
+        logger.error(f"Error inesperado en transacción {transaccion_id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
 
 def generar_token_transaccion(transaccion_id):
     """
@@ -146,7 +294,8 @@ def compra_monto_moneda(request):
             request.session['compra_datos'] = {
                 'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
-                'paso_actual': 2
+                'paso_actual': 2,
+                'cliente_tarjetas': None
             }
             
             # Redireccionar al siguiente paso sin parámetros en la URL
@@ -213,8 +362,10 @@ def compra_medio_pago(request):
                         'medio_pago': medio_pago
                     })
                     request.session['compra_datos'] = compra_datos
-
-                    messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
+                    if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
+                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)}) seleccionado correctamente.')
+                    else:
+                        messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
                     return redirect('transacciones:compra_medio_pago')  # Permanecer en el mismo paso
         
                 except Exception as e:
@@ -240,7 +391,8 @@ def compra_medio_pago(request):
     ]
     # Verificar si el cliente tiene tarjetas de crédito activas en Stripe
     if request.user.cliente_activo.tiene_tarjetas_activas():
-        for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
+        cliente_tarjetas = request.user.cliente_activo.obtener_tarjetas_stripe()
+        for tarjeta in cliente_tarjetas:
             medios_pago_disponibles.append(tarjeta)
     
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
@@ -321,7 +473,6 @@ def compra_medio_cobro(request):
     
     # Construir lista de medios de cobro disponibles
     medios_cobro_disponibles = ['Efectivo']  # Opción fija
-
     # Obtener el medio de cobro seleccionado actualmente (si hay uno)
     medio_cobro_seleccionado = None
     if compra_datos.get('medio_cobro'):
@@ -366,15 +517,18 @@ def compra_confirmacion(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-    
     # Crear la transacción en la base de datos
     try:
+        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
+            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)})'
+        else:
+            str_medio_pago = medio_pago
         transaccion = Transaccion.objects.create(
             cliente=request.user.cliente_activo,
             tipo='compra',
             moneda=moneda,
             monto=monto,
-            medio_pago=medio_pago,
+            medio_pago=str_medio_pago,
             medio_cobro=medio_cobro
         )
         # Generar token si el medio de pago es Efectivo o Cheque
@@ -391,7 +545,11 @@ def compra_confirmacion(request):
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
         else:
-            messages.success(request, 'Transacción creada exitosamente.')
+            if procesar_pago_stripe(transaccion.id, medio_pago)['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+            else:
+                messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
+                return redirect('transacciones:compra_monto_moneda')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
@@ -546,8 +704,10 @@ def venta_medio_pago(request):
                         'medio_pago': medio_pago
                     })
                     request.session['venta_datos'] = venta_datos
-
-                    messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
+                    if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
+                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)}) seleccionado correctamente.')
+                    else:
+                        messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
                     return redirect('transacciones:venta_medio_pago')  # Permanecer en el mismo paso
         
                 except Exception as e:
@@ -711,12 +871,16 @@ def venta_confirmacion(request):
     
     # Crear la transacción en la base de datos
     try:
+        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
+            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)})'
+        else:
+            str_medio_pago = medio_pago
         transaccion = Transaccion.objects.create(
             cliente=request.user.cliente_activo,
             tipo='venta',
             moneda=moneda,
             monto=monto,
-            medio_pago=medio_pago,
+            medio_pago=str_medio_pago,
             medio_cobro=medio_cobro
         )
         
@@ -733,7 +897,11 @@ def venta_confirmacion(request):
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
         else:
-            messages.success(request, 'Transacción creada exitosamente.')
+            if procesar_pago_stripe(transaccion.id, medio_pago)['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+            else:
+                messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
+                return redirect('transacciones:venta_monto_moneda')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
