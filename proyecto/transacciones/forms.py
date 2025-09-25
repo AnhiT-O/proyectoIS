@@ -96,3 +96,25 @@ class SeleccionMonedaMontoForm(forms.Form):
         self.fields['moneda'].widget.attrs.update({
             'data-monedas': json.dumps(monedas_data)
         })
+
+class RecargoForm(forms.ModelForm):
+    """
+    Formulario para gestionar recargos en transacciones.
+    """
+    recargo = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '1',
+            'min': '0',
+            'placeholder': 'Ingresa el recargo en porcentaje'
+        }),
+        required=True,
+        error_messages={
+            'invalid': 'Por favor, ingresa un valor numérico válido para el recargo.'
+        }
+    )
+    
+    class Meta:
+        from .models import Recargos
+        model = Recargos
+        fields = ['recargo']

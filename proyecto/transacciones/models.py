@@ -26,9 +26,9 @@ def crear_recargos(sender, **kwargs):
     # Solo crear si la migración es de la app transacciones
     if kwargs['app_config'].name == 'transacciones':
 
-        if not Recargos.objects.filter(nombre='TC').exists():
+        if not Recargos.objects.filter(nombre='Tarjeta de Crédito').exists():
             Recargos.objects.create(
-                nombre='TC',
+                nombre='Tarjeta de Crédito',
                 recargo=1
             )
 

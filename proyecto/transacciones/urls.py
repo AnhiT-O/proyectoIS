@@ -17,6 +17,9 @@ urlpatterns = [
     path('vender/medio-cobro/', views.venta_medio_cobro, name='venta_medio_cobro'),
     path('vender/confirmacion/', views.venta_confirmacion, name='venta_confirmacion'),
     path('vender/exito/', views.venta_exito, name='venta_exito'),
+
+    # URLs para edicion de recargos
+    path('recargos/', views.editar_recargos, name='editar_recargos'),
     
     # URLs para funcionalidades auxiliares de límites
     path('limites/cliente/', views.obtener_limites_cliente, name='obtener_limites_cliente'),

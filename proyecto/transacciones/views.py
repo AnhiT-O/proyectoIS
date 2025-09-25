@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from monedas.models import Moneda
 from monedas.services import LimiteService
-from .forms import SeleccionMonedaMontoForm
+from .forms import SeleccionMonedaMontoForm, RecargoForm
 from decimal import Decimal
 from clientes.models import Cliente
 
@@ -610,3 +610,54 @@ def simular_transaccion_limites(request):
         return JsonResponse({
             'error': 'Error interno del servidor'
         }, status=500)
+    
+@login_required
+@permission_required('transacciones.edicion', raise_exception=True)
+def editar_recargos(request):
+    """
+    Vista para editar los recargos de las transacciones.
+    Muestra un formulario con todos los recargos existentes para su edición.
+    """
+    from .models import Recargos
+    
+    if request.method == 'POST':
+        # Procesar cada recargo individualmente
+        try:
+            recargos_actualizados = 0
+            for key, value in request.POST.items():
+                if key.startswith('recargo_') and value:
+                    recargo_id = key.replace('recargo_', '')
+                    try:
+                        recargo = Recargos.objects.get(id=int(recargo_id))
+                        nuevo_valor = int(value)
+                        if 0 <= nuevo_valor <= 100:  # Validar rango
+                            recargo.recargo = nuevo_valor
+                            recargo.save()
+                            recargos_actualizados += 1
+                        else:
+                            messages.error(request, f'El recargo para {recargo.nombre} debe estar entre 0 y 100%.')
+                            return redirect('transacciones:editar_recargos')
+                    except (Recargos.DoesNotExist, ValueError) as e:
+                        messages.error(request, f'Error al actualizar recargo: {str(e)}')
+                        return redirect('transacciones:editar_recargos')
+            
+            if recargos_actualizados > 0:
+                messages.success(request, f'Se actualizaron {recargos_actualizados} recargos correctamente.')
+            else:
+                messages.warning(request, 'No se actualizó ningún recargo.')
+            return redirect('transacciones:editar_recargos')
+            
+        except Exception as e:
+            messages.error(request, f'Error al procesar los recargos: {str(e)}')
+            return redirect('transacciones:editar_recargos')
+    
+    # Obtener todos los recargos para mostrar en el formulario
+    recargos = Recargos.objects.all()
+    
+    # Crear un formulario base para validaciones
+    form = RecargoForm()
+
+    return render(request, 'transacciones/editar_recargos.html', {
+        'form': form,
+        'recargos': recargos
+    })
