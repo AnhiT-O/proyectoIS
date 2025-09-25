@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from monedas.models import Moneda
+from transacciones.models import Recargos
 from decimal import Decimal
 
 class LoginForm(AuthenticationForm):
@@ -48,14 +49,26 @@ class SimuladorForm(forms.Form):
         choices=OPERACION_CHOICES,
         error_messages={'required': 'Debes seleccionar una operación.'}
     )
-    tarjeta_credito = forms.BooleanField(
+    recargo = forms.ChoiceField(
         required=False,
-        help_text='Marque si realizará el pago con tarjeta de crédito (recargo del 5%)'
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'recargo'}),
+        error_messages={'required': 'Debes seleccionar un método de pago.'}
     )
     
     def __init__(self, *args, **kwargs):
         self.cliente = kwargs.pop('cliente', None)
         super().__init__(*args, **kwargs)
+        
+        # Cargar opciones de recargo dinámicamente desde la base de datos
+        recargo_choices = []
+        for recargo_obj in Recargos.objects.all().order_by('recargo'):
+            if recargo_obj.recargo == 0:
+                label = f"{recargo_obj.nombre}"
+            else:
+                label = f"{recargo_obj.nombre} (recargo del {recargo_obj.recargo}%)"
+            recargo_choices.append((str(recargo_obj.id), label))
+        
+        self.fields['recargo'].choices = [('', 'Efectivo, Cheque, Transferencia')] + recargo_choices
     
     def clean_monto(self):
         monto = self.cleaned_data.get('monto')
@@ -122,7 +135,7 @@ class SimuladorForm(forms.Form):
         moneda = self.cleaned_data['moneda']
         monto = self.cleaned_data['monto']
         operacion = self.cleaned_data['operacion']
-        tarjeta_credito = self.cleaned_data.get('tarjeta_credito', False)
+        recargo_id = self.cleaned_data.get('recargo')
         
         # Obtener precios según la segmentación del cliente
         if self.cliente:
@@ -141,13 +154,26 @@ class SimuladorForm(forms.Form):
             # Venta: moneda extranjera a PYG (cuántos guaraníes recibo por X moneda extranjera)
             resultado = monto * precios['precio_compra']
         
-        # Aplicar recargo del 5% si se usa tarjeta de crédito (solo en compras)
-        if tarjeta_credito and operacion == 'compra':
-            resultado = resultado * Decimal('1.05')  # Incremento del 5%
+        # Aplicar recargo basado en la tabla Recargos
+        recargo_aplicado = False
+        porcentaje_recargo = 0
+        
+        if recargo_id:
+            try:
+                recargo_obj = Recargos.objects.get(id=recargo_id)
+                if recargo_obj.recargo > 0:
+                    # Convertir porcentaje a decimal (ej: 1% -> 1.01, 2% -> 1.02)
+                    multiplicador_recargo = Decimal('1') + (Decimal(str(recargo_obj.recargo)) / Decimal('100'))
+                    resultado = resultado * multiplicador_recargo
+                    recargo_aplicado = True
+                    porcentaje_recargo = float(recargo_obj.recargo)
+            except Recargos.DoesNotExist:
+                pass  # Si no existe el recargo, no se aplica ningún recargo
         
         return {
             'success': True,
             'resultado_numerico': int(resultado),
             'tipo_resultado': 'guaranies',
-            'recargo_aplicado': tarjeta_credito and operacion == 'compra'
+            'recargo_aplicado': recargo_aplicado,
+            'porcentaje_recargo': porcentaje_recargo
         }

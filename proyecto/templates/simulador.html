@@ -55,25 +55,16 @@
                 <div id="monto-errors" class="form-errores" style="display: none;"></div>
             </div>
 
-            <div class="form-campo" id="tarjeta-credito-campo" style="display: none;">
-                <div class="form-check">
-                    <input type="checkbox" 
-                           id="tarjeta_credito" 
-                           name="tarjeta_credito" 
-                           class="form-check-input">
-                    <label for="tarjeta_credito" class="form-check-label">
-                        Pago con tarjeta de crédito (+5% recargo)
-                    </label>
-                </div>
+            <div class="form-campo" id="recargo-campo">
+                <label for="recargo">Medio de pago:</label>
+                {{ form.recargo }}
+                <div id="recargo-errors" class="form-errores" style="display: none;"></div>
             </div>
 
             <div class="form-campo">
                 <label for="resultado">Resultado:</label>
                 <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
                     <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
-                    <div id="recargo-info" style="font-size: small; color: #666; margin-top: 0.5rem; display: none;">
-                        * Incluye recargo del 5% por tarjeta de crédito
-                    </div>
                 </div>
             </div>
 
@@ -153,15 +144,10 @@
             }
             tipoOperacion = btn.dataset.operacion;
             
-            // Mostrar/ocultar checkbox de tarjeta de crédito según la operación
-            const tarjetaCreditoCampo = document.getElementById('tarjeta-credito-campo');
-            const tarjetaCreditoCheckbox = document.getElementById('tarjeta_credito');
-            if (tipoOperacion === 'compra') {
-                tarjetaCreditoCampo.style.display = 'block';
-            } else {
-                tarjetaCreditoCampo.style.display = 'none';
-                tarjetaCreditoCheckbox.checked = false;
-            }
+            // Mostrar campo de recargo para ambas operaciones
+            const recargoCampo = document.getElementById('recargo-campo');
+            const recargoSelect = document.getElementById('recargo');
+            recargoCampo.style.display = 'block';
             
             // Actualizar placeholder según operación
             const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
@@ -228,11 +214,9 @@
         // Inicializar step por defecto
         actualizarStepMonto();
         
-        // Inicializar visibilidad del campo tarjeta de crédito (compra por defecto)
-        const tarjetaCreditoCampo = document.getElementById('tarjeta-credito-campo');
-        if (tipoOperacion === 'compra') {
-            tarjetaCreditoCampo.style.display = 'block';
-        }
+        // Inicializar visibilidad del campo de recargo (visible para ambas operaciones)
+        const recargoCampo = document.getElementById('recargo-campo');
+        recargoCampo.style.display = 'block';
 
         // Manejar envío del formulario
         form.addEventListener('submit', function(e) {
@@ -267,8 +251,10 @@
                     
                     // Mostrar/ocultar información de recargo
                     const recargoInfo = document.getElementById('recargo-info');
-                    if (recargoInfo) {
+                    const recargoTexto = document.getElementById('recargo-texto');
+                    if (recargoInfo && recargoTexto) {
                         if (data.recargo_aplicado) {
+                            recargoTexto.textContent = `Recargo aplicado: ${data.porcentaje_recargo}%`;
                             recargoInfo.style.display = 'block';
                         } else {
                             recargoInfo.style.display = 'none';
@@ -314,13 +300,14 @@
             });
         }
 
-        // Limpiar errores cuando el usuario empiece a escribir
+        // Limpiar errores cuando el usuario empiece a escribir o cambiar campos
         montoInput.addEventListener('input', clearErrors);
         monedaSelect.addEventListener('change', clearErrors);
+        recargoSelect.addEventListener('change', clearErrors);
         
-        // Limpiar resultado cuando cambie el checkbox de tarjeta de crédito
-        const tarjetaCreditoCheckbox = document.getElementById('tarjeta_credito');
-        tarjetaCreditoCheckbox.addEventListener('change', function() {
+        // Limpiar resultado cuando cambie el select de recargo
+        const recargoSelect = document.getElementById('recargo');
+        recargoSelect.addEventListener('change', function() {
             resultadoDiv.textContent = '\u00A0';
             const recargoInfo = document.getElementById('recargo-info');
             if (recargoInfo) {
@@ -334,6 +321,10 @@
         const btnCompra = document.querySelector('[data-operacion="compra"]');
         form.reset();
         toggleOperacion(btnCompra);
+        
+        // Resetear el select de recargo al primer valor (vacío)
+        const recargoSelect = document.getElementById('recargo');
+        recargoSelect.selectedIndex = 0;
         
         // Ocultar información de recargo
         const recargoInfo = document.getElementById('recargo-info');

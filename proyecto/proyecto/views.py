@@ -103,7 +103,18 @@ def logout_usuario(request):
 def simular(request):
     if request.method == 'GET':
         monedas = Moneda.objects.filter(activa=True)
-        return render(request, 'simulador.html', {'monedas': monedas})
+        # Obtener el cliente activo si el usuario está autenticado
+        cliente = None
+        if request.user.is_authenticated and hasattr(request.user, 'cliente_activo'):
+            cliente = request.user.cliente_activo
+        
+        # Crear el formulario para pasar las opciones de recargo
+        form = SimuladorForm(cliente=cliente)
+        
+        return render(request, 'simulador.html', {
+            'monedas': monedas,
+            'form': form
+        })
 
     elif request.method == 'POST':
         try:
