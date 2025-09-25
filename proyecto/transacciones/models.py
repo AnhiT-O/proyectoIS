@@ -103,3 +103,17 @@ class Transaccion(models.Model):
         count = transacciones_expiradas.count()
         transacciones_expiradas.delete()
         return count
+
+    def save(self, *args, **kwargs):
+        """
+        Actualiza la fecha_hora cuando el estado cambia
+        """
+        if self.pk:  # Si la instancia ya existe
+            try:
+                old_instance = Transaccion.objects.get(pk=self.pk)
+                if old_instance.estado != self.estado:
+                    self.fecha_hora = timezone.now()
+            except Transaccion.DoesNotExist:
+                pass
+        
+        super().save(*args, **kwargs)
