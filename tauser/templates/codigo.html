@@ -9,33 +9,42 @@
     <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
 </head>
 <body>
+    {% if messages %}
+    <div class="zona-alertas">
+        {% for message in messages %}
+            <div class="alerta-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <main class="cuerpo">
         <div class="contenido">
-        <div class="form-cabecera">
-            <div class="logo">💰Tauser - Global Exchange</div>
-            <p class="subtitulo">Ingresa el código de transacción</p>
-        </div>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <div class="form-campo">
-                {{ form.codigo }}
-                {% if form.codigo.errors %}
-                    <div class="form-errores">
-                        {% for error in form.codigo.errors %}
-                            <div class="mensaje-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+            <div class="form-cabecera">
+                <div class="logo">💰Tauser - Global Exchange</div>
+                <p class="subtitulo">Ingresa el código de transacción</p>
             </div>
-            <div class="zona-botones">
-                <button type="submit" class="btn-enviar">
+            
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-campo">
+                    {{ form.codigo }}
+                    {% if form.codigo.errors %}
+                        <div class="form-errores">
+                            {% for error in form.codigo.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn-primario">
                     Enviar código
                 </button>
-                <a href="{% url 'inicio' %}" class="btn-atras">
+                <a href="{% url 'inicio' %}" class="btn-secundario">
                     Volver al Inicio
                 </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </main>
 </body>
 </html>
