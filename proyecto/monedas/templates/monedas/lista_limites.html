@@ -24,16 +24,6 @@
             </div>
         </div>
 
-        {% if messages %}
-            <div class="zona-alertas">
-                {% for message in messages %}
-                    <div class="alerta-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         <!-- Límite vigente actual -->
         {% if limite_vigente %}
         <div class="zona-conteo">

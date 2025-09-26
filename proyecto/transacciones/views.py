@@ -80,9 +80,6 @@ def procesar_pago_stripe(transaccion_id, payment_method_id):
             monto_recargado = a_guaranies * (Decimal('1') + (Decimal(str(Recargos.objects.get(nombre='Tarjeta de Crédito').recargo)) / Decimal('100')))
             moneda_stripe = 'pyg'  # Cambiar según la moneda
             monto_centavos = int(monto_recargado)
-            print(monto_centavos)
-            print(monto_recargado)
-            print(a_guaranies)
         # Crear PaymentIntent
         payment_intent = stripe.PaymentIntent.create(
             amount=monto_centavos,
@@ -1157,7 +1154,7 @@ def editar_recargos(request):
                 messages.success(request, f'Se actualizaron los recargos correctamente.')
             else:
                 messages.warning(request, 'No se actualizó ningún recargo.')
-            return redirect('monedas:listar_limites')
+            return redirect('monedas:lista_limites')
             
         except Exception as e:
             messages.error(request, f'Error al procesar los recargos: {str(e)}')

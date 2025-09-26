@@ -15,16 +15,6 @@
         <p class="subtitulo">Configura los recargos por tipo de medio de pago</p>
     </div>
     
-    {% if messages %}
-        <div class="mensajes">
-            {% for message in messages %}
-                <div class="mensaje mensaje-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-    
         <form method="post" novalidate>
             {% csrf_token %}
             

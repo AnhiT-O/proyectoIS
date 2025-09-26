@@ -13,11 +13,11 @@ def realizar_conversion(transaccion_id):
         resultado = transaccion_id.monto * precios['precio_venta']
     else:
         resultado = transaccion_id.monto * precios['precio_compra']
-        if transaccion_id.medio_cobro.startswith('Billetera - Tigo Money'):
+        if transaccion_id.medio_cobro.startswith('Tigo Money'):
             resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Tigo Money').recargo)) / Decimal('100')))
-        elif transaccion_id.medio_cobro.startswith('Billetera - Billetera Personal'):
+        elif transaccion_id.medio_cobro.startswith('Billetera Personal'):
             resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Billetera Personal').recargo)) / Decimal('100')))
-        elif transaccion_id.medio_cobro.startswith('Billetera - Zimple'):
+        elif transaccion_id.medio_cobro.startswith('Zimple'):
             resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Zimple').recargo)) / Decimal('100')))
     return resultado
 
@@ -44,7 +44,10 @@ def codigo(request):
                 return render(request, 'codigo.html', {'form': form})
             
             if transaccion.tipo == 'compra':
-                messages.info(request, 'Cliente ingresa, luego retira del tauser en el momento. Transacción completada.')
+                if transaccion.medio_pago not in ['Efectivo', 'Cheque']:
+                    messages.info(request, 'Cliente retira del tauser el dinero comprado. Transacción completada.')
+                else:
+                    messages.info(request, 'Cliente ingresa, luego retira del tauser en el momento. Transacción completada.')
                 consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
                 consumo.consumo_diario += realizar_conversion(transaccion)
                 consumo.consumo_mensual += realizar_conversion(transaccion)
