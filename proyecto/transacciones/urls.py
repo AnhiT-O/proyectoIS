@@ -24,4 +24,9 @@ urlpatterns = [
     # URLs para funcionalidades auxiliares de límites
     path('limites/cliente/', views.obtener_limites_cliente, name='obtener_limites_cliente'),
     path('limites/simular/', views.simular_transaccion_limites, name='simular_transaccion_limites'),
+    
+    # URLs para historial de transacciones
+    path('historial/', views.historial_transacciones, name='historial'),
+    path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
+    path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
 ]

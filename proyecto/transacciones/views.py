@@ -13,6 +13,7 @@ import secrets
 import json
 import base64
 from datetime import datetime, timedelta
+from django.db import models
 
 def generar_token_transaccion(transaccion_id):
     """
@@ -369,14 +370,17 @@ def compra_confirmacion(request):
     
     # Crear la transacción en la base de datos
     try:
+        print(f"Intentando crear transacción de compra con usuario: {request.user}")
         transaccion = Transaccion.objects.create(
             cliente=request.user.cliente_activo,
             tipo='compra',
             moneda=moneda,
             monto=monto,
             medio_pago=medio_pago,
-            medio_cobro=medio_cobro
+            medio_cobro=medio_cobro,
+            usuario=request.user
         )
+        print(f"Transacción creada con ID: {transaccion.id}")
         # Generar token si el medio de pago es Efectivo o Cheque
         if medio_pago in ['Efectivo', 'Cheque']:
             try:
@@ -711,14 +715,17 @@ def venta_confirmacion(request):
     
     # Crear la transacción en la base de datos
     try:
+        print(f"Intentando crear transacción de venta con usuario: {request.user}")
         transaccion = Transaccion.objects.create(
             cliente=request.user.cliente_activo,
             tipo='venta',
             moneda=moneda,
             monto=monto,
             medio_pago=medio_pago,
-            medio_cobro=medio_cobro
+            medio_cobro=medio_cobro,
+            usuario=request.user
         )
+        print(f"Transacción creada con ID: {transaccion.id}")
         
         # Generar token si el medio de pago es Efectivo
         if medio_pago == 'Efectivo':
@@ -909,3 +916,136 @@ def editar_recargos(request):
         'form': form,
         'recargos': recargos
     })
+
+
+# NUEVAS VISTAS PARA HISTORIAL DE TRANSACCIONES
+@login_required
+def historial_transacciones(request, cliente_id=None):
+    """
+    Vista que muestra el historial de transacciones realizadas.
+    Permite filtrar por cliente, usuario, tipo de operación y estado.
+    
+    Si se proporciona cliente_id, muestra solo transacciones de ese cliente.
+    """
+    # Obtener parámetros de filtrado
+    busqueda = request.GET.get('busqueda', '')
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    
+    # Obtener todas las transacciones (o aplicar filtros)
+    transacciones = Transaccion.objects.all().order_by('-fecha_hora')
+    
+    # Si hay un cliente_id, filtrar transacciones solo para ese cliente
+    if cliente_id:
+        try:
+            from clientes.models import Cliente
+            cliente = Cliente.objects.get(id=cliente_id)
+            transacciones = transacciones.filter(cliente=cliente)
+            cliente_filtrado = cliente
+        except Cliente.DoesNotExist:
+            messages.error(request, "Cliente no encontrado")
+            return redirect('transacciones:historial')
+    else:
+        cliente_filtrado = None
+    
+    # Aplicar filtros según parámetros recibidos
+    if busqueda:
+        # Buscar por cliente o usuario
+        transacciones = transacciones.filter(
+            models.Q(cliente__nombre__icontains=busqueda) | 
+            models.Q(cliente__docCliente__icontains=busqueda) |
+            models.Q(cliente__usuarios__username__icontains=busqueda)
+        )
+    
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    # Procesar cada transacción para obtener información de tarjetas y calcular montos
+    for transaccion in transacciones:
+        # Calcular montos de origen y destino
+        if transaccion.tipo == 'compra':
+            transaccion.monto_origen = int(transaccion.monto * transaccion.moneda.calcular_precio_venta(
+                transaccion.cliente.beneficio_segmento
+            ))
+            transaccion.monto_destino = float(transaccion.monto)
+        else:  # venta
+            transaccion.monto_origen = float(transaccion.monto)
+            transaccion.monto_destino = int(transaccion.monto * transaccion.moneda.calcular_precio_compra(
+                transaccion.cliente.beneficio_segmento
+            ))
+        
+        # Obtener información de tarjetas de Stripe para el cliente
+        tarjetas_cliente = transaccion.cliente.obtener_tarjetas_stripe()
+        
+        # Formatear medio de pago (las tarjetas solo pueden ser medio de pago)
+        transaccion.medio_pago_formateado = transaccion.medio_pago
+        for tarjeta in tarjetas_cliente:
+            if tarjeta['id'] == transaccion.medio_pago:
+                transaccion.medio_pago_formateado = f"Tarjeta {tarjeta['brand']} **** **** **** {tarjeta['last4']}"
+                break
+    
+    context = {
+        'transacciones': transacciones,
+        'busqueda': busqueda,
+        'tipo_operacion': tipo_operacion,
+        'estado_filtro': estado_filtro,
+        'cliente_filtrado': cliente_filtrado
+    }
+    
+    return render(request, 'transacciones/historial_transacciones.html', context)
+
+@login_required
+def detalle_transaccion(request, transaccion_id):
+    """
+    Vista para mostrar el detalle completo de una transacción específica.
+    """
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'La transacción solicitada no existe.')
+        return redirect('transacciones:historial')
+    
+    # Calcular montos en guaraníes para mostrar
+    if transaccion.tipo == 'compra':
+        monto_origen = int(transaccion.monto * transaccion.moneda.calcular_precio_venta(
+            transaccion.cliente.beneficio_segmento
+        ))
+        monto_destino = float(transaccion.monto)
+    else:  # venta
+        monto_origen = float(transaccion.monto)
+        monto_destino = int(transaccion.monto * transaccion.moneda.calcular_precio_compra(
+            transaccion.cliente.beneficio_segmento
+        ))
+    
+    context = {
+        'transaccion': transaccion,
+        'monto_origen': monto_origen,
+        'monto_destino': monto_destino
+    }
+    
+    return render(request, 'transacciones/detalle_transaccion.html', context)
+
+@login_required
+def editar_transaccion(request, transaccion_id):
+    """
+    Vista para editar una transacción existente.
+    Solo permite editar transacciones en estado pendiente.
+    """
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+        
+        # Verificar que la transacción esté pendiente
+        if transaccion.estado.lower() != 'pendiente':
+            messages.error(request, 'Solo se pueden editar transacciones en estado pendiente.')
+            return redirect('transacciones:historial')
+            
+        # Aquí implementar lógica para editar la transacción
+        # Por ahora, solo redireccionar al historial
+        return redirect('transacciones:historial')
+        
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'La transacción solicitada no existe.')
+        return redirect('transacciones:historial')

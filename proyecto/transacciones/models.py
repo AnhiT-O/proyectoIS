@@ -63,6 +63,7 @@ class Transaccion(models.Model):
     estado = models.CharField(max_length=20, default='Pendiente')
     token = models.CharField(max_length=255, blank=True, null=True)  # Campo para el token
     token_expiracion = models.DateTimeField(blank=True, null=True)  # Campo para la expiración del token
+    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
         verbose_name = "Transacción"
