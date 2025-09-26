@@ -27,12 +27,12 @@
             </div>
 
             <div class="form-campo">
-                <label for="moneda">Seleccione la moneda:</label>
+                <label for="moneda">Seleccionar moneda:</label>
                 <select id="moneda" 
                         name="moneda" 
                         class="form-control" 
                         required>
-                    <option value="">Seleccione una moneda</option>
+                    <option value="" disabled selected hidden>Selecciona una moneda</option>
                     {% for moneda in monedas %}
                         <option value="{{ moneda.id }}" data-simbolo="{{ moneda.simbolo }}">
                             {{ moneda.simbolo }} - {{ moneda.nombre }}
@@ -48,11 +48,17 @@
                         id="monto" 
                         name="monto" 
                         class="form-control" 
-                        step="1" 
-                        min="1"
-                        placeholder="Ingrese el monto en guaraníes"
+                        step="0.01" 
+                        min="0.01"
+                        placeholder="Seleccione primero una moneda"
                         required>
                 <div id="monto-errors" class="form-errores" style="display: none;"></div>
+            </div>
+
+            <div class="form-campo" id="recargo-campo">
+                <label for="recargo">Medio de pago:</label>
+                {{ form.recargo }}
+                <div id="recargo-errors" class="form-errores" style="display: none;"></div>
             </div>
 
             <div class="form-campo">
@@ -100,22 +106,15 @@
 
         // Función para actualizar el step y min del input según la operación y moneda
         function actualizarStepMonto() {
-            if (tipoOperacion === 'compra') {
-                // Para compra: solo números enteros en guaraníes
-                montoInput.step = '1';
-                montoInput.min = '1'; // Monto mínimo de 1000 guaraníes
+            // Tanto compra como venta ahora usan decimales según la moneda seleccionada (moneda extranjera)
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
+                montoInput.min = montoInput.step;
             } else {
-                // Para venta: decimales según la moneda seleccionada
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    // Obtener decimales de la moneda desde el backend o usar un valor por defecto
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
-                    montoInput.min = montoInput.step; // Monto mínimo igual al step mínimo
-                } else {
-                    montoInput.step = '0.01'; // Valor por defecto
-                    montoInput.min = '0.01'; // Monto mínimo por defecto
-                }
+                montoInput.step = '0.01';
+                montoInput.min = '0.01';
             }
         }
 
@@ -145,19 +144,25 @@
             }
             tipoOperacion = btn.dataset.operacion;
             
+            // Mostrar campo de recargo para ambas operaciones
+            const recargoCampo = document.getElementById('recargo-campo');
+            const recargoSelect = document.getElementById('recargo');
+            recargoCampo.style.display = 'block';
+            
             // Actualizar placeholder según operación
-            if (tipoOperacion === 'compra') {
-                montoInput.placeholder = 'Ingrese el monto en guaraníes';
-            } else {
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                
+                if (tipoOperacion === 'compra') {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 } else {
-                    montoInput.placeholder = 'Ingrese el monto en la moneda extranjera';
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 }
+            } else {
+                montoInput.placeholder = 'Seleccione primero una moneda';
             }
                 
             // Actualizar step del input
@@ -167,6 +172,12 @@
             montoInput.value = '';
             resultadoDiv.textContent = '\u00A0';
             
+            // Ocultar información de recargo
+            const recargoInfo = document.getElementById('recargo-info');
+            if (recargoInfo) {
+                recargoInfo.style.display = 'none';
+            }
+            
             // Limpiar errores
             clearErrors();
         }
@@ -175,14 +186,17 @@
         monedaSelect.addEventListener('change', function() {
             actualizarStepMonto();
             
-            // Actualizar placeholder si estamos en modo venta
-            if (tipoOperacion === 'venta') {
-                const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-                if (monedaSeleccionada && monedaSeleccionada.value) {
-                    const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                    const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                    const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                    montoInput.placeholder = `Ingrese el monto en ${simbolo} (mín. ${montoMin} ${simbolo})`;
+            // Actualizar placeholder para cualquier operación
+            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
+            if (monedaSeleccionada && monedaSeleccionada.value) {
+                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
+                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
+                const simbolo = monedaSeleccionada.dataset.simbolo || '';
+                
+                if (tipoOperacion === 'compra') {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
+                } else {
+                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
                 }
             }
             
@@ -199,6 +213,10 @@
 
         // Inicializar step por defecto
         actualizarStepMonto();
+        
+        // Inicializar visibilidad del campo de recargo (visible para ambas operaciones)
+        const recargoCampo = document.getElementById('recargo-campo');
+        recargoCampo.style.display = 'block';
 
         // Manejar envío del formulario
         form.addEventListener('submit', function(e) {
@@ -229,6 +247,18 @@
                     } else {
                         // Fallback para compatibilidad
                         resultadoDiv.textContent = data.resultado;
+                    }
+                    
+                    // Mostrar/ocultar información de recargo
+                    const recargoInfo = document.getElementById('recargo-info');
+                    const recargoTexto = document.getElementById('recargo-texto');
+                    if (recargoInfo && recargoTexto) {
+                        if (data.recargo_aplicado) {
+                            recargoTexto.textContent = `Recargo aplicado: ${data.porcentaje_recargo}%`;
+                            recargoInfo.style.display = 'block';
+                        } else {
+                            recargoInfo.style.display = 'none';
+                        }
                     }
                 } else if (data.errors) {
                     // Mostrar errores de validación específicos
@@ -270,9 +300,20 @@
             });
         }
 
-        // Limpiar errores cuando el usuario empiece a escribir
+        // Limpiar errores cuando el usuario empiece a escribir o cambiar campos
         montoInput.addEventListener('input', clearErrors);
         monedaSelect.addEventListener('change', clearErrors);
+        recargoSelect.addEventListener('change', clearErrors);
+        
+        // Limpiar resultado cuando cambie el select de recargo
+        const recargoSelect = document.getElementById('recargo');
+        recargoSelect.addEventListener('change', function() {
+            resultadoDiv.textContent = '\u00A0';
+            const recargoInfo = document.getElementById('recargo-info');
+            if (recargoInfo) {
+                recargoInfo.style.display = 'none';
+            }
+        });
     });
 
     function resetForm() {
@@ -280,6 +321,16 @@
         const btnCompra = document.querySelector('[data-operacion="compra"]');
         form.reset();
         toggleOperacion(btnCompra);
+        
+        // Resetear el select de recargo al primer valor (vacío)
+        const recargoSelect = document.getElementById('recargo');
+        recargoSelect.selectedIndex = 0;
+        
+        // Ocultar información de recargo
+        const recargoInfo = document.getElementById('recargo-info');
+        if (recargoInfo) {
+            recargoInfo.style.display = 'none';
+        }
     }
     </script>
 {% endblock %}

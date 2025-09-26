@@ -41,9 +41,17 @@
                 {% endfor %}
             </div>
 
+            {% if form.clientes.errors %}
+                <div class="form-errores">
+                    {% for error in form.clientes.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div class="zona-botones">
-                    <button type="submit" class="btn-enviar">Asignar</button>
-                    <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
+                <button type="submit" class="btn-enviar">Asignar</button>
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
             </div>
         {% endif %}
     </form>

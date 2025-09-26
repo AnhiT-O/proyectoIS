@@ -1,5 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.conf import settings
+import stripe
+import logging
+
+# Configurar Stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 class Cliente(models.Model):
     TIPO_CLIENTE_CHOICES = [
@@ -52,6 +59,11 @@ class Cliente(models.Model):
         related_name='clientes_operados',
         verbose_name='Usuarios operadores'
     )
+    id_stripe = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -80,7 +92,145 @@ class Cliente(models.Model):
 
     def __str__(self):
         return f"{self.nombre}"
+
+    def tiene_tarjetas_activas(self):
+        """
+        Verifica si un cliente tiene tarjetas de crédito activas en Stripe.
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return False
         
+        try:
+            # Obtener los métodos de pago del cliente desde Stripe
+            payment_methods = stripe.PaymentMethod.list(
+                customer=self.id_stripe,
+                type='card'
+            )
+            
+            # Verificar si hay al menos una tarjeta activa
+            return len(payment_methods.data) > 0
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al consultar tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            return False
+        except Exception as e:
+            logger.error(f"Error inesperado al verificar tarjetas para cliente {self.nombre}: {str(e)}")
+            return False
+
+    def obtener_tarjetas_stripe(self):
+        """
+        Obtiene las tarjetas de crédito del cliente desde Stripe.
+        Retorna una lista de diccionarios con la información de las tarjetas.
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return []
+        
+        try:
+            # Obtener los métodos de pago del cliente desde Stripe
+            payment_methods = stripe.PaymentMethod.list(
+                customer=self.id_stripe,
+                type='card'
+            )
+            
+            tarjetas = []
+            for payment_method in payment_methods.data:
+                card = payment_method.card
+                tarjeta_info = {
+                    'id': payment_method.id,
+                    'brand': card.brand.upper(),
+                    'last4': card.last4,
+                    'exp_month': card.exp_month,
+                    'exp_year': card.exp_year,
+                    'funding': card.funding,
+                    'created': payment_method.created,
+                }
+                tarjetas.append(tarjeta_info)
+            
+            return tarjetas
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al obtener tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            return []
+        except Exception as e:
+            logger.error(f"Error inesperado al obtener tarjetas para cliente {self.nombre}: {str(e)}")
+            return []
+    def obtener_last4_tarjeta(self, payment_method_id):
+        """
+        Obtiene los últimos 4 dígitos de una tarjeta específica por su ID.
+        
+        Args:
+            payment_method_id (str): ID del método de pago en Stripe
+            
+        Returns:
+            str: Los últimos 4 dígitos de la tarjeta o None si no se encuentra
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return None
+        
+        try:
+            # Obtener el método de pago específico desde Stripe
+            payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+            
+            # Verificar que pertenece al cliente y es una tarjeta
+            if (payment_method.customer == self.id_stripe and 
+                payment_method.type == 'card'):
+                return payment_method.card.last4
+            else:
+                logger.warning(f"Tarjeta {payment_method_id} no pertenece al cliente {self.nombre} o no es una tarjeta")
+                return None
+                
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al obtener tarjeta {payment_method_id} para cliente {self.nombre}: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Error inesperado al obtener tarjeta {payment_method_id} para cliente {self.nombre}: {str(e)}")
+            return None
+
+    def obtener_tarjeta_por_id(self, payment_method_id):
+        """
+        Obtiene el objeto completo de una tarjeta específica por su ID.
+        
+        Args:
+            payment_method_id (str): ID del método de pago en Stripe
+            
+        Returns:
+            dict: Información completa de la tarjeta o None si no se encuentra
+        """
+        if not self or not getattr(self, 'id_stripe', None):
+            return None
+        
+        try:
+            # Obtener el método de pago específico desde Stripe
+            payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+            
+            # Verificar que pertenece al cliente y es una tarjeta
+            if (payment_method.customer == self.id_stripe and 
+                payment_method.type == 'card'):
+                
+                card = payment_method.card
+                tarjeta_info = {
+                    'id': payment_method.id,
+                    'brand': card.brand.upper(),
+                    'last4': card.last4,
+                    'exp_month': card.exp_month,
+                    'exp_year': card.exp_year,
+                    'funding': card.funding,
+                    'created': payment_method.created,
+                    'country': card.country,
+                    'fingerprint': card.fingerprint,
+                }
+                return tarjeta_info
+            else:
+                logger.warning(f"Tarjeta {payment_method_id} no pertenece al cliente {self.nombre} o no es una tarjeta")
+                return None
+                
+        except stripe.error.StripeError as e:
+            logger.error(f"Error al obtener tarjeta {payment_method_id} para cliente {self.nombre}: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Error inesperado al obtener tarjeta {payment_method_id} para cliente {self.nombre}: {str(e)}")
+            return None
+
     class Meta:
         db_table = 'clientes'
         verbose_name = 'Cliente'

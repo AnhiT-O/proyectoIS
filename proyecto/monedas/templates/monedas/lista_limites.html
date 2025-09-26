@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="cuerpo">
+    <div class="contenido">
+        <div class="gestion-cabecera">
+            <h2><i class="fas fa-chart-line"></i> {{ title }}</h2>
+            <div>
+                <a href="{% url 'transacciones:editar_recargos' %}" class="btn-primario">
+                    Editar Recargos
+                </a>  
+                <a href="{% url 'monedas:crear_limite' %}" class="btn-primario">
+                    Nuevo Límite
+                </a>  
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="zona-alertas">
+                {% for message in messages %}
+                    <div class="alerta-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Límite vigente actual -->
+        {% if limite_vigente %}
+        <div class="zona-conteo">
+            <div class="conteo-info">
+                <i class="fas fa-check-circle"></i> <strong>Límite Vigente Actual</strong>
+            </div>
+        </div>
+        <div class="zona-monedas" style="grid-template-columns: 1fr;">
+            <div class="tarjeta-moneda">
+                <div class="tarjeta-cabecera">
+                    <h3><i class="fas fa-chart-line"></i> Límites Activos</h3>
+                    <span class="etiqueta-activo">
+                        <i class="fas fa-check"></i> Vigente
+                    </span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                    <div style="text-align: center;">
+                        <strong>Límite Diario:</strong><br>
+                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem">
+                            {{ limite_vigente.limite_diario|format_number }} PYG
+                        </span>
+                    </div>
+                    <div style="text-align: center;">
+                        <strong>Límite Mensual:</strong><br>
+                        <span class="moneda-simbolo" style="font-size: 1.2rem; padding: 0.5rem 1rem">
+                            {{ limite_vigente.limite_mensual|format_number }} PYG
+                        </span>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1rem;">
+                    <div style="text-align: center;">
+                        <strong>Vigente desde:</strong><br>
+                        {{ limite_vigente.fecha_inicio }}
+                    </div>
+                    <div style="text-align: center;">
+                        <strong>Vigente hasta:</strong><br>
+                        {{ limite_vigente.fecha_fin|default:"Sin fecha límite" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alerta-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>¡Atención!</strong> No hay límites globales vigentes configurados.
+        </div>
+        {% endif %}
+
+        <!-- Lista de todos los límites -->
+        <div class="zona-conteo">
+            <div class="conteo-info">
+                <i class="fas fa-list"></i> <strong>Historial de Límites</strong>
+                <span class="conteo">{{ limites|length }}</span>
+            </div>
+        </div>
+        
+        {% if limites %}
+        <div class="contenedor-tabla">
+            <table class="gestion-tabla">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Límite Diario</th>
+                        <th>Límite Mensual</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for limite in limites %}
+                    <tr>
+                        <td>
+                            {% if limite.activo %}
+                                <span class="etiqueta-activo">
+                                    <i class="fas fa-check"></i> Activo
+                                </span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    <i class="fas fa-times"></i> Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ limite.limite_diario|format_number }} PYG</td>
+                        <td>{{ limite.limite_mensual|format_number }} PYG</td>
+                        <td>{{ limite.fecha_inicio }}</td>
+                        <td>{{ limite.fecha_fin|default:"Sin fecha límite" }}</td>
+                        <td>
+                            <div class="zona-acciones">
+                                <a href="{% url 'monedas:editar_limite' limite.pk %}" 
+                                   class="btn-editar">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                {% if not limite.activo %}
+                                <form method="post" action="{% url 'monedas:activar_limite' limite.pk %}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Está seguro de activar este límite? Se desactivarán todos los demás.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-activar">
+                                        <i class="fas fa-play"></i> Activar
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem;">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <p style="color: #666; margin-bottom: 1rem;">No hay límites configurados.</p>
+            <a href="{% url 'monedas:crear_limite' %}" class="btn-primario">
+                <i class="fas fa-plus"></i> Crear Primer Límite
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

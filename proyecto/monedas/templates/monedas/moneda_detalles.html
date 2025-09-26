@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ moneda.nombre }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h1 class="detalle-nombre">
+            {{ moneda.nombre }}
+        </h1>
+    </div>
+
+    <div class="zona-detalle">
+        <div class="seccion-info">
+            <!-- Información Básica -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">🔍</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Símbolo</div>
+                        <div class="info-valor">{{ moneda.simbolo }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🔢</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Decimales a Mostrar</div>
+                        <div class="info-valor">{{ moneda.decimales }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📦</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Stock Disponible</div>
+                        <div class="info-valor">
+                            {{ moneda.stock|intcomma }}
+                        </div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🔒</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Estado</div>
+                        <div class="info-valor">
+                            {% if moneda.activa %}
+                                <span class="etiqueta-activo">
+                                    Activa
+                                </span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    Inactiva
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Cotización -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">💰</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Tasa Base</div>
+                        <div class="info-valor">Gs. {{ moneda.tasa_base|intcomma }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📈</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Comisión de Compra</div>
+                        <div class="info-valor">Gs. {{ moneda.comision_compra|intcomma }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📉</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Comisión de Venta</div>
+                        <div class="info-valor">Gs. {{ moneda.comision_venta|intcomma }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📅</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Última Actualización de Cotización</div>
+                        <div class="info-valor">{{ moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            {% if perms.monedas.gestion or perms.monedas.cotizacion %}
+                <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-primario">
+                    Editar Moneda
+                </a>
+            {% endif %}
+            <a href="{% url 'monedas:lista_monedas' %}" class="btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

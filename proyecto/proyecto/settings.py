@@ -13,14 +13,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import stripe
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde el archivo .env en el directorio del proyecto Django
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-h7ll7v=(-+-galb%dh7_ev1ig+3is*a30q2wv%moa@1f3-cv9y'
@@ -44,7 +46,9 @@ INSTALLED_APPS = [
     'clientes',
     'roles',
     'monedas',
-    'medios_pago'
+    'transacciones',
+    'corsheaders',
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
 
 # Configuración de internacionalización
@@ -157,3 +163,20 @@ HANDLER403 = 'proyecto.views.custom_permission_denied_view'
 
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
+
+STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2GvbbBBNVzYHjiA6YaF4KAXeSnvjsO2LY7d0VwJm00WsPp8Oxu'
+STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5500",  # URL donde se sirve tu HTML de pasarela
+]
+
+# Configuración de monedas del sistema
+# Moneda base del sistema (Guaraní paraguayo)
+MONEDA_BASE_GUARANIES = {
+    'nombre': 'Guaraní',
+    'simbolo': 'PYG',
+    'codigo_iso': 'PYG',
+    'decimales': 0,  # El guaraní no utiliza decimales
+    'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
+}

@@ -62,11 +62,10 @@
                 <table class="gestion-tabla">
                     <thead>
                         <tr>
-                            <th style="width: 30%;">Estado</th>
-                            <th style="width: 30%;">Decimales a mostrar</th>
-                            <th style="width: 30%;">Tasa base</th>
-                            <th style="width: 30%;">Comisión de compra</th>
-                            <th style="width: 30%;">Comisión de venta</th>
+                            <th style="width: 25%;">Estado</th>
+                            <th style="width: 33%;">Precio de Compra</th>
+                            <th style="width: 33%;">Precio de Venta</th>
+                            <th style="width: 34%;">Stock</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,21 +76,21 @@
                                 </span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; font-weight:700;">{{ moneda.decimales }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.calcular_precio_compra|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.tasa_base|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.calcular_precio_venta|intcomma }}</span>
                             </td>
                             <td>
-                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_compra|intcomma }}</span>
-                            </td>
-                            <td>
-                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.comision_venta|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|intcomma }}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             <div class="zona-acciones" style="justify-content: flex-end">
+                <a href="{% url 'monedas:moneda_detalle' moneda.pk %}" class="btn-detalles" title="Ver detalles de la moneda">
+                    Detalles
+                </a>
                 {% if perms.monedas.gestion or perms.monedas.cotizacion %}
                 <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-editar" title="Editar moneda">
                     Editar

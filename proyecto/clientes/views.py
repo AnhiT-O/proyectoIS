@@ -2,12 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Q
-from django.http import JsonResponse
-from django.urls import reverse
+from django.conf import settings
 from .models import Cliente
-from .forms import ClienteForm
-from medios_pago.models import MedioPago, MedioPagoCliente
-from medios_pago.forms import TarjetaCreditoForm, CuentaBancariaForm
+from .forms import ClienteForm, AgregarTarjetaForm
+from medios_acreditacion.models import CuentaBancaria, Billetera
+from medios_acreditacion.forms import CuentaBancariaForm, BilleteraForm
+import stripe
+import logging
+
+# Configurar Stripe y logging
+stripe.api_key = settings.STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 def verificar_acceso_cliente(user, cliente):
     """
@@ -38,86 +43,21 @@ def get_cliente_detalle_url(request, cliente_pk):
     else:
         return f'/clientes/{cliente_pk}/'
 
-def procesar_medios_pago_cliente(cliente, usuario):
+def procesar_medios_acreditacion_cliente(cliente, usuario):
     """
-    Función auxiliar para procesar los medios de pago de un cliente
-    con la lógica de ocultación de datos sensibles según el tipo de usuario
+    Función auxiliar para procesar los medios de acreditación de un cliente
     """
     # Determinar si es administrador
     es_administrador = usuario.has_perm('clientes.gestion')
     
-    # Obtener medios de pago según el rol del usuario (usando el modelo intermedio)
-    if es_administrador:
-        # Administradores ven todos los medios (activos e inactivos)
-        medios_pago_cliente = MedioPagoCliente.objects.filter(
-            cliente=cliente
-        ).select_related('medio_pago').order_by('medio_pago__tipo')
-    else:
-        # Operadores solo ven medios activos
-        medios_pago_cliente = MedioPagoCliente.objects.filter(
-            cliente=cliente, 
-            activo=True, 
-            is_deleted=False
-        ).select_related('medio_pago').order_by('medio_pago__tipo')
-    
-    # Aplicar ocultación de datos sensibles para operadores
-    if not es_administrador:
-        for medio_cliente in medios_pago_cliente:
-            if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
-                # Ocultar datos sensibles de tarjeta
-                if medio_cliente.numero_tarjeta:
-                    medio_cliente.numero_tarjeta_oculto = '**** **** **** ' + medio_cliente.numero_tarjeta[-4:]
-                else:
-                    medio_cliente.numero_tarjeta_oculto = '****'
-                medio_cliente.cvv_tarjeta_oculto = '***'
-            elif medio_cliente.medio_pago.tipo == 'transferencia':
-                # Ocultar datos sensibles de cuenta bancaria
-                if medio_cliente.numero_cuenta:
-                    medio_cliente.numero_cuenta_oculto = '****' + medio_cliente.numero_cuenta[-4:] if len(medio_cliente.numero_cuenta) > 4 else '****'
-                else:
-                    medio_cliente.numero_cuenta_oculto = '****'
-    else:
-        # Administradores ven datos completos
-        for medio_cliente in medios_pago_cliente:
-            if medio_cliente.medio_pago.tipo == 'tarjeta_credito':
-                medio_cliente.numero_tarjeta_oculto = medio_cliente.numero_tarjeta
-                medio_cliente.cvv_tarjeta_oculto = medio_cliente.cvv_tarjeta
-            elif medio_cliente.medio_pago.tipo == 'transferencia':
-                medio_cliente.numero_cuenta_oculto = medio_cliente.numero_cuenta
-    
-    # Separar por tipo para mostrar en la interfaz
-    medios_por_tipo = {}
-    for medio_cliente in medios_pago_cliente:
-        tipo = medio_cliente.medio_pago.tipo
-        if tipo not in medios_por_tipo:
-            medios_por_tipo[tipo] = []
-        medios_por_tipo[tipo].append(medio_cliente)
-    
-    # Verificar si hay medios configurados por tipo
-    tiene_tarjetas_configuradas = any(
-        medio_cliente.tarjeta_credito_completa 
-        for medio_cliente in medios_por_tipo.get('tarjeta_credito', [])
-    )
-    
-    tiene_cuentas_configuradas = any(
-        medio_cliente.cuenta_bancaria_completa 
-        for medio_cliente in medios_por_tipo.get('transferencia', [])
-    )
-    
-    # Verificar si se pueden agregar más tarjetas (máximo 3)
-    tarjetas_configuradas = sum(
-        1 for medio_cliente in medios_por_tipo.get('tarjeta_credito', [])
-        if medio_cliente.tarjeta_credito_completa
-    )
-    puede_agregar_tarjeta = tarjetas_configuradas < 3
+    # Obtener medios de acreditación
+    cuentas_bancarias = cliente.cuentas_bancarias.all()
+    billeteras = cliente.billeteras.all()
     
     return {
-        'medios_pago': medios_pago_cliente,  # Ahora son objetos MedioPagoCliente
-        'medios_por_tipo': medios_por_tipo,
-        'tiene_tarjetas_configuradas': tiene_tarjetas_configuradas,
-        'tiene_cuentas_configuradas': tiene_cuentas_configuradas,
-        'puede_agregar_tarjeta': puede_agregar_tarjeta,
         'es_administrador': es_administrador,
+        'cuentas_bancarias': cuentas_bancarias,
+        'billeteras': billeteras,
     }
 
 @login_required
@@ -179,16 +119,19 @@ def cliente_detalle(request, pk):
     """Vista de detalle del cliente - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
+    tarjetas_stripe = cliente.obtener_tarjetas_stripe()
     # Verificar acceso híbrido (admin o usuario asociado)
     if not verificar_acceso_cliente(request.user, cliente):
         messages.error(request, 'No tienes permisos para ver este cliente.')
         return redirect('inicio')
     
-    # Usar función auxiliar para procesar medios de pago
-    medios_data = procesar_medios_pago_cliente(cliente, request.user)
+    # Usar función auxiliar para procesar medios de acreditación
+    medios_data = procesar_medios_acreditacion_cliente(cliente, request.user)
     
     context = {
         'cliente': cliente,
+        'tarjetas_stripe': tarjetas_stripe,
+        'total_tarjetas': len(tarjetas_stripe),
         **medios_data
     }
     return render(request, 'clientes/cliente_detalle.html', context)
@@ -209,119 +152,17 @@ def cliente_editar(request, pk):
 
 
 @login_required
-def cliente_agregar_tarjeta(request, pk):
-    """Vista para agregar una tarjeta de crédito al cliente - Acceso híbrido"""
+def agregar_tarjeta(request, pk):
+    """Vista para agregar tarjeta de crédito a un cliente - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
     if not verificar_acceso_cliente(request.user, cliente):
-        messages.error(request, 'No tienes permisos para gestionar este cliente.')
-        return redirect('inicio')
-    
-    # Verificar límite de tarjetas configuradas activas (máximo 3)
-    tarjetas_configuradas = MedioPagoCliente.objects.filter(
-        cliente=cliente,
-        medio_pago__tipo='tarjeta_credito',
-        numero_tarjeta__isnull=False,
-        activo=True,
-        is_deleted=False
-    ).count()
-    
-    if tarjetas_configuradas >= 3:
-        messages.error(request, f'El cliente {cliente.nombre} ya tiene el máximo de 3 tarjetas de crédito configuradas.')
-        return get_cliente_detalle_redirect(request, cliente.pk)
-    
-    if request.method == 'POST':
-        form = TarjetaCreditoForm(request.POST)
-        if form.is_valid():
-            numero_tarjeta = form.cleaned_data['numero_tarjeta']
-            
-            # Buscar si existe una tarjeta con EXACTAMENTE los mismos datos
-            tarjeta_existente = MedioPagoCliente.objects.filter(
-                cliente=cliente,
-                medio_pago__tipo='tarjeta_credito',
-                numero_tarjeta=numero_tarjeta,
-                cvv_tarjeta=form.cleaned_data['cvv'],
-                nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
-                fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
-                descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                moneda_tc=form.cleaned_data['moneda_tc']
-            ).first()
-            
-            if tarjeta_existente:
-                # Si existe con exactamente los mismos datos pero está inactiva, reactivarla
-                if not tarjeta_existente.activo or tarjeta_existente.is_deleted:
-                    tarjeta_existente.activo = True
-                    tarjeta_existente.is_deleted = False
-                    tarjeta_existente.save()
-                    
-                    messages.success(request, f'Tarjeta de crédito "{tarjeta_existente.descripcion_tarjeta}" agregada exitosamente.')
-                else:
-                    messages.warning(request, 'Esta tarjeta ya está activa y asociada al cliente.')
-            else:
-                # Verificar si existe una tarjeta con el mismo número pero datos diferentes
-                tarjeta_mismo_numero = MedioPagoCliente.objects.filter(
-                    cliente=cliente,
-                    medio_pago__tipo='tarjeta_credito',
-                    numero_tarjeta=numero_tarjeta
-                ).first()
-                
-                if tarjeta_mismo_numero:
-                    messages.error(request, 'Ya existe una tarjeta con este número pero con datos diferentes. Si desea cambiar los datos, primero debe eliminar la tarjeta anterior.')
-                    return render(request, 'clientes/cliente_agregar_tarjeta.html', {
-                        'form': form,
-                        'cliente': cliente,
-                        'titulo': 'Agregar Tarjeta de Crédito',
-                        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
-                    })
-                
-                # Obtener o crear el medio de pago tipo tarjeta de crédito
-                medio_pago_tc, created = MedioPago.objects.get_or_create(
-                    tipo='tarjeta_credito',
-                    defaults={'activo': True}
-                )
-                
-                # Crear un nuevo registro en la tabla intermedia
-                MedioPagoCliente.objects.create(
-                    cliente=cliente,
-                    medio_pago=medio_pago_tc,
-                    numero_tarjeta=numero_tarjeta,
-                    cvv_tarjeta=form.cleaned_data['cvv'],
-                    nombre_titular_tarjeta=form.cleaned_data['nombre_titular_tarjeta'],
-                    fecha_vencimiento_tc=form.cleaned_data['fecha_vencimiento_tc'],
-                    descripcion_tarjeta=form.cleaned_data['descripcion_tarjeta'],
-                    moneda_tc=form.cleaned_data['moneda_tc'],
-                    activo=True,
-                    is_deleted=False
-                )
-                
-                messages.success(request, f'Tarjeta de crédito "{form.cleaned_data["descripcion_tarjeta"]}" agregada exitosamente.')
-            
-            return get_cliente_detalle_redirect(request, cliente.pk)
-    else:
-        form = TarjetaCreditoForm()
-    
-    context = {
-        'form': form,
-        'cliente': cliente,
-        'titulo': 'Agregar Tarjeta de Crédito',
-        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
-    }
-    return render(request, 'clientes/cliente_agregar_tarjeta.html', context)
-
-
-@login_required
-def cliente_agregar_cuenta(request, pk):
-    """Vista para agregar una cuenta bancaria al cliente - Acceso híbrido"""
-    cliente = get_object_or_404(Cliente, pk=pk)
-    
-    # Verificar acceso híbrido (admin o usuario asociado)
-    if not verificar_acceso_cliente(request.user, cliente):
-        messages.error(request, 'No tienes permisos para gestionar este cliente.')
+        messages.error(request, 'No tienes permisos para gestionar las tarjetas de este cliente.')
         return redirect('inicio')
     
     if request.method == 'POST':
-        form = CuentaBancariaForm(request.POST)
+        form = AgregarTarjetaForm(request.POST, cliente=cliente)
         if form.is_valid():
             numero_cuenta = form.cleaned_data['numero_cuenta']
             
@@ -384,6 +225,46 @@ def cliente_agregar_cuenta(request, pk):
             
             return get_cliente_detalle_redirect(request, cliente.pk)
     else:
+        form = AgregarTarjetaForm(cliente=cliente)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'clientes/cliente_agregar_cuenta.html', context)
+
+def cliente_agregar_cuenta_bancaria(request, pk):
+    """Vista para agregar una cuenta bancaria al cliente - Acceso híbrido"""
+    cliente = get_object_or_404(Cliente, pk=pk)
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar este cliente.')
+        return redirect('inicio')
+    
+    if request.method == 'POST':
+        form = CuentaBancariaForm(request.POST)
+        if form.is_valid():
+            cuenta_bancaria = form.save(commit=False)
+            cuenta_bancaria.cliente = cliente
+            
+            # Verificar si ya existe una cuenta con los mismos datos
+            cuenta_existente = CuentaBancaria.objects.filter(
+                cliente=cliente,
+                banco=cuenta_bancaria.banco,
+                numero_cuenta=cuenta_bancaria.numero_cuenta,
+                nombre_titular=cuenta_bancaria.nombre_titular
+            ).first()
+            
+            if cuenta_existente:
+                messages.warning(request, 'Ya existe una cuenta bancaria con estos datos para este cliente.')
+            else:
+                cuenta_bancaria.save()
+                messages.success(request, 'Cuenta bancaria agregada exitosamente.')
+            
+            return get_cliente_detalle_redirect(request, cliente.pk)
+    else:
         form = CuentaBancariaForm()
     
     context = {
@@ -392,21 +273,13 @@ def cliente_agregar_cuenta(request, pk):
         'titulo': 'Agregar Cuenta Bancaria',
         'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
     }
-    return render(request, 'clientes/cliente_agregar_cuenta.html', context)
-
+    return render(request, 'clientes/agregar_cuenta_bancaria.html', context)
 
 @login_required
-def cliente_cambiar_estado_medio_pago(request, pk, medio_id):
-    """Vista para activar/desactivar un medio de pago específico del cliente - Acceso híbrido"""
+def eliminar_tarjeta(request, pk, payment_method_id):
+    """Vista para eliminar tarjeta de crédito de un cliente - Acceso híbrido"""
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
-        return redirect('clientes:cliente_detalle', pk=pk)
-    
-    cliente = get_object_or_404(Cliente, pk=pk)
-    
-    # Verificar acceso híbrido (admin o usuario asociado)
-    if not verificar_acceso_cliente(request.user, cliente):
-        messages.error(request, 'No tienes permisos para gestionar este cliente.')
         return redirect('inicio')
     
     medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
@@ -422,8 +295,8 @@ def cliente_cambiar_estado_medio_pago(request, pk, medio_id):
 
 
 @login_required
-def cliente_eliminar_medio_pago(request, pk, medio_id):
-    """Vista para desactivar un medio de pago del cliente - Solo POST con modal"""
+def cliente_eliminar_medio_acreditacion(request, pk, tipo, medio_id):
+    """Vista para eliminar un medio de acreditación (cuenta bancaria o billetera) - Acceso híbrido"""
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
@@ -431,50 +304,64 @@ def cliente_eliminar_medio_pago(request, pk, medio_id):
         messages.error(request, 'No tienes permisos para gestionar este cliente.')
         return redirect('inicio')
     
-    medio_pago_cliente = get_object_or_404(MedioPagoCliente, id=medio_id, cliente=cliente)
+    if request.method == 'POST':
+        if tipo == 'cuenta':
+            medio = get_object_or_404(CuentaBancaria, id=medio_id, cliente=cliente)
+            descripcion = f'Cuenta {medio.banco} - {medio.numero_cuenta}'
+        elif tipo == 'billetera':
+            medio = get_object_or_404(Billetera, id=medio_id, cliente=cliente)
+            descripcion = f'Billetera {medio.get_tipo_billetera_display()} - {medio.telefono}'
+        else:
+            messages.error(request, 'Tipo de medio de acreditación no válido.')
+            return get_cliente_detalle_redirect(request, cliente.pk)
+        
+        medio.delete()
+        messages.success(request, f'{descripcion} eliminado exitosamente.')
+        
+        return get_cliente_detalle_redirect(request, cliente.pk)
     
-    # No permitir eliminar medios de pago básicos (efectivo, cheque sin configurar)
-    medios_basicos = ['efectivo', 'cheque']
-    if medio_pago_cliente.medio_pago.tipo in medios_basicos and not any([
-        medio_pago_cliente.numero_tarjeta, 
-        medio_pago_cliente.numero_cuenta, 
-        medio_pago_cliente.numero_billetera
-    ]):
-        messages.error(request, f'No se puede eliminar el medio de pago {medio_pago_cliente.medio_pago.get_tipo_display()} básico.')
-        return redirect('clientes:cliente_detalle', pk=pk)
+    # Solo aceptar POST
+    messages.error(request, 'Acción no permitida.')
+    return get_cliente_detalle_redirect(request, cliente.pk)
+
+def cliente_agregar_billetera(request, pk):
+    """Vista para agregar una billetera electrónica al cliente - Acceso híbrido"""
+    cliente = get_object_or_404(Cliente, pk=pk)
     
-    # Permitir eliminar transferencias solo si están configuradas
-    if medio_pago_cliente.medio_pago.tipo == 'transferencia' and not medio_pago_cliente.numero_cuenta:
-        messages.error(request, f'No se puede eliminar la transferencia básica sin configurar.')
-        return redirect('clientes:cliente_detalle', pk=pk)
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para gestionar este cliente.')
+        return redirect('inicio')
     
     if request.method == 'POST':
-        descripcion_completa = medio_pago_cliente.get_descripcion_completa()
-        
-        # Solo desactivar el medio de pago, no marcarlo como eliminado
-        # Esto permite que aparezca en el panel de administración como inactivo
-        medio_pago_cliente.activo = False
-        medio_pago_cliente.save()
-        
-        # Si es una petición AJAX, devolver JSON para mostrar modal de éxito
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # Determinar la URL de redirección basada en el referer
-            referer = request.META.get('HTTP_REFERER', '')
-            if 'usuarios/cliente' in referer:
-                redirect_url = reverse('usuarios:detalle_cliente', kwargs={'cliente_id': pk})
+        form = BilleteraForm(request.POST)
+        if form.is_valid():
+            billetera = form.save(commit=False)
+            billetera.cliente = cliente
+            
+            # Verificar si ya existe una billetera con los mismos datos
+            billetera_existente = Billetera.objects.filter(
+                cliente=cliente,
+                tipo_billetera=billetera.tipo_billetera,
+                telefono=billetera.telefono,
+                nombre_titular=billetera.nombre_titular,
+                nro_documento=billetera.nro_documento
+            ).first()
+            
+            if billetera_existente:
+                messages.warning(request, 'Ya existe una billetera con estos datos para este cliente.')
             else:
-                redirect_url = reverse('clientes:cliente_detalle', kwargs={'pk': pk})
-                
-            return JsonResponse({
-                'success': True,
-                'message': f'{descripcion_completa} eliminado exitosamente.',
-                'descripcion': descripcion_completa,
-                'redirect_url': redirect_url
-            })
-        
-        messages.success(request, f'{descripcion_completa} eliminado exitosamente.')
-        return redirect('clientes:cliente_detalle', pk=pk)
+                billetera.save()
+                messages.success(request, 'Billetera agregada exitosamente.')
+            
+            return get_cliente_detalle_redirect(request, cliente.pk)
+    else:
+        form = BilleteraForm()
     
-    # Solo aceptar POST - ya no necesitamos página de confirmación con modal
-    messages.error(request, 'Acción no permitida.')
-    return redirect('clientes:cliente_detalle', pk=pk)
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'titulo': 'Agregar Billetera Electrónica',
+        'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
+    }
+    return render(request, 'clientes/agregar_billetera.html', context)

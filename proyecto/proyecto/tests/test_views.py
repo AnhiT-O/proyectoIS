@@ -330,7 +330,7 @@ class TestSimularView:
         data = json.loads(response.content)
         assert not data['success']
         assert 'monto' in data['errors']
-        assert 'El monto es obligatorio.' in data['errors']['monto']
+        assert 'Debes ingresar un monto numérico.' in data['errors']['monto']
         
         # Probar con monto inválido (negativo)
         response = self.client.post(reverse('simular'), {
@@ -345,27 +345,25 @@ class TestSimularView:
 
     def test_realiza_conversion_compra_correctamente(self):
         """
-        Prueba 14a: Realizar conversión de compra correctamente (PYG a moneda extranjera)
+        Prueba 14a: Realizar conversión de compra correctamente (moneda extranjera a PYG)
         """
         self.client.login(username='simuser', password='testpass')
         
         response = self.client.post(reverse('simular'), {
             'moneda': str(self.moneda.id),
-            'monto': '7250',  # PYG
+            'monto': '1.50',  # Moneda extranjera
             'operacion': 'compra'
         })
         
         data = json.loads(response.content)
         assert data['success']
         assert 'resultado_numerico' in data
-        assert data['tipo_resultado'] == 'moneda_extranjera'
-        assert data['simbolo'] == 'TSD'
-        assert data['decimales'] == 2
+        assert data['tipo_resultado'] == 'guaranies'
         
-        # Verificar cálculo: 7250 / precio_venta
+        # Verificar cálculo: 1.50 * precio_venta
         precio_venta = self.moneda.calcular_precio_venta(0)
-        resultado_esperado = float(Decimal('7250') / precio_venta)
-        assert abs(data['resultado_numerico'] - resultado_esperado) < 0.001
+        resultado_esperado = int(Decimal('1.50') * precio_venta)
+        assert data['resultado_numerico'] == resultado_esperado
 
     def test_realiza_conversion_venta_correctamente(self):
         """

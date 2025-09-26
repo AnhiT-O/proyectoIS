@@ -57,6 +57,13 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
+                                    
+                                    <!-- Gestión de Límites -->
+                                    {% if perms.monedas.gestion %}
+                                        <a href="{% url 'monedas:lista_limites' %}" class="gestion-seleccion">
+                                            📊 Gestionar Límites
+                                        </a>
+                                    {% endif %}
                                   
                                 </div>
                             </div>
@@ -65,7 +72,7 @@
                         <!-- Mostrar Ver Clientes solo si el usuario tiene clientes asociados -->
                         {% if user.clientes_operados.exists %}
                             <a href="{% url 'usuarios:mis_clientes' %}" class="btn-panel">
-                                👥 Ver Clientes
+                                👥 Mis Clientes
                             </a>
                         {% endif %}
                         
@@ -106,7 +113,6 @@
     </main>
 
     {% block extra_js %}{% endblock %}
-    
     <script src="{% static 'global.js' %}"></script>
 </body>
 </html>

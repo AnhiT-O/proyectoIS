@@ -55,6 +55,7 @@
     border-radius: 10px;
     margin-bottom: 2rem;
     border: 1px solid #4b5563;
+    transition: all 0.2s;
 }
 
 .perfil-info:hover {

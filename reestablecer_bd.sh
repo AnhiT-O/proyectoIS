@@ -46,6 +46,8 @@ find ./proyecto -type f -path "*/medios_pago/migrations/*" -name "[0-9]*.py" -ex
 find ./proyecto -type f -path "*/monedas/migrations/*" -name "[0-9]*.py" -exec rm {} +
 find ./proyecto -type f -path "*/roles/migrations/*" -name "[0-9]*.py" -exec rm {} +
 find ./proyecto -type f -path "*/usuarios/migrations/*" -name "[0-9]*.py" -exec rm {} +
+find ./proyecto -type f -path "*/medios_acreditacion/migrations/*" -name "[0-9]*.py" -exec rm {} +
+find ./proyecto -type f -path "*/transacciones/migrations/*" -name "[0-9]*.py" -exec rm {} +
 
 # 4. Ejecución de las migraciones de Django
 # Asume que te encuentras en el directorio raíz de tu proyecto de Django

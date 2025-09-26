@@ -69,6 +69,7 @@ pip install django #framework del proyecto
 pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
 pip install gunicorn #para despliegue de la página
+pip install stripe #pasarela de pagos
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
@@ -80,6 +81,7 @@ pip install python-dotenv #variables de entorno
 pip install pytest #para pruebas unitarias
 pip install pytest-django #integración de pruebas con django
 pip install sphinx #para documentación automática de código
+pip install stripe #pasarela de pagos
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
@@ -265,3 +267,44 @@ sudo systemctl restart nginx
   proyecto$ cd docs
   proyecto/docs$ make html
 ```
+
+## Configuración de STRIPE
+- Iniciar sesión en google con la cuenta globalexchange.is2.g1@gmail.com
+- Ir a https://stripe.com/es-us desde la cuenta de global exchange e iniciar sesión 'continuar con correo electrónico'
+- Configura la CLI de Stripe
+```bash
+  $ source dvenv/bin/activate
+  $ brew install stripe-cli
+  $ stripe login # Pulsa la tecla Enter en el teclado para completar el proceso de autenticación en el navegador.
+
+```
+- Instalar y/o actualizar librería Stripe
+```bash
+  $ source dvenv/bin/activate
+  $ pip install --upgrade stripe
+```
+
+- Crear un oyente local para webhook (con dvenv activo ejecutar el siguiente comando en terminal)
+```bash
+  $ stripe listen --forward-to localhost:4242/webhook
+  $ stripe trigger payment_intent.succeeded
+```
+
+- Crear variables de entorno en el archivo .env
+  #https://dashboard.stripe.com/acct_1S42lzQPV8qMpvzT/test/dashboard   --> en ese en lace aparecen las claves que hay que copiar en el archivo .env
+```bash
+  # Claves de Stripe
+  STRIPE_PUBLIC_KEY= # Clave publicable
+  STRIPE_SECRET_KEY= # Clave secreta
+  STRIPE_ENDPOINT_SECRET= # Clave obtenida desde terminal --> whsec_...
+```
+- Para la clave STRIPE_ENDPOINT_SECRET ejecutar lo siguiente en terminal
+```bash
+  $ stripe listen
+```
+
+- En terminal se mostrará "Your webhook signing secret is whsec_ ...."
+- Copiar desde whsec_  en adelante, esa es la clave para la variable STRIPE_ENDPOINT_SECRET
+
+## Enlace a tarjetas de prueba de STRIPE
+- https://docs.stripe.com/testing?locale=es-419 

@@ -107,12 +107,24 @@
                     </div>
                 {% endif %}
             </div>
+
+            <div class="form-campo">
+                <label for="{{ form.stock.id_for_label }}">Stock</label>
+                {{ form.stock }}
+                {% if form.stock.errors %}
+                    <div class="form-errores">
+                        {% for error in form.stock.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         {% endif %}
 
                 <div class="zona-botones">
             <button type="submit" class="btn-primario">
                 {% if form.instance.pk %}
-                    Guardar Cambios
+                    Editar Moneda
                 {% else %}
                     Crear Moneda
                 {% endif %}
