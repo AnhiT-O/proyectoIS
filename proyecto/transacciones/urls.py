@@ -49,8 +49,6 @@ urlpatterns = [
     path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
     path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
 
-    # URLs para manejar la notificación de cambios
-    path('operaciones/cotizacion-cambiada/<int:transaccion_id>/', views.mostrar_cambio_cotizacion, name='cotizacion_cambiada'),
-    path('operaciones/cancelar-por-timeout/', views.cancelar_por_timeout, name='cancelar_por_timeout'),
-    path('operaciones/verificar-cambios/<int:transaccion_id>/', views.verificar_cambio_cotizacion, name='verificar_cambios'),
+    # URL para timeout
+    path('cancelar-por-timeout/', views.cancelar_por_timeout, name='cancelar_por_timeout'),
 ]
