@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle {{ rol.name }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h3 class="detalle-nombre"> {{ rol.name }}</h3>
+    </div>
+    <div class="zona-detalle">
+        <div class="info-columna">
+            <div class="info-celda">
+                <div class="info-contenido">
+                    <div class="info-titulo">Descripción:</div>
+                    <div class="info-valor">{{ rol.descripcion|default:"Sin descripción" }}</div>
+                </div>
+            </div>
+            <div class="info-celda">
+                <div class="info-contenido">
+                    <div class="info-titulo">Permisos Asignados:</div>
+                    <div class="lista-permisos">
+                        {% for permiso in rol.permissions.all %}
+                            <div class="permiso">{{ permiso.name }}</div>
+                        {% empty %}
+                            <div class="sin-permisos">No hay permisos asignados a este rol</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            {% if perms.auth.change_group %}
+            <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-primario">
+                 Editar Rol
+            </a>
+            {% endif %}
+            <a href="{% url 'roles:listar_roles' %}" class="btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

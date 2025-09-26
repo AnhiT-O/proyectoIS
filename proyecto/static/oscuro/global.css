@@ -1,0 +1,653 @@
+/* ESTILOS DE BOTONES */
+
+/* Botón primario - Acción principal */
+.btn-primario {
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    color: white;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0.25rem;
+}
+
+.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 95, 247, 0.6);
+}
+
+/* Botón secundario - Acción alternativa */
+.btn-secundario {
+    color: #8b5cf6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 0.5px solid #8b5cf6;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0.25rem;
+    box-shadow: none;
+    background: transparent;
+}
+
+.btn-secundario:hover {
+    background: #8b5cf6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+}
+
+/* Botones de formularios */
+.btn-enviar {
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    color: white;
+    width: auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0.25rem;
+}
+
+.btn-enviar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 95, 247, 0.6);
+}
+
+.btn-atras {
+    background: transparent;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #8b5cf6;
+    border: 0.5px solid #8b5cf6;
+    width: auto;
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0.25rem;
+    box-shadow: none;
+}
+
+.btn-atras:hover {
+    background: #8b5cf6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+}
+
+/* Botón de búsqueda */
+.btn-buscar {
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(79, 95, 247, 0.5);
+    font-size: 0.9rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-width: 80px;
+}
+
+.btn-buscar:hover {
+    background: linear-gradient(135deg, #3b4acb 0%, #5b61e8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 95, 247, 0.6);
+}
+
+/* Botón de limpiar búsqueda */
+.btn-limpiar {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #d1d5db;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-width: 80px;
+    box-sizing: border-box;
+}
+
+.btn-limpiar:hover {
+    background: #4b5563;
+    color: #f3f4f6;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+/* Botón para ver detalles */
+.btn-detalles {
+    background: linear-gradient(135deg, #17a2b8 0%, #117c8d 100%);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-detalles:hover, .btn-editar:hover, .btn-activar:hover, .btn-desactivar:hover {
+    transform: scale(1.05);
+}
+
+/* Botón para editar */
+.btn-editar {
+    background: linear-gradient(135deg, #ffc107 0%, #daa405 100%);
+    color: #212529;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Botones para activar y desactivar */
+.btn-activar {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-desactivar {
+    background: linear-gradient(135deg, #dc3545 0%, #a52734 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-panel {
+    cursor: pointer;
+    user-select: none;
+    color: #8b5cf6;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin: 0.25rem;
+    box-shadow: none;
+    background: transparent;
+}
+
+/* Botón X para remover rol */
+.btn-remover-rol {
+    background-color: #024892;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    margin-left: 0.2rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-remover-rol:hover {
+    background-color: #c82333;
+    transform: scale(1.1);
+}
+
+/* ESTILOS PARA LAS ALERTAS */
+
+.zona-alertas {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+}
+
+.alerta-success {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #064e3b;
+    color: #10b981;
+    border-left: 4px solid #10b981;
+}
+
+.alerta-error {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #7f1d1d;
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+}
+
+.alerta-info {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #0c4a6e;
+    color: #0ea5e9;
+    border-left: 4px solid #0ea5e9;
+}
+
+.alerta-warning {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background-color: #78350f;
+    color: #f59e0b;
+    border-left: 4px solid #f59e0b;
+}
+
+/* ESTILOS PARA LA BARRA DE NAVEGACIÓN */
+
+.zona-barra {
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #2d3748;
+}
+
+.barra-contenido {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.barra-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8b5cf6;
+    text-decoration: none;
+    margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
+}
+
+.barra-navegacion {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1; /* Toma el espacio disponible */
+    justify-content: flex-end; /* Alinea el contenido hacia la derecha */
+}
+
+.zona-usuario {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1rem;
+}
+
+.usuario-nombre {
+    color: #e0e6ed;
+    font-weight: bold;
+}
+
+/* Estilos para el dropdown del panel de administración */
+.panel-gestiones {
+    position: relative;
+    display: inline-block;
+}
+
+.gestion-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    min-width: 250px;
+    background-color: #2d3748;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+}
+
+.gestion-menu.show {
+    display: block;
+}
+
+.gestion-seleccion {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    clear: both;
+    font-weight: bold;
+    color: #e0e6ed;
+    text-decoration: none;
+    text-align: left;
+    background-color: transparent;
+    border: 0;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.gestion-seleccion:not(:last-child) {
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.gestion-separador {
+    height: 1px;
+    background-color: rgba(139, 92, 246, 0.5);
+    margin: 0.25rem 0;
+}
+
+.gestion-seleccion:hover,
+.gestion-seleccion:focus {
+    color: white;
+    background-color: #8b5cf6;
+}
+
+/* ESTILOS DE ETIQUETAS */
+
+.rol-admin {
+    background: #dc3545;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 0.3rem;
+}
+
+.rol-analista {
+    background: #28a745;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 0.3rem;
+}
+
+.rol-operador {
+    background: #007bff;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 0.3rem;
+}
+
+.rol-otro {
+    background: #760199;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+    margin-bottom: 0.3rem;
+}
+
+.etiqueta-activo {
+    background: #064e3b;
+    color: #10b981;
+    border: 1px solid #10b981;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.etiqueta-bloqueado {
+    background: #7f1d1d;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+/* ESTILOS GENERALES */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    color: #e0e6ed;
+}
+
+/* ESTILOS PARA EL POP-UP DE OPERACIONES */
+
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.popup-contenido {
+    background: #2d3748;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+    border: 1px solid #4a5568;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.popup-cabecera {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #4a5568;
+    background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.popup-cabecera h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.popup-cerrar:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.popup-cuerpo {
+    padding: 2rem 1.5rem;
+}
+
+.popup-cuerpo p {
+    margin-bottom: 1.5rem;
+    color: #a0aec0;
+    font-size: 1rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.popup-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn-opcion-comprar,
+.btn-opcion-vender {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #4a5568;
+    border-radius: 12px;
+    background: #1a202c;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    gap: 0.5rem;
+    color: #e0e6ed;
+}
+
+.btn-opcion-comprar:hover {
+    border-color: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(56, 161, 105, 0.3);
+    background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+    color: white;
+}
+
+.btn-opcion-vender:hover {
+    border-color: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3);
+    background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+    color: white;
+}
+
+.icono-opcion {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.texto-opcion {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.descripcion-opcion {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+.btn-opcion-comprar:hover .descripcion-opcion,
+.btn-opcion-vender:hover .descripcion-opcion {
+    opacity: 0.9;
+}

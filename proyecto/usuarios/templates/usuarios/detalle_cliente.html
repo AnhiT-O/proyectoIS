@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Detalle del Cliente - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+<style>
+    .perfil-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--color-borde, #667eea); 
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    }
+
+    .perfil-header .perfil-titulo {
+    margin: 0;
+    }
+
+    .perfil-header .acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: -0.3rem; 
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="cabecera-perfil">
+        <div class="logo">👤</div>
+        <h1 class="titulo">Detalle del Cliente</h1>
+        <p class="subtitulo">Información completa del cliente {{ cliente.nombre }}</p>
+    </div>
+
+    <div class="zona-perfil">
+        <div class="perfil-info">
+            <h2 class="perfil-titulo">Información Personal</h2>
+            <div class="info-campos">
+                <div class="info-campo">
+                    <div class="info-titulo">Nombre Completo</div>
+                    <div class="info-valor">{{ cliente.nombre }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Tipo de Cliente</div>
+                    <div class="info-valor">{{ cliente.get_tipoCliente_display }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Correo Electrónico</div>
+                    <div class="info-valor">{{ cliente.correoElecCliente }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Teléfono</div>
+                    <div class="info-valor">{{ cliente.telefono }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">{{ cliente.get_tipoDocCliente_display }}</div>
+                    <div class="info-valor">{{ cliente.docCliente }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Dirección</div>
+                    <div class="info-valor">{{ cliente.direccion }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Ocupación</div>
+                    <div class="info-valor">{{ cliente.ocupacion }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Segmento</div>
+                    <div class="info-valor">{{ cliente.get_segmento_display }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Declaración Jurada</div>
+                    <div class="info-valor">
+                        {% if cliente.declaracion_jurada %}
+                            <span class="etiqueta-activo">Firmada</span>
+                        {% else %}
+                            <span class="etiqueta-bloqueado">Pendiente</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="perfil-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px">
+                <h2 class="perfil-titulo" style="margin: 0; border-bottom: none; padding-bottom: 0;">Tarjetas de Crédito</h2>
+                <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-primario" style="padding:0.5rem 1rem">
+                    Agregar Tarjeta
+                </a>
+            </div>
+            {% if tarjetas_stripe %}
+            <div class="lista-clientes">
+                {% for tarjeta in tarjetas_stripe %}
+                    <div class="cliente">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <strong>**** **** **** {{ tarjeta.last4 }}</strong>
+                                <br>
+                                <small style="color: #6c757d;">
+                                    Marca: {{ tarjeta.brand|title }} 
+                                    | Expira: {{ tarjeta.exp_month }}/{{ tarjeta.exp_year }}
+                                </small>
+                            </div>
+                            <div class="acciones-tarjeta" style="margin-left: 10px;">
+                                <form method="post" action="{% url 'usuarios:eliminar_tarjeta_cliente' cliente.pk tarjeta.id %}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-desactivar" title="Eliminar tarjeta">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <p style="color: #6c757d; margin-bottom: 15px;">Este cliente no tiene tarjetas registradas.</p>
+            {% endif %}
+        </div>
+        <!-- Sección de Medios de Acreditación -->
+        <div class="perfil-info" style="margin-top: 2rem;">
+            <div class="perfil-header" style="align-items: end">
+                <h2 class="perfil-titulo" style="border-bottom: none">Medios de Acreditación</h2>
+                <div class="acciones">
+                    <a href="{% url 'clientes:cliente_agregar_cuenta_bancaria' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        Agregar Cuenta Bancaria
+                    </a>
+                    <a href="{% url 'clientes:cliente_agregar_billetera' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        Agregar Billetera
+                    </a>
+                </div>
+            </div>
+
+            {% if cuentas_bancarias or billeteras %}
+                <div class="info-campos">
+                    <!-- Cuentas Bancarias -->
+                    {% for cuenta in cuentas_bancarias %}
+                    <div class="info-campo">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">Cuenta Bancaria</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta' cuenta.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta cuenta bancaria?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Banco:</strong> {{ cuenta.get_banco_display }}<br>
+                            <strong>Número:</strong> {{ cuenta.numero_cuenta }}<br>
+                            <strong>Titular:</strong> {{ cuenta.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ cuenta.nro_documento }}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Billeteras -->
+                    {% for billetera in billeteras %}
+                    <div class="info-campo" style="border-left: 4px solid #f0de3c;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta billetera?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Teléfono:</strong> {{ billetera.telefono }}<br>
+                            <strong>Titular:</strong> {{ billetera.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ billetera.nro_documento }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
+                    <span style="font-size: 3rem; opacity: 0.5;">💰</span>
+                    <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de acreditación</h3>
+                    <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de acreditación asociados.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            <a href="{% url 'usuarios:cliente_historial' cliente.pk %}" class="btn-primario">
+                Historial de Transacciones
+            </a>
+            <a href="{% url 'usuarios:mis_clientes' %}" class="btn-secundario">
+                Volver a Mis Clientes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de Usuario - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="cabecera-perfil">
+        <div class="logo">👤</div>
+        <h1 class="titulo">Mi Perfil</h1>
+        <p class="subtitulo">Gestiona tu cuenta desde tu panel de usuario</p>
+    </div>
+
+    <div class="zona-perfil">
+        <div class="perfil-info">
+            <h2 class="perfil-titulo">Información Personal</h2>
+            <div class="info-campos">
+                <div class="info-campo">
+                    <div class="info-titulo">Nombre Completo</div>
+                    <div class="info-valor">{{ user.first_name }} {{ user.last_name }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Nombre de Usuario</div>
+                    <div class="info-valor">{{ user.username }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Correo Electrónico</div>
+                    <div class="info-valor">{{ user.email }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Tipo de Documento</div>
+                    <div class="info-valor">{{ user.get_tipo_cedula_display }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Número de Documento</div>
+                    <div class="info-valor">{{ user.cedula_identidad }}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-titulo">Roles en el Sistema</div>
+                    <div class="info-valor">
+                        {% if user.groups.exists %}
+                            {% for group in user.groups.all %}
+                                {% if group.name == 'Administrador' %}
+                                    <span class="rol-admin">Administrador</span>
+                                {% elif group.name == 'Analista cambiario' %}
+                                    <span class="rol-analista">Analista Cambiario</span>
+                                {% elif group.name == 'Operador' %}
+                                    <span class="rol-operador">Operador</span>
+                                {% else %}
+                                    <span class="rol-otro">{{ group.name|title }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span>Sin roles asignados</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

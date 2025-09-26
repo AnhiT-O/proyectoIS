@@ -1,0 +1,21 @@
+Pruebas unitarias a crear:
+1. RolForm: creación exitosa de un rol con nombre y descripción válidos. 
+2. RolForm: error si el nombre del rol ya existe (único). 
+3. RolForm: error si el nombre está vacío o excede el límite de caracteres. 
+4. Modelo Roles: método __str__ retorna el nombre correctamente. 
+5. Modelo Roles: propiedad nombre retorna el mismo valor que name. 
+6. Modelo Roles: se crean los roles predefinidos tras migraciones. 
+7. Vista listar_roles: solo usuarios autenticados y con permiso pueden acceder. 
+8. Vista listar_roles: no muestra el rol “Administrador” en la lista. 
+9. Vista crear_rol: permite crear un rol si el usuario tiene permiso y datos válidos. 
+10. Vista crear_rol: muestra errores si los datos del formulario son inválidos. 
+11. Vista editar_rol: permite editar un rol existente si el usuario tiene permiso. 
+12. Vista editar_rol: muestra error y redirige si el rol no existe. 
+13. Vista detalle_rol: muestra detalles de un rol existente. 
+14. Vista detalle_rol: muestra error y redirige si el rol no existe. 
+15. Todas las vistas: redirigen o muestran error si el usuario no tiene el permiso roles.gestion.
+
+Ten en cuenta:
+- Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
+- Cada error debe mostrar su mensaje de error correspondiente
+- No crear más pruebas unitarias de lo necesario

@@ -1,0 +1,199 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.5 (Ubuntu 17.5-0ubuntu0.25.04.1)
+-- Dumped by pg_dump version 17.5 (Ubuntu 17.5-0ubuntu0.25.04.1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.auth_group (name) FROM stdin;
+Moderador de usuarios
+Encargado de clientes
+\.
+
+--
+-- Data for Name: auth_group_permissions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
+2	24
+2	23
+5	18
+5	20
+4	17
+\.
+
+
+--
+-- Data for Name: clientes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, id_stripe, created_at, updated_at) FROM stdin;
+Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	cus_T6oluR2pptn5i1	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
+Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	\N	2025-09-20 12:27:38.687681-03	2025-09-20 12:27:38.687718-03
+Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	\N	2025-09-20 12:29:50.697586-03	2025-09-20 12:29:50.697627-03
+Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	\N	2025-09-20 12:30:54.408672-03	2025-09-20 12:30:54.408708-03
+Miguel Torres	CI	5675675	miguel.torres@example.com	0985675675	F	Luque, Paraguay	Contador	t	minorista	0	\N	2025-09-20 12:31:53.579782-03	2025-09-20 12:31:53.579816-03
+Sofía Martínez	RUC	6786786	sofia.martinez@example.com	0986786786	F	Capiatá, Paraguay	Médica	t	vip	10	\N	2025-09-20 12:33:32.910055-03	2025-09-20 12:33:32.910098-03
+Diego Alonso	CI	7897897	diego.alonso@example.com	0987897897	F	Fernando de la Mora, Paraguay	Arquitecto	t	minorista	0	\N	2025-09-20 12:34:33.754898-03	2025-09-20 12:34:33.754934-03
+Valentina Rivas	CI	8908908	valentina.rivas@example.com	0988908908	F	Lambaré, Paraguay	Diseñadora	t	corporativo	5	\N	2025-09-20 12:35:39.80619-03	2025-09-20 12:35:39.806227-03
+Camila Acosta	RUC	1234567	camila_acosta@example.com	0981234567	F	Areguá, Paraguay	Psicóloga	t	vip	10	\N	2025-09-20 12:36:39.958919-03	2025-09-20 12:36:39.958954-03
+Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Venta de artículos	t	corporativo	5	\N	2025-09-20 12:38:01.427257-03	2025-09-20 12:38:01.427291-03
+\.
+
+--
+-- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion, stock) FROM stdin;
+Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03	1000000
+Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	10000000
+Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	100000000
+\.
+
+--
+-- Data for Name: consumo_limite_cliente
+--
+COPY public.consumo_limite_cliente (fecha, consumo_diario, consumo_mensual, cliente_id) FROM stdin;
+2025-09-20	0	0	1
+2025-09-20	0	0	2
+2025-09-20	0	0	3
+2025-09-20	0	0	4
+2025-09-20	0	0	5
+2025-09-20	0	0	6
+2025-09-20	0	0	7
+2025-09-20	0	0	8
+2025-09-20	0	0	9
+2025-09-20	0	0	10
+\.
+
+--
+-- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.roles (group_ptr_id, descripcion) FROM stdin;
+4	Rol encargado de bloquear o desbloquear usuarios del sistema.
+5	Rol encargado de gestionar y asignar clientes a usuarios.
+\.
+
+
+--
+-- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, tipo_cedula, cedula_identidad, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
+pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	CI	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
+pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	CI	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
+pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	CI	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
+pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	CI	5167191	f	t	2025-09-20 12:56:51.22464-03	1
+pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	CI	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
+\.
+
+
+--
+-- Data for Name: usuarios_clientes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuarios_clientes (created_at, cliente_id, usuario_id) FROM stdin;
+2025-09-20 13:03:50.590517-03	4	4
+2025-09-20 13:03:50.599811-03	7	4
+2025-09-20 13:03:50.607862-03	1	4
+2025-09-20 13:03:50.615836-03	5	4
+2025-09-20 13:03:50.624227-03	6	4
+2025-09-20 13:04:11.700055-03	4	2
+2025-09-20 13:04:11.707592-03	3	2
+2025-09-20 13:04:11.714918-03	7	2
+2025-09-20 13:04:11.72165-03	10	2
+2025-09-20 13:04:11.72892-03	6	2
+\.
+
+
+--
+-- Data for Name: usuarios_groups; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
+5	3
+3	2
+2	1
+1	5
+1	4
+4	1
+\.
+
+--
+-- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.auth_group_id_seq', 5, true);
+
+
+--
+-- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.auth_permission_id_seq', 25, true);
+
+
+--
+-- Name: clientes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.clientes_id_seq', 1, true);
+
+
+--
+-- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.django_content_type_id_seq', 9, true);
+
+
+--
+-- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.django_migrations_id_seq', 20, true);
+
+
+--
+-- Name: monedas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.monedas_id_seq', 3, true);
+
+
+
+--
+-- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.usuarios_id_seq', 4, true);
+
+
+--
+-- Name: usuarios_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+-- SELECT pg_catalog.setval('public.usuarios_user_permissions_id_seq', 1, false);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

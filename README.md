@@ -1,26 +1,310 @@
-# proyectoIS 🧑‍💻🌱
-Esta será la parte codificación para el proyecto de Ingeneria de sofware(Usar Django, PostgreSQL) donde podemos dividir el proyecto en:
-## ✅ Interfaz: 
-Las ventanas para la app 
-### 1- Inicio
-La pantalla del carga que será igual para todos los usuarios
-### 2- Inicio de Sesión 
-Pantalla para ingresar los datos como el nombre de usuario y contraseña
-#### 2.1 Olvidaste tu contraseña
-No sé que va ahí todavía
-#### 2.2 Registrarse 
-Pantalla para registrarse en el sistema necesita nombre,......
-#####  2.2.1 Pantalla para mostrar que el correo de confirmación fue enviado  
-## ✅ Base de Datos
-La base de datos de la casa de cambio
+## Software necesario para instalar y usar en el proyecto
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [Git](https://git-scm.com/downloads/linux)
+- PostgreSQL:
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install postgresql postgresql-contrib
+```
+- Nginx:
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install nginx
+```
+- Python y su instalador de paquetes (pip) ya vienen instalado con el Ubuntu, pero siempre es importante mantener actualizado todo:
+```bash
+sudo apt update
+sudo apt upgrade
+```
+## Configurar Visual Studio Code
+- Iniciar sesión en tu cuenta de GitHub
+- Enlazar cuenta de GitHub en Visual Studio Code para usar GitHub Copilot
+- Instalar las extensiones necesarias para el proyecto:
+  - Spanish Language Pack for Visual Studio Code
+  - Python
+  - PostgreSQL
+  - Otras que creas necesarias
 
-## ✅ Clases
-Las clases necesarias para el funcionamiento del sistema
+## Configurar y enlazar Git con VSC
+- En Control de Código Fuente click en Clonar Repositorio
+- Usar enlace para clonarlo: https://github.com/AnhiT-O/proyectoIS.git
+- Abrir terminal desde VSC y añadir email y nombre de usuario de Git:
+```bash
+git config --global user.email "tu email entre comillas"
+git config --global user.name "tu nombre de usuario entre comillas"
+```
 
-## ✅ Implemetación   
-Parte donde implementamos todas las partes del código   
+## Configurar y enlazar PostgreSQL con VSC
+- Se debe crear una contraseña para el usuario postgres creado al instalar PostgreSQL:
+```bash
+sudo -i -u postgres
+psql -U postgres
+ALTER USER postgres WITH PASSWORD 'contraseña'; #acá poner la contraseña
+\q
+exit
+```
+- Crear una base de datos para cada entorno:
+```bash
+sudo -u postgres createdb bd_desarrollo
+sudo -u postgres createdb bd_produccion
+```
+- En Visual Studio Code, en la sección Database se debe conectar al servidor de base de datos, el host es `localhost`, username `postgres` con su contraseña. Finalmente darle Connect
 
-![](https://github.com/AnhiT-O/proyectoIS/blob/main/Recursos/mockup-de-una-aplicacion-web.webp)
+## Crear entorno virtual e instalar dependencias en cada entorno
+- Crear dos entornos virtuales dentro del directorio del proyecto(proyectoIS/proyecto): 
+```bash
+python3 -m venv dvenv #entorno de desarrollo
+python3 -m venv pvenv #entorno de producción
+```
+- Activar el entorno virtual a utilizar, **esto se deberá hacer cada vez que se ejecutará comandos del proyecto desde ese entorno**:
+```bash
+source dvenv/bin/activate #activar este para usar entorno de desarrollo
+source pvenv/bin/activate #activar este para usar entorno de producción
+```
+- Con el entorno virtual de producción activado, instalar estas dependencias:
+```bash
+pip install django #framework del proyecto
+pip install psycopg2-binary #conexión con PostgreSQL
+pip install python-dotenv #variables de entorno
+pip install gunicorn #para despliegue de la página
+pip install stripe #pasarela de pagos
+#a medida que el proyecto avance se tendrán que instalar más dependencias
+```
 
+- Con el entorno virtual de desarrollo activado, instalar estas dependencias:
+```bash
+pip install django #framework del proyecto
+pip install psycopg2-binary #conexión con PostgreSQL
+pip install python-dotenv #variables de entorno
+pip install pytest #para pruebas unitarias
+pip install pytest-django #integración de pruebas con django
+pip install sphinx #para documentación automática de código
+pip install stripe #pasarela de pagos
+#a medida que el proyecto avance se tendrán que instalar más dependencias
+```
 
-  >🚨 Plis si alzan codigo pueden hacer un readme para que todos entendamos que hace el codigo.  Pueden ver la sintaxis en <https://www.markdownguide.org/> GRAXX💚💚💚
+- Para desactivar el entorno virtual simplemente se ejecuta el comando `deactivate`
+
+## Habilitar dirección de correo electrónico para usarlo como confirmador de registros 
+Para verificar que la confirmación de registros de usuario por correo funcione, se debe establecer tu propio correo como el remitente, estos serían los pasos para hacerlo desde Gmail:
+- Activar verificación en dos pasos en tu correo
+- En la sección Contraseña de aplicaciones crear uno llamado "Django App"
+- La contraseña generada se debe copiar y pegar en una variable de entorno
+
+## Crear variables de entorno
+- Crea un archivo `.env` en el directorio `proyectoIS/proyecto`
+- Dentro del archivo debe estar:
+```bash
+DB_PASSWORD=password #la contraseña de tu usuario postgres
+EMAIL_HOST_USER=correo #el correo a usar para envío de confirmación
+EMAIL_HOST_PASSWORD=contraseña_generada #la contraseña generada desde tu gmail
+#a medida que el proyecto avance se tendrán que añadir más variables de entorno
+```
+
+## Git Flow
+- En VSC crear rama desde 'desarrollo' con el nombre `feature/SCRUM#` reemplazando '#' por el número de historia de usuario a codificar, y publicarlo
+- Desde la nueva rama codificar, commitear y hacer todo lo necesario para la funcionalidad que se esté creando
+- Al culminar la funcionalidad, subir (sincronizar) la rama a GitHub
+- Desde GitHub en la pestaña Pull Request crear el pull request (solicitud de unión), describiendo todo lo que se hizo lo más detallado posible
+- Al estar seguros que todo funciona, realizaremos el merge (mezcla de ramas) desde la rama feature a la rama desarrollo
+
+## Ejecutar proyecto en desarrollo
+- Luego de escribir el código:
+```bash
+python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
+python manage.py migrate #exportará los cambios preparados a la base de datos
+python manage.py runserver #correrá el proyecto
+```
+  - Si necesitas reestablecer la base de datos debes posicionarte en ProyectoIS, luego: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo
+  python manage.py runserver
+  ```
+  - Si deseas usar `backup_datos.sql`: 
+  ```bash
+  ./reestablecer_bd.sh bd_desarrollo backup_datos.sql
+  python manage.py runserver
+  ```
+- Se podrá ver los resultados del proyecto en: http://localhost:8000/
+
+## Ejecutar proyecto en producción
+- La primera vez debes configurar el proyecto para su ejecución en producción:
+  - Crear un archivo `gunicorn.service` que contenga esto:
+  ```bash
+  [Unit]
+  Description=Gunicorn instance to serve myproject
+  After=network.target
+
+  [Service]
+  User=nombre #poner tu nombre de usuario de tu directorio en 'home'
+  Group=nombre #lo mismo que arriba
+  WorkingDirectory=.../proyectoIS/proyecto #colocar tu directorio del proyecto
+  ExecStart=".../proyectoIS/proyecto/pvenv/bin/gunicorn" --workers 3 --bind "unix:.../proyectoIS/proyecto/proyecto.sock" proyecto.wsgi:application #acá lo mismo
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+  - Mover el archivo en tu carpeta de system:
+  ```bash
+  sudo mv ./gunicorn.service /etc/systemd/system
+  ```
+  
+  - Modificar el archivo `proyecto.conf` de tal forma que quede así:
+  ```bash
+  server {
+    listen 80;
+    server_name localhost;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        root ".../proyectoIS/proyecto"; #tu directorio del proyecto
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass "http://unix:.../proyectoIS/proyecto/proyecto.sock"; #tu directorio del proyecto desde el dos puntos
+    }
+  }
+  ```
+  
+  - Copiar y testear la configuración de nginx:
+  ```bash
+  sudo cp proyecto.conf /etc/nginx/sites-available/
+  sudo ln -s /etc/nginx/sites-available/proyecto.conf /etc/nginx/sites-enabled/
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo nginx -t
+  sudo systemctl daemon-reload #recarga systemd
+  ```
+
+- Para iniciar el proyecto en producción:
+```bash
+python manage.py collectstatic --noinput #colecciona archivos estaticos
+python manage.py makemigrations #si hiciste algún cambio en models, este comando preparará la exportación de cambios a la base de datos
+python manage.py migrate #exportará los cambios preparados a la base de datos
+sudo systemctl start gunicorn #inicia gunicorn
+sudo systemctl status gunicorn #verifica estado de gunicorn
+sudo systemctl start nginx #inicia nginx
+sudo systemctl status nginx #verifica estado de nginx
+```
+
+- Para ver logs en caso de errores:
+```bash
+sudo journalctl -u gunicorn #logs de gunicorn
+sudo tail -f /var/log/nginx/error.log #logs de nginx
+```
+
+- Para detener el proyecto en producción:
+```bash
+sudo systemctl stop gunicorn
+sudo systemctl stop nginx
+```
+
+- Para reiniciar después de cambios en el código:
+```bash
+python manage.py collectstatic --noinput
+python manage.py makemigrations
+python manage.py migrate
+sudo systemctl restart gunicorn
+sudo systemctl restart nginx
+```
+- Se podrá ver los resultados del proyecto en producción en: http://localhost/
+
+## Datos del archivo 'backup_datos.sql'
+
+- Roles añadidos:
+  - Moderador de usuarios: Permiso de bloquear usuarios
+  - Encargado de clientes: Permisos de crear y asignar clientes
+
+- Roles actualizados:
+  - Analista cambiario: Permisos de activar/desactivar monedas y cambiar cotizaciones
+
+- 12 clientes añadidos
+
+- Monedas añadidas: Euro, Peso argentino
+
+- Usuarios añadidos:
+  - Nombre de usuario: admin
+    - Contraseña: admin123.
+    - Rol: Administrador
+  - Nombre de usuario: iris
+    - Contraseña: qweqweqwe.1
+    - Roles: Moderador de usuario, Encargado de clientes
+  - Nombre de usuario: aylen
+    - Contraseña: qweqweqwe.1
+    - Rol: Analista cambiario
+  - Nombre de usuario: brandon
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar
+  - Nombre de usuario: josias
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar
+  - Nombre de usuario: anahi
+    - Contraseña: qweqweqwe.1
+    - Rol: Operador
+    - Clientes asignados al azar
+
+## Documetación del proyecto
+- Para ejecutar el html de  la documentación
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs/build/html
+  proyecto/docs/build/html$ python -m http.server 8080
+```
+- Para limpiar los build creados 
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs
+  proyecto/docs$ make clean
+```
+- Generar nueva documentación 
+```bash
+  proyecto$ source dvenv/bin/activate
+  proyecto$ cd docs
+  proyecto/docs$ make html
+```
+
+## Configuración de STRIPE
+- Iniciar sesión en google con la cuenta globalexchange.is2.g1@gmail.com
+- Ir a https://stripe.com/es-us desde la cuenta de global exchange e iniciar sesión 'continuar con correo electrónico'
+- Configura la CLI de Stripe
+```bash
+  $ source dvenv/bin/activate
+  $ brew install stripe-cli
+  $ stripe login # Pulsa la tecla Enter en el teclado para completar el proceso de autenticación en el navegador.
+
+```
+- Instalar y/o actualizar librería Stripe
+```bash
+  $ source dvenv/bin/activate
+  $ pip install --upgrade stripe
+```
+
+- Crear un oyente local para webhook (con dvenv activo ejecutar el siguiente comando en terminal)
+```bash
+  $ stripe listen --forward-to localhost:4242/webhook
+  $ stripe trigger payment_intent.succeeded
+```
+
+- Crear variables de entorno en el archivo .env
+  #https://dashboard.stripe.com/acct_1S42lzQPV8qMpvzT/test/dashboard   --> en ese en lace aparecen las claves que hay que copiar en el archivo .env
+```bash
+  # Claves de Stripe
+  STRIPE_PUBLIC_KEY= # Clave publicable
+  STRIPE_SECRET_KEY= # Clave secreta
+  STRIPE_ENDPOINT_SECRET= # Clave obtenida desde terminal --> whsec_...
+```
+- Para la clave STRIPE_ENDPOINT_SECRET ejecutar lo siguiente en terminal
+```bash
+  $ stripe listen
+```
+
+- En terminal se mostrará "Your webhook signing secret is whsec_ ...."
+- Copiar desde whsec_  en adelante, esa es la clave para la variable STRIPE_ENDPOINT_SECRET
+
+## Enlace a tarjetas de prueba de STRIPE
+- https://docs.stripe.com/testing?locale=es-419 

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Gestionar Monedas - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Gestionar Monedas</h2>
+        {% if perms.monedas.gestion %}
+        <a href="{% url 'monedas:crear_monedas' %}" class="btn-primario">
+            Nueva Moneda
+        </a>
+        {% endif %}
+    </div>
+    <!-- Formulario de búsqueda con nuevo estilo -->
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-busqueda">
+                <input type="text" 
+                        name="busqueda" 
+                        class="texto-busqueda" 
+                        value="{{ busqueda }}" 
+                        placeholder="Buscar moneda por nombre o símbolo...">
+            </div>
+            <div class="botones-busqueda">
+                <button type="submit" class="btn-buscar">
+                    Buscar
+                </button>
+                {% if busqueda %}
+                <a href="{% url 'monedas:lista_monedas' %}" class="btn-limpiar">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            <span>Total: <span class="conteo">{{ monedas|length }}</span></span>
+            <span style="margin-left: 1rem;">Activas: <span class="conteo" style="background: #28a745;">{{ monedas_activas }}</span></span>
+            <span style="margin-left: 0.5rem;">Inactivas: <span class="conteo" style="background: #dc3545;">{{ monedas_inactivas }}</span></span>
+        </div>
+    </div>
+
+    <div class="zona-monedas" id="monedasGrid">
+        {% for moneda in monedas %}
+        <div class="tarjeta-moneda" data-search="{{ moneda.nombre|lower }} {{ moneda.simbolo|lower }}">
+            <!-- Cabecera comprimida: nombre a la izquierda, símbolo a la derecha -->
+            <div class="tarjeta-cabecera">
+                <h3>{{ moneda.nombre }}</h3>
+                <div class="moneda-simbolo">{{ moneda.simbolo }}</div>
+            </div>
+            <!-- Información tipo tabla -->
+                <table class="gestion-tabla">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Estado</th>
+                            <th style="width: 33%;">Precio de Compra</th>
+                            <th style="width: 33%;">Precio de Venta</th>
+                            <th style="width: 34%;">Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span class="{% if moneda.activa %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
+                                    {% if moneda.activa %}Activa{% else %}Inactiva{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.calcular_precio_compra|intcomma }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.calcular_precio_venta|intcomma }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|intcomma }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            <div class="zona-acciones" style="justify-content: flex-end">
+                <a href="{% url 'monedas:moneda_detalle' moneda.pk %}" class="btn-detalles" title="Ver detalles de la moneda">
+                    Detalles
+                </a>
+                {% if perms.monedas.gestion or perms.monedas.cotizacion %}
+                <a href="{% url 'monedas:editar_monedas' moneda.pk %}" class="btn-editar" title="Editar moneda">
+                    Editar
+                </a>
+                {% endif %}
+                {% if perms.monedas.activacion %}
+                    {% if moneda.activa %}
+                        <form method="post" action="{% url 'monedas:lista_monedas' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="cambiar_estado" value="true">
+                            <input type="hidden" name="moneda_id" value="{{ moneda.pk }}">
+                            <button type="submit" class="btn-desactivar" title="Desactivar moneda" onclick="return confirm('¿Estás seguro de que quieres desactivar la moneda {{ moneda.nombre }}?')">
+                                Desactivar
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'monedas:lista_monedas' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="cambiar_estado" value="true">
+                            <input type="hidden" name="moneda_id" value="{{ moneda.pk }}">
+                            <button type="submit" class="btn-activar" title="Activar moneda" onclick="return confirm('¿Estás seguro de que quieres activar la moneda {{ moneda.nombre }}?')">
+                                Activar
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+            {% if busqueda %}
+                <h3>No se encontraron monedas</h3>
+            {% else %}
+                <h3>No hay monedas registradas</h3>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

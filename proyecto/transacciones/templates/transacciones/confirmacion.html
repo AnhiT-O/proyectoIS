@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+    {% if tipo_transaccion == 'venta' %}
+        Vender Monedas - Confirmación - Global Exchange
+    {% else %}
+        Comprar Monedas - Confirmación - Global Exchange
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <!-- Barra de progreso -->
+    <div class="barra-progreso-container">
+        <div class="barra-progreso" data-progreso="{{ paso_actual }}">
+            <div class="paso {% if paso_actual == 1 %}activo{% elif paso_actual > 1 %}completado{% endif %}">
+                <div class="paso-numero">1</div>
+                <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
+            </div>
+            <div class="paso {% if paso_actual == 2 %}activo{% elif paso_actual > 2 %}completado{% endif %}">
+                <div class="paso-numero">2</div>
+                <div class="paso-titulo">Medio de<br>Pago</div>
+            </div>
+            <div class="paso {% if paso_actual == 3 %}activo{% elif paso_actual > 3 %}completado{% endif %}">
+                <div class="paso-numero">3</div>
+                <div class="paso-titulo">Medio de<br>Cobro</div>
+            </div>
+            <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
+                <div class="paso-numero">4</div>
+                <div class="paso-titulo">Confirmación de<br>
+                    {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-cabecera">
+        <h2>{{ titulo_paso }}</h2>
+        <div style="margin: 2rem;">
+            <p class="subtitulo">
+                Confirma que los datos están correctos antes de proceder con la {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %} de monedas.
+            </p>
+        </div>
+
+        <!-- Información de la transacción -->
+        <div class="info-transaccion">
+            <h3>Resumen de la transacción</h3>
+            <div class="detalles-transaccion">
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Nombre del cliente:</div>
+                    <div class="detalle-valor">{{ user.cliente_activo.nombre }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Segmento del cliente:</div>
+                    <div class="detalle-valor">{{ user.cliente_activo.get_segmento_display }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Tipo de transacción:</div>
+                    <div class="detalle-valor">
+                        {% if tipo_transaccion == 'venta' %}
+                            Venta de {{ moneda.nombre }}
+                        {% else %}
+                            Compra de {{ moneda.nombre }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% if tipo_transaccion == 'compra' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto a pagar:</div>
+                        <div class="detalle-valor">Gs. {{ dar|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto a recibir:</div>
+                        <div class="detalle-valor">{{ recibir|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
+                    </div>
+                {% else %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto a pagar:</div>
+                        <div class="detalle-valor">Gs. {{ dar|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto a recibir:</div>
+                        <div class="detalle-valor"> Gs. {{ recibir|intcomma }}</div>
+                    </div>
+                {% endif %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Medio de pago:</div>
+                    {% if medio_pago.last4 %}
+                        <div class="detalle-valor">Tarjeta de Crédito (**** **** **** {{ medio_pago.last4 }})</div>
+                    {% else %}
+                        <div class="detalle-valor">{{ medio_pago }}</div>
+                    {% endif %}
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Medio de cobro:</div>
+                    {% if medio_cobro.tipo_billetera %}
+                        <div class="detalle-valor">{{ medio_cobro.tipo_billetera }} ({{ medio_cobro.telefono }})</div>
+                    {% else %}
+                        <div class="detalle-valor">{{ medio_cobro }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <form method="post">
+    {% csrf_token %}
+    <div class="zona-botones">
+        {% if tipo_transaccion == 'venta' %}
+            <a href="{% url 'transacciones:venta_exito' %}" class="btn-enviar">
+                Confirmar Venta
+            </a>
+        {% else %}
+            <a href="{% url 'transacciones:compra_exito' %}" class="btn-enviar">
+                Confirmar Compra
+            </a>
+        {% endif %}
+        <a href="{% url 'inicio' %}" class="btn-atras">
+            Cancelar {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+        </a>
+    </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Función para verificar cambios cada 3 segundos
+    function verificarCambios() {
+        fetch(`/operaciones/verificar-cambios/{{ transaccion.id }}/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                // La línea que fallaba: ahora el elemento existe cuando se llama.
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Manejo básico de errores de red
+                console.error("Fallo la petición de polling. Estado:", response.status);
+                // No programar la próxima llamada si hay un error HTTP grave.
+                return Promise.reject(new Error("Error HTTP"));
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.hubo_cambio) {
+                // Detener el polling si hubo un cambio para evitar redirecciones múltiples
+                clearInterval(window.verificacionIntervalo); 
+                window.location.href = `/operaciones/cotizacion-cambiada/{{ transaccion.id }}/`;
+            }
+        })
+        .catch(error => {
+            console.error("Polling error:", error);
+            // Opcional: Podrías detener el polling si la transacción es inválida
+        });
+    }
+    
+    // ----------------------------------------------------------------------
+    // 🚨 SOLUCIÓN AL PROBLEMA DE SINCRONIZACIÓN
+    // ----------------------------------------------------------------------
+
+    // Aseguramos que la variable 'intervalo' sea global o esté accesible.
+    let verificacionIntervalo;
+
+    // Ejecutar todo el código DOM-dependiente solo cuando la página está lista.
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Iniciar verificación periódica (AHORA SE EJECUTA TARDE)
+        // Guardamos la referencia en una variable accesible (verificacionIntervalo)
+        verificacionIntervalo = setInterval(verificarCambios, 3000);
+
+        // 2. Detener verificación al enviar el formulario
+        // Usamos el querySelector sin '?' ya que estamos en DOMContentLoaded
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', () => {
+                // Usamos la variable global
+                clearInterval(verificacionIntervalo); 
+                console.log("Polling detenido al enviar formulario.");
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asignar Rol - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera" style="margin-bottom: 1rem;">
+        <h2>Asignar Rol a Usuario</h2>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Nombre del Usuario:</div>
+            <div class="info-valor">{{ usuario.get_full_name }}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Roles actuales:</div>
+            <div class="info-valor">
+                {% if usuario.groups.exists %}
+                    {% for group in usuario.groups.all %}
+                        {% if group.name == 'Administrador' %}
+                            <span class="rol-administrador">Administrador</span>
+                        {% elif group.name == 'Analista cambiario' %}
+                            <span class="rol-analista">Analista Cambiario</span>
+                        {% elif group.name == 'Operador' %}
+                            <span class="rol-operador">Operador</span>
+                        {% else %}
+                            <span class="rol-otro">{{ group.name|title }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span class="no-roles">Sin roles asignados</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <p class="subtitulo">Selecciona los roles que deseas asignar a este usuario:</p>
+
+        {% if roles_disponibles %}
+            <div class="zona-tarjetas">
+                {% for rol in roles_disponibles %}
+                    <div class="tarjeta">
+                        <input class="form-casilla" type="checkbox" name="rol" value="{{ rol.pk }}" id="rol_{{ rol.pk }}">
+                        <label class="form-casilla-label" for="rol_{{ rol.pk }}">
+                            <strong>{{ rol.name }}</strong>
+                        </label>
+                        <div class="tarjeta-detalles">
+                            {{ rol.descripcion|default:"Sin descripción disponible" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if form.rol.errors %}
+                <div class="form-errores">
+                    {% for error in form.rol.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="zona-botones">
+                <button type="submit" class="btn-enviar">Asignar Rol</button>
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
+            </div>
+        {% else %}
+            <p class="no-roles">No hay roles disponibles para asignar.</p>
+            <div class="zona-botones">
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Volver</a>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="cuerpo">
+    <div class="contenido extendido">
+        <div class="form-cabecera">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i> {{ title }}
+            </div>
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alerta-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.limite_diario.id_for_label }}">
+                        <i class="fas fa-calendar-day"></i> {{ form.limite_diario.label }}
+                    </label>
+                    {{ form.limite_diario|add_class:"form-control" }}
+                    {% if form.limite_diario.help_text %}
+                        <small style="color: #666; font-size: 0.875rem;">{{ form.limite_diario.help_text }}</small>
+                    {% endif %}
+                    {% if form.limite_diario.errors %}
+                        <div class="form-errores">
+                            {% for error in form.limite_diario.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                    <label for="{{ form.limite_mensual.id_for_label }}">
+                        <i class="fas fa-calendar-alt"></i> {{ form.limite_mensual.label }}
+                    </label>
+                    {{ form.limite_mensual|add_class:"form-control" }}
+                    {% if form.limite_mensual.help_text %}
+                        <small style="color: #666; font-size: 0.875rem;">{{ form.limite_mensual.help_text }}</small>
+                    {% endif %}
+                    {% if form.limite_mensual.errors %}
+                        <div class="form-errores">
+                            {% for error in form.limite_mensual.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.fecha_inicio.id_for_label }}">
+                        <i class="fas fa-play"></i> {{ form.fecha_inicio.label }}
+                    </label>
+                    {{ form.fecha_inicio|add_class:"form-control" }}
+                    {% if form.fecha_inicio.help_text %}
+                        <small style="color: #666; font-size: 0.875rem;">{{ form.fecha_inicio.help_text }}</small>
+                    {% endif %}
+                    {% if form.fecha_inicio.errors %}
+                        <div class="form-errores">
+                            {% for error in form.fecha_inicio.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                    <label for="{{ form.fecha_fin.id_for_label }}">
+                        <i class="fas fa-stop"></i> {{ form.fecha_fin.label }}
+                    </label>
+                    {{ form.fecha_fin|add_class:"form-control" }}
+                    {% if form.fecha_fin.help_text %}
+                        <small style="color: #666; font-size: 0.875rem;">{{ form.fecha_fin.help_text }}</small>
+                    {% endif %}
+                    {% if form.fecha_fin.errors %}
+                        <div class="form-errores">
+                            {% for error in form.fecha_fin.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-campo">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    {{ form.activo|add_class:"form-casilla" }}
+                    <label class="form-casilla-label" for="{{ form.activo.id_for_label }}">
+                        <i class="fas fa-toggle-on"></i> {{ form.activo.label }}
+                    </label>
+                </div>
+                {% if form.activo.help_text %}
+                    <small style="color: #666; font-size: 0.875rem;">{{ form.activo.help_text }}</small>
+                {% endif %}
+                {% if form.activo.errors %}
+                    <div class="form-errores">
+                        {% for error in form.activo.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="form-errores">
+                    {% for error in form.non_field_errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="zona-botones">
+                <button type="submit" class="btn-enviar">
+                    <i class="fas fa-save"></i> {{ accion }}
+                </button>
+                <a href="{% url 'monedas:lista_limites' %}" class="btn-atras">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Validación del formulario en el frontend
+(function() {
+    'use strict';
+    
+    // Validación de Bootstrap
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Validación personalizada de límites
+    var limiteDiario = document.getElementById('id_limite_diario');
+    var limiteMensual = document.getElementById('id_limite_mensual');
+    
+    function validarLimites() {
+        var diario = parseInt(limiteDiario.value) || 0;
+        var mensual = parseInt(limiteMensual.value) || 0;
+        
+        if (diario > 0 && mensual > 0 && diario > mensual) {
+            limiteDiario.setCustomValidity('El límite diario no puede ser mayor al mensual');
+        } else {
+            limiteDiario.setCustomValidity('');
+        }
+    }
+    
+    if (limiteDiario && limiteMensual) {
+        limiteDiario.addEventListener('input', validarLimites);
+        limiteMensual.addEventListener('input', validarLimites);
+    }
+})();
+</script>
+{% endblock %}

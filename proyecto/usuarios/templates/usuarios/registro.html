@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registro de Usuario - Global Exchange{% endblock %}
+
+{% block navbar %}
+<!-- Ocultar la barra de navegación en la página de registro -->
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <div class="logo">💰 Global Exchange</div>
+        <p class="subtitulo">Crea tu cuenta para acceder al sistema</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-errores">
+                        {% for error in form.username.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="form-errores">
+                        {% for error in form.email.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.first_name.id_for_label }}">Nombres</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="form-errores">
+                        {% for error in form.first_name.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.last_name.id_for_label }}">Apellidos</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="form-errores">
+                        {% for error in form.last_name.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.tipo_cedula.id_for_label }}">Tipo de documento</label>
+                {{ form.tipo_cedula }}
+                {% if form.tipo_cedula.errors %}
+                    <div class="form-errores">
+                        {% for error in form.tipo_cedula.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.cedula_identidad.id_for_label }}">Número de documento</label>
+                {{ form.cedula_identidad }}
+                {% if form.cedula_identidad.errors %}
+                    <div class="form-errores">
+                        {% for error in form.cedula_identidad.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.password1.id_for_label }}">Contraseña</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="form-errores">
+                        {% for error in form.password1.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="form-errores">
+                        {% for error in form.password2.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Registrarse
+            </button>
+            <a href="{% url 'inicio' %}" class="btn-atras">
+                Volver al Inicio
+            </a>
+        </div>
+    </form>
+    <div class="zona-enlaces">
+        <p>
+            ¿Ya tienes una cuenta? 
+            <a href="{% url 'login' %}" class="enlace">Inicia sesión aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ usuario.get_full_name }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h1 class="detalle-nombre">
+            👤 {{ usuario.get_full_name }}
+        </h1>
+        <div class="detalle-tipo">
+            {{ usuario.username }}
+        </div>
+    </div>
+
+    <div class="zona-detalle">
+        <div class="seccion-info">
+            <!-- Información Personal -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📧</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Correo Electrónico</div>
+                        <div class="info-valor">{{ usuario.email }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📅</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Fecha de Registro</div>
+                        <div class="info-valor">{{ usuario.date_joined|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🕐</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Último Acceso</div>
+                        <div class="info-valor">
+                            {% if usuario.last_login %}
+                                {{ usuario.last_login|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Nunca
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles y Estado -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">🎭</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Roles Asignados</div>
+                        <div class="info-valor">
+                            {% if roles.exists %}
+                                <div class="zona-roles">
+                                    {% for rol in roles %}
+                                        <span class="{% if rol.name == 'Administrador' %}rol-admin{% elif rol.name == 'Analista cambiario' %}rol-analista{% elif rol.name == 'Operador' %}rol-operador{% else %}rol-otro{% endif %}">
+                                            {{ rol.name|title }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span style="color: #6c757d; font-style: italic;">Sin roles asignados</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🔒</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Estado de la Cuenta</div>
+                        <div class="info-valor">
+                            {% if not usuario.bloqueado %}
+                                <span class="etiqueta-activo">
+                                    Activo
+                                </span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    Bloqueado
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if es_operador %}
+        <!-- Clientes Asignados -->
+        <div class="info-columna" style="grid-column: 1 / -1;">
+            <div class="info-celda">
+                <span class="info-icon">👥</span>
+                <div class="info-contenido">
+                    <div class="info-titulo">Clientes Asignados ({{ total_clientes }})</div>
+                    <div class="info-valor">
+                        {% if clientes_asignados.exists %}
+                            <div class="lista-clientes">
+                                {% for cliente in clientes_asignados %}
+                                    <div class="cliente">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div style="flex: 1;">
+                                                <strong>{{ cliente.nombre }}</strong>
+                                                <br>
+                                                <small style="color: #6c757d;">
+                                                    {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }} 
+                                                    | {{ cliente.correoElecCliente }}
+                                                </small>
+                                            </div>
+                                            {% if perms.usuarios.asignacion_clientes %}
+                                                <form method="post" action="{% url 'usuarios:remover_cliente' usuario.pk cliente.pk %}" style="margin: 0;">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="next" value="{% url 'usuarios:usuario_detalle' usuario.pk %}">
+                                                    <button type="submit" class="btn-desactivar" 
+                                                            onclick="return confirm('¿Estás seguro de que deseas desasignar el cliente {{ cliente.nombre }} de {{ usuario.get_full_name }}?')"
+                                                            title="Desasignar cliente"
+                                                            style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+                                                        Desasignar
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span style="color: #6c757d; font-style: italic;">No tiene clientes asignados</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            {% if perms.usuarios.asignacion_roles %}
+                <a href="{% url 'usuarios:asignar_rol' usuario.pk %}" class="btn-primario">
+                    Asignar Roles
+                </a>
+            {% endif %}
+            
+            {% if perms.usuarios.asignacion_clientes %}
+                {% if es_operador %}
+                    <a href="{% url 'usuarios:asignar_clientes' usuario.pk %}" class="btn-primario">
+                        Asignar Clientes
+                    </a>
+                {% endif %}
+            {% endif %}
+            
+            <a href="{% url 'usuarios:administrar_usuarios' %}" class="btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

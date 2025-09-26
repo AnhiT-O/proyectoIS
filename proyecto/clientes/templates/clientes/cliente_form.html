@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <h2>{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Cliente</h2>
+        <p class="subtitulo">
+            {% if form.instance.pk %}
+                Modifica la información del cliente en el sistema
+            {% else %}
+                Registra un nuevo cliente en la casa de cambios
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.nombre.id_for_label }}">Nombre</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}
+                    <div class="form-errores">
+                        {% for error in form.nombre.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.tipoCliente.id_for_label }}">Tipo de Cliente</label>
+                {{ form.tipoCliente }}
+                {% if form.tipoCliente.errors %}
+                    <div class="form-errores">
+                        {% for error in form.tipoCliente.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.tipoDocCliente.id_for_label }}">Tipo de Documento</label>
+                {{ form.tipoDocCliente }}
+                {% if form.tipoDocCliente.errors %}
+                    <div class="form-errores">
+                        {% for error in form.tipoDocCliente.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.docCliente.id_for_label }}">Número de Documento</label>
+                {{ form.docCliente }}
+                {% if form.docCliente.errors %}
+                    <div class="form-errores">
+                        {% for error in form.docCliente.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.correoElecCliente.id_for_label }}">Correo Electrónico</label>
+                {{ form.correoElecCliente }}
+                {% if form.correoElecCliente.errors %}
+                    <div class="form-errores">
+                        {% for error in form.correoElecCliente.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}
+                    <div class="form-errores">
+                        {% for error in form.telefono.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.ocupacion.id_for_label }}">Ocupación</label>
+                {{ form.ocupacion }}
+                {% if form.ocupacion.errors %}
+                    <div class="form-errores">
+                        {% for error in form.ocupacion.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                {{ form.direccion }}
+                {% if form.direccion.errors %}
+                    <div class="form-errores">
+                        {% for error in form.direccion.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.segmento.id_for_label }}">Segmento</label>
+                {{ form.segmento }}
+                {% if form.segmento.errors %}
+                    <div class="form-errores">
+                        {% for error in form.segmento.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="zona-declaracion">
+            <div class="declaracion-titulo">
+                Declaración Jurada
+            </div>
+            <div class="declaracion-casilla">
+                {{ form.declaracion_jurada }}
+                <label for="{{ form.declaracion_jurada.id_for_label }}">
+                    El cliente ha firmado la declaración jurada
+                </label>
+            </div>
+            {% if form.declaracion_jurada.errors %}
+                <div class="form-errores">
+                    {% for error in form.declaracion_jurada.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                {% if form.instance.pk %}
+                    Editar Cliente
+                {% else %}
+                    Crear Cliente
+                {% endif %}
+            </button>
+            <a href="{% url 'clientes:cliente_lista' %}" class="btn-atras">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

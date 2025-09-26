@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administrar Clientes - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Gestionar Clientes</h2>
+        <a href="{% url 'clientes:cliente_crear' %}" class="btn-primario">
+            Nuevo Cliente
+        </a>
+    </div>
+    <!-- Formulario de búsqueda con nuevo estilo -->
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-busqueda">
+                <input type="text" 
+                        name="busqueda" 
+                        class="texto-busqueda" 
+                        value="{{ busqueda }}" 
+                        placeholder="Buscar cliente por nombre o documento">
+            </div>
+            <div class="campo-filtro">
+                <select name="segmento" class="select-filtro">
+                    <option value="">Todos los segmentos</option>
+                    <option value="vip" {% if segmento_filtro == 'vip' %}selected{% endif %}>
+                        VIP ({{ stats_segmentos.vip }})
+                    </option>
+                    <option value="corporativo" {% if segmento_filtro == 'corporativo' %}selected{% endif %}>
+                        Corporativo ({{ stats_segmentos.corporativo }})
+                    </option>
+                    <option value="minorista" {% if segmento_filtro == 'minorista' %}selected{% endif %}>
+                        Minorista ({{ stats_segmentos.minorista }})
+                    </option>
+                </select>
+            </div>
+            <div class="botones-busqueda">
+                <button type="submit" class="btn-buscar">
+                    Buscar
+                </button>
+                {% if busqueda or segmento_filtro %}
+                <a href="{% url 'clientes:cliente_lista' %}" class="btn-limpiar">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            Total de clientes: <span class="conteo">{{ clientes|length }}</span>
+            {% if busqueda or segmento_filtro %}
+                <span style="margin-left: 1rem; color: #6c757d;">
+                    ({{ clientes|length }} resultado{{ clientes|length|pluralize }}
+                    {% if busqueda %}para "{{ busqueda }}"{% endif %}
+                    {% if segmento_filtro %}en segmento {{ segmento_filtro|title }}{% endif %})
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th style="width: 25%">Nombre</th>
+                <th style="width: 18%">Documento</th>
+                <th style="width: 15%">Segmento</th>
+                <th style="width: 26%">Contacto</th>
+                <th style="width: 16%">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>
+                    {{ cliente.nombre }}
+                </td>
+                <td>
+                    <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
+                    <small>{{ cliente.docCliente }}</small>
+                </td>
+                <td>
+                    <div>
+                        {{ cliente.get_segmento_display }}
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <strong>Cliente:</strong> {{ cliente.correoElecCliente|truncatechars:30 }}<br>
+                        <strong>Teléfono:</strong> {{ cliente.telefono }}
+                    </div>
+                </td>
+                <td>
+                    <div class="zona-acciones">
+                        <a href="{% url 'clientes:cliente_detalle' cliente.pk %}" class="btn-detalles" title="Ver detalles">
+                            Detalles
+                        </a>
+                        <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-editar" title="Editar">
+                            Editar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    {% if busqueda or segmento_filtro %}
+                        No se encontraron clientes que coincidan con los filtros aplicados.
+                    {% else %}
+                        No hay clientes registrados.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

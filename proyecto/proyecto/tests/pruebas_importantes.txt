@@ -1,0 +1,21 @@
+Pruebas unitarias para crear:
+1. LoginForm: Validar login exitoso con usuario y contraseña correctos. 
+2. LoginForm: Rechazar login si el usuario está bloqueado (campo bloqueado=True). 
+3. LoginForm: Mostrar mensaje de error personalizado si el usuario está bloqueado. 
+4. LoginForm: Mostrar mensaje de error personalizado si usuario/contraseña no coinciden. 
+5. Vista login_usuario: Redirigir a perfil si el usuario ya está autenticado. 
+6. Vista login_usuario: Permitir login y redirigir correctamente tras autenticación. 
+7. Vista login_usuario: No permitir login con credenciales inválidas. 
+8. Vista logout_usuario: Cerrar sesión y redirigir a inicio mostrando mensaje de éxito. 
+9. Vista inicio: Renderizar correctamente para usuario autenticado mostrando cotizaciones. 
+10. Vista inicio: Renderizar correctamente para usuario no autenticado (sin cotizaciones). 
+11. Vista inicio: Mostrar precios según segmento seleccionado por administrador. 
+12. Vista simular (GET): Renderizar plantilla con monedas activas para usuario autenticado. 
+13. Vista simular (POST): Validar correctamente errores de entrada (monto, moneda, operación). 
+14. Vista simular (POST): Realizar conversión de compra y venta correctamente (incluyendo decimales y mínimos). 
+15. Vista custom_permission_denied_view: Renderizar la plantilla 403.html ante error de permisos.
+
+Ten en cuenta:
+- Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
+- Cada error debe mostrar su mensaje de error correspondiente
+- No crear más pruebas unitarias de lo necesario

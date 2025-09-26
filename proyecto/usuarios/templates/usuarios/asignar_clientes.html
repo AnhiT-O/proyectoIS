@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asignar Clientes - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera" style="margin-bottom: 1rem;">
+        <h2>Asignar Clientes a Usuario</h2>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Nombre del Usuario:</div>
+            <div class="info-valor">{{ usuario.get_full_name }}</div>
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <p class="subtitulo" style="text-align: center;">Marca los clientes que deseas asignar a este usuario:</p>
+
+        {% if form.clientes.field.queryset.exists %}
+            <div class="zona-tarjetas">
+                {% for cliente in form.clientes.field.queryset %}
+                    <div class="tarjeta">
+                            <input class="form-casilla" type="checkbox" name="clientes" value="{{ cliente.pk }}" id="cliente_{{ cliente.pk }}">
+                            <label class="form-casilla-label" for="cliente_{{ cliente.pk }}">
+                                <strong>{{ cliente.nombre }} ({{ cliente.docCliente }})</strong>
+                            </label>
+                        <div class="tarjeta-detalles">
+                            Email: {{ cliente.correoElecCliente }}<br>
+                            Teléfono: {{ cliente.telefono }}<br>
+                            Tipo: {% if cliente.tipoCliente == 'F' %}Persona Física{% else %}Persona Jurídica{% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if form.clientes.errors %}
+                <div class="form-errores">
+                    {% for error in form.clientes.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="zona-botones">
+                <button type="submit" class="btn-enviar">Asignar</button>
+                <a href="{% url 'usuarios:usuario_detalle' usuario.pk %}" class="btn-atras">Cancelar</a>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

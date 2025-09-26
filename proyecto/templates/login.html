@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Global Exchange{% endblock %}
+
+{% block navbar %}
+<!-- Ocultar la barra de navegación en la página de login -->
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <div class="logo">💰 Global Exchange</div>
+        <p class="subtitulo">Inicia sesión en tu cuenta</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-campo">
+            <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="form-errores">
+                    {% for error in form.username.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.password.id_for_label }}">Contraseña</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="form-errores">
+                    {% for error in form.password.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Errores generales del formulario -->
+        {% if form.non_field_errors %}
+            <div class="form-errores">
+                {% for error in form.non_field_errors %}
+                    <div class="mensaje-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Iniciar Sesión
+            </button>
+            <a href="{% url 'inicio' %}" class="btn-atras">
+                Volver al Inicio
+            </a>
+        </div>
+    </form>
+
+    <div class="zona-enlaces">
+        <p>
+            ¿Olvidaste tu contraseña?
+            <a href="{% url 'usuarios:recuperar_password' %}" class="enlace">Recupéralo aquí</a>
+        </p>
+    </div>
+    <div class="zona-enlaces">
+        <p>
+            ¿No tienes una cuenta? 
+            <a href="{% url 'usuarios:registro' %}" class="enlace">Regístrate aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

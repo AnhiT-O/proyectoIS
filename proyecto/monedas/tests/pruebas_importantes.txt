@@ -1,0 +1,21 @@
+Pruebas unitarias a crear:
+1. MonedaForm: creación exitosa de moneda con datos válidos. 
+2. MonedaForm: error si el nombre ya existe o está vacío. 
+3. MonedaForm: error si el símbolo ya existe, no es solo letras o no está en mayúsculas. 
+4. MonedaForm: error si la tasa base, comisión de compra o venta son negativos o vacíos. 
+5. MonedaForm: el campo decimales por defecto es 3 si no se especifica. 
+6. Modelo Moneda: método __str__ retorna el nombre correctamente. 
+7. Modelo Moneda: método clean lanza error si el símbolo no está en mayúsculas. 
+8. Modelo Moneda: método calcular_precio_venta calcula correctamente el precio con y sin beneficio. 
+9. Modelo Moneda: método calcular_precio_compra calcula correctamente el precio con y sin beneficio. 
+10. Modelo Moneda: método get_precios_cliente aplica correctamente el beneficio del cliente. 
+11. Vista moneda_crear: solo usuarios autenticados y con permiso pueden crear monedas. 
+12. Vista moneda_crear: muestra errores si los datos del formulario son inválidos. 
+13. Vista moneda_lista: muestra todas las monedas y permite búsqueda por nombre o símbolo. 
+14. Vista moneda_lista: permite activar/desactivar monedas solo a usuarios con permiso. 
+15. Vista moneda_editar: solo usuarios con permiso pueden editar y se ocultan campos según permisos.
+
+Ten en cuenta:
+- Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
+- Cada error debe mostrar su mensaje de error correspondiente
+- No crear más pruebas unitarias de lo necesario

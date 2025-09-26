@@ -1,8 +1,11 @@
 dvenv/
 pvenv/
-.env
+.env/
 __pycache__/
 .vscode/
 staticfiles/
 mediafiles/
 proyecto.sock
+.pytest_cache/
+.vscode/
+proyecto/*/migrations/[0-9]*.py

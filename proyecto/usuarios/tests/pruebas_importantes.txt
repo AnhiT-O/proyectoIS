@@ -1,0 +1,21 @@
+Pruebas unitarias a crear:
+1. RegistroUsuarioForm: registro exitoso con datos válidos (usuario, email, cédula únicos y contraseñas válidas). 
+2. RegistroUsuarioForm: error si la cédula no es numérica, es muy corta o ya existe. 
+3. RegistroUsuarioForm: error si el email ya está registrado o es inválido. 
+4. RegistroUsuarioForm: error si las contraseñas no coinciden, no tienen más de 8 caracteres, no tienen número o caracter especial. 
+5. RecuperarPasswordForm: error si el email no existe o el usuario está inactivo. 
+6. EstablecerPasswordForm: error si la nueva contraseña no cumple requisitos de seguridad. 
+7. AsignarRolForm: solo muestra roles no asignados y no permite asignar “Administrador” si no corresponde. 
+8. AsignarClienteForm: solo muestra clientes no asignados y etiqueta personalizada. 
+9. Vista registro_usuario: crea usuario, envía email y redirige correctamente. 
+10. Vista activar_cuenta: activa usuario solo con token válido, asigna rol “Operador” y redirige. 
+11. Vista recuperar_password: envía email solo si el usuario existe y está activo. 
+12. Vista reset_password_confirm: permite cambiar contraseña solo con token válido. 
+13. Vista bloquear_usuario: bloquea/desbloquea usuario solo con permiso y método POST. 
+14. Vista asignar_rol: asigna roles solo si el usuario tiene permiso y no es administrador. 
+15. Vista asignar_clientes: asigna clientes solo a operadores y si hay clientes disponibles.
+
+Ten en cuenta:
+- Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
+- Cada error debe mostrar su mensaje de error correspondiente
+- No crear más pruebas unitarias de lo necesario

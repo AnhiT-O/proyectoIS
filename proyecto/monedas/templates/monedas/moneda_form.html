@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Crear{% endif %} Moneda - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <h2>
+            {% if form.instance.pk %}
+                Editar Moneda
+            {% else %}
+                Crear Moneda
+            {% endif %}
+        </h2>
+        <p class="subtitulo">
+            {% if form.instance.pk %}
+                Modifica los datos de la moneda {{ form.instance.nombre }}
+            {% else %}
+                Agrega una nueva moneda al sistema para las operaciones de cambio
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" id="monedaForm" novalidate>
+        {% csrf_token %}
+        
+        {% if not form.instance.pk or perms.monedas.gestion %}
+            <div class="form-campo">
+                <label for="{{ form.nombre.id_for_label }}">Nombre de la Moneda</label>
+                {{ form.nombre }}
+                {% if form.nombre.errors %}
+                    <div class="form-errores">
+                        {% for error in form.nombre.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.simbolo.id_for_label }}">Símbolo de la Moneda</label>
+                {{ form.simbolo }}
+                {% if form.simbolo.errors %}
+                    <div class="form-errores">
+                        {% for error in form.simbolo.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if not form.instance.pk or perms.monedas.cotizacion or perms.monedas.gestion %}
+            <div class="form-campo">
+                <label for="{{ form.tasa_base.id_for_label }}">Tasa base</label>
+                {{ form.tasa_base }}
+                {% if form.tasa_base.errors %}
+                    <div class="form-errores">
+                        {% for error in form.tasa_base.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if not form.instance.pk or perms.monedas.cotizacion or perms.monedas.gestion %}
+            <div class="form-campo">
+                <label for="{{ form.comision_compra.id_for_label }}">Comisión de compra</label>
+                {{ form.comision_compra }}
+                {% if form.comision_compra.errors %}
+                    <div class="form-errores">
+                        {% for error in form.comision_compra.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.comision_venta.id_for_label }}">Comisión de venta</label>
+                {{ form.comision_venta }}
+                {% if form.comision_venta.errors %}
+                    <div class="form-errores">
+                        {% for error in form.comision_venta.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if not form.instance.pk or perms.monedas.gestion %}
+            <div class="form-campo">
+                <label for="{{ form.decimales.id_for_label }}">Decimales</label>
+                {{ form.decimales }}
+                {% if form.decimales.errors %}
+                    <div class="form-errores">
+                        {% for error in form.decimales.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.stock.id_for_label }}">Stock</label>
+                {{ form.stock }}
+                {% if form.stock.errors %}
+                    <div class="form-errores">
+                        {% for error in form.stock.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+                <div class="zona-botones">
+            <button type="submit" class="btn-primario">
+                {% if form.instance.pk %}
+                    Editar Moneda
+                {% else %}
+                    Crear Moneda
+                {% endif %}
+            </button>
+            <a href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'monedas:lista_monedas' %}{% endif %}" class="btn-secundario">Cancelar</a>
+        </div>
+    </form>
+    
+    <script>
+        // Si el formulario se envía exitosamente, redirigir a la página de retorno si existe
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const returnUrl = '{{ request.GET.return_url|escapejs }}';
+            if (returnUrl) {
+                e.preventDefault();
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = returnUrl;
+                    } else {
+                        this.submit();
+                    }
+                }).catch(() => {
+                    this.submit();
+                });
+            }
+        });
+    </script>
+    </div>
+</div>
+{% endblock %}

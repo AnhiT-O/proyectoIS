@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cliente.nombre }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido" style="max-width: 1000px;">
+    <div class="detalle-cabecera" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="detalle-nombre">
+                {{ cliente.nombre }}
+            </h1>
+            <div class="detalle-tipo">
+                {{ cliente.get_tipoCliente_display }}
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <!-- Botón para ver historial de transacciones -->
+            <a href="{% url 'clientes:cliente_historial' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+                Historial de Transacciones
+            </a>
+        </div>
+    </div>
+
+    <div class="zona-detalle">
+        <div class="seccion-info">
+            <!-- Información Personal -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📄</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Tipo de Documento</div>
+                        <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🔢</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Número de Documento</div>
+                        <div class="info-valor">{{ cliente.docCliente }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🏷️</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Segmento</div>
+                        <div class="info-valor">{{ cliente.get_segmento_display }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🎁</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Beneficio aplicado</div>
+                        <div class="info-valor">
+                            {% if cliente.beneficio_segmento > 0 %}
+                                {{ cliente.beneficio_segmento }}%
+                            {% else %}
+                                Ninguno
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="info-columna">
+                <div class="info-celda">
+                    <span class="info-icono">📧</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Correo Electrónico</div>
+                        <div class="info-valor">{{ cliente.correoElecCliente }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📞</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Teléfono</div>
+                        <div class="info-valor">{{ cliente.telefono }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">🏠</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Domicilio</div>
+                        <div class="info-valor">{{ cliente.direccion|default:"No especificado" }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">💼</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Ocupación</div>
+                        <div class="info-valor">{{ cliente.ocupacion|default:"No especificada" }}</div>
+                    </div>
+                </div>
+                <div class="info-celda">
+                    <span class="info-icono">📝</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Estado de Declaración Jurada</div>
+                        <div class="info-valor">
+                            {% if cliente.declaracion_jurada %}
+                                <span class="etiqueta-activo">
+                                    Declaración Firmada
+                                </span>
+                            {% else %}
+                                <span class="etiqueta-bloqueado">
+                                    Declaración Pendiente
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if tarjetas_stripe %}
+        <div class="info-columna" style="grid-column: 1 / -1;">
+            <div class="info-celda">
+                <span class="info-icono">💳</span>
+                <div class="info-contenido">
+                    <div class="info-titulo">Tarjetas de Crédito ({{ total_tarjetas }})</div>
+                    <div class="info-valor">
+                        <div class="lista-clientes">
+                            {% for tarjeta in tarjetas_stripe %}
+                                <div class="cliente">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div style="flex: 1;">
+                                            <strong>**** **** **** {{ tarjeta.last4 }}</strong>
+                                            <br>
+                                            <small style="color: #6c757d;">
+                                                Marca: {{ tarjeta.brand|title }} 
+                                                | Expira: {{ tarjeta.exp_month }}/{{ tarjeta.exp_year }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+        <!-- Sección de Medios de Acreditación -->
+    <div class="zona-detalle" style="margin-top: 2rem;">
+        <div class="detalle-cabecera" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; color: var(--color-texto-principal); font-size: 1.5rem;">Medios de Acreditación</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                <!-- Botón para agregar cuenta bancaria -->
+                <a href="{% url 'clientes:cliente_agregar_cuenta_bancaria' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+                    Agregar Cuenta Bancaria
+                </a>
+                <a href="{% url 'clientes:cliente_agregar_billetera' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+                    Agregar Billetera
+                </a>
+            </div>
+        </div>
+
+        {% if cuentas_bancarias or billeteras %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <!-- Cuentas Bancarias -->
+                {% for cuenta in cuentas_bancarias %}
+                <div class="info-campo">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">🏦</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">Cuenta Bancaria</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'cuenta' cuenta.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta cuenta bancaria?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Banco:</strong> {{ cuenta.get_banco_display }}<br>
+                            <strong>Número:</strong> {{ cuenta.numero_cuenta }}<br>
+                            <strong>Titular:</strong> {{ cuenta.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ cuenta.nro_documento }}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Billeteras -->
+                    {% for billetera in billeteras %}
+                    <div class="info-campo" style="border-left: 4px solid #f0de3c;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <!--<span style="font-size: 1.5rem; margin-right: 0.5rem;">💳</span>-->
+                            <div style="flex: 1;">
+                                <div class="info-titulo">{{ billetera.get_tipo_billetera_display }}</div>
+                            </div>
+                            <form method="post" action="{% url 'clientes:cliente_eliminar_medio_acreditacion' cliente.pk 'billetera' billetera.id %}" 
+                                  onsubmit="return confirm('¿Estás seguro de eliminar esta billetera?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-desactivar" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                        <div class="info-valor">
+                            <strong>Teléfono:</strong> {{ billetera.telefono }}<br>
+                            <strong>Titular:</strong> {{ billetera.nombre_titular }}<br>
+                            <strong>Documento:</strong> {{ billetera.nro_documento }}
+                        </div>
+                    </div>
+                    {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
+                <span style="font-size: 3rem; opacity: 0.5;">💰</span>
+                <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de acreditación</h3>
+                <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de acreditación configurados.</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            <a href="{% url 'clientes:cliente_editar' cliente.pk %}" class="btn-primario">
+                Editar Cliente
+            </a>
+            <a href="{% url 'clientes:cliente_lista' %}" class="btn btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>   
+</div>
+
+{% endblock %}

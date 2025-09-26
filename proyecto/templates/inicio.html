@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Global Exchange - Bienvenido{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="logo">💰 Global Exchange</div>
+    {% if user.cliente_activo %}
+    <div class="info-cliente">
+        <div class="info-titulo">Cliente seleccionado:</div>
+        <div class="info-valor">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
+        <div style="margin-top: 0.5rem;"></div>
+        <div class="info-titulo">Segmento:</div>
+        <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
+    </div>
+    {% endif %}
+    
+    {% if perms.monedas.cotizacion %}
+        <div class="zona-segmento">
+            <form class="segmento-form" method="get" action="{% url 'inicio' %}">
+                <label for="segmento">Ver cotizaciones para segmento:</label>
+                <select class="select-filtro" name="segmento" id="segmento" onchange="this.form.submit()">
+                    {% for seg in segmentaciones %}
+                        <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id %}selected{% endif %}>
+                            {{ seg.nombre }} ({{ seg.porcentaje_beneficio }}%)
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if cotizaciones %}
+        <h2 style="margin-bottom: 1rem;">Cotizaciones del día</h2>
+        <table class="tabla-cotizaciones">
+            <thead>
+                <tr>
+                    <th width="10%">Moneda</th>
+                    <th width="20%">Compra</th>
+                    <th width="20%">Venta</th>
+                    <th width="30%">Última actualización</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cotizacion in cotizaciones %}
+                    <tr>
+                        <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.simbolo }}</span></td>
+                        <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
+                        <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
+                        <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="sin-cotizaciones">No hay monedas registradas aún.</p>
+    {% endif %}
+        <div class="acciones-rapidas">
+            <a href="{% url 'simular' %}" class="btn-primario">
+                Simular conversiones
+            </a>
+        </div>
+        {% if user.cliente_activo %}
+        <div class="acciones-rapidas"></div>
+            <a href="#" class="btn-primario" onclick="mostrarPopupOperaciones(event)">
+                Operar con divisas
+            </a>
+        </div>
+        {% endif %}
+    <!-- Pop-up para operaciones -->
+    <div id="popup-operaciones" class="popup-overlay">
+        <div class="popup-contenido">
+            <div class="popup-cabecera">
+                <h3>¿Qué operación deseas realizar?</h3>
+            </div>
+            <div class="popup-cuerpo">
+                <p>Selecciona el tipo de operación que quieres realizar:</p>
+                <div class="popup-opciones">
+                    <button class="btn-opcion-comprar" onclick="seleccionarOperacion('comprar')">
+                        <span class="icono-opcion">💰</span>
+                        <span class="texto-opcion">Comprar Moneda</span>
+                        <span class="descripcion-opcion">Adquirir divisas extranjeras</span>
+                    </button>
+                    <button class="btn-opcion-vender" onclick="seleccionarOperacion('vender')">
+                        <span class="icono-opcion">💸</span>
+                        <span class="texto-opcion">Vender Moneda</span>
+                        <span class="descripcion-opcion">Vender tus divisas extranjeras</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

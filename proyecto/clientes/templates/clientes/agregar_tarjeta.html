@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agregar Tarjeta - {{ cliente.nombre }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+<style>
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    
+    .loading-content {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <h2>Agregar Tarjeta de Crédito</h2>
+        <p class="subtitulo">
+            Registra una nueva tarjeta de crédito de forma segura con Stripe
+        </p>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto; text-align: left;">
+            <div class="info-titulo">Información de seguridad:</div>
+            <div class="info-valor">Tus datos de tarjeta son procesados de forma segura por Stripe. 
+            No almacenamos información sensible de tarjetas de crédito en nuestros servidores.
+            Toda la información es encriptada y protegida con los más altos estándares de seguridad.</div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <form id="tarjeta-form" method="post">
+        {% csrf_token %}
+        
+        <div class="form-campo">
+            <label for="card-element">Información de la Tarjeta</label>
+            <div id="card-element" class="form-control">
+                <!-- Stripe Elements se insertará aquí -->
+            </div>
+            <div id="card-errors" class="form-errores" role="alert"></div>
+        </div>
+
+        <!-- Mostrar errores del formulario Django si los hay -->
+        {% if form.errors %}
+            <div class="form-errores">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Token oculto de Stripe -->
+        <input type="hidden" id="stripe-token" name="stripe_token" value="">
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar" id="submit-btn">
+                Agregar Tarjeta
+            </button>
+            <a href="{% if 'usuarios/cliente' in request.get_full_path %}{% url 'usuarios:detalle_cliente' cliente_id=cliente.pk %}{% else %}{% url 'clientes:cliente_detalle' pk=cliente.pk %}{% endif %}" class="btn-atras">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Overlay de carga -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Procesando tarjeta...</h3>
+        <p>Por favor, espera mientras procesamos tu información de forma segura.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+
+    // Detectar modo oscuro
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Crear elemento de tarjeta con estilos personalizados adaptables
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: isDarkMode ? '#f3f4f6' : '#424770',
+                '::placeholder': {
+                    color: isDarkMode ? '#adb5bd' : '#aab7c4',
+                },
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+            },
+            invalid: {
+                color: '#dc3545',
+                iconColor: '#dc3545'
+            }
+        },
+        hidePostalCode: true, // Ocultar código postal si no es necesario
+        disableLink: true // Deshabilitar el botón "use link"
+    });
+
+    // Montar el elemento en el DOM
+    cardElement.mount('#card-element');
+
+    // Escuchar cambios en el modo de color
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    darkModeMediaQuery.addEventListener('change', function(e) {
+        // Actualizar solo los colores del elemento existente
+        cardElement.update({
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: e.matches ? '#f3f4f6' : '#424770',
+                    '::placeholder': {
+                        color: e.matches ? '#adb5bd' : '#aab7c4',
+                    },
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545'
+                }
+            }
+        });
+    });
+
+    // Elementos del DOM
+    const form = document.getElementById('tarjeta-form');
+    const submitButton = document.getElementById('submit-btn');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const cardErrors = document.getElementById('card-errors');
+    const stripeTokenInput = document.getElementById('stripe-token');
+
+    // Actualizar vista previa de la tarjeta
+    cardElement.addEventListener('change', function(event) {
+        if (event.error) {
+            cardErrors.innerHTML = `<div class="mensaje-error">${event.error.message}</div>`;
+        } else {
+            cardErrors.innerHTML = '';
+        }
+
+        // Actualizar vista previa (simplificada)
+        if (event.brand) {
+            updateCardPreview(event);
+        }
+    });
+
+    // Función para actualizar la vista previa de la tarjeta
+    function updateCardPreview(event) {
+        const cardPreview = document.getElementById('card-preview');
+        const expiryPreview = document.getElementById('card-expiry-preview');
+        
+        // Actualizar número de tarjeta (parcial por seguridad)
+        if (event.complete && event.brand) {
+            const brandName = event.brand.toUpperCase();
+            cardPreview.textContent = '•••• •••• •••• ••••';
+        }
+    }
+
+    // Manejar envío del formulario
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        // Deshabilitar el botón y mostrar loading
+        submitButton.disabled = true;
+        submitButton.textContent = 'Procesando...';
+        loadingOverlay.style.display = 'flex';
+
+        try {
+            // Crear token con Stripe
+            const {token, error} = await stripe.createToken(cardElement);
+
+            if (error) {
+                // Mostrar error
+                cardErrors.innerHTML = `<div class="mensaje-error">${error.message}</div>`;
+                
+                // Restaurar botón
+                submitButton.disabled = false;
+                submitButton.textContent = 'Agregar Tarjeta';
+                loadingOverlay.style.display = 'none';
+            } else {
+                // Token creado exitosamente
+                stripeTokenInput.value = token.id;
+                
+                // Enviar formulario
+                form.submit();
+            }
+        } catch (err) {
+            console.error('Error al procesar la tarjeta:', err);
+            cardErrors.innerHTML = '<div class="mensaje-error">Error inesperado. Por favor, inténtalo de nuevo.</div>';
+            
+            // Restaurar botón
+            submitButton.disabled = false;
+            submitButton.textContent = 'Agregar Tarjeta';
+            loadingOverlay.style.display = 'none';
+        }
+    });
+
+    // Prevenir envío múltiple
+    let formSubmitted = false;
+    form.addEventListener('submit', function() {
+        if (formSubmitted) {
+            return false;
+        }
+        formSubmitted = true;
+    });
+});
+</script>
+{% endblock %}

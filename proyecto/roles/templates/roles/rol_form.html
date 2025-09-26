@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <h2>{{ titulo }}</h2>
+        <p class="subtitulo">
+        {% if rol %}
+            Modifica los datos del rol {{ rol.name }}
+        {% else %}
+            Crea un nuevo rol para el sistema
+        {% endif %}
+        </p>
+    </div>
+
+    <form method="post" id="rolForm" novalidate>
+        {% csrf_token %}
+        <div class="form-campo">
+            <label for="{{ form.name.id_for_label }}">Nombre del rol</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="form-errores">
+                    {% for error in form.name.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-campo">
+            <label for="{{ form.descripcion.id_for_label }}">Descripción</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+                <div class="form-errores">
+                    {% for error in form.descripcion.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-campo">
+            <label>Permisos</label>
+            <div class="seccion-permisos">
+                {{ form.permisos }}
+            </div>
+            {% if form.permisos.errors %}
+                <div class="form-errores">
+                    {% for error in form.permisos.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                {% if rol %}Editar Rol{% else %}Crear Rol{% endif %}
+            </button>
+            <a href="{% url 'roles:listar_roles' %}" class="btn-atras">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
