@@ -84,6 +84,14 @@ form-campo {
     margin-top: 0.25rem;
 }
 
+.zona-botones {
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 1.5rem;
+}
+
 
 /* Botón primario - Acción principal */
 .btn-primario {
@@ -345,7 +353,43 @@ form-campo {
     transform: scale(1.1);
 }
 
-/* ESTILOS PARA LAS ALERTAS */
+/* ESTILOS PARA LAS ALERTAS Y MENSAJES */
+
+.mensajes {
+    margin-bottom: 1.5rem;
+}
+
+.mensaje {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #1f2937;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mensaje-success {
+    background-color: #064e3b;
+    color: #10b981;
+    border-left: 4px solid #10b981;
+}
+
+.mensaje-error {
+    background-color: #7f1d1d;
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+}
+
+.mensaje-info {
+    background-color: #0c4a6e;
+    color: #0ea5e9;
+    border-left: 4px solid #0ea5e9;
+}
+
+.mensaje-warning {
+    background-color: #78350f;
+    color: #f59e0b;
+    border-left: 4px solid #f59e0b;
+}
 
 .zona-alertas {
     max-width: 1200px;

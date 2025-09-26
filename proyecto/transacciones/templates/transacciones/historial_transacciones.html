@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Historial de Transacciones - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>
+            {% if cliente_filtrado %}
+                Historial de Transacciones - Cliente: {{ cliente_filtrado.nombre }}
+            {% else %}
+                Historial de Transacciones
+            {% endif %}
+        </h2>
+    </div>
+    <!-- Formulario de búsqueda con nuevo estilo -->
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-busqueda">
+                <input type="text" 
+                        name="busqueda" 
+                        class="texto-busqueda" 
+                        value="{{ busqueda }}" 
+                        placeholder="Buscar por usuario">
+            </div>
+            <div class="campo-filtro">
+                <select name="tipo_operacion" class="select-filtro">
+                    <option value="">Todos los tipos</option>
+                    <option value="compra" {% if tipo_operacion == 'compra' %}selected{% endif %}>
+                        Compra
+                    </option>
+                    <option value="venta" {% if tipo_operacion == 'venta' %}selected{% endif %}>
+                        Venta
+                    </option>
+                </select>
+            </div>
+            <div class="campo-filtro">
+                <select name="estado" class="select-filtro">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>
+                        Pendiente
+                    </option>
+                    <option value="confirmada" {% if estado_filtro == 'confirmada' %}selected{% endif %}>
+                        Confirmada
+                    </option>
+                    <option value="cancelada" {% if estado_filtro == 'cancelada' %}selected{% endif %}>
+                        Cancelada
+                    </option>
+                    <option value="anulada" {% if estado_filtro == 'anulada' %}selected{% endif %}>
+                        Anulada
+                    </option>
+                </select>
+            </div>
+            <div class="botones-busqueda">
+                <button type="submit" class="btn-buscar">
+                    Buscar
+                </button>
+                {% if busqueda or tipo_operacion or estado_filtro %}
+                <a href="{% url 'transacciones:historial' %}" class="btn-limpiar">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            Total de transacciones: <span class="conteo">{{ transacciones|length }}</span>
+            {% if busqueda or tipo_operacion or estado_filtro %}
+                <span style="margin-left: 1rem; color: #6c757d;">
+                    ({{ transacciones|length }} resultado{{ transacciones|length|pluralize }}
+                    {% if busqueda %}para "{{ busqueda }}"{% endif %}
+                    {% if tipo_operacion %}de tipo {{ tipo_operacion|title }}{% endif %}
+                    {% if estado_filtro %}en estado {{ estado_filtro|title }}{% endif %})
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th>Fecha/Hora</th>
+                <th>Usuario</th>
+                <th>Operación</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Medios</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaccion in transacciones %}
+            <tr>
+                <td>
+                    <div>
+                        <strong>{{ transaccion.fecha_hora|date:"d/m/Y" }}</strong><br>
+                        <small>{{ transaccion.fecha_hora|time:"H:i:s" }}</small>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        {{ transaccion.usuario.get_full_name }}
+                    </div>
+                </td>
+                <td>
+                    <div class="tipo-operacion {% if transaccion.tipo == 'compra' %}compra{% else %}venta{% endif %}">
+                        {{ transaccion.tipo|title }}
+                    </div>
+                </td>
+                <td>
+                    {% if transaccion.tipo == 'compra' %}
+                        {{ transaccion.monto_origen|floatformat:0 }} PYG
+                    {% else %}
+                        {{ transaccion.monto_origen|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if transaccion.tipo == 'compra' %}
+                        {{ transaccion.monto_destino|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
+                    {% else %}
+                        {{ transaccion.monto_destino|floatformat:0 }} PYG
+                    {% endif %}
+                </td>
+                <td>
+                    <div>
+                        <strong>Pago:</strong> {{ transaccion.medio_pago_formateado }}<br>
+                        <strong>Cobro:</strong> {{ transaccion.medio_cobro }}
+                    </div>
+                </td>
+                <td>
+                    <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">
+                        {{ transaccion.estado }}
+                    </div>
+                </td>
+                <td>
+                    <div class="zona-acciones">
+                        <a href="{% url 'transacciones:detalle' transaccion.pk %}" class="btn-detalles" title="Ver detalles">
+                            Detalles
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    {% if busqueda or tipo_operacion or estado_filtro %}
+                        No se encontraron transacciones que coincidan con los filtros aplicados.
+                    {% else %}
+                        No hay transacciones registradas.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

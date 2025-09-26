@@ -40,9 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'usuarios',
+    'transacciones',
     'clientes',
-    'monedas'
+    'monedas',
+    'usuarios',
+    'roles',
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [
@@ -120,8 +123,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # Puerto estándar para TLS
@@ -147,3 +148,8 @@ PASSWORD_RESET_TIMEOUT = 3600
 
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
+
+AUTH_USER_MODEL = 'usuarios.Usuario'
+
+STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2GvbbBBNVzYHjiA6YaF4KAXeSnvjsO2LY7d0VwJm00WsPp8Oxu'
+STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'

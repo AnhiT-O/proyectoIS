@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from transacciones.views import historial_transacciones
 
 app_name = 'usuarios'
 
@@ -24,4 +25,6 @@ urlpatterns = [
     # Rutas para gestión de tarjetas por operadores
     path('cliente/<int:pk>/agregar-tarjeta/', views.agregar_tarjeta_cliente, name='agregar_tarjeta_cliente'),
     path('cliente/<int:pk>/eliminar-tarjeta/<str:payment_method_id>/', views.eliminar_tarjeta_cliente, name='eliminar_tarjeta_cliente'),
+    # URL para historial de transacciones del cliente
+    path('cliente/<int:cliente_id>/historial/', historial_transacciones, name='cliente_historial'),
 ]

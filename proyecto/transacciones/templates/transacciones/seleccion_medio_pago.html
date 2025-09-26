@@ -62,22 +62,42 @@
         <div class="info-campos">
             {% for medio_cliente in medios_pago %}
                 <div class="info-usuario {% if medio_cliente == medio_pago_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cliente }}</div>
+                    {% if medio_cliente.last4 %}
+                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">Tarjeta de Crédito - **** {{ medio_cliente.last4 }} ({{ medio_cliente.brand }})</div>
+                    {% else %}
+                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cliente }}</div>
+                    {% endif %}
                     
                     <!-- Botón de acción alineado a la derecha -->
                     <div style="margin-left: 1rem; align-self: center;">
-                        {% if medio_cliente == medio_pago_seleccionado %}
-                            <span class="etiqueta-activo">Seleccionado</span>
+                        {% if medio_cliente.last4 %}
+                            {% if medio_cliente.id == medio_pago_seleccionado %}
+                                <span class="etiqueta-activo">Seleccionado</span>
+                            {% else %}
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="accion" value="seleccionar_medio">
+                                    <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
+                                    <button type="submit" class="btn-activar" 
+                                            onclick="return confirm('¿Confirmas que quieres usar **** {{ medio_cliente.last4 }} ({{ medio_cliente.brand }}) como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
+                                        Seleccionar
+                                    </button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                            <form method="post" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="accion" value="seleccionar_medio">
-                                <input type="hidden" name="medio_pago_id" value="{{ medio_cliente }}">
-                                <button type="submit" class="btn-activar" 
-                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
-                                    Seleccionar
-                                </button>
-                            </form>
+                            {% if medio_cliente == medio_pago_seleccionado %}
+                                <span class="etiqueta-activo">Seleccionado</span>
+                            {% else %}
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="accion" value="seleccionar_medio">
+                                    <input type="hidden" name="medio_pago_id" value="{{ medio_cliente }}">
+                                    <button type="submit" class="btn-activar" 
+                                            onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
+                                        Seleccionar
+                                    </button>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

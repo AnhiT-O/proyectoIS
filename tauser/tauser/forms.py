@@ -2,7 +2,7 @@ from django import forms
 
 class CodigoForm(forms.Form):
     codigo = forms.CharField(
-        max_length=30,
+        max_length=50,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'autofocus': True
