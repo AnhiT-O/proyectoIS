@@ -931,6 +931,7 @@ def historial_transacciones(request, cliente_id=None):
     busqueda = request.GET.get('busqueda', '')
     tipo_operacion = request.GET.get('tipo_operacion', '')
     estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
     
     # Obtener todas las transacciones (o aplicar filtros)
     transacciones = Transaccion.objects.all().order_by('-fecha_hora')
@@ -942,15 +943,18 @@ def historial_transacciones(request, cliente_id=None):
             cliente = Cliente.objects.get(id=cliente_id)
             transacciones = transacciones.filter(cliente=cliente)
             cliente_filtrado = cliente
+            # Obtener usuarios asociados al cliente
+            usuarios_cliente = cliente.usuarios.all()
         except Cliente.DoesNotExist:
             messages.error(request, "Cliente no encontrado")
             return redirect('transacciones:historial')
     else:
         cliente_filtrado = None
+        usuarios_cliente = None
     
     # Aplicar filtros según parámetros recibidos
-    if busqueda:
-        # Buscar por cliente o usuario
+    if busqueda and not cliente_filtrado:
+        # Buscar por cliente o usuario solo cuando no hay cliente filtrado
         transacciones = transacciones.filter(
             models.Q(cliente__nombre__icontains=busqueda) | 
             models.Q(cliente__docCliente__icontains=busqueda) |
@@ -962,6 +966,14 @@ def historial_transacciones(request, cliente_id=None):
     
     if estado_filtro:
         transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    # Filtrar por usuario si se especifica
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
     
     # Procesar cada transacción para obtener información de tarjetas y calcular montos
     for transaccion in transacciones:
@@ -992,7 +1004,9 @@ def historial_transacciones(request, cliente_id=None):
         'busqueda': busqueda,
         'tipo_operacion': tipo_operacion,
         'estado_filtro': estado_filtro,
-        'cliente_filtrado': cliente_filtrado
+        'cliente_filtrado': cliente_filtrado,
+        'usuario_filtro': usuario_filtro,
+        'usuarios_cliente': usuarios_cliente
     }
     
     return render(request, 'transacciones/historial_transacciones.html', context)
@@ -1040,11 +1054,11 @@ def editar_transaccion(request, transaccion_id):
         # Verificar que la transacción esté pendiente
         if transaccion.estado.lower() != 'pendiente':
             messages.error(request, 'Solo se pueden editar transacciones en estado pendiente.')
-            return redirect('transacciones:historial')
+            return redirect(f'transacciones:historial?usuario={transaccion.usuario.id}')
             
         # Aquí implementar lógica para editar la transacción
-        # Por ahora, solo redireccionar al historial
-        return redirect('transacciones:historial')
+        # Por ahora, solo redireccionar al historial del usuario
+        return redirect(f'transacciones:historial?usuario={transaccion.usuario.id}')
         
     except Transaccion.DoesNotExist:
         messages.error(request, 'La transacción solicitada no existe.')

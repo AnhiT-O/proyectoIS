@@ -27,6 +27,7 @@ urlpatterns = [
     
     # URLs para historial de transacciones
     path('historial/', views.historial_transacciones, name='historial'),
+    path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),
     path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
     path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
 ]
