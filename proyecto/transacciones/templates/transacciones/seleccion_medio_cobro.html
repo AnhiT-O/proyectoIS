@@ -63,7 +63,7 @@
             {% for medio_cobro in medios_cobro %}
                 <div class="info-usuario {% if medio_cobro == medio_cobro_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     {% if medio_cobro.tipo_billetera %}
-                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro.get_tipo_billetera_display }} ({{ medio_cobro.telefono }})</div>
+                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro.tipo_billetera }} ({{ medio_cobro.telefono }})</div>
                     {% else %}
                     <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro }}</div>
                     {% endif %}

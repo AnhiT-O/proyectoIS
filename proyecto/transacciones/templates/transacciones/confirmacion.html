@@ -103,7 +103,7 @@
                 <div class="detalle-item">
                     <div class="detalle-titulo">Medio de cobro:</div>
                     {% if medio_cobro.tipo_billetera %}
-                        <div class="detalle-valor">{{ medio_cobro.get_tipo_billetera_display }} ({{ medio_cobro.telefono }})</div>
+                        <div class="detalle-valor">{{ medio_cobro.tipo_billetera }} ({{ medio_cobro.telefono }})</div>
                     {% else %}
                         <div class="detalle-valor">{{ medio_cobro }}</div>
                     {% endif %}

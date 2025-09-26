@@ -836,8 +836,11 @@ def venta_medio_cobro(request):
                         'medio_cobro': medio_cobro
                     })
                     request.session['venta_datos'] = venta_datos
-
-                    messages.success(request, f'Medio de cobro {medio_cobro} seleccionado correctamente.')
+                    if medio_cobro.startswith('{'):
+                        medio_cobro_dict = ast.literal_eval(medio_cobro)
+                        messages.success(request, f'Medio de cobro {medio_cobro_dict["tipo_billetera"]} seleccionado correctamente.')
+                    else:
+                        messages.success(request, f'Medio de cobro {medio_cobro} seleccionado correctamente.')
                     return redirect('transacciones:venta_medio_cobro')  # Permanecer en el mismo paso
         
                 except Exception as e:
@@ -867,7 +870,14 @@ def venta_medio_cobro(request):
     # Agregar billeteras si las hay
     billeteras = request.user.cliente_activo.billeteras.all()
     for billetera in billeteras:
-        medios_cobro_disponibles.append(billetera)
+        billetera_dict = {
+            'id': billetera.id,
+            'tipo_billetera': billetera.get_tipo_billetera_display(),
+            'telefono': billetera.telefono,
+            'nombre_titular': billetera.nombre_titular,
+            'nro_documento': billetera.nro_documento
+        }
+        medios_cobro_disponibles.append(billetera_dict)
 
     # Obtener el medio de cobro seleccionado actualmente (si hay uno)
     medio_cobro_seleccionado = None
@@ -958,13 +968,18 @@ def venta_exito(request):
             str_medio_pago = f'Tarjeta de Crédito (**** **** **** {medio_pago_dict["last4"]})'
         else:
             str_medio_pago = medio_pago
+        if medio_cobro.startswith('{'):
+            medio_cobro_dict = ast.literal_eval(medio_cobro)
+            str_medio_cobro = f'{medio_cobro_dict["tipo_billetera"]} ({medio_cobro_dict["telefono"]})'
+        else:
+            str_medio_cobro = medio_cobro
         transaccion = Transaccion.objects.create(
             cliente=request.user.cliente_activo,
             tipo='venta',
             moneda=moneda,
             monto=monto,
             medio_pago=str_medio_pago,
-            medio_cobro=medio_cobro
+            medio_cobro=str_medio_cobro
         )
         
         # Generar token si el medio de pago es Efectivo
@@ -984,12 +999,22 @@ def venta_exito(request):
             else:
                 messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
                 return redirect('transacciones:venta_monto_moneda')
+            context = {
+            'tipo': 'venta',
+            'medio_cobro': medio_cobro,
+        }
         else:
             try:
                 token_data = generar_token_transaccion(transaccion.id)
                 
                 # Guardar el token en la sesión para su posterior uso
                 request.session['token_transaccion'] = token_data
+
+                context = {
+                'token': token_data['token'],
+                'tipo': 'venta',
+                'medio_cobro': medio_cobro,
+            }
 
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
@@ -1001,12 +1026,6 @@ def venta_exito(request):
     # Limpiar los datos de la sesión relacionados con la venta
     if 'venta_datos' in request.session:
         del request.session['venta_datos']
-
-    context = {
-        'token': token_data['token'],
-        'tipo': 'venta',
-        'medio_cobro': medio_cobro,
-    }
     
     return render(request, 'transacciones/exito.html', context)
 
