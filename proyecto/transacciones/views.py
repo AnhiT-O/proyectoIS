@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from monedas.models import Moneda
 from monedas.services import LimiteService
 from .forms import SeleccionMonedaMontoForm, RecargoForm
@@ -32,6 +33,8 @@ import secrets
 import json
 import base64
 import ast
+import stripe
+import logging
 from datetime import datetime, timedelta
 from django.db import models
 
@@ -766,8 +769,6 @@ def compra_exito(request):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
@@ -1268,9 +1269,7 @@ def venta_exito(request):
             moneda=moneda,
             monto=monto,
             medio_pago=str_medio_pago,
-            medio_cobro=str_medio_cobro
-            medio_pago=medio_pago,
-            medio_cobro=medio_cobro,
+            medio_cobro=str_medio_cobro,
             usuario=request.user
         )
         print(f"Transacción creada con ID: {transaccion.id}")
@@ -1312,8 +1311,6 @@ def venta_exito(request):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')

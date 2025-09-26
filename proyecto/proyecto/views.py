@@ -36,35 +36,36 @@ def inicio(request):
             porcentaje_beneficio_admin = Cliente.BENEFICIOS_SEGMENTO[segmento_id]
         context['segmento_seleccionado'] = segmento_seleccionado
     
-    # Si el usuario está autenticado
-    cotizaciones = []
-    for moneda in monedas_activas:
-        if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
-            # Usuario u operador con cliente seleccionado
-            cliente = request.user.cliente_activo
-            precios = moneda.get_precios_cliente(cliente)
-        elif segmento_seleccionado:
-            # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
-            precios = {
-                'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
-                'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
-            }
-        else:
-            # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
-            precios = {
-                'precio_compra': moneda.calcular_precio_compra(0),
-                'precio_venta': moneda.calcular_precio_venta(0)
-            }
-        
-        cotizaciones.append({
-            'moneda': moneda,
-            'simbolo': moneda.simbolo,
-            'precio_compra': precios['precio_compra'],
-            'precio_venta': precios['precio_venta'],
-            'fecha': moneda.fecha_cotizacion
-        })
-    cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
-    context['cotizaciones'] = cotizaciones
+    # Solo mostrar cotizaciones si el usuario está autenticado
+    if request.user.is_authenticated:
+        cotizaciones = []
+        for moneda in monedas_activas:
+            if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+                # Usuario u operador con cliente seleccionado
+                cliente = request.user.cliente_activo
+                precios = moneda.get_precios_cliente(cliente)
+            elif segmento_seleccionado:
+                # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
+                    'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+                }
+            else:
+                # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
+                precios = {
+                    'precio_compra': moneda.calcular_precio_compra(0),
+                    'precio_venta': moneda.calcular_precio_venta(0)
+                }
+            
+            cotizaciones.append({
+                'moneda': moneda,
+                'simbolo': moneda.simbolo,
+                'precio_compra': precios['precio_compra'],
+                'precio_venta': precios['precio_venta'],
+                'fecha': moneda.fecha_cotizacion
+            })
+        cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
+        context['cotizaciones'] = cotizaciones
     
     return render(request, 'inicio.html', context)
 
