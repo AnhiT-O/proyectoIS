@@ -17,6 +17,8 @@ Author: Equipo de desarrollo Global Exchange
 Date: 2024
 """
 
+import logging
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -34,6 +36,7 @@ import base64
 import ast
 from datetime import datetime, timedelta
 from django.db import models
+import stripe
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -97,9 +100,6 @@ def procesar_pago_stripe(transaccion_id, payment_method_id):
             monto_recargado = a_guaranies * (Decimal('1') + (Decimal(str(Recargos.objects.get(nombre='Tarjeta de Crédito').recargo)) / Decimal('100')))
             moneda_stripe = 'pyg'  # Cambiar según la moneda
             monto_centavos = int(monto_recargado)
-            print(monto_centavos)
-            print(monto_recargado)
-            print(a_guaranies)
         # Crear PaymentIntent
         payment_intent = stripe.PaymentIntent.create(
             amount=monto_centavos,
@@ -120,8 +120,6 @@ def procesar_pago_stripe(transaccion_id, payment_method_id):
         consumo.consumo_diario += realizar_conversion(transaccion)
         consumo.consumo_mensual += realizar_conversion(transaccion)
         consumo.save()
-        transaccion.estado = 'Completada'
-        transaccion.save()
         
         logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion_id}. PaymentIntent: {payment_intent.id}")
         
@@ -715,7 +713,20 @@ def compra_confirmacion(request):
 @login_required
 def compra_exito(request):
     """
-    Vista que muestra el mensaje de éxito tras completar la compra.
+    Página final del proceso de compra: mensaje de éxito.
+    
+    Muestra confirmación de que la transacción ha sido procesada
+    exitosamente y limpia los datos de sesión relacionados con
+    el proceso de compra.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        
+    Returns:
+        HttpResponse: Página de éxito
+        
+    Template:
+        transacciones/exito.html
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -742,7 +753,7 @@ def compra_exito(request):
             tipo='compra',
             moneda=moneda,
             monto=monto,
-            medio_pago=medio_pago,
+            medio_pago=str_medio_pago,
             medio_cobro=medio_cobro,
             usuario=request.user
         )
@@ -766,8 +777,6 @@ def compra_exito(request):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
@@ -778,31 +787,7 @@ def compra_exito(request):
         'tipo': 'compra'
     }
     
-    return render(request, 'transacciones/confirmacion.html', context)
-
-@login_required
-def compra_exito(request):
-    """
-    Página final del proceso de compra: mensaje de éxito.
-    
-    Muestra confirmación de que la transacción ha sido procesada
-    exitosamente y limpia los datos de sesión relacionados con
-    el proceso de compra.
-    
-    Args:
-        request (HttpRequest): Petición HTTP
-        
-    Returns:
-        HttpResponse: Página de éxito
-        
-    Template:
-        transacciones/exito.html
-    """
-    # Limpiar los datos de la sesión relacionados con la compra
-    if 'compra_datos' in request.session:
-        del request.session['compra_datos']
-    
-    return render(request, 'transacciones/exito.html')
+    return render(request, 'transacciones/exito.html', context)
 
 # ============================================================================
 # PROCESO DE VENTA DE MONEDAS
@@ -1234,7 +1219,20 @@ def venta_confirmacion(request):
 @login_required
 def venta_exito(request):
     """
-    Vista que muestra el mensaje de éxito tras completar la venta.
+    Página final del proceso de venta: mensaje de éxito.
+    
+    Muestra confirmación de que la transacción de venta ha sido procesada
+    exitosamente y limpia los datos de sesión relacionados con
+    el proceso de venta.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        
+    Returns:
+        HttpResponse: Página de éxito
+        
+    Template:
+        transacciones/exito.html
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -1268,9 +1266,7 @@ def venta_exito(request):
             moneda=moneda,
             monto=monto,
             medio_pago=str_medio_pago,
-            medio_cobro=str_medio_cobro
-            medio_pago=medio_pago,
-            medio_cobro=medio_cobro,
+            medio_cobro=str_medio_cobro,
             usuario=request.user
         )
         print(f"Transacción creada con ID: {transaccion.id}")
@@ -1282,12 +1278,14 @@ def venta_exito(request):
                 messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
                 if medio_cobro == 'Efectivo':
                     token_data = generar_token_transaccion(transaccion.id)
+                    transaccion.estado = 'Confirmada'
+                    transaccion.save()
                 else:
                     consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente)
                     consumo.consumo_diario += convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago, medio_cobro)
                     consumo.consumo_mensual += convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago, medio_cobro)
                     consumo.save()
-                    transaccion.estado = 'Completada'
+                    transaccion.estado = 'Completa'
                     transaccion.save()
             else:
                 messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
@@ -1312,8 +1310,6 @@ def venta_exito(request):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
             
     except Exception as e:
         messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
@@ -1322,31 +1318,7 @@ def venta_exito(request):
     if 'venta_datos' in request.session:
         del request.session['venta_datos']
     
-    return render(request, 'transacciones/confirmacion.html', context)
-
-@login_required
-def venta_exito(request):
-    """
-    Página final del proceso de venta: mensaje de éxito.
-    
-    Muestra confirmación de que la transacción de venta ha sido procesada
-    exitosamente y limpia los datos de sesión relacionados con
-    el proceso de venta.
-    
-    Args:
-        request (HttpRequest): Petición HTTP
-        
-    Returns:
-        HttpResponse: Página de éxito
-        
-    Template:
-        transacciones/exito.html
-    """
-    # Limpiar los datos de la sesión relacionados con la venta
-    if 'venta_datos' in request.session:
-        del request.session['venta_datos']
-
-    return render(request, 'transacciones/exito.html')
+    return render(request, 'transacciones/exito.html', context)
 
 # ============================================================================
 # VISTAS AUXILIARES Y APIs

@@ -61,16 +61,19 @@
             <div class="campo-filtro">
                 <select name="estado" class="select-filtro">
                     <option value="">Todos los estados</option>
-                    <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>
+                    <option value="pendiente" {% if estado_filtro == 'Pendiente' %}selected{% endif %}>
                         Pendiente
                     </option>
-                    <option value="confirmada" {% if estado_filtro == 'confirmada' %}selected{% endif %}>
+                    <option value="confirmada" {% if estado_filtro == 'Confirmada' %}selected{% endif %}>
                         Confirmada
                     </option>
-                    <option value="cancelada" {% if estado_filtro == 'cancelada' %}selected{% endif %}>
+                     <option value="completa" {% if estado_filtro == 'Completa' %}selected{% endif %}>
+                        Completa
+                    </option>
+                    <option value="cancelada" {% if estado_filtro == 'Cancelada' %}selected{% endif %}>
                         Cancelada
                     </option>
-                    <option value="anulada" {% if estado_filtro == 'anulada' %}selected{% endif %}>
+                    <option value="anulada" {% if estado_filtro == 'Anulada' %}selected{% endif %}>
                         Anulada
                     </option>
                 </select>

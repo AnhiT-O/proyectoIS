@@ -35,7 +35,10 @@ def codigo(request):
                 # Verificar si el token ha expirado
                 if not transaccion.token_valido():
                     # Token expirado, eliminar la transacción
-                    transaccion.delete()
+                    transaccion.estado = 'Cancelada'
+                    transaccion.token = None
+                    transaccion.token_expiracion = None
+                    transaccion.save()
                     messages.error(request, 'El código ha expirado. La transacción ha sido cancelada.')
                     return render(request, 'codigo.html', {'form': CodigoForm()})
                 
@@ -54,7 +57,7 @@ def codigo(request):
                 print(realizar_conversion(transaccion))
                 print(transaccion.monto)
                 consumo.save()
-                transaccion.estado = 'Completada'
+                transaccion.estado = 'Completa'
                 transaccion.token = None
                 transaccion.token_expiracion = None
                 transaccion.save()
@@ -66,7 +69,7 @@ def codigo(request):
                     consumo.consumo_diario += realizar_conversion(transaccion)
                     consumo.consumo_mensual += realizar_conversion(transaccion)
                     consumo.save()
-                    transaccion.estado = 'Completada'
+                    transaccion.estado = 'Completa'
                     transaccion.token = None
                     transaccion.token_expiracion = None
                     transaccion.save()
@@ -77,7 +80,7 @@ def codigo(request):
                     consumo.consumo_diario += realizar_conversion(transaccion)
                     consumo.consumo_mensual += realizar_conversion(transaccion)
                     consumo.save()
-                    transaccion.estado = 'Completada'
+                    transaccion.estado = 'Completa'
                     transaccion.token = None
                     transaccion.token_expiracion = None
                     transaccion.save()
