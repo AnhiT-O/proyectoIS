@@ -141,6 +141,11 @@ class Transaccion(models.Model):
     token_expiracion = models.DateTimeField(blank=True, null=True)  # Campo para la expiración del token
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
+    # Campos para almacenar cotizaciones originales al crear la transacción
+    precio_compra_original = models.IntegerField(null=True, blank=True)  # Precio de compra al momento de crear la transacción
+    precio_venta_original = models.IntegerField(null=True, blank=True)   # Precio de venta al momento de crear la transacción
+    fecha_cotizacion_original = models.DateTimeField(null=True, blank=True)  # Fecha de cotización original
+    
     class Meta:
         verbose_name = "Transacción"
         verbose_name_plural = "Transacciones"
@@ -204,6 +209,61 @@ class Transaccion(models.Model):
         count = transacciones_expiradas.count()
         transacciones_expiradas.delete()
         return count
+
+    def almacenar_cotizacion_original(self):
+        """
+        Almacena los precios de compra y venta originales al momento de crear la transacción.
+        
+        Calcula y guarda los precios según la configuración actual de la moneda
+        para poder detectar cambios posteriores.
+        """
+        if self.moneda:
+            # Calcular precios según el tipo de transacción
+            precio_compra = self.moneda.tasa_base + self.moneda.comision_compra
+            precio_venta = self.moneda.tasa_base - self.moneda.comision_venta
+            
+            self.precio_compra_original = precio_compra
+            self.precio_venta_original = precio_venta
+            self.fecha_cotizacion_original = self.moneda.fecha_cotizacion
+            self.save(update_fields=['precio_compra_original', 'precio_venta_original', 'fecha_cotizacion_original'])
+
+    def verificar_cambio_cotizacion(self):
+        """
+        Verifica si la cotización ha cambiado desde que se creó la transacción.
+        
+        Returns:
+            dict: Diccionario con información de cambios o None si no hay cambios
+                - 'hay_cambios': boolean indicando si hubo cambios
+                - 'valores_anteriores': dict con precio_compra y precio_venta originales
+                - 'valores_actuales': dict con precio_compra y precio_venta actuales
+        """
+        if not self.moneda or not self.precio_compra_original or not self.precio_venta_original:
+            return None
+            
+        # Calcular precios actuales
+        precio_compra_actual = self.moneda.tasa_base + self.moneda.comision_compra
+        precio_venta_actual = self.moneda.tasa_base - self.moneda.comision_venta
+        
+        # Verificar si hay cambios
+        hay_cambios = (
+            precio_compra_actual != self.precio_compra_original or 
+            precio_venta_actual != self.precio_venta_original
+        )
+        
+        if hay_cambios:
+            return {
+                'hay_cambios': True,
+                'valores_anteriores': {
+                    'precio_compra': self.precio_compra_original,
+                    'precio_venta': self.precio_venta_original
+                },
+                'valores_actuales': {
+                    'precio_compra': precio_compra_actual,
+                    'precio_venta': precio_venta_actual
+                }
+            }
+        
+        return {'hay_cambios': False}
 
     def save(self, *args, **kwargs):
         """
