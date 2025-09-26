@@ -62,7 +62,11 @@
         <div class="info-campos">
             {% for medio_cobro in medios_cobro %}
                 <div class="info-usuario {% if medio_cobro == medio_cobro_seleccionado %}cliente-activo{% endif %}" style="width: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    {% if medio_cobro.tipo_billetera %}
+                    <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro.get_tipo_billetera_display }} ({{ medio_cobro.telefono }})</div>
+                    {% else %}
                     <div class="info-titulo" style="font-size: 1.1rem; font-weight: bold; text-align: left;">{{ medio_cobro }}</div>
+                    {% endif %}
                 
                     <!-- Botón de acción alineado a la derecha -->
                     <div style="margin-left: 1rem; align-self: center;">
@@ -73,8 +77,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="accion" value="seleccionar_medio">
                                 <input type="hidden" name="medio_cobro_id" value="{{ medio_cobro }}">
-                                <button type="submit" class="btn-activar" 
-                                        onclick="return confirm('¿Confirmas que quieres usar {{ medio_cobro }} como medio de cobro?')">
+                                <button type="submit" class="btn-activar">
                                     Seleccionar
                                 </button>
                             </form>

@@ -70,21 +70,6 @@
                     
                     <!-- Botón de acción alineado a la derecha -->
                     <div style="margin-left: 1rem; align-self: center;">
-                        {% if medio_cliente.last4 %}
-                            {% if medio_cliente.id == medio_pago_seleccionado %}
-                                <span class="etiqueta-activo">Seleccionado</span>
-                            {% else %}
-                                <form method="post" style="display: inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="accion" value="seleccionar_medio">
-                                    <input type="hidden" name="medio_pago_id" value="{{ medio_cliente.id }}">
-                                    <button type="submit" class="btn-activar" 
-                                            onclick="return confirm('¿Confirmas que quieres usar **** {{ medio_cliente.last4 }} ({{ medio_cliente.brand }}) como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
-                                        Seleccionar
-                                    </button>
-                                </form>
-                            {% endif %}
-                        {% else %}
                             {% if medio_cliente == medio_pago_seleccionado %}
                                 <span class="etiqueta-activo">Seleccionado</span>
                             {% else %}
@@ -92,13 +77,11 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="accion" value="seleccionar_medio">
                                     <input type="hidden" name="medio_pago_id" value="{{ medio_cliente }}">
-                                    <button type="submit" class="btn-activar" 
-                                            onclick="return confirm('¿Confirmas que quieres usar {{ medio_cliente }} como medio de {% if tipo_transaccion == venta %}cobro{% else %}pago{% endif %}?')">
+                                    <button type="submit" class="btn-activar">
                                         Seleccionar
                                     </button>
                                 </form>
                             {% endif %}
-                        {% endif %}
                     </div>
                 </div>
             {% endfor %}

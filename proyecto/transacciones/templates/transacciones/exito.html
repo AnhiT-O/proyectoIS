@@ -23,18 +23,11 @@
                 </p>
                 <div class="info-campo">{{ token }}</div>
             {% else %}
-                {% if medio_cobro == 'Efectivo' %}
-                    <div class="logo">Transacción Pagada</div>
-                    <p class="subtitulo">
-                        Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
-                    </p>
-                    <div class="info-campo">{{ token }}</div>
-                {% else %}
-                    <div class="logo">¡Transacción Completada!</div>
-                    <p class="subtitulo">
-                        La compra de monedas se ha realizado exitosamente. Tu dinero se ha acreditado automáticamente.
-                    </p>
-                {% endif %}
+                <div class="logo">Transacción Pagada</div>
+                <p class="subtitulo">
+                    Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                </p>
+                <div class="info-campo">{{ token }}</div>
             {% endif %}
         {% elif tipo == 'venta' %}
             {% if medio_pago == 'Efectivo' %}
@@ -58,6 +51,11 @@
                 {% endif %}
             {% endif %}
         {% endif %}
+    </div>
+    <div class="zona-botones">
+        <a href="{% url 'inicio' %}" class="btn-primario">
+            Volver a inicio
+        </a>
     </div>
 </div>
 {% endblock %}

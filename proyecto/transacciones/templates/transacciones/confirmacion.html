@@ -94,11 +94,19 @@
                 {% endif %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Medio de pago:</div>
-                    <div class="detalle-valor">{{ medio_pago }}</div>
+                    {% if medio_pago.last4 %}
+                        <div class="detalle-valor">Tarjeta de Crédito (**** **** **** {{ medio_pago.last4 }})</div>
+                    {% else %}
+                        <div class="detalle-valor">{{ medio_pago }}</div>
+                    {% endif %}
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Medio de cobro:</div>
-                    <div class="detalle-valor">{{ medio_cobro }}</div>
+                    {% if medio_cobro.tipo_billetera %}
+                        <div class="detalle-valor">{{ medio_cobro.get_tipo_billetera_display }} ({{ medio_cobro.telefono }})</div>
+                    {% else %}
+                        <div class="detalle-valor">{{ medio_cobro }}</div>
+                    {% endif %}
                 </div>
             </div>
         </div>

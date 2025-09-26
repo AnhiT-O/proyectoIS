@@ -13,6 +13,7 @@ from clientes.models import Cliente
 import secrets
 import json
 import base64
+import ast
 import stripe
 import logging
 from datetime import datetime, timedelta
@@ -29,29 +30,28 @@ def realizar_conversion(transaccion_id):
         resultado = transaccion_id.monto * precios['precio_compra']
     return resultado
 
-def convertir(monto, cliente, moneda, tipo, medio_pago):
+def convertir(monto, cliente, moneda, tipo, medio_pago, medio_cobro):
     precios = moneda.get_precios_cliente(cliente)
     if tipo == 'compra':
         if medio_pago in ['Efectivo', 'Cheque']:
             resultado = monto * precios['precio_venta']
-        elif cliente.obtener_last4_tarjeta(medio_pago):
-            resultado = monto * precios['precio_venta']
-            recargo = Recargos.objects.get(nombre='Tarjeta de Crédito').recargo
-            resultado *= (Decimal('1') + (Decimal(str(recargo)) / Decimal('100')))
-        else:
+        elif Recargos.objects.filter(nombre=medio_pago).exists():
             resultado = monto * precios['precio_venta']
             recargo = Recargos.objects.get(nombre=medio_pago).recargo
             resultado *= (Decimal('1') + (Decimal(str(recargo)) / Decimal('100')))
+        else:
+            resultado = monto * precios['precio_venta']
+            recargo = Recargos.objects.get(nombre='Tarjeta de Crédito').recargo
+            resultado *= (Decimal('1') + (Decimal(str(recargo)) / Decimal('100')))
     else:
-        if medio_pago in ['Efectivo', 'Cheque']:
+        if medio_pago == 'Efectivo':
             resultado = monto * precios['precio_compra']
-        elif cliente.obtener_last4_tarjeta(medio_pago):
+        else:
             resultado = monto * precios['precio_compra']
             recargo = Recargos.objects.get(nombre='Tarjeta de Crédito').recargo
             resultado *= (Decimal('1') - (Decimal(str(recargo)) / Decimal('100')))
-        else:
-            resultado = monto * precios['precio_compra']
-            recargo = Recargos.objects.get(nombre=medio_pago).recargo
+        if Recargos.objects.filter(nombre=medio_cobro).exists():
+            recargo = Recargos.objects.get(nombre=medio_cobro).recargo
             resultado *= (Decimal('1') - (Decimal(str(recargo)) / Decimal('100')))
     return int(resultado)
 
@@ -320,8 +320,7 @@ def compra_monto_moneda(request):
             request.session['compra_datos'] = {
                 'moneda': moneda.id,
                 'monto': str(monto),  # Convertir Decimal a string para serialización
-                'paso_actual': 2,
-                'cliente_tarjetas': None
+                'paso_actual': 2
             }
             
             # Redireccionar al siguiente paso sin parámetros en la URL
@@ -382,14 +381,14 @@ def compra_medio_pago(request):
             medio_pago = request.POST.get('medio_pago_id')
             if medio_pago:
                 try:
-                    
                     # Actualizar los datos de la sesión (sin cambiar el paso_actual)
                     compra_datos.update({
                         'medio_pago': medio_pago
                     })
                     request.session['compra_datos'] = compra_datos
-                    if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)}) seleccionado correctamente.')
+                    if medio_pago.startswith('{'):
+                        medio_pago_dict = ast.literal_eval(medio_pago)
+                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {medio_pago_dict["last4"]}) seleccionado correctamente.')
                     else:
                         messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
                     return redirect('transacciones:compra_medio_pago')  # Permanecer en el mismo paso
@@ -416,16 +415,17 @@ def compra_medio_pago(request):
     ]
     # Verificar si el cliente tiene tarjetas de crédito activas en Stripe
     if request.user.cliente_activo.tiene_tarjetas_activas():
-        cliente_tarjetas = request.user.cliente_activo.obtener_tarjetas_stripe()
-        for tarjeta in cliente_tarjetas:
+        for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
             medios_pago_disponibles.append(tarjeta)
-    for billetera in Recargos.objects.filter(nombre__in=['Tigo Money', 'Billetera Personal', 'Zimple']):
+    for billetera in Recargos.objects.all().exclude(nombre='Tarjeta de Crédito'):
         medios_pago_disponibles.append(billetera.nombre)
-    
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
     if compra_datos.get('medio_pago'):
-        medio_pago_seleccionado = compra_datos['medio_pago']
+        if compra_datos['medio_pago'].startswith('{'):
+            medio_pago_seleccionado = ast.literal_eval(compra_datos['medio_pago'])
+        else:
+            medio_pago_seleccionado = compra_datos['medio_pago']
 
     context = {
         'moneda': moneda,
@@ -464,7 +464,6 @@ def compra_medio_cobro(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-    
     if request.method == 'POST':
         # Verificar si es selección de medio de cobro o avance al siguiente paso
         accion = request.POST.get('accion')
@@ -540,7 +539,7 @@ def compra_confirmacion(request):
         moneda = Moneda.objects.get(id=compra_datos['moneda'])
         monto = Decimal(compra_datos['monto'])
         medio_pago = compra_datos['medio_pago']
-        medio_cobro = compra_datos.get('medio_cobro', 'No seleccionado')
+        medio_cobro = compra_datos['medio_cobro']
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
@@ -548,8 +547,8 @@ def compra_confirmacion(request):
     context = {
         'moneda': moneda,
         'recibir': monto,
-        'dar': convertir(monto, request.user.cliente_activo, moneda, 'compra', medio_pago),
-        'medio_pago': medio_pago,
+        'dar': convertir(monto, request.user.cliente_activo, moneda, 'compra', medio_pago, medio_cobro),
+        'medio_pago': ast.literal_eval(medio_pago) if medio_pago.startswith('{') else medio_pago,
         'medio_cobro': medio_cobro,
         'cliente_activo': request.user.cliente_activo,
         'paso_actual': 4,
@@ -574,14 +573,15 @@ def compra_exito(request):
         moneda = Moneda.objects.get(id=compra_datos['moneda'])
         monto = Decimal(compra_datos['monto'])
         medio_pago = compra_datos['medio_pago']
-        medio_cobro = compra_datos.get('medio_cobro', 'No seleccionado')
+        medio_cobro = compra_datos['medio_cobro']
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
     # Crear la transacción en la base de datos
     try:
-        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)})'
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {medio_pago_dict["last4"]})'
         else:
             str_medio_pago = medio_pago
         transaccion = Transaccion.objects.create(
@@ -592,20 +592,18 @@ def compra_exito(request):
             medio_pago=str_medio_pago,
             medio_cobro=medio_cobro
         )
-        # Generar token si el medio de pago es Efectivo o Cheque
-        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-            if procesar_pago_stripe(transaccion.id, medio_pago)['success']:
+
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            if procesar_pago_stripe(transaccion.id, medio_pago_dict["id"])['success']:
                 messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
-                if medio_cobro == 'Efectivo':
-                    token_data = generar_token_transaccion(transaccion.id)
+                token_data = generar_token_transaccion(transaccion.id)
             else:
                 messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
                 return redirect('transacciones:compra_monto_moneda')
         else:
             try:
                 token_data = generar_token_transaccion(transaccion.id)
-                # Guardar el token en la sesión para su posterior uso
-                request.session['token_transaccion'] = token_data
 
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
@@ -620,8 +618,7 @@ def compra_exito(request):
     
     context = {
         'token': token_data['token'],
-        'tipo': 'compra',
-        'medio_cobro': medio_cobro,
+        'tipo': 'compra'
     }
     
     return render(request, 'transacciones/exito.html', context)
@@ -749,8 +746,9 @@ def venta_medio_pago(request):
                         'medio_pago': medio_pago
                     })
                     request.session['venta_datos'] = venta_datos
-                    if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)}) seleccionado correctamente.')
+                    if medio_pago.startswith('{'):
+                        medio_pago_dict = ast.literal_eval(medio_pago)
+                        messages.success(request, f'Medio de pago Tarjeta de Crédito (**** **** **** {medio_pago_dict["last4"]}) seleccionado correctamente.')
                     else:
                         messages.success(request, f'Medio de pago {medio_pago} seleccionado correctamente.')
                     return redirect('transacciones:venta_medio_pago')  # Permanecer en el mismo paso
@@ -781,7 +779,10 @@ def venta_medio_pago(request):
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
     if venta_datos.get('medio_pago'):
-        medio_pago_seleccionado = venta_datos['medio_pago']
+        if venta_datos['medio_pago'].startswith('{'):
+            medio_pago_seleccionado = ast.literal_eval(venta_datos['medio_pago'])
+        else:
+            medio_pago_seleccionado = venta_datos['medio_pago']
 
     context = {
         'moneda': moneda,
@@ -866,13 +867,15 @@ def venta_medio_cobro(request):
     # Agregar billeteras si las hay
     billeteras = request.user.cliente_activo.billeteras.all()
     for billetera in billeteras:
-        medio_descripcion = f"Billetera - {billetera.get_tipo_billetera_display()} ({billetera.telefono})"
-        medios_cobro_disponibles.append(medio_descripcion)
+        medios_cobro_disponibles.append(billetera)
 
     # Obtener el medio de cobro seleccionado actualmente (si hay uno)
     medio_cobro_seleccionado = None
     if venta_datos.get('medio_cobro'):
-        medio_cobro_seleccionado = venta_datos['medio_cobro']
+        if venta_datos['medio_cobro'].startswith('{'):
+            medio_cobro_seleccionado = ast.literal_eval(venta_datos['medio_cobro'])
+        else:
+            medio_cobro_seleccionado = venta_datos['medio_cobro']
 
     context = {
         'moneda': moneda,
@@ -909,17 +912,17 @@ def venta_confirmacion(request):
         moneda = Moneda.objects.get(id=venta_datos['moneda'])
         monto = Decimal(venta_datos['monto'])
         medio_pago = venta_datos['medio_pago']
-        medio_cobro = venta_datos.get('medio_cobro', 'No seleccionado')
+        medio_cobro = venta_datos['medio_cobro']
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
     context = {
         'moneda': moneda,
-        'recibir': convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago),
+        'recibir': convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago, medio_cobro),
         'dar': monto,
-        'medio_pago': medio_pago,
-        'medio_cobro': medio_cobro,
+        'medio_pago': ast.literal_eval(medio_pago) if medio_pago.startswith('{') else medio_pago,
+        'medio_cobro': ast.literal_eval(medio_cobro) if medio_cobro.startswith('{') else medio_cobro,
         'cliente_activo': request.user.cliente_activo,
         'paso_actual': 4,
         'total_pasos': 4,
@@ -950,8 +953,9 @@ def venta_exito(request):
         return redirect('transacciones:venta_monto_moneda')
     # Crear la transacción en la base de datos
     try:
-        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {request.user.cliente_activo.obtener_last4_tarjeta(medio_pago)})'
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            str_medio_pago = f'Tarjeta de Crédito (**** **** **** {medio_pago_dict["last4"]})'
         else:
             str_medio_pago = medio_pago
         transaccion = Transaccion.objects.create(
@@ -964,11 +968,19 @@ def venta_exito(request):
         )
         
         # Generar token si el medio de pago es Efectivo
-        if request.user.cliente_activo.obtener_last4_tarjeta(medio_pago):
-            if procesar_pago_stripe(transaccion.id, medio_pago)['success']:
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            if procesar_pago_stripe(transaccion.id, medio_pago_dict["id"])['success']:
                 messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
                 if medio_cobro == 'Efectivo':
                     token_data = generar_token_transaccion(transaccion.id)
+                else:
+                    consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente)
+                    consumo.consumo_diario += convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago, medio_cobro)
+                    consumo.consumo_mensual += convertir(monto, request.user.cliente_activo, moneda, 'venta', medio_pago, medio_cobro)
+                    consumo.save()
+                    transaccion.estado = 'Completada'
+                    transaccion.save()
             else:
                 messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
                 return redirect('transacciones:venta_monto_moneda')
@@ -978,7 +990,6 @@ def venta_exito(request):
                 
                 # Guardar el token en la sesión para su posterior uso
                 request.session['token_transaccion'] = token_data
-                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
 
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')

@@ -40,7 +40,7 @@ class SeleccionMonedaMontoForm(forms.Form):
         moneda = cleaned_data.get('moneda')
         monto = cleaned_data.get('monto')
         
-        if monto is not None:
+        if monto is not None and moneda is not None:
             try:
                 monto = Decimal(monto)
                 if monto <= 0:
