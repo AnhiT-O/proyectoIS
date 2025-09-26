@@ -832,7 +832,6 @@ def compra_confirmacion(request):
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:compra_medio_cobro')
     
-    # VERIFICAR CAMBIOS DE COTIZACIÓN
     cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
     if cambios and cambios.get('hay_cambios'):
         # Manejar POST del modal de cambio de cotización
@@ -875,39 +874,6 @@ def compra_confirmacion(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-    
-    # Crear la transacción en la base de datos
-    try:
-        print(f"Intentando crear transacción de compra con usuario: {request.user}")
-        transaccion = Transaccion.objects.create(
-            cliente=request.user.cliente_activo,
-            tipo='compra',
-            moneda=moneda,
-            monto=monto,
-            medio_pago=medio_pago,
-            medio_cobro=medio_cobro,
-            usuario=request.user
-        )
-        print(f"Transacción creada con ID: {transaccion.id}")
-        # Generar token si el medio de pago es Efectivo o Cheque
-        if medio_pago in ['Efectivo', 'Cheque']:
-            try:
-                token_data = generar_token_transaccion(transaccion.id)
-                
-                # Guardar el token en la sesión para su posterior uso
-                request.session['token_transaccion'] = token_data
-
-                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
-
-            except Exception as e:
-                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-                return redirect('transacciones:compra_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
-            
-    except Exception as e:
-        messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
-        return redirect('transacciones:compra_medio_cobro')
     
     context = {
         'moneda': moneda,
@@ -955,6 +921,39 @@ def compra_exito(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
+    
+    cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
+    if cambios and cambios.get('hay_cambios'):
+        # Manejar POST del modal de cambio de cotización
+        if request.method == 'POST' and request.POST.get('action'):
+            action = request.POST.get('action')
+            if action == 'aceptar':
+                # Usuario acepta los nuevos precios, actualizar precios en sesión
+                moneda = cambios['moneda']
+                cliente_activo = request.user.cliente_activo
+                precios_actuales = moneda.get_precios_cliente(cliente_activo)
+                request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
+                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+                messages.success(request, 'Precios actualizados. Continuando con la transacción.')
+                # Continuar con el flujo normal
+            elif action == 'cancelar':
+                # Usuario cancela la transacción
+                # Limpiar datos de sesión
+                if 'compra_datos' in request.session:
+                    del request.session['compra_datos']
+                if 'precio_compra_inicial' in request.session:
+                    del request.session['precio_compra_inicial']
+                if 'precio_venta_inicial' in request.session:
+                    del request.session['precio_venta_inicial']
+                messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
+                return redirect('inicio')
+        else:
+            # Mostrar modal de cambio de cotización
+            return render(request, 'transacciones/cotizacion_cambiada.html', {
+                'cambios': cambios,
+                'paso_actual': 4,
+                'tipo_transaccion': 'compra'
+            })
     # Crear la transacción en la base de datos
     try:
         if medio_pago.startswith('{'):
@@ -1311,6 +1310,40 @@ def venta_medio_cobro(request):
     if not venta_datos or venta_datos.get('paso_actual') != 3:
         messages.error(request, 'Debe completar el segundo paso antes de continuar.')
         return redirect('transacciones:venta_medio_pago')
+
+    # VERIFICAR CAMBIOS DE COTIZACIÓN
+    cambios = verificar_cambio_cotizacion_sesion(request, 'venta')
+    if cambios and cambios.get('hay_cambios'):
+        # Manejar POST del modal de cambio de cotización
+        if request.method == 'POST' and request.POST.get('action'):
+            action = request.POST.get('action')
+            if action == 'aceptar':
+                # Usuario acepta los nuevos precios, actualizar precios en sesión
+                moneda = cambios['moneda']
+                cliente_activo = request.user.cliente_activo
+                precios_actuales = moneda.get_precios_cliente(cliente_activo)
+                request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
+                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+                messages.success(request, 'Precios actualizados. Continuando con la transacción.')
+                # Continuar con el flujo normal
+            elif action == 'cancelar':
+                # Usuario cancela la transacción
+                # Limpiar datos de sesión
+                if 'venta_datos' in request.session:
+                    del request.session['venta_datos']
+                if 'precio_compra_inicial' in request.session:
+                    del request.session['precio_compra_inicial']
+                if 'precio_venta_inicial' in request.session:
+                    del request.session['precio_venta_inicial']
+                messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
+                return redirect('inicio')
+        else:
+            # Mostrar modal de cambio de cotización
+            return render(request, 'transacciones/cotizacion_cambiada.html', {
+                'cambios': cambios,
+                'paso_actual': 3,
+                'tipo_transaccion': 'venta'
+            })
     # Recuperar los datos de la sesión
     try:
         moneda = Moneda.objects.get(id=venta_datos['moneda'])
@@ -1447,6 +1480,40 @@ def venta_confirmacion(request):
     if not venta_datos or venta_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:venta_medio_cobro')
+    
+    # VERIFICAR CAMBIOS DE COTIZACIÓN
+    cambios = verificar_cambio_cotizacion_sesion(request, 'venta')
+    if cambios and cambios.get('hay_cambios'):
+        # Manejar POST del modal de cambio de cotización
+        if request.method == 'POST' and request.POST.get('action'):
+            action = request.POST.get('action')
+            if action == 'aceptar':
+                # Usuario acepta los nuevos precios, actualizar precios en sesión
+                moneda = cambios['moneda']
+                cliente_activo = request.user.cliente_activo
+                precios_actuales = moneda.get_precios_cliente(cliente_activo)
+                request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
+                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+                messages.success(request, 'Precios actualizados. Continuando con la transacción.')
+                # Continuar con el flujo normal
+            elif action == 'cancelar':
+                # Usuario cancela la transacción
+                # Limpiar datos de sesión
+                if 'venta_datos' in request.session:
+                    del request.session['venta_datos']
+                if 'precio_compra_inicial' in request.session:
+                    del request.session['precio_compra_inicial']
+                if 'precio_venta_inicial' in request.session:
+                    del request.session['precio_venta_inicial']
+                messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
+                return redirect('inicio')
+        else:
+            # Mostrar modal de cambio de cotización
+            return render(request, 'transacciones/cotizacion_cambiada.html', {
+                'cambios': cambios,
+                'paso_actual': 4,
+                'tipo_transaccion': 'venta'
+            })
     # Recuperar los datos de la sesión
     try:
         moneda = Moneda.objects.get(id=venta_datos['moneda'])
@@ -1456,39 +1523,6 @@ def venta_confirmacion(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
-    
-    # Crear la transacción en la base de datos
-    try:
-        print(f"Intentando crear transacción de venta con usuario: {request.user}")
-        transaccion = Transaccion.objects.create(
-            cliente=request.user.cliente_activo,
-            tipo='venta',
-            moneda=moneda,
-            monto=monto,
-            medio_pago=medio_pago,
-            medio_cobro=medio_cobro,
-            usuario=request.user
-        )
-        print(f"Transacción creada con ID: {transaccion.id}")
-        
-        # Generar token si el medio de pago es Efectivo
-        if medio_pago == 'Efectivo':
-            try:
-                token_data = generar_token_transaccion(transaccion.id)
-                
-                # Guardar el token en la sesión para su posterior uso
-                request.session['token_transaccion'] = token_data
-                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
-
-            except Exception as e:
-                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-                return redirect('transacciones:venta_medio_cobro')
-        else:
-            messages.success(request, 'Transacción creada exitosamente.')
-            
-    except Exception as e:
-        messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
-        return redirect('transacciones:venta_medio_cobro')
     
     context = {
         'moneda': moneda,
@@ -1537,6 +1571,39 @@ def venta_exito(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
+
+    # VERIFICAR CAMBIOS DE COTIZACIÓN
+    cambios = verificar_cambio_cotizacion_sesion(request, 'venta')
+    if cambios and cambios.get('hay_cambios'):
+        # Manejar POST del modal de cambio de cotización
+        if request.method == 'POST' and request.POST.get('action'):
+            action = request.POST.get('action')
+            if action == 'aceptar':
+                # Usuario acepta los nuevos precios, actualizar precios en sesión
+                moneda = cambios['moneda']
+                cliente_activo = request.user.cliente_activo
+                precios_actuales = moneda.get_precios_cliente(cliente_activo)
+                request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
+                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+                messages.success(request, 'Precios actualizados. Continuando con la transacción.')
+                # Continuar con el flujo normal
+            elif action == 'cancelar':
+                # Usuario cancela la transacción
+                # Limpiar datos de sesión
+                if 'venta_datos' in request.session:
+                    del request.session['venta_datos']
+                if 'precio_compra_inicial' in request.session:
+                    del request.session['precio_compra_inicial']
+                if 'precio_venta_inicial' in request.session:
+                    del request.session['precio_venta_inicial']
+                messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
+                return redirect('inicio')
+        else:
+            # Mostrar modal de cambio de cotización
+            return render(request, 'transacciones/cotizacion_cambiada.html', {
+                'cambios': cambios,
+                'tipo_transaccion': 'venta'
+            })
     # Crear la transacción en la base de datos
     try:
         if medio_pago.startswith('{'):
@@ -1607,7 +1674,7 @@ def venta_exito(request):
     if 'venta_datos' in request.session:
         del request.session['venta_datos']
 
-    return render(request, 'transacciones/exito.html')
+    return render(request, 'transacciones/exito.html', context)
 
 # ============================================================================
 # VISTAS AUXILIARES Y APIs
