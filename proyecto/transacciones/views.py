@@ -1,3 +1,22 @@
+"""
+Vistas para el sistema de transacciones de Global Exchange.
+
+Este módulo contiene todas las vistas necesarias para el procesamiento de transacciones
+de compra y venta de monedas extranjeras, incluyendo la gestión del flujo completo
+desde la selección inicial hasta la confirmación final.
+
+Funcionalidades principales:
+    - Proceso completo de compra de monedas (4 pasos)
+    - Proceso completo de venta de monedas (4 pasos)
+    - Gestión de recargos por medio de pago
+    - Historial y consulta de transacciones
+    - Validaciones de límites en tiempo real
+    - Generación y gestión de tokens de seguridad
+
+Author: Equipo de desarrollo Global Exchange
+Date: 2024
+"""
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -15,15 +34,22 @@ import base64
 from datetime import datetime, timedelta
 from django.db import models
 
+
 def generar_token_transaccion(transaccion_id):
     """
-    Genera un token único para transacciones con medios de pago Efectivo o Cheque.
+    Genera un token único de seguridad para transacciones específicas.
+    
+    Se utiliza para transacciones con medios de pago que requieren verificación
+    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
     
     Args:
-        transaccion_id: ID de la transacción creada
+        transaccion_id (int): ID de la transacción para la cual generar el token
     
     Returns:
-        dict con 'token' y 'expiracion'
+        dict: Diccionario con 'token' (str) y 'datos' (dict) de la transacción
+        
+    Raises:
+        ValueError: Si la transacción no existe
     """
     # Generar token único
     token = secrets.token_urlsafe(32)
@@ -50,8 +76,16 @@ def generar_token_transaccion(transaccion_id):
 
 def extraer_mensaje_error(validation_error):
     """
-    Función auxiliar para extraer el mensaje de error de un ValidationError
-    sin los corchetes que Django puede agregar.
+    Extrae el mensaje de error limpio de un ValidationError de Django.
+    
+    Django a veces agrega corchetes y formateo adicional a los mensajes de error.
+    Esta función extrae el mensaje principal sin el formateo extra.
+    
+    Args:
+        validation_error (ValidationError): Error de validación de Django
+        
+    Returns:
+        str: Mensaje de error limpio sin formateo adicional
     """
     if hasattr(validation_error, 'message'):
         return validation_error.message
@@ -68,8 +102,24 @@ def extraer_mensaje_error(validation_error):
 
 def obtener_contexto_limites(cliente):
     """
-    Función auxiliar para obtener información de límites del cliente
-    para mostrar en las plantillas.
+    Obtiene información completa de límites de transacción para un cliente.
+    
+    Consulta el servicio de límites para obtener información detallada sobre
+    los límites diarios y mensuales del cliente, incluyendo consumo actual
+    y porcentajes de uso.
+    
+    Args:
+        cliente (Cliente): Instancia del cliente para consultar límites
+        
+    Returns:
+        dict: Diccionario con información de límites o diccionario vacío si hay error
+            - limites_disponibles: Información detallada de límites
+            - limite_diario_total: Límite diario configurado
+            - limite_mensual_total: Límite mensual configurado
+            - consumo_diario: Consumo actual del día
+            - consumo_mensual: Consumo actual del mes
+            - porcentaje_uso_diario: Porcentaje usado del límite diario
+            - porcentaje_uso_mensual: Porcentaje usado del límite mensual
     """
     try:
         limites_info = LimiteService.obtener_limites_disponibles(cliente)
@@ -90,13 +140,40 @@ def obtener_contexto_limites(cliente):
         pass
     return {}
 
-# PROCESO DE COMPRA
+# ============================================================================
+# PROCESO DE COMPRA DE MONEDAS
+# ============================================================================
 
 @login_required
 def compra_monto_moneda(request):
     """
-    Vista para el primer paso del proceso de compra de monedas.
-    Permite al usuario seleccionar la moneda y el monto que desea comprar.
+    Primer paso del proceso de compra: selección de moneda y monto.
+    
+    Permite al usuario seleccionar la moneda extranjera que desea comprar
+    y especificar el monto. Incluye validaciones de límites de transacción
+    antes de proceder al siguiente paso.
+    
+    Validaciones realizadas:
+        - Usuario debe tener un cliente activo
+        - Monto debe cumplir con límites diarios y mensuales
+        - Moneda debe estar activa en el sistema
+    
+    Args:
+        request (HttpRequest): Petición HTTP con datos del formulario
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_moneda_monto.html
+        
+    Context:
+        - form: Formulario de selección de moneda y monto
+        - paso_actual: Número del paso actual (1)
+        - total_pasos: Total de pasos en el proceso (4)
+        - titulo_paso: Título descriptivo del paso
+        - tipo_transaccion: Tipo de operación ('compra')
+        - limites_disponibles: Información de límites del cliente
     """
     if request.method == 'POST':
         form = SeleccionMonedaMontoForm(request.POST)
@@ -173,12 +250,39 @@ def compra_monto_moneda(request):
     
     return render(request, 'transacciones/seleccion_moneda_monto.html', context)
 
-# Vista para el segundo paso del proceso de compra
 @login_required
 def compra_medio_pago(request):
     """
-    Vista para el segundo paso del proceso de compra.
-    Permite seleccionar el medio de pago del cliente activo.
+    Segundo paso del proceso de compra: selección del medio de pago.
+    
+    Permite al usuario seleccionar cómo va a pagar por la moneda extranjera.
+    Las opciones incluyen efectivo, cheque, billetera electrónica, transferencia
+    bancaria y tarjetas de crédito registradas en Stripe.
+    
+    Validaciones realizadas:
+        - Datos del paso anterior deben existir en sesión
+        - Usuario debe tener cliente activo
+        - Medio de pago debe estar disponible para el cliente
+    
+    Args:
+        request (HttpRequest): Petición HTTP con selección de medio de pago
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_medio_pago.html
+        
+    Context:
+        - moneda: Moneda seleccionada en el paso anterior
+        - monto: Monto seleccionado en el paso anterior
+        - medios_pago: Lista de medios de pago disponibles
+        - medio_pago_seleccionado: Medio actualmente seleccionado
+        - cliente_activo: Cliente activo del usuario
+        - paso_actual: Número del paso actual (2)
+        - total_pasos: Total de pasos en el proceso (4)
+        - titulo_paso: Título descriptivo del paso
+        - tipo_transaccion: Tipo de operación ('compra')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -266,8 +370,37 @@ def compra_medio_pago(request):
 @login_required
 def compra_medio_cobro(request):
     """
-    Vista para el tercer paso del proceso de compra.
-    Permite seleccionar el medio de cobro del cliente activo para realizar el pago.
+    Tercer paso del proceso de compra: selección del medio de cobro.
+    
+    Permite al usuario seleccionar cómo va a recibir la moneda extranjera
+    que está comprando. Actualmente solo se ofrece la opción de efectivo
+    como medio de cobro para las compras.
+    
+    Validaciones realizadas:
+        - Datos de pasos anteriores deben existir en sesión
+        - Usuario debe tener cliente activo
+        - Medio de cobro debe estar disponible
+    
+    Args:
+        request (HttpRequest): Petición HTTP con selección de medio de cobro
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_medio_cobro.html
+        
+    Context:
+        - moneda: Moneda seleccionada
+        - monto: Monto seleccionado
+        - medio_pago: Medio de pago seleccionado
+        - medios_cobro: Lista de medios de cobro disponibles
+        - medio_cobro_seleccionado: Medio de cobro actualmente seleccionado
+        - cliente_activo: Cliente activo del usuario
+        - paso_actual: Número del paso actual (3)
+        - total_pasos: Total de pasos en el proceso (4)
+        - titulo_paso: Título descriptivo del paso
+        - tipo_transaccion: Tipo de operación ('compra')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -346,8 +479,38 @@ def compra_medio_cobro(request):
 @login_required
 def compra_confirmacion(request):
     """
-    Vista para el último paso del proceso de compra.
-    Muestra un resumen de la transacción antes de confirmarla.
+    Cuarto paso del proceso de compra: confirmación y creación de transacción.
+    
+    Muestra un resumen completo de la transacción y procede a crearla en
+    la base de datos. Para medios de pago como Efectivo o Cheque,
+    genera un token de seguridad con validez de 5 minutos.
+    
+    Acciones realizadas:
+        - Creación de registro de transacción en base de datos
+        - Generación de token para medios específicos
+        - Configuración del estado inicial como 'Pendiente'
+        - Vinculación con cliente y usuario activos
+    
+    Args:
+        request (HttpRequest): Petición HTTP de confirmación
+        
+    Returns:
+        HttpResponse: Renderiza página de confirmación
+        
+    Template:
+        transacciones/confirmacion.html
+        
+    Context:
+        - moneda: Moneda de la transacción
+        - monto: Monto de la transacción
+        - medio_pago: Medio de pago seleccionado
+        - medio_cobro: Medio de cobro seleccionado
+        - cliente_activo: Cliente que realiza la transacción
+        - transaccion: Instancia de transacción creada
+        - paso_actual: Número del paso actual (4)
+        - total_pasos: Total de pasos en el proceso (4)
+        - titulo_paso: Título descriptivo del paso
+        - tipo_transaccion: Tipo de operación ('compra')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -419,7 +582,20 @@ def compra_confirmacion(request):
 @login_required
 def compra_exito(request):
     """
-    Vista que muestra el mensaje de éxito tras completar la compra.
+    Página final del proceso de compra: mensaje de éxito.
+    
+    Muestra confirmación de que la transacción ha sido procesada
+    exitosamente y limpia los datos de sesión relacionados con
+    el proceso de compra.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        
+    Returns:
+        HttpResponse: Página de éxito
+        
+    Template:
+        transacciones/exito.html
     """
     # Limpiar los datos de la sesión relacionados con la compra
     if 'compra_datos' in request.session:
@@ -427,13 +603,40 @@ def compra_exito(request):
     
     return render(request, 'transacciones/exito.html')
 
-# PROCESO DE VENTA
+# ============================================================================
+# PROCESO DE VENTA DE MONEDAS
+# ============================================================================
 
 @login_required
 def venta_monto_moneda(request):
     """
-    Vista para el primer paso del proceso de venta de monedas.
-    Permite al usuario seleccionar la moneda y el monto que desea vender.
+    Primer paso del proceso de venta: selección de moneda y monto.
+    
+    Permite al usuario seleccionar la moneda extranjera que desea vender
+    y especificar el monto. Similar al proceso de compra pero con validaciones
+    específicas para operaciones de venta.
+    
+    Validaciones realizadas:
+        - Usuario debe tener un cliente activo
+        - Monto debe cumplir con límites diarios y mensuales
+        - Moneda debe estar activa en el sistema
+    
+    Args:
+        request (HttpRequest): Petición HTTP con datos del formulario
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_moneda_monto.html
+        
+    Context:
+        - form: Formulario de selección de moneda y monto
+        - paso_actual: Número del paso actual (1)
+        - total_pasos: Total de pasos en el proceso (4)
+        - titulo_paso: Título descriptivo del paso
+        - tipo_transaccion: Tipo de operación ('venta')
+        - limites_disponibles: Información de límites del cliente
     """
     if request.method == 'POST':
         form = SeleccionMonedaMontoForm(request.POST)
@@ -513,8 +716,34 @@ def venta_monto_moneda(request):
 @login_required
 def venta_medio_pago(request):
     """
-    Vista para el segundo paso del proceso de venta.
-    Permite seleccionar el medio de pago del cliente activo para recibir el pago.
+    Segundo paso del proceso de venta: selección del medio de pago.
+    
+    Permite al usuario seleccionar cómo va a recibir el pago por la moneda
+    extranjera que está vendiendo. Para ventas, principalmente se ofrece
+    efectivo, y para USD también tarjetas de crédito registradas.
+    
+    Validaciones realizadas:
+        - Datos del paso anterior deben existir en sesión
+        - Usuario debe tener cliente activo
+        - Para tarjetas: solo disponibles para USD y clientes con tarjetas activas
+    
+    Args:
+        request (HttpRequest): Petición HTTP con selección de medio de pago
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_medio_pago.html
+        
+    Context:
+        - moneda: Moneda seleccionada en el paso anterior
+        - monto: Monto seleccionado en el paso anterior
+        - medios_pago: Lista de medios de pago disponibles
+        - medio_pago_seleccionado: Medio actualmente seleccionado
+        - cliente_activo: Cliente activo del usuario
+        - paso_actual: Número del paso actual (2)
+        - tipo_transaccion: Tipo de operación ('venta')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -599,8 +828,35 @@ def venta_medio_pago(request):
 @login_required
 def venta_medio_cobro(request):
     """
-    Vista para el tercer paso del proceso de venta.
-    Permite seleccionar el medio de cobro del cliente activo para realizar el pago.
+    Tercer paso del proceso de venta: selección del medio de cobro.
+    
+    Permite al usuario seleccionar cómo va a entregar la moneda extranjera
+    que está vendiendo. Incluye opciones como efectivo, cuentas bancarias
+    registradas y billeteras electrónicas del cliente.
+    
+    Validaciones realizadas:
+        - Datos de pasos anteriores deben existir en sesión
+        - Usuario debe tener cliente activo
+        - Medios disponibles según configuración del cliente
+    
+    Args:
+        request (HttpRequest): Petición HTTP con selección de medio de cobro
+        
+    Returns:
+        HttpResponse: Renderiza formulario o redirecciona al siguiente paso
+        
+    Template:
+        transacciones/seleccion_medio_cobro.html
+        
+    Context:
+        - moneda: Moneda seleccionada
+        - monto: Monto seleccionado
+        - medio_pago: Medio de pago seleccionado
+        - medios_cobro: Lista de medios de cobro disponibles (efectivo, cuentas, billeteras)
+        - medio_cobro_seleccionado: Medio de cobro actualmente seleccionado
+        - cliente_activo: Cliente activo del usuario
+        - paso_actual: Número del paso actual (3)
+        - tipo_transaccion: Tipo de operación ('venta')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -691,8 +947,36 @@ def venta_medio_cobro(request):
 @login_required
 def venta_confirmacion(request):
     """
-    Vista para el último paso del proceso de venta.
-    Muestra un resumen de la transacción antes de confirmarla.
+    Cuarto paso del proceso de venta: confirmación y creación de transacción.
+    
+    Muestra un resumen completo de la transacción de venta y procede a crearla
+    en la base de datos. Para ventas en efectivo, genera un token de seguridad
+    con validez de 5 minutos.
+    
+    Acciones realizadas:
+        - Creación de registro de transacción en base de datos
+        - Generación de token para pagos en efectivo
+        - Configuración del estado inicial como 'Pendiente'
+        - Vinculación con cliente y usuario activos
+    
+    Args:
+        request (HttpRequest): Petición HTTP de confirmación
+        
+    Returns:
+        HttpResponse: Renderiza página de confirmación
+        
+    Template:
+        transacciones/confirmacion.html
+        
+    Context:
+        - moneda: Moneda de la transacción
+        - monto: Monto de la transacción
+        - medio_pago: Medio de pago seleccionado
+        - medio_cobro: Medio de cobro seleccionado
+        - cliente_activo: Cliente que realiza la transacción
+        - transaccion: Instancia de transacción creada
+        - paso_actual: Número del paso actual (4)
+        - tipo_transaccion: Tipo de operación ('venta')
     """
     # Verificar que el usuario tenga un cliente activo
     if not request.user.cliente_activo:
@@ -764,7 +1048,20 @@ def venta_confirmacion(request):
 @login_required
 def venta_exito(request):
     """
-    Vista que muestra el mensaje de éxito tras completar la venta.
+    Página final del proceso de venta: mensaje de éxito.
+    
+    Muestra confirmación de que la transacción de venta ha sido procesada
+    exitosamente y limpia los datos de sesión relacionados con
+    el proceso de venta.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        
+    Returns:
+        HttpResponse: Página de éxito
+        
+    Template:
+        transacciones/exito.html
     """
     # Limpiar los datos de la sesión relacionados con la venta
     if 'venta_datos' in request.session:
@@ -772,11 +1069,37 @@ def venta_exito(request):
 
     return render(request, 'transacciones/exito.html')
 
+# ============================================================================
+# VISTAS AUXILIARES Y APIs
+# ============================================================================
+
 @login_required
 def obtener_limites_cliente(request):
     """
-    Vista AJAX para obtener información de límites del cliente activo.
-    Útil para mostrar información dinámica en las plantillas.
+    API AJAX para consultar límites de transacción del cliente activo.
+    
+    Devuelve información detallada sobre los límites diarios y mensuales
+    del cliente, incluyendo consumo actual y disponibilidad restante.
+    Útil para mostrar información dinámica en las interfaces de usuario.
+    
+    Args:
+        request (HttpRequest): Petición AJAX
+        
+    Returns:
+        JsonResponse: Información de límites en formato JSON
+            - limite_diario: Límite diario total
+            - limite_mensual: Límite mensual total
+            - consumo_diario: Consumo actual del día
+            - consumo_mensual: Consumo actual del mes
+            - disponible_diario: Disponible restante hoy
+            - disponible_mensual: Disponible restante este mes
+            - porcentaje_uso_diario: Porcentaje usado del límite diario
+            - porcentaje_uso_mensual: Porcentaje usado del límite mensual
+            
+    Status Codes:
+        - 200: Información obtenida exitosamente
+        - 400: No hay cliente activo
+        - 500: Error interno del servidor
     """
     if not request.user.cliente_activo:
         return JsonResponse({
@@ -810,8 +1133,31 @@ def obtener_limites_cliente(request):
 @login_required
 def simular_transaccion_limites(request):
     """
-    Vista AJAX para simular una transacción y verificar límites sin procesarla.
-    Útil para validaciones en tiempo real.
+    API AJAX para simular transacciones y validar límites en tiempo real.
+    
+    Permite verificar si una transacción propuesta cumple con los límites
+    del cliente sin procesarla realmente. Útil para validaciones dinámicas
+    en formularios antes de proceder con la transacción real.
+    
+    Args:
+        request (HttpRequest): Petición AJAX con datos de simulación
+            - moneda_id: ID de la moneda a simular
+            - monto: Monto en la moneda seleccionada
+            - tipo_transaccion: 'COMPRA' o 'VENTA'
+        
+    Returns:
+        JsonResponse: Resultado de la simulación
+            - valida (bool): Si la transacción es válida según límites
+            - monto_guaranies: Monto convertido a guaraníes
+            - mensaje: Mensaje descriptivo del resultado
+            - error: Mensaje de error si la transacción no es válida
+            
+    Status Codes:
+        - 200: Simulación realizada exitosamente
+        - 400: Parámetros faltantes o cliente inactivo
+        - 404: Moneda no encontrada
+        - 405: Método no permitido (solo POST)
+        - 500: Error interno del servidor
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -866,12 +1212,37 @@ def simular_transaccion_limites(request):
             'error': 'Error interno del servidor'
         }, status=500)
     
+# ============================================================================
+# GESTIÓN DE RECARGOS
+# ============================================================================
+
 @login_required
 @permission_required('transacciones.edicion', raise_exception=True)
 def editar_recargos(request):
     """
-    Vista para editar los recargos de las transacciones.
-    Muestra un formulario con todos los recargos existentes para su edición.
+    Vista para la gestión y edición de recargos por medio de pago.
+    
+    Permite a usuarios con permisos administrativos modificar los porcentajes
+    de recargo aplicables a diferentes medios de pago en las transacciones.
+    Los recargos se aplican como porcentajes adicionales al monto base.
+    
+    Validaciones:
+        - Usuario debe tener permiso 'transacciones.edicion'
+        - Recargos deben estar en rango 0-100%
+        - Valores deben ser numéricos enteros
+    
+    Args:
+        request (HttpRequest): Petición HTTP con datos del formulario
+        
+    Returns:
+        HttpResponse: Formulario de edición o redirecciona tras guardar
+        
+    Template:
+        transacciones/editar_recargos.html
+        
+    Context:
+        - form: Formulario base para validaciones
+        - recargos: QuerySet con todos los recargos existentes
     """
     from .models import Recargos
     
@@ -918,19 +1289,49 @@ def editar_recargos(request):
     })
 
 
-# NUEVAS VISTAS PARA HISTORIAL DE TRANSACCIONES
+# ============================================================================
+# HISTORIAL Y CONSULTA DE TRANSACCIONES
+# ============================================================================
+
 @login_required
 def historial_transacciones(request, cliente_id=None):
     """
-    Vista que muestra el historial de transacciones realizadas.
-    Permite filtrar por cliente, usuario, tipo de operación y estado.
+    Vista principal para el historial y consulta de transacciones.
     
-    Si se proporciona cliente_id, muestra solo transacciones de ese cliente.
+    Muestra un listado completo de transacciones con capacidades de filtrado
+    avanzado por cliente, usuario, tipo de operación y estado. Si se proporciona
+    un cliente_id específico, filtra solo las transacciones de ese cliente.
+    
+    Filtros disponibles:
+        - Búsqueda por nombre/documento de cliente o usuario
+        - Tipo de operación (compra/venta)
+        - Estado de transacción (pendiente/completada/etc.)
+        - Usuario específico que procesó la transacción
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro
+        cliente_id (int, optional): ID específico de cliente para filtrar
+        
+    Returns:
+        HttpResponse: Listado de transacciones filtrado
+        
+    Template:
+        transacciones/historial_transacciones.html
+        
+    Context:
+        - transacciones: QuerySet de transacciones filtradas
+        - busqueda: Término de búsqueda aplicado
+        - tipo_operacion: Filtro de tipo aplicado
+        - estado_filtro: Filtro de estado aplicado
+        - cliente_filtrado: Cliente específico si aplica
+        - usuario_filtro: Usuario específico si aplica
+        - usuarios_cliente: Usuarios asociados al cliente (si aplica)
     """
     # Obtener parámetros de filtrado
     busqueda = request.GET.get('busqueda', '')
     tipo_operacion = request.GET.get('tipo_operacion', '')
     estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
     
     # Obtener todas las transacciones (o aplicar filtros)
     transacciones = Transaccion.objects.all().order_by('-fecha_hora')
@@ -942,15 +1343,18 @@ def historial_transacciones(request, cliente_id=None):
             cliente = Cliente.objects.get(id=cliente_id)
             transacciones = transacciones.filter(cliente=cliente)
             cliente_filtrado = cliente
+            # Obtener usuarios asociados al cliente
+            usuarios_cliente = cliente.usuarios.all()
         except Cliente.DoesNotExist:
             messages.error(request, "Cliente no encontrado")
             return redirect('transacciones:historial')
     else:
         cliente_filtrado = None
+        usuarios_cliente = None
     
     # Aplicar filtros según parámetros recibidos
-    if busqueda:
-        # Buscar por cliente o usuario
+    if busqueda and not cliente_filtrado:
+        # Buscar por cliente o usuario solo cuando no hay cliente filtrado
         transacciones = transacciones.filter(
             models.Q(cliente__nombre__icontains=busqueda) | 
             models.Q(cliente__docCliente__icontains=busqueda) |
@@ -962,6 +1366,14 @@ def historial_transacciones(request, cliente_id=None):
     
     if estado_filtro:
         transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    # Filtrar por usuario si se especifica
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
     
     # Procesar cada transacción para obtener información de tarjetas y calcular montos
     for transaccion in transacciones:
@@ -992,7 +1404,9 @@ def historial_transacciones(request, cliente_id=None):
         'busqueda': busqueda,
         'tipo_operacion': tipo_operacion,
         'estado_filtro': estado_filtro,
-        'cliente_filtrado': cliente_filtrado
+        'cliente_filtrado': cliente_filtrado,
+        'usuario_filtro': usuario_filtro,
+        'usuarios_cliente': usuarios_cliente
     }
     
     return render(request, 'transacciones/historial_transacciones.html', context)
@@ -1000,7 +1414,31 @@ def historial_transacciones(request, cliente_id=None):
 @login_required
 def detalle_transaccion(request, transaccion_id):
     """
-    Vista para mostrar el detalle completo de una transacción específica.
+    Vista de detalle para una transacción específica.
+    
+    Muestra información completa y detallada de una transacción individual,
+    incluyendo todos los datos relevantes como montos calculados, medios
+    de pago/cobro, información del cliente y estado actual.
+    
+    Cálculos realizados:
+        - Para compras: Convierte monto extranjero a guaraníes usando precio de venta
+        - Para ventas: Convierte monto extranjero a guaraníes usando precio de compra
+        - Aplica beneficios del segmento del cliente
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        transaccion_id (int): ID de la transacción a mostrar
+        
+    Returns:
+        HttpResponse: Página de detalle o redirecciona si no existe
+        
+    Template:
+        transacciones/detalle_transaccion.html
+        
+    Context:
+        - transaccion: Instancia de la transacción
+        - monto_origen: Monto en moneda de origen (guaraníes o extranjera)
+        - monto_destino: Monto en moneda de destino (extranjera o guaraníes)
     """
     try:
         transaccion = Transaccion.objects.get(id=transaccion_id)
@@ -1031,8 +1469,24 @@ def detalle_transaccion(request, transaccion_id):
 @login_required
 def editar_transaccion(request, transaccion_id):
     """
-    Vista para editar una transacción existente.
-    Solo permite editar transacciones en estado pendiente.
+    Vista para editar transacciones existentes (funcionalidad pendiente).
+    
+    Actualmente solo permite editar transacciones que se encuentren en estado
+    'pendiente'. Para otras transacciones redirecciona al historial del usuario.
+    La lógica de edición está pendiente de implementación.
+    
+    Restricciones:
+        - Solo transacciones en estado 'pendiente' pueden ser editadas
+        - Otros estados son inmutables por seguridad
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        transaccion_id (int): ID de la transacción a editar
+        
+    Returns:
+        HttpResponse: Redirecciona al historial del usuario
+        
+    TODO: Implementar lógica completa de edición de transacciones
     """
     try:
         transaccion = Transaccion.objects.get(id=transaccion_id)
@@ -1040,11 +1494,11 @@ def editar_transaccion(request, transaccion_id):
         # Verificar que la transacción esté pendiente
         if transaccion.estado.lower() != 'pendiente':
             messages.error(request, 'Solo se pueden editar transacciones en estado pendiente.')
-            return redirect('transacciones:historial')
+            return redirect(f'transacciones:historial?usuario={transaccion.usuario.id}')
             
         # Aquí implementar lógica para editar la transacción
-        # Por ahora, solo redireccionar al historial
-        return redirect('transacciones:historial')
+        # Por ahora, solo redireccionar al historial del usuario
+        return redirect(f'transacciones:historial?usuario={transaccion.usuario.id}')
         
     except Transaccion.DoesNotExist:
         messages.error(request, 'La transacción solicitada no existe.')
