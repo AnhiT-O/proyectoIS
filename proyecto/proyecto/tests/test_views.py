@@ -320,7 +320,7 @@ class TestSimularView:
         data = json.loads(response.content)
         assert not data['success']
         assert 'moneda' in data['errors']
-        assert 'Debe seleccionar una moneda.' in data['errors']['moneda']
+        assert 'Debes seleccionar una moneda.' in data['errors']['moneda']
         
         # Probar sin monto
         response = self.client.post(reverse('simular'), {

@@ -218,7 +218,7 @@ class TestSimuladorForm:
         
         assert not form.is_valid()
         assert 'moneda' in form.errors
-        assert 'Debe seleccionar una moneda.' in form.errors['moneda']
+        assert 'Debes seleccionar una moneda.' in form.errors['moneda']
     
     def test_validacion_monto_requerido(self):
         """
