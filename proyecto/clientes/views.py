@@ -1,3 +1,15 @@
+"""
+Módulo de vistas para la gestión de clientes.
+
+Este módulo contiene todas las vistas necesarias para el CRUD de clientes,
+incluyendo funcionalidades de creación, listado, detalle, edición y gestión
+de medios de pago y acreditación. También incluye funciones de utilidad
+para el control de acceso y navegación.
+
+Autor: Equipo de desarrollo
+Fecha: 2025
+"""
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -16,16 +28,57 @@ logger = logging.getLogger(__name__)
 
 def verificar_acceso_cliente(user, cliente):
     """
-    Verifica si el usuario tiene acceso al cliente mediante:
-    1. Permisos de administración (clientes.gestion)
-    2. Asociación directa como usuario operador
+    Verifica si un usuario tiene acceso para operar con un cliente específico.
+
+    Esta función implementa un sistema de acceso híbrido que permite el acceso
+    a un cliente a través de dos mecanismos:
+    1. Permisos administrativos globales (clientes.gestion)
+    2. Asociación directa usuario-cliente
+
+    Args:
+        user: Instancia del usuario que solicita acceso
+        cliente: Instancia del cliente al que se solicita acceso
+
+    Returns:
+        bool: True si el usuario tiene acceso, False en caso contrario
+
+    Examples:
+        >>> usuario_admin = Usuario.objects.get(id=1)  # Con permisos admin
+        >>> usuario_operador = Usuario.objects.get(id=2)  # Sin permisos admin
+        >>> cliente = Cliente.objects.get(id=1)
+        >>> verificar_acceso_cliente(usuario_admin, cliente)  # True
+        >>> verificar_acceso_cliente(usuario_operador, cliente)  # Depende de asociación
     """
     return (user.has_perm('clientes.gestion') or 
             cliente in user.clientes_operados.all())
 
 def get_cliente_detalle_redirect(request, cliente_pk):
     """
-    Determina la URL correcta para redirigir según el tipo de usuario
+    Determina la URL correcta de redirección según el tipo de usuario.
+
+    Esta función analiza el contexto del usuario y su origen de navegación
+    para determinar la vista de detalle de cliente apropiada, proporcionando
+    una experiencia de navegación coherente.
+
+    Args:
+        request: Objeto HttpRequest con información de la petición
+        cliente_pk: Clave primaria del cliente
+
+    Returns:
+        HttpResponseRedirect: Redirección a la vista apropiada
+
+    Logic:
+        - Si viene de la sección usuarios o no tiene permisos admin: vista de usuario
+        - Si tiene permisos admin y viene de gestión: vista administrativa
+
+    Examples:
+        >>> # Usuario operador sin permisos admin
+        >>> redirect_response = get_cliente_detalle_redirect(request, 1)
+        >>> # Redirige a: /usuarios/cliente/1/
+        
+        >>> # Usuario administrador
+        >>> redirect_response = get_cliente_detalle_redirect(request, 1)
+        >>> # Redirige a: /clientes/1/
     """
     referer = request.META.get('HTTP_REFERER', '')
     if 'usuarios/cliente' in referer or not request.user.has_perm('clientes.gestion'):
@@ -35,7 +88,26 @@ def get_cliente_detalle_redirect(request, cliente_pk):
 
 def get_cliente_detalle_url(request, cliente_pk):
     """
-    Determina la URL correcta de detalle del cliente según el tipo de usuario (para templates)
+    Determina la URL correcta de detalle del cliente para uso en templates.
+
+    Similar a get_cliente_detalle_redirect, pero retorna la URL como string
+    para ser utilizada en enlaces y formularios dentro de templates.
+
+    Args:
+        request: Objeto HttpRequest con información de la petición
+        cliente_pk: Clave primaria del cliente
+
+    Returns:
+        str: URL string de la vista de detalle apropiada
+
+    Examples:
+        >>> # Para usuario operador
+        >>> url = get_cliente_detalle_url(request, 1)
+        >>> print(url)  # '/usuarios/cliente/1/'
+        
+        >>> # Para administrador
+        >>> url = get_cliente_detalle_url(request, 1)  
+        >>> print(url)  # '/clientes/1/'
     """
     referer = request.META.get('HTTP_REFERER', '')
     if 'usuarios/cliente' in referer or not request.user.has_perm('clientes.gestion'):
@@ -45,7 +117,28 @@ def get_cliente_detalle_url(request, cliente_pk):
 
 def procesar_medios_acreditacion_cliente(cliente, usuario):
     """
-    Función auxiliar para procesar los medios de acreditación de un cliente
+    Procesa y obtiene los medios de acreditación asociados a un cliente.
+
+    Esta función auxiliar centraliza la lógica de obtención de medios de
+    acreditación y determinación de permisos del usuario para presentar
+    la información de manera consistente en las vistas.
+
+    Args:
+        cliente: Instancia del cliente cuyos medios se van a procesar
+        usuario: Instancia del usuario que solicita la información
+
+    Returns:
+        dict: Diccionario con la siguiente estructura:
+            - es_administrador (bool): Si el usuario tiene permisos administrativos
+            - cuentas_bancarias (QuerySet): Cuentas bancarias del cliente
+            - billeteras (QuerySet): Billeteras electrónicas del cliente
+
+    Examples:
+        >>> cliente = Cliente.objects.get(id=1)
+        >>> usuario = request.user
+        >>> datos = procesar_medios_acreditacion_cliente(cliente, usuario)
+        >>> print(f"Es admin: {datos['es_administrador']}")
+        >>> print(f"Cuentas: {datos['cuentas_bancarias'].count()}")
     """
     # Determinar si es administrador
     es_administrador = usuario.has_perm('clientes.gestion')
@@ -63,6 +156,33 @@ def procesar_medios_acreditacion_cliente(cliente, usuario):
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_crear(request):
+    """
+    Vista para crear un nuevo cliente.
+
+    Permite a los usuarios con permisos administrativos crear nuevos clientes
+    en el sistema mediante un formulario de Django. Maneja tanto la presentación
+    del formulario (GET) como el procesamiento de los datos (POST).
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+
+    Returns:
+        HttpResponse: Renderiza el formulario o redirecciona tras creación exitosa
+
+    Decorators:
+        - @login_required: Requiere usuario autenticado
+        - @permission_required: Requiere permiso 'clientes.gestion'
+
+    Template:
+        clientes/cliente_form.html
+
+    Context:
+        - form: Instancia del formulario ClienteForm
+
+    Examples:
+        >>> # GET: Muestra el formulario vacío
+        >>> # POST: Procesa datos y crea cliente si es válido
+    """
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
@@ -76,6 +196,37 @@ def cliente_crear(request):
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_lista(request):
+    """
+    Vista para listar todos los clientes con funciones de filtrado y búsqueda.
+
+    Presenta una lista paginada de clientes con opciones de filtrado por segmento
+    y búsqueda por nombre o documento. Incluye estadísticas por segmento para
+    facilitar la navegación y gestión.
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+
+    Returns:
+        HttpResponse: Página con la lista de clientes filtrada
+
+    Decorators:
+        - @login_required: Requiere usuario autenticado
+        - @permission_required: Requiere permiso 'clientes.gestion'
+
+    Template:
+        clientes/cliente_lista.html
+
+    Context:
+        - clientes: QuerySet de clientes filtrados
+        - hay_clientes: Boolean indicando si existen clientes
+        - busqueda: Término de búsqueda aplicado
+        - segmento_filtro: Segmento seleccionado para filtrar
+        - stats_segmentos: Estadísticas de clientes por segmento
+
+    Query Parameters:
+        - segmento: Filtro por segmento (vip, corporativo, minorista)
+        - busqueda: Término de búsqueda por nombre o documento
+    """
     # Obtener todos los clientes para verificar si hay alguno
     todos_los_clientes = Cliente.objects.all()
     
@@ -116,7 +267,39 @@ def cliente_lista(request):
 
 @login_required
 def cliente_detalle(request, pk):
-    """Vista de detalle del cliente - Acceso híbrido"""
+    """
+    Vista de detalle del cliente con acceso híbrido.
+
+    Muestra la información detallada de un cliente específico, incluyendo
+    datos personales, medios de acreditación y tarjetas de Stripe. Implementa
+    un sistema de acceso híbrido donde tanto administradores como usuarios
+    operadores asociados pueden ver los detalles.
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+        pk: Clave primaria del cliente a mostrar
+
+    Returns:
+        HttpResponse: Página de detalle del cliente o redirección si no tiene acceso
+
+    Decorators:
+        - @login_required: Requiere usuario autenticado
+
+    Template:
+        clientes/cliente_detalle.html
+
+    Context:
+        - cliente: Instancia del cliente
+        - tarjetas_stripe: Lista de tarjetas de crédito del cliente
+        - total_tarjetas: Número total de tarjetas
+        - es_administrador: Si el usuario tiene permisos administrativos
+        - cuentas_bancarias: Cuentas bancarias del cliente
+        - billeteras: Billeteras electrónicas del cliente
+
+    Access Control:
+        - Administradores con permiso 'clientes.gestion': Acceso completo
+        - Usuarios operadores asociados: Acceso limitado al cliente específico
+    """
     cliente = get_object_or_404(Cliente, pk=pk)
     
     tarjetas_stripe = cliente.obtener_tarjetas_stripe()
@@ -139,6 +322,34 @@ def cliente_detalle(request, pk):
 @login_required
 @permission_required('clientes.gestion', raise_exception=True)
 def cliente_editar(request, pk):
+    """
+    Vista para editar un cliente existente.
+
+    Permite a los usuarios con permisos administrativos modificar la información
+    de un cliente existente mediante un formulario prellenado con los datos actuales.
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+        pk: Clave primaria del cliente a editar
+
+    Returns:
+        HttpResponse: Formulario de edición o redirección tras actualización exitosa
+
+    Decorators:
+        - @login_required: Requiere usuario autenticado
+        - @permission_required: Requiere permiso 'clientes.gestion'
+
+    Template:
+        clientes/cliente_form.html
+
+    Context:
+        - form: Instancia del formulario ClienteForm con datos del cliente
+        - cliente: Instancia del cliente siendo editado
+
+    Examples:
+        >>> # GET: Muestra formulario prellenado con datos actuales
+        >>> # POST: Procesa cambios y actualiza si son válidos
+    """
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
@@ -153,7 +364,39 @@ def cliente_editar(request, pk):
 
 @login_required
 def agregar_tarjeta(request, pk):
-    """Vista para agregar tarjeta de crédito a un cliente - Acceso híbrido"""
+    """
+    Vista para agregar tarjeta de crédito a un cliente con acceso híbrido.
+
+    Permite tanto a administradores como a usuarios operadores asociados
+    agregar tarjetas de crédito a un cliente específico mediante integración
+    con Stripe Elements.
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+        pk: Clave primaria del cliente al que agregar la tarjeta
+
+    Returns:
+        HttpResponse: Formulario de tarjeta o redirección tras procesamiento
+
+    Decorators:
+        - @login_required: Requiere usuario autenticado
+
+    Template:
+        clientes/cliente_agregar_cuenta.html
+
+    Context:
+        - form: Instancia del formulario AgregarTarjetaForm
+        - cliente: Instancia del cliente
+        - stripe_public_key: Clave pública de Stripe para el frontend
+
+    Access Control:
+        - Administradores con permiso 'clientes.gestion': Acceso completo
+        - Usuarios operadores asociados al cliente: Acceso específico
+
+    Note:
+        Esta vista trabaja con Stripe Elements en el frontend para
+        procesamiento seguro de datos de tarjetas de crédito.
+    """
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
@@ -235,7 +478,38 @@ def agregar_tarjeta(request, pk):
     return render(request, 'clientes/cliente_agregar_cuenta.html', context)
 
 def cliente_agregar_cuenta_bancaria(request, pk):
-    """Vista para agregar una cuenta bancaria al cliente - Acceso híbrido"""
+    """
+    Vista para agregar una cuenta bancaria al cliente con acceso híbrido.
+
+    Permite tanto a administradores como a usuarios operadores asociados
+    agregar cuentas bancarias como medio de acreditación para un cliente específico.
+
+    Args:
+        request: Objeto HttpRequest con la información de la petición
+        pk: Clave primaria del cliente al que agregar la cuenta bancaria
+
+    Returns:
+        HttpResponse: Formulario de cuenta bancaria o redirección tras creación
+
+    Decorators:
+        Ninguno específico, pero utiliza verificación de acceso manual
+
+    Template:
+        clientes/agregar_cuenta_bancaria.html
+
+    Context:
+        - form: Instancia del formulario CuentaBancariaForm
+        - cliente: Instancia del cliente
+        - titulo: Título para mostrar en el template
+        - cancelar_url: URL para el botón de cancelar
+
+    Access Control:
+        - Administradores con permiso 'clientes.gestion': Acceso completo
+        - Usuarios operadores asociados al cliente: Acceso específico
+
+    Validation:
+        - Verifica duplicados de cuentas bancarias para evitar registros repetidos
+    """
     cliente = get_object_or_404(Cliente, pk=pk)
     
     # Verificar acceso híbrido (admin o usuario asociado)
