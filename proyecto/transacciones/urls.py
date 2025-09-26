@@ -1,3 +1,21 @@
+"""
+Configuración de URLs para la aplicación de transacciones.
+
+Este módulo define todas las rutas URL disponibles en la aplicación de transacciones,
+organizadas por funcionalidad: compras, ventas, gestión de recargos, historial y
+funcionalidades auxiliares.
+
+Grupos de URLs:
+    - Proceso de compra: URLs para el flujo completo de compra de monedas
+    - Proceso de venta: URLs para el flujo completo de venta de monedas  
+    - Gestión de recargos: URLs para administrar recargos por medio de pago
+    - Historial: URLs para consultar transacciones históricas
+    - Funcionalidades auxiliares: APIs para validaciones y consultas
+
+Author: Equipo de desarrollo Global Exchange
+Date: 2024
+"""
+
 from django.urls import path
 from . import views
 
