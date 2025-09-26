@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+
+<html lang="es" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Medios de Acreditación &#8212; documentación de Global Exchange - Versión 2</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/translations.js?v=f85f4cfb"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="Transacciones" href="transacciones.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="medios-de-acreditacion">
+<h1>Medios de Acreditación<a class="headerlink" href="#medios-de-acreditacion" title="Link to this heading">¶</a></h1>
+<p>Documentación de las vistas models y forms de medios de acreditación.</p>
+<p id="module-medios_acreditacion.models">Modelos para los medios de acreditación del sistema.</p>
+<p>Este módulo contiene los modelos que representan los diferentes medios de acreditación
+que pueden tener asociados los clientes del sistema, como cuentas bancarias y billeteras
+electrónicas.</p>
+<dl class="simple">
+<dt>Clases:</dt><dd><p>CuentaBancaria: Modelo que representa una cuenta bancaria de un cliente.
+Billetera: Modelo que representa una billetera electrónica de un cliente.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">Billetera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#Billetera"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.Billetera" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo que representa una billetera electrónica asociada a un cliente.</p>
+<p>Esta clase define los datos necesarios para almacenar información de billeteras
+electrónicas que pueden ser utilizadas como medio de acreditación para transacciones.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES">
+<span class="sig-name descname"><span class="pre">TIPO_BILLETERA_CHOICES</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES" title="Link to this definition">¶</a></dt>
+<dd><p>Lista de tuplas con los tipos de billetera disponibles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.tipo_billetera">
+<span class="sig-name descname"><span class="pre">tipo_billetera</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.tipo_billetera" title="Link to this definition">¶</a></dt>
+<dd><p>Tipo de billetera electrónica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.telefono">
+<span class="sig-name descname"><span class="pre">telefono</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.telefono" title="Link to this definition">¶</a></dt>
+<dd><p>Número de teléfono asociado a la billetera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.nombre_titular">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.nombre_titular" title="Link to this definition">¶</a></dt>
+<dd><p>Nombre completo del titular de la billetera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.nro_documento">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.nro_documento" title="Link to this definition">¶</a></dt>
+<dd><p>Número de documento del titular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Referencia al cliente propietario de la billetera.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>Meta:</dt><dd><p>db_table (str): Nombre de la tabla en la base de datos.</p>
+</dd>
+</dl>
+<dl class="py exception">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.DoesNotExist" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.MultipleObjectsReturned" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">TIPO_BILLETERA_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('-------',</span> <span class="pre">'Seleccione</span> <span class="pre">un</span> <span class="pre">tipo</span> <span class="pre">de</span> <span class="pre">billetera'),</span> <span class="pre">('tigo',</span> <span class="pre">'Tigo</span> <span class="pre">Money'),</span> <span class="pre">('personal',</span> <span class="pre">'Billetera</span> <span class="pre">Personal'),</span> <span class="pre">('zimple',</span> <span class="pre">'Zimple')]</span></em><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.cliente_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.get_tipo_billetera_display">
+<span class="sig-name descname"><span class="pre">get_tipo_billetera_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#Billetera.get_tipo_billetera_display"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.Billetera.get_tipo_billetera_display" title="Link to this definition">¶</a></dt>
+<dd><p>Método personalizado para mostrar el tipo de billetera correctamente.</p>
+<p>Este método proporciona un mapeo personalizado para mostrar los nombres
+de las billeteras de forma consistente, especialmente para valores que
+pueden contener guiones bajos o formatos especiales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre formateado del tipo de billetera para mostrar al usuario.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.id" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#id3" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#medios_acreditacion.models.Billetera.objects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">telefono</span></span><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">tipo_billetera</span></span><a class="headerlink" href="#id5" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">CuentaBancaria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#CuentaBancaria"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo que representa una cuenta bancaria asociada a un cliente.</p>
+<p>Esta clase define los datos necesarios para almacenar información de cuentas bancarias
+que pueden ser utilizadas como medio de acreditación para transacciones.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.BANCO_CHOICES">
+<span class="sig-name descname"><span class="pre">BANCO_CHOICES</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.BANCO_CHOICES" title="Link to this definition">¶</a></dt>
+<dd><p>Lista de tuplas con los bancos disponibles en el sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.banco">
+<span class="sig-name descname"><span class="pre">banco</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.banco" title="Link to this definition">¶</a></dt>
+<dd><p>Banco al que pertenece la cuenta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.numero_cuenta">
+<span class="sig-name descname"><span class="pre">numero_cuenta</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.numero_cuenta" title="Link to this definition">¶</a></dt>
+<dd><p>Número de la cuenta bancaria.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.nombre_titular">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.nombre_titular" title="Link to this definition">¶</a></dt>
+<dd><p>Nombre completo del titular de la cuenta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.nro_documento">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.nro_documento" title="Link to this definition">¶</a></dt>
+<dd><p>Número de documento del titular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Referencia al cliente propietario de la cuenta.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>Meta:</dt><dd><p>db_table (str): Nombre de la tabla en la base de datos.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">BANCO_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('-------',</span> <span class="pre">'Seleccione</span> <span class="pre">un</span> <span class="pre">banco'),</span> <span class="pre">('ATLAS',</span> <span class="pre">'Banco</span> <span class="pre">Atlas'),</span> <span class="pre">('BANCOP',</span> <span class="pre">'BANCOP'),</span> <span class="pre">('BASA',</span> <span class="pre">'Banco</span> <span class="pre">Basa'),</span> <span class="pre">('BNF',</span> <span class="pre">'Banco</span> <span class="pre">Nacional</span> <span class="pre">de</span> <span class="pre">Fomento</span> <span class="pre">(BNF)'),</span> <span class="pre">('CITIBANK',</span> <span class="pre">'Citibank'),</span> <span class="pre">('CONTINENTAL',</span> <span class="pre">'Banco</span> <span class="pre">Continental'),</span> <span class="pre">('FAMILIAR',</span> <span class="pre">'Banco</span> <span class="pre">Familiar'),</span> <span class="pre">('GNB',</span> <span class="pre">'Banco</span> <span class="pre">GNB'),</span> <span class="pre">('INTERFISA',</span> <span class="pre">'Interfisa</span> <span class="pre">Banco'),</span> <span class="pre">('ITAU',</span> <span class="pre">'Banco</span> <span class="pre">Itaú'),</span> <span class="pre">('SUDAMERIS',</span> <span class="pre">'Banco</span> <span class="pre">Sudameris'),</span> <span class="pre">('UENO',</span> <span class="pre">'ueno</span> <span class="pre">bank'),</span> <span class="pre">('ZETA',</span> <span class="pre">'Zeta</span> <span class="pre">Banco'),</span> <span class="pre">('FINLATINA',</span> <span class="pre">'Financiera</span> <span class="pre">Finlatina'),</span> <span class="pre">('TU_FINANCIERA',</span> <span class="pre">'Tu</span> <span class="pre">Financiera'),</span> <span class="pre">('PARAGUAYO_JAPONESA',</span> <span class="pre">'Financiera</span> <span class="pre">Paraguayo</span> <span class="pre">Japonesa'),</span> <span class="pre">('FIC',</span> <span class="pre">'FIC</span> <span class="pre">-</span> <span class="pre">Financiera'),</span> <span class="pre">('COOP_UNIVERSITARIA',</span> <span class="pre">'Cooperativa</span> <span class="pre">Universitaria'),</span> <span class="pre">('COOP_SAGRADOS_CORAZONES',</span> <span class="pre">'Cooperativa</span> <span class="pre">Sagrados</span> <span class="pre">Corazones'),</span> <span class="pre">('COOP_CHORTITZER',</span> <span class="pre">'Cooperativa</span> <span class="pre">Chortitzer')]</span></em><a class="headerlink" href="#id6" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.DoesNotExist" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.MultipleObjectsReturned" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">banco</span></span><a class="headerlink" href="#id7" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#id8" title="Link to this definition">¶</a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.cliente_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.get_banco_display">
+<span class="sig-name descname"><span class="pre">get_banco_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">banco&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.get_banco_display" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.id" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#id9" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#id10" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">numero_cuenta</span></span><a class="headerlink" href="#id11" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.objects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p id="module-medios_acreditacion.forms"><span id="module-medios_acreditacion.views"></span>Formularios para la gestión de medios de acreditación.</p>
+<p>Este módulo contiene los formularios de Django que manejan la validación y
+presentación de datos para los medios de acreditación, incluyendo cuentas
+bancarias y billeteras electrónicas.</p>
+<p>Los formularios incluyen validaciones personalizadas, mensajes de error
+personalizados y configuración de widgets para mejorar la experiencia del usuario.</p>
+<dl class="simple">
+<dt>Clases:</dt><dd><p>CuentaBancariaForm: Formulario para crear y editar cuentas bancarias.
+BilleteraForm: Formulario para crear y editar billeteras electrónicas.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.forms.</span></span><span class="sig-name descname"><span class="pre">BilleteraForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#BilleteraForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<p>Formulario para la gestión de billeteras electrónicas.</p>
+<p>Este formulario permite crear y editar billeteras electrónicas con validaciones
+personalizadas y mensajes de error específicos para cada campo.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.tipo_billetera">
+<span class="sig-name descname"><span class="pre">tipo_billetera</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.tipo_billetera" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de selección para el tipo de billetera.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.telefono">
+<span class="sig-name descname"><span class="pre">telefono</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.telefono" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el número de teléfono.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.nombre_titular">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.nombre_titular" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el nombre del titular.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.nro_documento">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.nro_documento" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el número de documento.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#BilleteraForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.Meta" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Metadatos del formulario BilleteraForm.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['tipo_billetera',</span> <span class="pre">'telefono',</span> <span class="pre">'nombre_titular',</span> <span class="pre">'nro_documento']</span></em><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.Meta.fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.Meta.model" title="Link to this definition">¶</a></dt>
+<dd><p>alias de <a class="reference internal" href="#medios_acreditacion.models.Billetera" title="medios_acreditacion.models.Billetera"><code class="xref py py-class docutils literal notranslate"><span class="pre">Billetera</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'nombre_titular':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nro_documento':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'telefono':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tipo_billetera':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.base_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.clean_tipo_billetera">
+<span class="sig-name descname"><span class="pre">clean_tipo_billetera</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#BilleteraForm.clean_tipo_billetera"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.clean_tipo_billetera" title="Link to this definition">¶</a></dt>
+<dd><p>Validación personalizada para el campo tipo_billetera.</p>
+<p>Verifica que se haya seleccionado un tipo de billetera válido y no la opción por defecto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>El valor del tipo de billetera seleccionado si es válido.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>forms.ValidationError</strong> – Si no se seleccionó un tipo de billetera válido.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'nombre_titular':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nro_documento':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'telefono':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tipo_billetera':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.declared_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.media" title="Link to this definition">¶</a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.forms.</span></span><span class="sig-name descname"><span class="pre">CuentaBancariaForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#CuentaBancariaForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<p>Formulario para la gestión de cuentas bancarias.</p>
+<p>Este formulario permite crear y editar cuentas bancarias con validaciones
+personalizadas y mensajes de error específicos para cada campo.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.banco">
+<span class="sig-name descname"><span class="pre">banco</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.banco" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de selección para el banco.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.numero_cuenta">
+<span class="sig-name descname"><span class="pre">numero_cuenta</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.numero_cuenta" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el número de cuenta.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.nombre_titular">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.nombre_titular" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el nombre del titular.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.nro_documento">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.nro_documento" title="Link to this definition">¶</a></dt>
+<dd><p>Campo de texto para el número de documento.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#CuentaBancariaForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.Meta" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Metadatos del formulario CuentaBancariaForm.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['banco',</span> <span class="pre">'numero_cuenta',</span> <span class="pre">'nombre_titular',</span> <span class="pre">'nro_documento']</span></em><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.Meta.fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.Meta.model" title="Link to this definition">¶</a></dt>
+<dd><p>alias de <a class="reference internal" href="#medios_acreditacion.models.CuentaBancaria" title="medios_acreditacion.models.CuentaBancaria"><code class="xref py py-class docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'banco':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre_titular':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nro_documento':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'numero_cuenta':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.base_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.clean_banco">
+<span class="sig-name descname"><span class="pre">clean_banco</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/forms.html#CuentaBancariaForm.clean_banco"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.clean_banco" title="Link to this definition">¶</a></dt>
+<dd><p>Validación personalizada para el campo banco.</p>
+<p>Verifica que se haya seleccionado un banco válido y no la opción por defecto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>El valor del banco seleccionado si es válido.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>forms.ValidationError</strong> – Si no se seleccionó un banco válido.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'banco':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre_titular':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nro_documento':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'numero_cuenta':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.declared_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.media" title="Link to this definition">¶</a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Global Exchange</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Configuración Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Medios de Acreditación</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#medios_acreditacion.models.Billetera"><code class="docutils literal notranslate"><span class="pre">Billetera</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#medios_acreditacion.models.CuentaBancaria"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#medios_acreditacion.forms.BilleteraForm"><code class="docutils literal notranslate"><span class="pre">BilleteraForm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#medios_acreditacion.forms.CuentaBancariaForm"><code class="docutils literal notranslate"><span class="pre">CuentaBancariaForm</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="transacciones.html" title="capítulo anterior">Transacciones</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Grupo 1.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/medios_acreditacion.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

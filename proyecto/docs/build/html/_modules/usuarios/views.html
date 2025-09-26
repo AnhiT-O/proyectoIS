@@ -49,7 +49,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistroUsuarioForm</span><span class="p">,</span> <span class="n">RecuperarPasswordForm</span><span class="p">,</span> <span class="n">EstablecerPasswordForm</span><span class="p">,</span> <span class="n">AsignarRolForm</span><span class="p">,</span> <span class="n">AsignarClienteForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Usuario</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span><span class="p">,</span> <span class="n">UsuarioCliente</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">clientes.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">procesar_medios_pago_cliente</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">clientes.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">procesar_medios_acreditacion_cliente</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">roles.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Roles</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.sessions.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
@@ -644,11 +644,16 @@
         <span class="c1"># Verificar que el cliente existe y está asociado al usuario</span>
         <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">clientes_operados</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">cliente_id</span><span class="p">)</span>
         
-        <span class="c1"># Usar función auxiliar para procesar medios de pago</span>
-        <span class="n">medios_data</span> <span class="o">=</span> <span class="n">procesar_medios_pago_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="c1"># Obtener las tarjetas de Stripe del cliente</span>
+        <span class="n">tarjetas_stripe</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">obtener_tarjetas_stripe</span><span class="p">()</span>
+
+        <span class="c1"># Usar función auxiliar para procesar medios de acreditación</span>
+        <span class="n">medios_data</span> <span class="o">=</span> <span class="n">procesar_medios_acreditacion_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
         
         <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+            <span class="s1">&#39;tarjetas_stripe&#39;</span><span class="p">:</span> <span class="n">tarjetas_stripe</span><span class="p">,</span>
+            <span class="s1">&#39;total_tarjetas&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tarjetas_stripe</span><span class="p">),</span>
             <span class="o">**</span><span class="n">medios_data</span>
         <span class="p">}</span>
         
@@ -657,6 +662,81 @@
     <span class="k">except</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cliente no encontrado o no autorizado.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:mis_clientes&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="agregar_tarjeta_cliente">
+<a class="viewcode-back" href="../../usuarios.html#usuarios.views.agregar_tarjeta_cliente">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">agregar_tarjeta_cliente</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para que un operador agregue tarjeta de crédito a su cliente asignado&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verificar que el cliente existe y está asociado al usuario</span>
+        <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">clientes_operados</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cliente no encontrado o no autorizado.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:mis_clientes&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Importar el formulario aquí para evitar dependencia circular</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgregarTarjetaForm</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AgregarTarjetaForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">payment_method</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Tarjeta agregada exitosamente.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:detalle_cliente&#39;</span><span class="p">,</span> <span class="n">cliente_id</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+                
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Error al agregar la tarjeta: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AgregarTarjetaForm</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;stripe_public_key&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_PUBLIC_KEY</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/agregar_tarjeta.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="eliminar_tarjeta_cliente">
+<a class="viewcode-back" href="../../usuarios.html#usuarios.views.eliminar_tarjeta_cliente">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eliminar_tarjeta_cliente</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">payment_method_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para que un operador elimine tarjeta de crédito de su cliente asignado&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Método no permitido.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:mis_clientes&#39;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verificar que el cliente existe y está asociado al usuario</span>
+        <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">clientes_operados</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cliente no encontrado o no autorizado.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:mis_clientes&#39;</span><span class="p">)</span>
+    
+    <span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+    
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Desadjuntar el método de pago del cliente</span>
+        <span class="n">stripe</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">payment_method_id</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Tarjeta eliminada exitosamente.&#39;</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;La tarjeta no existe o ya fue eliminada.&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">StripeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Error al eliminar la tarjeta: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error inesperado al eliminar tarjeta: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Error inesperado al eliminar la tarjeta.&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:detalle_cliente&#39;</span><span class="p">,</span> <span class="n">cliente_id</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -691,8 +771,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../medios_pago.html">Medios de Pago</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Configuración Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
 </ul>
 
 <div class="relations">

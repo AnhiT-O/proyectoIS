@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html lang="es" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transacciones.models &#8212; documentación de Global Exchange - Versión 2</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para transacciones.models</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Modelos para el sistema de transacciones de Global Exchange.</span>
+
+<span class="sd">Este módulo contiene los modelos de datos relacionados con las transacciones</span>
+<span class="sd">financieras, incluyendo la gestión de recargos y el procesamiento de </span>
+<span class="sd">transacciones de compra y venta de monedas extranjeras.</span>
+
+<span class="sd">Clases principales:</span>
+<span class="sd">    - Recargos: Gestiona los recargos aplicables por tipo de medio de pago</span>
+<span class="sd">    - Transaccion: Representa una transacción de compra o venta de monedas</span>
+
+<span class="sd">Author: Equipo de desarrollo Global Exchange</span>
+<span class="sd">Date: 2024</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_migrate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.dispatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">receiver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+
+
+<div class="viewcode-block" id="Recargos">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Recargos">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Recargos</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo para gestionar los recargos aplicables por tipo de medio de pago.</span>
+<span class="sd">    </span>
+<span class="sd">    Los recargos son porcentajes adicionales que se aplican a las transacciones</span>
+<span class="sd">    según el medio de pago utilizado (ej: tarjeta de crédito, billeteras digitales).</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        nombre (CharField): Nombre del medio de pago (ej: &quot;Tarjeta de Crédito&quot;)</span>
+<span class="sd">        recargo (SmallIntegerField): Porcentaje de recargo a aplicar (0-100)</span>
+<span class="sd">        </span>
+<span class="sd">    Meta:</span>
+<span class="sd">        verbose_name: &quot;Recargo&quot;</span>
+<span class="sd">        verbose_name_plural: &quot;Recargos&quot;</span>
+<span class="sd">        db_table: &quot;recargos&quot;</span>
+<span class="sd">        permissions: [(&#39;edicion&#39;, &#39;Puede editar recargos&#39;)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nombre</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">recargo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Recargo&quot;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;Recargos&quot;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s2">&quot;recargos&quot;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Deshabilita permisos predeterminados</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;edicion&#39;</span><span class="p">,</span> <span class="s1">&#39;Puede editar recargos&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Representación en cadena del modelo Recargos.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El nombre del medio de pago</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nombre</span></div>
+
+
+
+<div class="viewcode-block" id="crear_recargos">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.crear_recargos">[documentos]</a>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crear_recargos</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Signal handler que crea automáticamente los recargos predeterminados.</span>
+<span class="sd">    </span>
+<span class="sd">    Se ejecuta después de aplicar las migraciones de la aplicación transacciones.</span>
+<span class="sd">    Crea los recargos estándar para diferentes medios de pago si no existen.</span>
+<span class="sd">    </span>
+<span class="sd">    Recargos creados:</span>
+<span class="sd">        - Tarjeta de Crédito: 1%</span>
+<span class="sd">        - Tigo Money: 2%</span>
+<span class="sd">        - Billetera Personal: 2%</span>
+<span class="sd">        - Zimple: 3%</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        sender: La aplicación que envía la señal</span>
+<span class="sd">        **kwargs: Argumentos adicionales de la señal post_migrate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Solo crear si la migración es de la app transacciones</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app_config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;transacciones&#39;</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Tarjeta de Crédito&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Tarjeta de Crédito&#39;</span><span class="p">,</span>
+                <span class="n">recargo</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Tigo Money&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Tigo Money&#39;</span><span class="p">,</span>
+                <span class="n">recargo</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Billetera Personal&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Billetera Personal&#39;</span><span class="p">,</span>
+                <span class="n">recargo</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Zimple&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Zimple&#39;</span><span class="p">,</span>
+                <span class="n">recargo</span><span class="o">=</span><span class="mi">3</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transaccion">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transaccion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo principal para representar transacciones de compra y venta de monedas.</span>
+<span class="sd">    </span>
+<span class="sd">    Una transacción registra todos los detalles de una operación de cambio de moneda,</span>
+<span class="sd">    incluyendo el cliente, tipo de operación, medios de pago/cobro, montos y estado.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        cliente (ForeignKey): Cliente que realiza la transacción</span>
+<span class="sd">        tipo (CharField): Tipo de operación (&#39;compra&#39; o &#39;venta&#39;)</span>
+<span class="sd">        moneda (ForeignKey): Moneda extranjera involucrada en la transacción</span>
+<span class="sd">        monto (DecimalField): Cantidad de la moneda extranjera</span>
+<span class="sd">        medio_pago (CharField): Forma de pago del cliente (efectivo, tarjeta, etc.)</span>
+<span class="sd">        medio_cobro (CharField): Forma de cobro para entregar el dinero al cliente</span>
+<span class="sd">        fecha_hora (DateTimeField): Timestamp de creación/actualización de la transacción</span>
+<span class="sd">        estado (CharField): Estado actual de la transacción (Pendiente, Completada, etc.)</span>
+<span class="sd">        token (CharField): Token único para transacciones que lo requieren</span>
+<span class="sd">        token_expiracion (DateTimeField): Fecha y hora de expiración del token</span>
+<span class="sd">        usuario (ForeignKey): Usuario del sistema que procesó la transacción</span>
+<span class="sd">        </span>
+<span class="sd">    Meta:</span>
+<span class="sd">        verbose_name: &quot;Transacción&quot;</span>
+<span class="sd">        verbose_name_plural: &quot;Transacciones&quot;</span>
+<span class="sd">        db_table: &quot;transacciones&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;clientes.Cliente&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">tipo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># &#39;compra&#39; o &#39;venta&#39;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;monedas.Moneda&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">monto</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span><span class="n">max_digits</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">medio_pago</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span> 
+    <span class="n">medio_cobro</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># Agregar campo medio_cobro </span>
+    <span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">estado</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;Pendiente&#39;</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Campo para el token</span>
+    <span class="n">token_expiracion</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Campo para la expiración del token</span>
+    <span class="n">usuario</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;usuarios.Usuario&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    
+    <span class="c1"># Campos para almacenar cotizaciones originales al crear la transacción</span>
+    <span class="n">precio_compra_original</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Precio de compra al momento de crear la transacción</span>
+    <span class="n">precio_venta_original</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># Precio de venta al momento de crear la transacción</span>
+    <span class="n">fecha_cotizacion_original</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Fecha de cotización original</span>
+    
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Transacción&quot;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s2">&quot;Transacciones&quot;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s2">&quot;transacciones&quot;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># De momento no hay permisos necesarios</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Representación en cadena del modelo Transaccion.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Descripción de la transacción en formato &quot;Tipo - Cliente - Monto Moneda&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tipo</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">monto</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+<div class="viewcode-block" id="Transaccion.token_valido">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.token_valido">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">token_valido</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifica si el token de la transacción aún es válido.</span>
+<span class="sd">        </span>
+<span class="sd">        Un token es válido si existe y no ha expirado según su timestamp</span>
+<span class="sd">        de expiración configurado.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True si el token es válido, False en caso contrario</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_expiracion</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_expiracion</span></div>
+
+    
+<div class="viewcode-block" id="Transaccion.establecer_token_con_expiracion">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.establecer_token_con_expiracion">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">establecer_token_con_expiracion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asigna un token a la transacción con tiempo de expiración automático.</span>
+<span class="sd">        </span>
+<span class="sd">        Establece el token y calcula su fecha de expiración (5 minutos desde ahora).</span>
+<span class="sd">        Guarda automáticamente los cambios en la base de datos.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            token (str): Token único generado para la transacción</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_expiracion</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="Transaccion.limpiar_tokens_expirados">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.limpiar_tokens_expirados">[documentos]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">limpiar_tokens_expirados</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Elimina todas las transacciones con tokens expirados del sistema.</span>
+<span class="sd">        </span>
+<span class="sd">        Método de clase que busca y elimina transacciones cuyo token ha expirado</span>
+<span class="sd">        según el timestamp actual. Útil para limpieza periódica del sistema.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Número de transacciones eliminadas</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">transacciones_expiradas</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">token__isnull</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">token_expiracion__lt</span><span class="o">=</span><span class="n">now</span>
+        <span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">transacciones_expiradas</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">transacciones_expiradas</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">count</span></div>
+
+
+<div class="viewcode-block" id="Transaccion.almacenar_cotizacion_original">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.almacenar_cotizacion_original">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">almacenar_cotizacion_original</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Almacena los precios de compra y venta originales al momento de crear la transacción.</span>
+<span class="sd">        </span>
+<span class="sd">        Calcula y guarda los precios según la configuración actual de la moneda</span>
+<span class="sd">        para poder detectar cambios posteriores.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="p">:</span>
+            <span class="c1"># Calcular precios según el tipo de transacción</span>
+            <span class="n">precio_compra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span>
+            <span class="n">precio_venta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">precio_compra_original</span> <span class="o">=</span> <span class="n">precio_compra</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">precio_venta_original</span> <span class="o">=</span> <span class="n">precio_venta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fecha_cotizacion_original</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">fecha_cotizacion</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">update_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;precio_compra_original&#39;</span><span class="p">,</span> <span class="s1">&#39;precio_venta_original&#39;</span><span class="p">,</span> <span class="s1">&#39;fecha_cotizacion_original&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Transaccion.verificar_cambio_cotizacion">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.verificar_cambio_cotizacion">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verificar_cambio_cotizacion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifica si la cotización ha cambiado desde que se creó la transacción.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Diccionario con información de cambios o None si no hay cambios</span>
+<span class="sd">                - &#39;hay_cambios&#39;: boolean indicando si hubo cambios</span>
+<span class="sd">                - &#39;valores_anteriores&#39;: dict con precio_compra y precio_venta originales</span>
+<span class="sd">                - &#39;valores_actuales&#39;: dict con precio_compra y precio_venta actuales</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_compra_original</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_venta_original</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+            
+        <span class="c1"># Calcular precios actuales</span>
+        <span class="n">precio_compra_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span>
+        <span class="n">precio_venta_actual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+        
+        <span class="c1"># Verificar si hay cambios</span>
+        <span class="n">hay_cambios</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">precio_compra_actual</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_compra_original</span> <span class="ow">or</span> 
+            <span class="n">precio_venta_actual</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_venta_original</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">hay_cambios</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;hay_cambios&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;valores_anteriores&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_compra_original</span><span class="p">,</span>
+                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">precio_venta_original</span>
+                <span class="p">},</span>
+                <span class="s1">&#39;valores_actuales&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precio_compra_actual</span><span class="p">,</span>
+                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precio_venta_actual</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;hay_cambios&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Transaccion.save">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Transaccion.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sobrescribe el método save para actualizar timestamp en cambios de estado.</span>
+<span class="sd">        </span>
+<span class="sd">        Cuando el estado de una transacción cambia, actualiza automáticamente</span>
+<span class="sd">        el campo fecha_hora con el timestamp actual.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Argumentos posicionales para el método save del padre</span>
+<span class="sd">            **kwargs: Argumentos de palabra clave para el método save del padre</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>  <span class="c1"># Si la instancia ya existe</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">old_instance</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">old_instance</span><span class="o">.</span><span class="n">estado</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estado</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Global Exchange</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Configuración Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Grupo 1.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

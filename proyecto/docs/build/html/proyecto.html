@@ -15,7 +15,8 @@
     <script src="_static/translations.js?v=f85f4cfb"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
-    <link rel="prev" title="Medios de Pago" href="medios_pago.html" />
+    <link rel="next" title="Transacciones" href="transacciones.html" />
+    <link rel="prev" title="Monedas" href="monedas.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -70,6 +71,50 @@ allow login by active users, and reject login by inactive users.</p>
 <dt class="sig sig-object py" id="proyecto.forms.LoginForm.media">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#proyecto.forms.LoginForm.media" title="Link to this definition">¶</a></dt>
 <dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">proyecto.forms.</span></span><span class="sig-name descname"><span class="pre">SimuladorForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyecto/forms.html#SimuladorForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyecto.forms.SimuladorForm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.OPERACION_CHOICES">
+<span class="sig-name descname"><span class="pre">OPERACION_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('compra',</span> <span class="pre">'Compra'),</span> <span class="pre">('venta',</span> <span class="pre">'Venta')]</span></em><a class="headerlink" href="#proyecto.forms.SimuladorForm.OPERACION_CHOICES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moneda':</span> <span class="pre">&lt;django.forms.models.ModelChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'monto':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'operacion':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#proyecto.forms.SimuladorForm.base_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.clean_moneda">
+<span class="sig-name descname"><span class="pre">clean_moneda</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyecto/forms.html#SimuladorForm.clean_moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyecto.forms.SimuladorForm.clean_moneda" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.clean_monto">
+<span class="sig-name descname"><span class="pre">clean_monto</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyecto/forms.html#SimuladorForm.clean_monto"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyecto.forms.SimuladorForm.clean_monto" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moneda':</span> <span class="pre">&lt;django.forms.models.ModelChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'monto':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'operacion':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo':</span> <span class="pre">&lt;django.forms.fields.ChoiceField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#proyecto.forms.SimuladorForm.declared_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#proyecto.forms.SimuladorForm.media" title="Link to this definition">¶</a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="proyecto.forms.SimuladorForm.realizar_conversion">
+<span class="sig-name descname"><span class="pre">realizar_conversion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/proyecto/forms.html#SimuladorForm.realizar_conversion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#proyecto.forms.SimuladorForm.realizar_conversion" title="Link to this definition">¶</a></dt>
+<dd><p>Realiza la conversión de moneda basada en los datos validados del formulario.
+Debe llamarse solo después de que is_valid() retorne True.</p>
 </dd></dl>
 
 </dd></dl>
@@ -142,9 +187,9 @@ Se renderiza cuando un usuario autenticado no tiene permisos para acceder a una 
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="medios_pago.html">Medios de Pago</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Configuración Proyecto</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#proyecto.forms.LoginForm"><code class="docutils literal notranslate"><span class="pre">LoginForm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proyecto.forms.SimuladorForm"><code class="docutils literal notranslate"><span class="pre">SimuladorForm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#proyecto.views.custom_permission_denied_view"><code class="docutils literal notranslate"><span class="pre">custom_permission_denied_view()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#proyecto.views.inicio"><code class="docutils literal notranslate"><span class="pre">inicio()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#proyecto.views.login_usuario"><code class="docutils literal notranslate"><span class="pre">login_usuario()</span></code></a></li>
@@ -152,13 +197,16 @@ Se renderiza cuando un usuario autenticado no tiene permisos para acceder a una 
 <li class="toctree-l2"><a class="reference internal" href="#proyecto.views.simular"><code class="docutils literal notranslate"><span class="pre">simular()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="medios_pago.html" title="capítulo anterior">Medios de Pago</a></li>
+      <li>Previous: <a href="monedas.html" title="capítulo anterior">Monedas</a></li>
+      <li>Next: <a href="transacciones.html" title="próximo capítulo">Transacciones</a></li>
   </ul></li>
 </ul>
 </div>

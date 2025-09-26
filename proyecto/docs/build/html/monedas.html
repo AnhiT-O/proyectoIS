@@ -15,7 +15,7 @@
     <script src="_static/translations.js?v=f85f4cfb"></script>
     <link rel="index" title="Índice" href="genindex.html" />
     <link rel="search" title="Búsqueda" href="search.html" />
-    <link rel="next" title="Medios de Pago" href="medios_pago.html" />
+    <link rel="next" title="Configuración Proyecto" href="proyecto.html" />
     <link rel="prev" title="Roles" href="roles.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -38,8 +38,190 @@
 <h1>Monedas<a class="headerlink" href="#monedas" title="Link to this heading">¶</a></h1>
 <p>Documentación de las monedas utilizadas en el sistema.</p>
 <dl class="py class" id="module-monedas.models">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">ConsumoLimiteCliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#ConsumoLimiteCliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para registrar el consumo acumulado de límites por cliente
+Se actualiza con cada transacción y se resetea diaria/mensualmente</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.DoesNotExist" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.MultipleObjectsReturned" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#ConsumoLimiteCliente.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.cliente_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.consumo_diario">
+<span class="sig-name descname"><span class="pre">consumo_diario</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.consumo_diario" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.consumo_mensual">
+<span class="sig-name descname"><span class="pre">consumo_mensual</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.consumo_mensual" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.fecha">
+<span class="sig-name descname"><span class="pre">fecha</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.fecha" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.get_next_by_fecha">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.get_next_by_fecha" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.get_previous_by_fecha">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.get_previous_by_fecha" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.id" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.ConsumoLimiteCliente.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#monedas.models.ConsumoLimiteCliente.objects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">LimiteGlobal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#LimiteGlobal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.LimiteGlobal" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar los límites globales de transacciones
+que aplican a todos los clientes según la ley de casas de cambio</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.DoesNotExist" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.MultipleObjectsReturned" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.activo">
+<span class="sig-name descname"><span class="pre">activo</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.activo" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#LimiteGlobal.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.LimiteGlobal.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.fecha_fin">
+<span class="sig-name descname"><span class="pre">fecha_fin</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.fecha_fin" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.fecha_inicio">
+<span class="sig-name descname"><span class="pre">fecha_inicio</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.fecha_inicio" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.get_next_by_fecha_inicio">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_inicio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha_inicio&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.LimiteGlobal.get_next_by_fecha_inicio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.get_previous_by_fecha_inicio">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_inicio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha_inicio&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.LimiteGlobal.get_previous_by_fecha_inicio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.id" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.limite_diario">
+<span class="sig-name descname"><span class="pre">limite_diario</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.limite_diario" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.limite_mensual">
+<span class="sig-name descname"><span class="pre">limite_mensual</span></span><a class="headerlink" href="#monedas.models.LimiteGlobal.limite_mensual" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#monedas.models.LimiteGlobal.objects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.LimiteGlobal.obtener_limite_vigente">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obtener_limite_vigente</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#LimiteGlobal.obtener_limite_vigente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.LimiteGlobal.obtener_limite_vigente" title="Link to this definition">¶</a></dt>
+<dd><p>Retorna el límite global vigente para la fecha actual</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="monedas.models.Moneda">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nombre</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simbolo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasa_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_compra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_venta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fecha_cotizacion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nombre</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simbolo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasa_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_compra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_venta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fecha_cotizacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stock</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="monedas.models.Moneda.DoesNotExist">
@@ -119,8 +301,7 @@ object the first time, the query is executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="monedas.models.Moneda.get_precios_cliente">
 <span class="sig-name descname"><span class="pre">get_precios_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cliente</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.get_precios_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.get_precios_cliente" title="Link to this definition">¶</a></dt>
-<dd><p>Obtiene los precios de compra y venta para un cliente específico
-aplicando su porcentaje de beneficio.</p>
+<dd><p>Obtiene los precios finales para un cliente específico</p>
 </dd></dl>
 
 <dl class="py method">
@@ -128,27 +309,28 @@ aplicando su porcentaje de beneficio.</p>
 <span class="sig-name descname"><span class="pre">get_previous_by_fecha_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_cotizacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.Moneda.get_previous_by_fecha_cotizacion" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.ha_cambiado_cotizacion">
+<span class="sig-name descname"><span class="pre">ha_cambiado_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasa_base_anterior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_compra_anterior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_venta_anterior</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.ha_cambiado_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.ha_cambiado_cotizacion" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica si algún componente de la cotización ha cambiado
+:param tasa_base_anterior: Valor anterior de la tasa base
+:param comision_compra_anterior: Valor anterior de la comisión de compra
+:param comision_venta_anterior: Valor anterior de la comisión de venta</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Información sobre los cambios en la cotización</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.models.Moneda.id">
 <span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#monedas.models.Moneda.id" title="Link to this definition">¶</a></dt>
 <dd><p>A wrapper for a deferred-loading field. When the value is read from this
 object the first time, the query is executed.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="monedas.models.Moneda.medios_pago">
-<span class="sig-name descname"><span class="pre">medios_pago</span></span><a class="headerlink" href="#monedas.models.Moneda.medios_pago" title="Link to this definition">¶</a></dt>
-<dd><p>Accessor to the related objects manager on the forward and reverse sides of
-a many-to-many relation.</p>
-<p>In the example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Pizza</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="n">toppings</span> <span class="o">=</span> <span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Topping</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;pizzas&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">Pizza.toppings</span></code> and <code class="docutils literal notranslate"><span class="pre">Topping.pizzas</span></code> are <code class="docutils literal notranslate"><span class="pre">ManyToManyDescriptor</span></code>
-instances.</p>
-<p>Most of the implementation is delegated to a dynamically defined manager
-class built by <code class="docutils literal notranslate"><span class="pre">create_forward_many_to_many_manager()</span></code> defined below.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -181,12 +363,61 @@ object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.Moneda.stock">
+<span class="sig-name descname"><span class="pre">stock</span></span><a class="headerlink" href="#monedas.models.Moneda.stock" title="Link to this definition">¶</a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.models.Moneda.tasa_base">
 <span class="sig-name descname"><span class="pre">tasa_base</span></span><a class="headerlink" href="#monedas.models.Moneda.tasa_base" title="Link to this definition">¶</a></dt>
 <dd><p>A wrapper for a deferred-loading field. When the value is read from this
 object the first time, the query is executed.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.Moneda.transaccion_set">
+<span class="sig-name descname"><span class="pre">transaccion_set</span></span><a class="headerlink" href="#monedas.models.Moneda.transaccion_set" title="Link to this definition">¶</a></dt>
+<dd><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Parent.children</span></code> is a <code class="docutils literal notranslate"><span class="pre">ReverseManyToOneDescriptor</span></code> instance.</p>
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code class="docutils literal notranslate"><span class="pre">create_forward_many_to_many_manager()</span></code> defined below.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.verificar_cambio_cotizacion">
+<span class="sig-name descname"><span class="pre">verificar_cambio_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precio_original</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.verificar_cambio_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.verificar_cambio_cotizacion" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica si hubo cambios en la cotización comparando con el precio original
+:param precio_original: El precio que se mostró inicialmente al cliente</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Diccionario con información sobre el cambio de cotización</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_consumo_limite_cliente">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_consumo_limite_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_consumo_limite_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_consumo_limite_cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Crea automáticamente un registro de ConsumoLimiteCliente cuando se crea un nuevo cliente</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_limite_global_inicial">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_limite_global_inicial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_limite_global_inicial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_limite_global_inicial" title="Link to this definition">¶</a></dt>
+<dd><p>Crea automáticamente el límite global inicial después de ejecutar las migraciones</p>
 </dd></dl>
 
 <dl class="py function">
@@ -196,9 +427,45 @@ object the first time, the query is executed.</p>
 </dd></dl>
 
 <dl class="py function" id="module-monedas.views">
+<dt class="sig sig-object py" id="monedas.views.activar_limite">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">activar_limite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#activar_limite"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.activar_limite" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para activar un límite global específico</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.consultar_limites_cliente">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">consultar_limites_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#consultar_limites_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.consultar_limites_cliente" title="Link to this definition">¶</a></dt>
+<dd><p>Vista AJAX para consultar los límites disponibles de un cliente</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.crear_limite">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">crear_limite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#crear_limite"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.crear_limite" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para crear un nuevo límite global</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.editar_limite">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">editar_limite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#editar_limite"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.editar_limite" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para editar un límite global existente</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.lista_limites">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">lista_limites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#lista_limites"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.lista_limites" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para listar todos los límites globales configurados</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="monedas.views.moneda_crear">
 <span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_crear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_crear"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_crear" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.moneda_detalle">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_detalle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_detalle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_detalle" title="Link to this definition">¶</a></dt>
+<dd><p>Vista para mostrar los detalles completos de una moneda</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="monedas.views.moneda_editar">
@@ -224,7 +491,78 @@ para administrar monedas: creación, edición o activación.</p>
 para administrar monedas: creación, edición o activación.</p>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.validar_transaccion_limite">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">validar_transaccion_limite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#validar_transaccion_limite"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.validar_transaccion_limite" title="Link to this definition">¶</a></dt>
+<dd><p>Vista AJAX para validar si una transacción puede realizarse sin superar límites</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.verificar_cambios_precios">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">verificar_cambios_precios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moneda_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#verificar_cambios_precios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.verificar_cambios_precios" title="Link to this definition">¶</a></dt>
+<dd><p>API para verificar cambios en los precios de una moneda</p>
+</dd></dl>
+
 <dl class="py class" id="module-monedas.forms">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.forms.</span></span><span class="sig-name descname"><span class="pre">LimiteGlobalForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#LimiteGlobalForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.LimiteGlobalForm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<p>Formulario para gestionar los límites globales de transacciones</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/monedas/forms.html#LimiteGlobalForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.Meta" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['limite_diario',</span> <span class="pre">'limite_mensual',</span> <span class="pre">'fecha_inicio',</span> <span class="pre">'fecha_fin',</span> <span class="pre">'activo']</span></em><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.Meta.fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.Meta.model" title="Link to this definition">¶</a></dt>
+<dd><p>alias de <a class="reference internal" href="#monedas.models.LimiteGlobal" title="monedas.models.LimiteGlobal"><code class="xref py py-class docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'activo':</span> <span class="pre">&lt;django.forms.fields.BooleanField</span> <span class="pre">object&gt;,</span> <span class="pre">'fecha_fin':</span> <span class="pre">&lt;django.forms.fields.DateField</span> <span class="pre">object&gt;,</span> <span class="pre">'fecha_inicio':</span> <span class="pre">&lt;django.forms.fields.DateField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_diario':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_mensual':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.base_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#LimiteGlobalForm.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra form-wide cleaning after Field.clean() has been
+called on every field. Any ValidationError raised by this method will
+not be associated with a particular field; it will have a special-case
+association with the field named “__all__”.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.clean_limite_diario">
+<span class="sig-name descname"><span class="pre">clean_limite_diario</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#LimiteGlobalForm.clean_limite_diario"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.clean_limite_diario" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.clean_limite_mensual">
+<span class="sig-name descname"><span class="pre">clean_limite_mensual</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#LimiteGlobalForm.clean_limite_mensual"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.clean_limite_mensual" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'activo':</span> <span class="pre">&lt;django.forms.fields.BooleanField</span> <span class="pre">object&gt;,</span> <span class="pre">'fecha_fin':</span> <span class="pre">&lt;django.forms.fields.DateField</span> <span class="pre">object&gt;,</span> <span class="pre">'fecha_inicio':</span> <span class="pre">&lt;django.forms.fields.DateField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_diario':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_mensual':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.declared_fields" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="monedas.forms.LimiteGlobalForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#monedas.forms.LimiteGlobalForm.media" title="Link to this definition">¶</a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.forms.</span></span><span class="sig-name descname"><span class="pre">MonedaForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
@@ -234,7 +572,7 @@ para administrar monedas: creación, edición o activación.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.Meta.fields">
-<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['nombre',</span> <span class="pre">'simbolo',</span> <span class="pre">'tasa_base',</span> <span class="pre">'decimales',</span> <span class="pre">'comision_compra',</span> <span class="pre">'comision_venta']</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.Meta.fields" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['nombre',</span> <span class="pre">'simbolo',</span> <span class="pre">'tasa_base',</span> <span class="pre">'decimales',</span> <span class="pre">'comision_compra',</span> <span class="pre">'comision_venta',</span> <span class="pre">'stock']</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.Meta.fields" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -247,8 +585,20 @@ para administrar monedas: creación, edición o activación.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.base_fields">
-<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.base_fields" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'stock':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.base_fields" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_comision_compra">
+<span class="sig-name descname"><span class="pre">clean_comision_compra</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_comision_compra"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_comision_compra" title="Link to this definition">¶</a></dt>
+<dd><p>Valida que la comisión de compra sea un número positivo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_comision_venta">
+<span class="sig-name descname"><span class="pre">clean_comision_venta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_comision_venta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_comision_venta" title="Link to this definition">¶</a></dt>
+<dd><p>Valida que la comisión de venta sea un número positivo.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_decimales">
@@ -261,10 +611,28 @@ para administrar monedas: creación, edición o activación.</p>
 <dd><p>Convierte el símbolo a mayúsculas.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_tasa_base">
+<span class="sig-name descname"><span class="pre">clean_tasa_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_tasa_base"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_tasa_base" title="Link to this definition">¶</a></dt>
+<dd><p>Valida que la tasa base sea un número positivo.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.declared_fields">
-<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.declared_fields" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'stock':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.declared_fields" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.es_moneda_base">
+<span class="sig-name descname"><span class="pre">es_moneda_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.es_moneda_base"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.es_moneda_base" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica si la moneda actual es la moneda base del sistema (Guaraní).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.get_moneda_base_info">
+<span class="sig-name descname"><span class="pre">get_moneda_base_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.get_moneda_base_info"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.get_moneda_base_info" title="Link to this definition">¶</a></dt>
+<dd><p>Retorna la información de la moneda base del sistema.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.media">
@@ -308,18 +676,32 @@ para administrar monedas: creación, edición o activación.</p>
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Monedas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.ConsumoLimiteCliente"><code class="docutils literal notranslate"><span class="pre">ConsumoLimiteCliente</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.models.Moneda"><code class="docutils literal notranslate"><span class="pre">Moneda</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_consumo_limite_cliente"><code class="docutils literal notranslate"><span class="pre">crear_consumo_limite_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_moneda_usd"><code class="docutils literal notranslate"><span class="pre">crear_moneda_usd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.activar_limite"><code class="docutils literal notranslate"><span class="pre">activar_limite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.consultar_limites_cliente"><code class="docutils literal notranslate"><span class="pre">consultar_limites_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.crear_limite"><code class="docutils literal notranslate"><span class="pre">crear_limite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.editar_limite"><code class="docutils literal notranslate"><span class="pre">editar_limite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.lista_limites"><code class="docutils literal notranslate"><span class="pre">lista_limites()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_crear"><code class="docutils literal notranslate"><span class="pre">moneda_crear()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_detalle"><code class="docutils literal notranslate"><span class="pre">moneda_detalle()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_editar"><code class="docutils literal notranslate"><span class="pre">moneda_editar()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_lista"><code class="docutils literal notranslate"><span class="pre">moneda_lista()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.views.puede_editar"><code class="docutils literal notranslate"><span class="pre">puede_editar()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.views.tiene_algun_permiso"><code class="docutils literal notranslate"><span class="pre">tiene_algun_permiso()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.validar_transaccion_limite"><code class="docutils literal notranslate"><span class="pre">validar_transaccion_limite()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.verificar_cambios_precios"><code class="docutils literal notranslate"><span class="pre">verificar_cambios_precios()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.forms.LimiteGlobalForm"><code class="docutils literal notranslate"><span class="pre">LimiteGlobalForm</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monedas.forms.MonedaForm"><code class="docutils literal notranslate"><span class="pre">MonedaForm</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="medios_pago.html">Medios de Pago</a></li>
 <li class="toctree-l1"><a class="reference internal" href="proyecto.html">Configuración Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 </ul>
 
 <div class="relations">
@@ -327,7 +709,7 @@ para administrar monedas: creación, edición o activación.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="roles.html" title="capítulo anterior">Roles</a></li>
-      <li>Next: <a href="medios_pago.html" title="próximo capítulo">Medios de Pago</a></li>
+      <li>Next: <a href="proyecto.html" title="próximo capítulo">Configuración Proyecto</a></li>
   </ul></li>
 </ul>
 </div>
