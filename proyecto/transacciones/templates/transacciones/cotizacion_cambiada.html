@@ -1,0 +1,85 @@
+{% extends 'transacciones/modal_base.html' %}
+{% load humanize %} 
+
+{% block content %}
+<div class="modal fade" id="modalCambioCotizacion" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">¡La cotización ha cambiado!</h5>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <h6>Precios de Compra:</h6>
+                    <p>Original: {{ cambios.valores_anteriores.precio_compra|intcomma }} Gs.</p>
+                    <p>Actual: {{ cambios.valores_actuales.precio_compra|intcomma }} Gs.</p>
+                    <p>Diferencia: {{ cambios.valores_actuales.precio_compra|sub:cambios.valores_anteriores.precio_compra|intcomma }} Gs.</p>
+                    
+                    <h6>Precios de Venta:</h6>
+                    <p>Original: {{ cambios.valores_anteriores.precio_venta|intcomma }} Gs.</p>
+                    <p>Actual: {{ cambios.valores_actuales.precio_venta|intcomma }} Gs.</p>
+                    <p>Diferencia: {{ cambios.valores_actuales.precio_venta|sub:cambios.valores_anteriores.precio_venta|intcomma }} Gs.</p>
+                </div>
+                
+                <div class="timer-warning mt-3">
+                    <p class="text-danger">
+                        Esta notificación se cerrará en <span id="timer">30</span> segundos
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="aceptar" class="btn btn-success">
+                        Aceptar Nuevos Precios
+                    </button>
+                    <button type="submit" name="action" value="cancelar" class="btn btn-danger">
+                        Cancelar Transacción
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. ACTIVAR EL MODAL INMEDIATAMENTE
+        const modalElement = document.getElementById('modalCambioCotizacion');
+        if (modalElement) {
+            // Crea una instancia de Modal de Bootstrap 5 (funciona porque se ejecuta después del bundle)
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static', // Impide que se cierre al hacer clic fuera
+                keyboard: false     // Impide que se cierre con la tecla ESC
+            });
+            modal.show();
+        }
+
+        // 2. LÓGICA DEL TEMPORIZADOR
+        let timeLeft = 30;
+        const timerElement = document.getElementById('timer');
+        
+        // Aseguramos que el elemento exista antes de iniciar el temporizador
+        if (timerElement) {
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // Redirigir a cancelar
+                    window.location.href = "{% url 'transacciones:cancelar_por_timeout' %}";
+                }
+            }, 1000);
+        }
+
+        // 3. PREVENIR CIERRE DE VENTANA
+        window.onbeforeunload = function() {
+            return "Si cierras esta ventana, la transacción será cancelada.";
+        };
+    });
+</script>
+{% endblock %}

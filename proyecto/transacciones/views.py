@@ -17,7 +17,7 @@ Author: Equipo de desarrollo Global Exchange
 Date: 2024
 """
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import JsonResponse
@@ -226,6 +226,10 @@ def compra_monto_moneda(request):
                 'monto': str(monto),  # Convertir Decimal a string para serialización
                 'paso_actual': 2
             }
+            # Guardar precios iniciales en la sesión
+            precios_iniciales = moneda.get_precios_cliente(request.user.cliente_activo)
+            request.session['precio_compra_inicial'] = precios_iniciales['precio_compra']
+            request.session['precio_venta_inicial'] = precios_iniciales['precio_venta']
             
             # Redireccionar al siguiente paso sin parámetros en la URL
             return redirect('transacciones:compra_medio_pago')
@@ -411,9 +415,14 @@ def compra_medio_cobro(request):
     if not compra_datos or compra_datos.get('paso_actual') != 3:
         messages.error(request, 'Debe completar el segundo paso antes de continuar.')
         return redirect('transacciones:compra_medio_pago')
+    
     # Recuperar los datos de la sesión
     try:
         moneda = Moneda.objects.get(id=compra_datos['moneda'])
+        # Guardar valores iniciales de cotización
+        request.session['tasa_base_inicial'] = moneda.tasa_base
+        request.session['comision_compra_inicial'] = moneda.comision_compra
+        request.session['comision_venta_inicial'] = moneda.comision_venta
         monto = Decimal(compra_datos['monto'])
         medio_pago = compra_datos['medio_pago']
     except (Moneda.DoesNotExist, ValueError, KeyError):
@@ -870,6 +879,10 @@ def venta_medio_cobro(request):
     # Recuperar los datos de la sesión
     try:
         moneda = Moneda.objects.get(id=venta_datos['moneda'])
+        # Guardar valores iniciales de cotización
+        request.session['tasa_base_inicial'] = moneda.tasa_base
+        request.session['comision_compra_inicial'] = moneda.comision_compra
+        request.session['comision_venta_inicial'] = moneda.comision_venta
         monto = Decimal(venta_datos['monto'])
         medio_pago = venta_datos['medio_pago']
     except (Moneda.DoesNotExist, ValueError, KeyError):
@@ -1211,7 +1224,109 @@ def simular_transaccion_limites(request):
         return JsonResponse({
             'error': 'Error interno del servidor'
         }, status=500)
+
+def verificar_cambio_cotizacion(request, transaccion_id):
+    """Verifica si hubo cambios en la cotización y si la transacción está pendiente"""
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+        
+    try:
+        # Verificar si hay una transacción en curso y no pagada
+        transaccion = Transaccion.objects.get(
+            pk=transaccion_id,
+            estado='pendiente',  # Solo verificar transacciones pendientes
+            pagado=False  # Y que no estén pagadas
+        )
+        moneda = transaccion.moneda
+        cliente = request.user.cliente_activo
+        
+        # Obtener los precios actuales y compararlos con los iniciales
+        precios_actuales = moneda.get_precios_cliente(cliente)
+        
+        # Calcular precios actuales
+        precios_actuales = moneda.get_precios_cliente(cliente)
+        
+        # Obtener precios iniciales de la sesión
+        precio_compra_inicial = request.session.get('precio_compra_inicial')
+        precio_venta_inicial = request.session.get('precio_venta_inicial')
+        
+        # Calcular precios actuales
+        precios_actuales = moneda.get_precios_cliente(cliente)
+        
+        # Obtener precios iniciales de la sesión
+        precio_compra_inicial = request.session.get('precio_compra_inicial')
+        precio_venta_inicial = request.session.get('precio_venta_inicial')
+        
+        # Solo notificar cambios si no hay transacciones previas
+        if not transacciones_previas:
+            cambios = {
+                'hubo_cambio': (
+                    precio_compra_inicial != precios_actuales['precio_compra'] or
+                    precio_venta_inicial != precios_actuales['precio_venta']
+                ),
+                'valores_anteriores': {
+                    'precio_compra': precio_compra_inicial,
+                    'precio_venta': precio_venta_inicial
+                },
+                'valores_actuales': {
+                    'precio_compra': precios_actuales['precio_compra'],
+                    'precio_venta': precios_actuales['precio_venta']
+                },
+                'primera_operacion': True
+            }
+        else:
+            cambios = {
+                'hubo_cambio': False,
+                'primera_operacion': False
+            }
+        
+        return JsonResponse(cambios)
+        
+    except Transaccion.DoesNotExist:
+        return JsonResponse({'error': 'Transacción no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+        
+        return JsonResponse(cambios)
     
+    return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+
+def mostrar_cambio_cotizacion(request, transaccion_id):
+    """
+    Vista que muestra el modal con los cambios en la cotización
+    """
+    transaccion = get_object_or_404(Transaccion, pk=transaccion_id, estado='pendiente')
+    moneda = transaccion.moneda
+    cliente = request.user.cliente_activo
+    
+    # Obtener precios actuales
+    precios_actuales = moneda.get_precios_cliente(cliente)
+    
+    # Obtener precios iniciales de la sesión
+    precio_compra_inicial = request.session.get('precio_compra_inicial')
+    precio_venta_inicial = request.session.get('precio_venta_inicial')
+    
+    cambios = {
+        'precio_compra_anterior': precio_compra_inicial,
+        'precio_compra_actual': precios_actuales['precio_compra'],
+        'precio_venta_anterior': precio_venta_inicial,
+        'precio_venta_actual': precios_actuales['precio_venta'],
+        'diferencia_compra': precios_actuales['precio_compra'] - precio_compra_inicial,
+        'diferencia_venta': precios_actuales['precio_venta'] - precio_venta_inicial
+    }
+    
+    return render(request, 'transacciones/cotizacion_cambiada.html', {
+        'transaccion': transaccion,
+        'cambios': cambios
+    })
+
+def cancelar_por_timeout(request):
+    """
+    Vista que maneja la cancelación automática por timeout
+    """
+    messages.warning(request, 'La transacción ha sido cancelada por tiempo de espera excedido.')
+    return redirect('inicio')
+
 # ============================================================================
 # GESTIÓN DE RECARGOS
 # ============================================================================

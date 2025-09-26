@@ -180,3 +180,10 @@ MONEDA_BASE_GUARANIES = {
     'decimales': 0,  # El guaraní no utiliza decimales
     'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
 }
+
+# Configuración de sesiones
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Usar base de datos para sesiones
+SESSION_COOKIE_NAME = 'sessionid'  # Nombre de la cookie de sesión
+SESSION_COOKIE_SECURE = False  # False en desarrollo, True en producción
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # La sesión expira al cerrar el navegador
+SESSION_COOKIE_SAMESITE = None  # Permitir sesiones en diferentes pestañas/ventanas

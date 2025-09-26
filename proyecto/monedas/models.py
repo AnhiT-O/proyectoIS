@@ -73,18 +73,12 @@ class Moneda(models.Model):
         return precio
 
     def get_precios_cliente(self, cliente):
-        """
-        Obtiene los precios de compra y venta para un cliente específico
-        aplicando su porcentaje de beneficio.
-        """
-        # Si hay un cliente, usamos su beneficio_segmento
-        porcentaje_beneficio = 0
-        if cliente:
-            porcentaje_beneficio = cliente.beneficio_segmento
-        
+        """Obtiene los precios finales para un cliente específico"""
+        precio_compra = self.calcular_precio_compra(cliente.beneficio_segmento)
+        precio_venta = self.calcular_precio_venta(cliente.beneficio_segmento)
         return {
-            'precio_venta': self.calcular_precio_venta(porcentaje_beneficio),
-            'precio_compra': self.calcular_precio_compra(porcentaje_beneficio)
+            'precio_compra': precio_compra,
+            'precio_venta': precio_venta
         }
 
     def clean(self):
@@ -94,6 +88,61 @@ class Moneda(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def verificar_cambio_cotizacion(self, precio_original):
+        """
+        Verifica si hubo cambios en la cotización comparando con el precio original
+        Args:
+            precio_original: El precio que se mostró inicialmente al cliente
+        Returns:
+            dict: Diccionario con información sobre el cambio de cotización
+        """
+        precio_actual = self.calcular_precio_venta()  # O calcular_precio_compra según el caso
+        if precio_actual != precio_original:
+            return {
+                'hubo_cambio': True,
+                'precio_original': precio_original,
+                'precio_actual': precio_actual,
+                'diferencia': precio_actual - precio_original
+            }
+        return {'hubo_cambio': False}
+
+    def ha_cambiado_cotizacion(self, tasa_base_anterior, comision_compra_anterior, comision_venta_anterior):
+        """
+        Verifica si algún componente de la cotización ha cambiado
+        Args:
+            tasa_base_anterior: Valor anterior de la tasa base
+            comision_compra_anterior: Valor anterior de la comisión de compra
+            comision_venta_anterior: Valor anterior de la comisión de venta
+        Returns:
+            dict: Información sobre los cambios en la cotización
+        """
+        cambios = {
+            'tasa_base': self.tasa_base != tasa_base_anterior,
+            'comision_compra': self.comision_compra != comision_compra_anterior,
+            'comision_venta': self.comision_venta != comision_venta_anterior,
+            'hubo_cambio': False
+        }
+        
+        # Verifica si hubo algún cambio
+        if any([cambios['tasa_base'], cambios['comision_compra'], cambios['comision_venta']]):
+            cambios['hubo_cambio'] = True
+            # Calcular las diferencias en los precios finales
+            precio_compra_anterior = tasa_base_anterior - comision_compra_anterior
+            precio_venta_anterior = tasa_base_anterior + comision_venta_anterior
+            precio_compra_actual = self.tasa_base - self.comision_compra
+            precio_venta_actual = self.tasa_base + self.comision_venta
+            
+            cambios.update({
+                'precio_compra_anterior': precio_compra_anterior,
+                'precio_venta_anterior': precio_venta_anterior,
+                'precio_compra_actual': precio_compra_actual,
+                'precio_venta_actual': precio_venta_actual,
+                'diferencia_compra': precio_compra_actual - precio_compra_anterior,
+                'diferencia_venta': precio_venta_actual - precio_venta_anterior
+            })
+            
+        return cambios
 
 
 @receiver(post_migrate)

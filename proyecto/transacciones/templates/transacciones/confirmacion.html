@@ -22,3 +22,64 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    // Función para verificar cambios cada 3 segundos
+    function verificarCambios() {
+        fetch(`/operaciones/verificar-cambios/{{ transaccion.id }}/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                // La línea que fallaba: ahora el elemento existe cuando se llama.
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Manejo básico de errores de red
+                console.error("Fallo la petición de polling. Estado:", response.status);
+                // No programar la próxima llamada si hay un error HTTP grave.
+                return Promise.reject(new Error("Error HTTP"));
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.hubo_cambio) {
+                // Detener el polling si hubo un cambio para evitar redirecciones múltiples
+                clearInterval(window.verificacionIntervalo); 
+                window.location.href = `/operaciones/cotizacion-cambiada/{{ transaccion.id }}/`;
+            }
+        })
+        .catch(error => {
+            console.error("Polling error:", error);
+            // Opcional: Podrías detener el polling si la transacción es inválida
+        });
+    }
+    
+    // ----------------------------------------------------------------------
+    // 🚨 SOLUCIÓN AL PROBLEMA DE SINCRONIZACIÓN
+    // ----------------------------------------------------------------------
+
+    // Aseguramos que la variable 'intervalo' sea global o esté accesible.
+    let verificacionIntervalo;
+
+    // Ejecutar todo el código DOM-dependiente solo cuando la página está lista.
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Iniciar verificación periódica (AHORA SE EJECUTA TARDE)
+        // Guardamos la referencia en una variable accesible (verificacionIntervalo)
+        verificacionIntervalo = setInterval(verificarCambios, 3000);
+
+        // 2. Detener verificación al enviar el formulario
+        // Usamos el querySelector sin '?' ya que estamos en DOMContentLoaded
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', () => {
+                // Usamos la variable global
+                clearInterval(verificacionIntervalo); 
+                console.log("Polling detenido al enviar formulario.");
+            });
+        }
+    });
+</script>
+{% endblock %}
