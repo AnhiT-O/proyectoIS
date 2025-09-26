@@ -1,10 +1,42 @@
+"""
+Modelos para el sistema de transacciones de Global Exchange.
+
+Este módulo contiene los modelos de datos relacionados con las transacciones
+financieras, incluyendo la gestión de recargos y el procesamiento de 
+transacciones de compra y venta de monedas extranjeras.
+
+Clases principales:
+    - Recargos: Gestiona los recargos aplicables por tipo de medio de pago
+    - Transaccion: Representa una transacción de compra o venta de monedas
+
+Author: Equipo de desarrollo Global Exchange
+Date: 2024
+"""
+
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
 
+
 class Recargos(models.Model):
+    """
+    Modelo para gestionar los recargos aplicables por tipo de medio de pago.
+    
+    Los recargos son porcentajes adicionales que se aplican a las transacciones
+    según el medio de pago utilizado (ej: tarjeta de crédito, billeteras digitales).
+    
+    Attributes:
+        nombre (CharField): Nombre del medio de pago (ej: "Tarjeta de Crédito")
+        recargo (SmallIntegerField): Porcentaje de recargo a aplicar (0-100)
+        
+    Meta:
+        verbose_name: "Recargo"
+        verbose_name_plural: "Recargos"
+        db_table: "recargos"
+        permissions: [('edicion', 'Puede editar recargos')]
+    """
     nombre = models.CharField(max_length=50)
     recargo = models.SmallIntegerField(default=0)
 
@@ -18,12 +50,32 @@ class Recargos(models.Model):
         ]
 
     def __str__(self):
+        """
+        Representación en cadena del modelo Recargos.
+        
+        Returns:
+            str: El nombre del medio de pago
+        """
         return self.nombre
+
 
 @receiver(post_migrate)
 def crear_recargos(sender, **kwargs):
     """
-    Crea automáticamente los recargos después de ejecutar las migraciones
+    Signal handler que crea automáticamente los recargos predeterminados.
+    
+    Se ejecuta después de aplicar las migraciones de la aplicación transacciones.
+    Crea los recargos estándar para diferentes medios de pago si no existen.
+    
+    Recargos creados:
+        - Tarjeta de Crédito: 1%
+        - Tigo Money: 2%
+        - Billetera Personal: 2%
+        - Zimple: 3%
+    
+    Args:
+        sender: La aplicación que envía la señal
+        **kwargs: Argumentos adicionales de la señal post_migrate
     """
     # Solo crear si la migración es de la app transacciones
     if kwargs['app_config'].name == 'transacciones':
@@ -53,6 +105,30 @@ def crear_recargos(sender, **kwargs):
             )
 
 class Transaccion(models.Model):
+    """
+    Modelo principal para representar transacciones de compra y venta de monedas.
+    
+    Una transacción registra todos los detalles de una operación de cambio de moneda,
+    incluyendo el cliente, tipo de operación, medios de pago/cobro, montos y estado.
+    
+    Attributes:
+        cliente (ForeignKey): Cliente que realiza la transacción
+        tipo (CharField): Tipo de operación ('compra' o 'venta')
+        moneda (ForeignKey): Moneda extranjera involucrada en la transacción
+        monto (DecimalField): Cantidad de la moneda extranjera
+        medio_pago (CharField): Forma de pago del cliente (efectivo, tarjeta, etc.)
+        medio_cobro (CharField): Forma de cobro para entregar el dinero al cliente
+        fecha_hora (DateTimeField): Timestamp de creación/actualización de la transacción
+        estado (CharField): Estado actual de la transacción (Pendiente, Completada, etc.)
+        token (CharField): Token único para transacciones que lo requieren
+        token_expiracion (DateTimeField): Fecha y hora de expiración del token
+        usuario (ForeignKey): Usuario del sistema que procesó la transacción
+        
+    Meta:
+        verbose_name: "Transacción"
+        verbose_name_plural: "Transacciones"
+        db_table: "transacciones"
+    """
     cliente = models.ForeignKey('clientes.Cliente', on_delete=models.CASCADE)
     tipo = models.CharField(max_length=10)  # 'compra' o 'venta'
     moneda = models.ForeignKey('monedas.Moneda', on_delete=models.CASCADE)
@@ -63,6 +139,7 @@ class Transaccion(models.Model):
     estado = models.CharField(max_length=20, default='Pendiente')
     token = models.CharField(max_length=255, blank=True, null=True)  # Campo para el token
     token_expiracion = models.DateTimeField(blank=True, null=True)  # Campo para la expiración del token
+    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
         verbose_name = "Transacción"
@@ -72,11 +149,23 @@ class Transaccion(models.Model):
         permissions = []  # De momento no hay permisos necesarios
     
     def __str__(self):
+        """
+        Representación en cadena del modelo Transaccion.
+        
+        Returns:
+            str: Descripción de la transacción en formato "Tipo - Cliente - Monto Moneda"
+        """
         return f"{self.tipo.title()} - {self.cliente} - {self.monto} {self.moneda.simbolo}"
     
     def token_valido(self):
         """
-        Verifica si el token aún es válido (no ha expirado)
+        Verifica si el token de la transacción aún es válido.
+        
+        Un token es válido si existe y no ha expirado según su timestamp
+        de expiración configurado.
+        
+        Returns:
+            bool: True si el token es válido, False en caso contrario
         """
         if not self.token or not self.token_expiracion:
             return False
@@ -84,7 +173,13 @@ class Transaccion(models.Model):
     
     def establecer_token_con_expiracion(self, token):
         """
-        Establece el token y su tiempo de expiración (5 minutos)
+        Asigna un token a la transacción con tiempo de expiración automático.
+        
+        Establece el token y calcula su fecha de expiración (5 minutos desde ahora).
+        Guarda automáticamente los cambios en la base de datos.
+        
+        Args:
+            token (str): Token único generado para la transacción
         """
         self.token = token
         self.token_expiracion = timezone.now() + timedelta(minutes=5)
@@ -93,7 +188,13 @@ class Transaccion(models.Model):
     @classmethod
     def limpiar_tokens_expirados(cls):
         """
-        Elimina todas las transacciones con tokens expirados
+        Elimina todas las transacciones con tokens expirados del sistema.
+        
+        Método de clase que busca y elimina transacciones cuyo token ha expirado
+        según el timestamp actual. Útil para limpieza periódica del sistema.
+        
+        Returns:
+            int: Número de transacciones eliminadas
         """
         now = timezone.now()
         transacciones_expiradas = cls.objects.filter(
@@ -106,7 +207,14 @@ class Transaccion(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Actualiza la fecha_hora cuando el estado cambia
+        Sobrescribe el método save para actualizar timestamp en cambios de estado.
+        
+        Cuando el estado de una transacción cambia, actualiza automáticamente
+        el campo fecha_hora con el timestamp actual.
+        
+        Args:
+            *args: Argumentos posicionales para el método save del padre
+            **kwargs: Argumentos de palabra clave para el método save del padre
         """
         if self.pk:  # Si la instancia ya existe
             try:

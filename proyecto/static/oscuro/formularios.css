@@ -283,53 +283,6 @@
     gap: 1rem;
 }
 
-/* Información de la transacción */
-.info-transaccion {
-    background: #1f2937;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border-left: 4px solid #22c55e;
-    background-color: #111827;
-    border: 1px solid #374151;
-}
-
-.info-transaccion h3 {
-    margin: 0 0 1rem 0;
-    color: #f3f4f6;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.detalles-transaccion {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.detalle-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #374151;
-}
-
-.detalle-item:last-child {
-    border-bottom: none;
-}
-
-.detalle-titulo {
-    font-weight: 600;
-    color: #9ca3af;
-    font-size: 0.9rem;
-}
-
-.detalle-valor {
-    color: #f3f4f6;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
 .info-usuario:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);

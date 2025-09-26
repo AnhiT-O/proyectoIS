@@ -51,6 +51,8 @@ def codigo(request):
                 consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
                 consumo.consumo_diario += realizar_conversion(transaccion)
                 consumo.consumo_mensual += realizar_conversion(transaccion)
+                print(realizar_conversion(transaccion))
+                print(transaccion.monto)
                 consumo.save()
                 transaccion.estado = 'Completada'
                 transaccion.token = None

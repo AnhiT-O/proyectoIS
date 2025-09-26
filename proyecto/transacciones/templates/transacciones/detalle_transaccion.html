@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalles de Transacción - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Detalles de Transacción</h2>
+        <a href="{% url 'transacciones:historial' %}?usuario={{ transaccion.usuario.id }}" class="btn-secundario">
+            Volver al Historial
+        </a>
+    </div>
+
+    <div class="detalles-transaccion">
+        <div class="detalles-seccion">
+            <h3>Información General</h3>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Estado:</div>
+                <div class="detalle-valor estado-{{ transaccion.estado|lower }}">{{ transaccion.estado }}</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Tipo de Operación:</div>
+                <div class="detalle-valor tipo-{{ transaccion.tipo }}">
+                    {{ transaccion.tipo|title }}
+                </div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Fecha:</div>
+                <div class="detalle-valor">{{ transaccion.fecha_hora|date:"d/m/Y" }}</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Hora:</div>
+                <div class="detalle-valor">{{ transaccion.fecha_hora|time:"H:i:s" }}</div>
+            </div>
+        </div>
+
+        <div class="detalles-seccion">
+            <h3>Cliente y Usuario</h3>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Cliente:</div>
+                <div class="detalle-valor">{{ transaccion.cliente.nombre }}</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Documento:</div>
+                <div class="detalle-valor">
+                    {{ transaccion.cliente.get_tipoDocCliente_display }} {{ transaccion.cliente.docCliente }}
+                </div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Atendido por:</div>
+                <div class="detalle-valor">{{ transaccion.cliente.usuarios.first.username }}</div>
+            </div>
+        </div>
+
+        <div class="detalles-seccion">
+            <h3>Detalles de la Operación</h3>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Moneda:</div>
+                <div class="detalle-valor">{{ transaccion.moneda.nombre }} ({{ transaccion.moneda.simbolo }})</div>
+            </div>
+            {% if transaccion.tipo == 'compra' %}
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Guaraníes Entregados:</div>
+                <div class="detalle-valor">{{ monto_origen|floatformat:0 }} PYG</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">{{ transaccion.moneda.simbolo }} Recibidos:</div>
+                <div class="detalle-valor">{{ monto_destino|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+            </div>
+            {% else %}
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">{{ transaccion.moneda.simbolo }} Entregados:</div>
+                <div class="detalle-valor">{{ monto_origen|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Guaraníes Recibidos:</div>
+                <div class="detalle-valor">{{ monto_destino|floatformat:0 }} PYG</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="detalles-seccion">
+            <h3>Medios de Pago y Cobro</h3>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Medio de Pago:</div>
+                <div class="detalle-valor">{{ transaccion.medio_pago }}</div>
+            </div>
+            <div class="detalle-fila">
+                <div class="detalle-etiqueta">Medio de Cobro:</div>
+                <div class="detalle-valor">{{ transaccion.medio_cobro }}</div>
+            </div>
+        </div>
+
+        {% if transaccion.estado == 'pendiente' %}
+        <div class="acciones-transaccion">
+            <a href="{% url 'transacciones:editar' transaccion.id %}" class="btn-primario">Editar Transacción</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

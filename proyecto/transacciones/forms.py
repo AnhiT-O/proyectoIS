@@ -1,3 +1,17 @@
+"""
+Formularios para el sistema de transacciones de Global Exchange.
+
+Este módulo contiene los formularios utilizados en el proceso de transacciones,
+incluyendo la selección de monedas, montos y configuración de recargos.
+
+Formularios principales:
+    - SeleccionMonedaMontoForm: Selección de moneda y monto para transacciones
+    - RecargoForm: Gestión de recargos por medio de pago
+
+Author: Equipo de desarrollo Global Exchange
+Date: 2024
+"""
+
 from django import forms
 from monedas.models import Moneda
 from decimal import Decimal
@@ -5,8 +19,20 @@ from decimal import Decimal
 
 class SeleccionMonedaMontoForm(forms.Form):
     """
-    Formulario para seleccionar la moneda y el monto para compra.
-    Comportamiento consistente con el simulador para operaciones de compra.
+    Formulario para seleccionar moneda y monto en operaciones de compra/venta.
+    
+    Este formulario permite al usuario seleccionar la moneda extranjera
+    y especificar el monto que desea comprar o vender. Incluye validaciones
+    específicas para cada moneda según sus decimales configurados.
+    
+    Fields:
+        moneda (ModelChoiceField): Selector de moneda activa del sistema
+        monto (DecimalField): Monto en la moneda seleccionada
+        
+    Validaciones:
+        - El monto debe ser positivo y mayor al mínimo permitido
+        - Se respetan los decimales configurados para cada moneda
+        - Consistente con el comportamiento del simulador
     """
     
     moneda = forms.ModelChoiceField(
@@ -33,8 +59,18 @@ class SeleccionMonedaMontoForm(forms.Form):
 
     def clean(self):
         """
-        Validación personalizada para monto en moneda extranjera.
-        Similar al modo "venta" del simulador pero para operación de compra.
+        Validación personalizada para el monto en moneda extranjera.
+        
+        Realiza validaciones específicas sobre el monto ingresado:
+        - Verifica que sea un valor positivo
+        - Comprueba que respete el monto mínimo según los decimales de la moneda
+        - Convierte el monto a tipo Decimal para precisión
+        
+        Returns:
+            dict: Datos limpios del formulario incluyendo monto_decimal
+            
+        Raises:
+            ValidationError: Si el monto no cumple las validaciones
         """
         cleaned_data = super().clean()
         moneda = cleaned_data.get('moneda')
@@ -62,6 +98,17 @@ class SeleccionMonedaMontoForm(forms.Form):
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
+        """
+        Inicializador del formulario con configuración personalizada.
+        
+        Configura las opciones del campo moneda con información adicional
+        para JavaScript, personaliza el widget select y establece
+        comportamientos específicos del formulario.
+        
+        Args:
+            *args: Argumentos posicionales del formulario padre
+            **kwargs: Argumentos de palabra clave del formulario padre
+        """
         super().__init__(*args, **kwargs)
         
         # Personalizar el widget de moneda para mostrar símbolo y nombre, con datos para JS
@@ -99,7 +146,17 @@ class SeleccionMonedaMontoForm(forms.Form):
 
 class RecargoForm(forms.ModelForm):
     """
-    Formulario para gestionar recargos en transacciones.
+    Formulario para la gestión de recargos por medio de pago.
+    
+    Permite a los administradores editar los porcentajes de recargo
+    aplicables a diferentes medios de pago en las transacciones.
+    
+    Fields:
+        recargo (IntegerField): Porcentaje de recargo (0-100)
+        
+    Validaciones:
+        - El recargo debe ser un valor numérico entero
+        - Rango permitido de 0 a 100 por ciento
     """
     recargo = forms.IntegerField(
         widget=forms.NumberInput(attrs={
