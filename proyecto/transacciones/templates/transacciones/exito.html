@@ -15,10 +15,49 @@
 {% block content %}
 <div class="contenido extendido">
     <div class="form-cabecera">
-        <div class="logo">Página en construcción</div>
-        <p class="subtitulo">
-            Esta página está en construcción. Por favor, vuelva más tarde.
-        </p>
+        {% if tipo == 'compra' %}
+            {% if medio_pago == 'Efectivo' or medio_pago == 'Cheque' or medio_pago == 'Transferencia Bancaria' or medio_pago == 'Tigo Money' or medio_pago == 'Billetera Personal' or medio_pago == 'Zimple' %}
+                <div class="logo">Transacción Iniciada</div>
+                <p class="subtitulo">
+                    Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
+                </p>
+                <div class="info-campo">{{ token }}</div>
+            {% else %}
+                {% if medio_cobro == 'Efectivo' %}
+                    <div class="logo">Transacción Pagada</div>
+                    <p class="subtitulo">
+                        Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                    </p>
+                    <div class="info-campo">{{ token }}</div>
+                {% else %}
+                    <div class="logo">¡Transacción Completada!</div>
+                    <p class="subtitulo">
+                        La compra de monedas se ha realizado exitosamente. Tu dinero se ha acreditado automáticamente.
+                    </p>
+                {% endif %}
+            {% endif %}
+        {% elif tipo == 'venta' %}
+            {% if medio_pago == 'Efectivo' %}
+                <div class="logo">Transacción Iniciada</div>
+                <p class="subtitulo">
+                    Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la venta.
+                </p>
+                <div class="info-campo">{{ token }}</div>
+            {% else %}
+                {% if medio_cobro == 'Efectivo' %}
+                    <div class="logo">Transacción Pagada</div>
+                    <p class="subtitulo">
+                        Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                    </p>
+                    <div class="info-campo">{{ token }}</div>
+                {% else %}
+                    <div class="logo">¡Transacción Completada!</div>
+                    <p class="subtitulo">
+                        La compra de monedas se ha realizado exitosamente. Tu dinero se ha acreditado automáticamente.
+                    </p>
+                {% endif %}
+            {% endif %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}
