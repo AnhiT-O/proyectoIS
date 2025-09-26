@@ -579,3 +579,47 @@ def validar_transaccion_limite(request):
             }, status=500)
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def verificar_cambios_precios(request, moneda_id):
+    """API para verificar cambios en los precios de una moneda"""
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            moneda = Moneda.objects.get(pk=moneda_id)
+            cliente = request.user.cliente_activo
+            
+            # Obtener precios actuales
+            precios_actuales = moneda.get_precios_cliente(cliente)
+            
+            # Obtener precios iniciales de la sesión
+            precio_compra_inicial = request.session.get('precio_compra_inicial')
+            precio_venta_inicial = request.session.get('precio_venta_inicial')
+            
+            if precio_compra_inicial is None or precio_venta_inicial is None:
+                # Si no hay precios iniciales, guardarlos
+                request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
+                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+                return JsonResponse({'hubo_cambio': False})
+            
+            # Verificar si hubo cambios
+            hubo_cambio = (precio_compra_inicial != precios_actuales['precio_compra'] or 
+                          precio_venta_inicial != precios_actuales['precio_venta'])
+            
+            return JsonResponse({
+                'hubo_cambio': hubo_cambio,
+                'precios_anteriores': {
+                    'compra': precio_compra_inicial,
+                    'venta': precio_venta_inicial
+                },
+                'precios_actuales': {
+                    'compra': precios_actuales['precio_compra'],
+                    'venta': precios_actuales['precio_venta']
+                }
+            })
+            
+        except Moneda.DoesNotExist:
+            return JsonResponse({'error': 'Moneda no encontrada'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Solicitud inválida'}, status=400)

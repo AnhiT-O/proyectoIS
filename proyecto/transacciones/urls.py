@@ -48,4 +48,7 @@ urlpatterns = [
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),
     path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
     path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
+
+    # URL para timeout
+    path('cancelar-por-timeout/', views.cancelar_por_timeout, name='cancelar_por_timeout'),
 ]

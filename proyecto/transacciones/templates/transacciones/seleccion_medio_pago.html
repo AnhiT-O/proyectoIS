@@ -112,3 +112,33 @@
     </form>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    const transaccionId = {{ transaccion.id }};
+    
+    // Verificar cambios en la cotización cada 5 segundos
+    function verificarCambiosCotizacion() {
+        fetch(`/transacciones/verificar-cambios/${transaccionId}/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.hubo_cambio) {
+                window.location.href = `/transacciones/cotizacion-cambiada/${transaccionId}/`;
+            }
+        });
+    }
+
+    // Iniciar verificación periódica
+    const intervaloVerificacion = setInterval(verificarCambiosCotizacion, 5000);
+
+    // Detener verificación al enviar el formulario
+    document.querySelector('form').addEventListener('submit', () => {
+        clearInterval(intervaloVerificacion);
+    });
+</script>
+{% endblock %}
