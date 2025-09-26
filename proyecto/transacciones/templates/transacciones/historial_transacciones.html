@@ -21,7 +21,7 @@
             {% endif %}
         </h2>
     </div>
-    <!-- Formulario de búsqueda con nuevo estilo -->
+    <!-- Formulario de búsqueda -->
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
             {% if usuario_filtro %}
@@ -110,7 +110,7 @@
                 <th>Operación</th>
                 <th>Origen</th>
                 <th>Destino</th>
-                <th>Medios</th>
+                <th style="min-width: 250px; max-width: 350px;">Medios</th>
                 <th>Estado</th>
                 <!--<th>Acciones</th>-->
             </tr>
@@ -148,10 +148,16 @@
                         {{ transaccion.monto_destino|floatformat:0 }} PYG
                     {% endif %}
                 </td>
-                <td>
-                    <div>
-                        <strong>Pago:</strong> {{ transaccion.medio_pago_formateado }}<br>
-                        <strong>Cobro:</strong> {{ transaccion.medio_cobro }}
+                <td style="min-width: 250px; max-width: 350px; white-space: normal; text-overflow: unset; overflow: visible; padding: 0.8rem 1rem; text-align: left;">
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; line-height: 1.4;">
+                        <div style="display: flex; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-weight: 600; min-width: 45px; flex-shrink: 0; font-size: 0.85rem;">Pago:</span>
+                            <span style="font-size: 0.85rem; word-break: break-word; flex: 1;">{{ transaccion.medio_pago_formateado }}</span>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-weight: 600; min-width: 45px; flex-shrink: 0; font-size: 0.85rem;">Cobro:</span>
+                            <span style="font-size: 0.85rem; word-break: break-word; flex: 1;">{{ transaccion.medio_cobro }}</span>
+                        </div>
                     </div>
                 </td>
                 <td>
