@@ -614,8 +614,6 @@ def compra_medio_pago(request):
     if request.user.cliente_activo.tiene_tarjetas_activas():
         for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
             medios_pago_disponibles.append(tarjeta)
-    for billetera in Recargos.objects.all().exclude(nombre='Tarjeta de Crédito'):
-        medios_pago_disponibles.append(billetera.nombre)
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
     if compra_datos.get('medio_pago'):
@@ -988,8 +986,6 @@ def compra_exito(request):
                 # Guardar el token en la sesión para su posterior uso
                 request.session['token_transaccion'] = token_data
 
-                messages.success(request, f'Transacción creada. Token generado: {token_data["token"][:8]}... (válido por 5 minutos)')
-
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
@@ -1000,6 +996,7 @@ def compra_exito(request):
     
     context = {
         'token': token_data['token'],
+        'medio_pago': medio_pago,
         'tipo': 'compra'
     }
     
@@ -1651,6 +1648,7 @@ def venta_exito(request):
                 return redirect('transacciones:venta_monto_moneda')
             context = {
             'tipo': 'venta',
+            'medio_pago': medio_pago,
             'medio_cobro': medio_cobro,
         }
         else:

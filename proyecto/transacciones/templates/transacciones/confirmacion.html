@@ -85,7 +85,7 @@
                 {% else %}
                     <div class="detalle-item">
                         <div class="detalle-titulo">Monto a pagar:</div>
-                        <div class="detalle-valor">Gs. {{ dar|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
+                        <div class="detalle-valor">{{ dar|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
                     </div>
                     <div class="detalle-item">
                         <div class="detalle-titulo">Monto a recibir:</div>

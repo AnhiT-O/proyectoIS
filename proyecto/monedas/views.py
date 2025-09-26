@@ -166,13 +166,8 @@ def moneda_detalle(request, pk):
     """Vista para mostrar los detalles completos de una moneda"""
     moneda = get_object_or_404(Moneda, pk=pk)
     
-    # Calcular precios sin beneficios (cliente None)
-    precios = moneda.get_precios_cliente(None)
-    
     context = {
-        'moneda': moneda,
-        'precio_compra': precios['precio_compra'],
-        'precio_venta': precios['precio_venta'],
+        'moneda': moneda
     }
     return render(request, 'monedas/moneda_detalles.html', context)
 
