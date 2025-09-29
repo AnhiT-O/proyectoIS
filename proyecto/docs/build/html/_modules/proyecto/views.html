@@ -1,43 +1,85 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>proyecto.views &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
-<html lang="es" data-content_root="../../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>proyecto.views &#8212; documentación de Global Exchange - Versión 2</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
-    <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../_static/translations.js?v=f85f4cfb"></script>
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="../../genindex.html" />
-    <link rel="search" title="Búsqueda" href="../../search.html" />
-   
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-  
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
 
-  
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+</ul>
 
-          <div class="body" role="main">
-            
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">proyecto.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <h1>Código fuente para proyecto.views</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpResponseForbidden</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">login</span><span class="p">,</span> <span class="n">authenticate</span><span class="p">,</span> <span class="n">logout</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoginForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoginForm</span><span class="p">,</span> <span class="n">SimuladorForm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">monedas.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moneda</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
@@ -46,7 +88,12 @@
 <div class="viewcode-block" id="inicio">
 <a class="viewcode-back" href="../../proyecto.html#proyecto.views.inicio">[documentos]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">inicio</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para la página de inicio&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para la página de inicio. Muestra las cotizaciones de las monedas activas.</span>
+<span class="sd">    -   Si el usuario es un operador con un cliente seleccionado, muestra los precios personalizados.</span>
+<span class="sd">    -   Si el usuario es un administrador, puede seleccionar un segmento para ver precios con beneficios específicos.</span>
+<span class="sd">    -   Si el usuario no está autenticado, muestra los precios base sin beneficios.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">context</span> <span class="o">=</span> <span class="p">{}</span>
     
     <span class="c1"># Obtener las monedas activas</span>
@@ -72,36 +119,34 @@
             <span class="n">porcentaje_beneficio_admin</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">BENEFICIOS_SEGMENTO</span><span class="p">[</span><span class="n">segmento_id</span><span class="p">]</span>
         <span class="n">context</span><span class="p">[</span><span class="s1">&#39;segmento_seleccionado&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">segmento_seleccionado</span>
     
-    <span class="c1"># Si el usuario está autenticado</span>
-    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
-        <span class="n">cotizaciones</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">moneda</span> <span class="ow">in</span> <span class="n">monedas_activas</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;cliente_activo&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span><span class="p">:</span>
-                <span class="c1"># Usuario u operador con cliente seleccionado</span>
-                <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
-                <span class="n">precios</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">segmento_seleccionado</span><span class="p">:</span>
-                <span class="c1"># Administrador con segmento seleccionado - usar porcentaje de beneficio específico</span>
-                <span class="n">precios</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="n">porcentaje_beneficio_admin</span><span class="p">),</span>
-                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">(</span><span class="n">porcentaje_beneficio_admin</span><span class="p">)</span>
-                <span class="p">}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base</span>
-                <span class="n">precios</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="p">}</span>
-            
-            <span class="n">cotizaciones</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-                <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
-                <span class="s1">&#39;simbolo&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="p">,</span>
-                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">],</span>
-                <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">fecha_cotizacion</span>
-            <span class="p">})</span>
-        <span class="n">cotizaciones</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;fecha&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">context</span><span class="p">[</span><span class="s1">&#39;cotizaciones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cotizaciones</span>
+    <span class="n">cotizaciones</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">moneda</span> <span class="ow">in</span> <span class="n">monedas_activas</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;cliente_activo&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span><span class="p">:</span>
+            <span class="c1"># Usuario u operador con cliente seleccionado</span>
+            <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
+            <span class="n">precios</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">segmento_seleccionado</span><span class="p">:</span>
+            <span class="c1"># Administrador con segmento seleccionado - usar porcentaje de beneficio específico</span>
+            <span class="n">precios</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="n">porcentaje_beneficio_admin</span><span class="p">),</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">(</span><span class="n">porcentaje_beneficio_admin</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base</span>
+            <span class="n">precios</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">}</span>
+        
+        <span class="n">cotizaciones</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
+            <span class="s1">&#39;simbolo&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="p">,</span>
+            <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">fecha_cotizacion</span>
+        <span class="p">})</span>
+    <span class="n">cotizaciones</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;fecha&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="s1">&#39;cotizaciones&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cotizaciones</span>
     
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;inicio.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
 
@@ -110,7 +155,7 @@
 <a class="viewcode-back" href="../../proyecto.html#proyecto.views.custom_permission_denied_view">[documentos]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">custom_permission_denied_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Vista personalizada para manejar errores 403 (Permission Denied)</span>
+<span class="sd">    Vista personalizada para manejar errores 403 (Permission Denied). </span>
 <span class="sd">    Se renderiza cuando un usuario autenticado no tiene permisos para acceder a una vista</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;403.html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content</span><span class="p">)</span></div>
@@ -119,6 +164,9 @@
 <div class="viewcode-block" id="login_usuario">
 <a class="viewcode-back" href="../../proyecto.html#proyecto.views.login_usuario">[documentos]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">login_usuario</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para manejar el inicio de sesión de usuarios.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:perfil&#39;</span><span class="p">)</span>
     
@@ -142,6 +190,9 @@
 <div class="viewcode-block" id="logout_usuario">
 <a class="viewcode-back" href="../../proyecto.html#proyecto.views.logout_usuario">[documentos]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">logout_usuario</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para manejar el cierre de sesión de usuarios.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">logout</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Has cerrado sesión exitosamente.&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span></div>
@@ -149,96 +200,47 @@
 
 <div class="viewcode-block" id="simular">
 <a class="viewcode-back" href="../../proyecto.html#proyecto.views.simular">[documentos]</a>
-<span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">simular</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para manejar el simulador de conversiones de moneda.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        El resultado se devuelve en formato JSON para facilitar su uso en aplicaciones AJAX.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
         <span class="n">monedas</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">activa</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;simulador.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;monedas&#39;</span><span class="p">:</span> <span class="n">monedas</span><span class="p">})</span>
+        <span class="c1"># Obtener el cliente activo si el usuario está autenticado</span>
+        <span class="n">cliente</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;cliente_activo&#39;</span><span class="p">):</span>
+            <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
+        
+        <span class="c1"># Crear el formulario para pasar las opciones de recargo</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">SimuladorForm</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;simulador.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s1">&#39;monedas&#39;</span><span class="p">:</span> <span class="n">monedas</span><span class="p">,</span>
+            <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span>
+        <span class="p">})</span>
 
     <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">moneda_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda&#39;</span><span class="p">)</span>
-            <span class="n">monto_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">operacion</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;operacion&#39;</span><span class="p">)</span>
-
-            <span class="c1"># Validaciones simples</span>
-            <span class="n">errores</span> <span class="o">=</span> <span class="p">{}</span>
-            
-            <span class="c1"># Validar moneda requerida</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">moneda_id</span><span class="p">:</span>
-                <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;moneda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Debe seleccionar una moneda.&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">moneda</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">,</span> <span class="n">activa</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">except</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
-                    <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;moneda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;La moneda seleccionada no es válida.&#39;</span><span class="p">]</span>
-            
-            <span class="c1"># Validar monto requerido y mínimo</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">monto_str</span><span class="p">:</span>
-                <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;El monto es obligatorio.&#39;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">monto</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">monto_str</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">monto</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;El monto debe ser mayor a 0.&#39;</span><span class="p">]</span>
-                    <span class="k">elif</span> <span class="n">operacion</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
-                        <span class="c1"># Para compra (PYG), no permitir decimales</span>
-                        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">monto_str</span> <span class="ow">and</span> <span class="n">monto_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
-                            <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Para compra, ingrese solo números enteros (guaraníes).&#39;</span><span class="p">]</span>
-                        <span class="k">elif</span> <span class="n">monto</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                            <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;El monto mínimo para compra es 1 guaraní.&#39;</span><span class="p">]</span>
-                    <span class="k">elif</span> <span class="n">operacion</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
-                        <span class="c1"># Para venta, usar los decimales de la moneda seleccionada</span>
-                        <span class="k">if</span> <span class="s1">&#39;moneda&#39;</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">():</span>
-                            <span class="n">monto_minimo</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="n">moneda</span><span class="o">.</span><span class="n">decimales</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">monto</span> <span class="o">&lt;</span> <span class="n">monto_minimo</span><span class="p">:</span>
-                                <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;El monto mínimo para venta es </span><span class="si">{</span><span class="n">monto_minimo</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">]</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># Fallback si no se puede obtener la moneda</span>
-                            <span class="k">if</span> <span class="n">monto</span> <span class="o">&lt;</span> <span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.01&#39;</span><span class="p">):</span>
-                                <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;El monto mínimo para venta es 0.01.&#39;</span><span class="p">]</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-                    <span class="n">errores</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Por favor, ingrese un monto válido.&#39;</span><span class="p">]</span>
-            
-            <span class="c1"># Si hay errores, devolverlos</span>
-            <span class="k">if</span> <span class="n">errores</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
-                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="n">errores</span>
-                <span class="p">})</span>
-
-            <span class="c1"># Si todo está bien, realizar la conversión</span>
-            <span class="n">monto</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">monto_str</span><span class="p">)</span>
-            
             <span class="c1"># Obtener el cliente activo si el usuario está autenticado</span>
             <span class="n">cliente</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;cliente_activo&#39;</span><span class="p">):</span>
                 <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
-
-            <span class="c1"># Obtener precios según la segmentación del cliente</span>
-            <span class="n">precios</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">)</span> <span class="k">if</span> <span class="n">cliente</span> <span class="k">else</span> <span class="p">{</span>
-                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(),</span>
-                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">()</span>
-            <span class="p">}</span>
-
-            <span class="c1"># Realizar la conversión según el tipo de operación</span>
-            <span class="k">if</span> <span class="n">operacion</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
-                <span class="c1"># Venta: moneda extranjera a PYG</span>
-                <span class="n">resultado</span> <span class="o">=</span> <span class="n">monto</span> <span class="o">*</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">]</span>
+            
+            <span class="c1"># Crear el formulario con los datos POST y el cliente</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">SimuladorForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="c1"># Si el formulario es válido, realizar la conversión</span>
+                <span class="n">resultado</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">realizar_conversion</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">resultado</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Si hay errores de validación, devolverlos</span>
                 <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
-                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s1">&#39;resultado_numerico&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">resultado</span><span class="p">),</span>
-                    <span class="s1">&#39;tipo_resultado&#39;</span><span class="p">:</span> <span class="s1">&#39;guaranies&#39;</span>
-                <span class="p">})</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># compra</span>
-                <span class="c1"># Compra: PYG a moneda extranjera</span>
-                <span class="n">resultado</span> <span class="o">=</span> <span class="n">monto</span> <span class="o">/</span> <span class="n">precios</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">]</span>
-                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
-                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s1">&#39;resultado_numerico&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">resultado</span><span class="p">),</span>
-                    <span class="s1">&#39;decimales&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">decimales</span><span class="p">,</span>
-                    <span class="s1">&#39;simbolo&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="p">,</span>
-                    <span class="s1">&#39;tipo_resultado&#39;</span><span class="p">:</span> <span class="s1">&#39;moneda_extranjera&#39;</span>
+                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span>
                 <span class="p">})</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -249,73 +251,31 @@
 
 </pre></div>
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">Global Exchange</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-
-<search id="searchbox" style="display: none" role="search">
-    <div class="searchformwrapper">
-    <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
-      <input type="submit" value="Ir a" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../medios_pago.html">Medios de Pago</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Configuración Proyecto</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Código de módulo</a><ul>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &#169;2025, Grupo 1.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
-      
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>

@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
-    TIPO_CEDULA_CHOICES = [
+    tipo_documento_CHOICES = [
         ('CI', 'Cédula de Identidad'),
         ('RUC', 'Registro Único de Contribuyente')
     ]
@@ -21,13 +21,13 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
 
-    tipo_cedula = models.CharField(
+    tipo_documento = models.CharField(
         max_length=3,
-        choices=TIPO_CEDULA_CHOICES,
+        choices=tipo_documento_CHOICES,
         null=False,
         blank=False
     )
-    cedula_identidad = models.CharField(
+    numero_documento = models.CharField(
         max_length=13,
         unique=True
     )
@@ -54,7 +54,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         """Obtiene una lista de nombres de roles a los que pertenece el usuario"""
         return list(self.groups.values_list('name', flat=True))
     
-    def get_full_name(self):
+    def nombre_completo(self):
         """
         Retorna el nombre completo del usuario.
         """

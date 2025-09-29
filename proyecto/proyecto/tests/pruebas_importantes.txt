@@ -8,7 +8,7 @@ Pruebas unitarias para crear:
 7. Vista login_usuario: No permitir login con credenciales inválidas. 
 8. Vista logout_usuario: Cerrar sesión y redirigir a inicio mostrando mensaje de éxito. 
 9. Vista inicio: Renderizar correctamente para usuario autenticado mostrando cotizaciones. 
-10. Vista inicio: Renderizar correctamente para usuario no autenticado (sin cotizaciones). 
+10. Vista inicio: Renderizar correctamente cotizaciones para usuario no autenticado. 
 11. Vista inicio: Mostrar precios según segmento seleccionado por administrador. 
 12. Vista simular (GET): Renderizar plantilla con monedas activas para usuario autenticado. 
 13. Vista simular (POST): Validar correctamente errores de entrada (monto, moneda, operación). 
@@ -18,4 +18,6 @@ Pruebas unitarias para crear:
 Ten en cuenta:
 - Las pruebas unitarias deben hacerse usando Pytest (No usar unittest)
 - Cada error debe mostrar su mensaje de error correspondiente
-- No crear más pruebas unitarias de lo necesario
+- No crear pruebas unitarias adicionales
+- El proyecto usa un modelo de usuario personalizado (usuarios.Usuario)
+- El modelo de usuario no usa 'is_staff'

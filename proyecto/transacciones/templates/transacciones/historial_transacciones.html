@@ -33,7 +33,7 @@
                     <option value="">Todos los usuarios del cliente</option>
                     {% for usuario in usuarios_cliente %}
                     <option value="{{ usuario.id }}" {% if usuario_filtro == usuario.id|stringformat:"s" %}selected{% endif %}>
-                        {{ usuario.get_full_name|default:usuario.username }}
+                        {{ usuario.nombre_completo|default:usuario.username }}
                     </option>
                     {% endfor %}
                 </select>
@@ -121,7 +121,7 @@
                 </td>
                 <td>
                     <div>
-                        {{ transaccion.usuario.get_full_name }}
+                        {{ transaccion.usuario.nombre_completo }}
                     </div>
                 </td>
                 <td>

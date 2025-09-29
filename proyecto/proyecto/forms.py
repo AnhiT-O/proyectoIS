@@ -5,6 +5,13 @@ from transacciones.models import Recargos
 from decimal import Decimal
 
 class LoginForm(AuthenticationForm):
+    """
+    Formulario de inicio de sesión personalizado.
+
+    Attributes:
+        username (CharField): Campo para el nombre de usuario.
+        password (CharField): Campo para la contraseña.
+    """
     username = forms.CharField(
         max_length=30,
         widget=forms.TextInput(attrs={'class': 'form-control', 'autofocus': True})
@@ -19,7 +26,9 @@ class LoginForm(AuthenticationForm):
     }
 
     def confirm_login_allowed(self, user):
-        # Verifica si el usuario está bloqueado
+        """ 
+        Verifica si el usuario no está bloqueado para iniciar sesión.
+        """
         if user.bloqueado:
             raise forms.ValidationError(
                 self.error_messages['blocked'],
@@ -29,6 +38,15 @@ class LoginForm(AuthenticationForm):
 
 
 class SimuladorForm(forms.Form):
+    """
+    Formulario para simular conversiones de moneda.
+
+    Attributes:
+        moneda (ModelChoiceField): Campo para seleccionar la moneda.
+        monto (DecimalField): Campo para ingresar el monto a convertir.
+        operacion (ChoiceField): Campo para seleccionar el tipo de operación (compra o venta).
+        recargo (ChoiceField): Campo para seleccionar el método de pago.
+    """
     OPERACION_CHOICES = [
         ('compra', 'Compra'),
         ('venta', 'Venta'),
@@ -56,6 +74,9 @@ class SimuladorForm(forms.Form):
     )
     
     def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario y carga las opciones de recargo desde la base de datos.
+        """
         self.cliente = kwargs.pop('cliente', None)
         super().__init__(*args, **kwargs)
         
@@ -71,6 +92,11 @@ class SimuladorForm(forms.Form):
         self.fields['recargo'].choices = [('', 'Efectivo, Cheque, Transferencia')] + recargo_choices
     
     def clean_monto(self):
+        """
+        Valida el campo monto según las reglas específicas de la operación y moneda seleccionada.
+        -   Si el monto es menor o igual a 0, lanza un error.
+        -   Valida que el monto mínimo sea acorde a los decimales de la moneda seleccionada.
+        """
         monto = self.cleaned_data.get('monto')
         operacion = self.data.get('operacion')
         moneda = self.data.get('moneda')
@@ -117,12 +143,6 @@ class SimuladorForm(forms.Form):
                     raise forms.ValidationError('El monto mínimo para venta es 0.01.')
         
         return monto
-    
-    def clean_moneda(self):
-        moneda = self.cleaned_data.get('moneda')
-        if moneda and not moneda.activa:
-            raise forms.ValidationError('La moneda seleccionada no es válida.')
-        return moneda
     
     def realizar_conversion(self):
         """

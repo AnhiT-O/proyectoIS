@@ -1,43 +1,126 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clientes.models &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
-<html lang="es" data-content_root="../../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>clientes.models &#8212; documentación de Global Exchange - Versión 2</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
-    <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../_static/translations.js?v=f85f4cfb"></script>
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Índice" href="../../genindex.html" />
-    <link rel="search" title="Búsqueda" href="../../search.html" />
-   
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-  
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
 
-  
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+</ul>
 
-          <div class="body" role="main">
-            
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">clientes.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <h1>Código fuente para clientes.models</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Módulo de modelos para la gestión de clientes.</span>
+
+<span class="sd">Este módulo contiene los modelos de datos relacionados con la gestión de clientes</span>
+<span class="sd">del sistema, incluyendo la información personal, segmentación, integración con Stripe</span>
+<span class="sd">para métodos de pago y relaciones con usuarios operadores.</span>
+
+<span class="sd">Autor: Equipo de desarrollo</span>
+<span class="sd">Fecha: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configurar Stripe</span>
+<span class="n">stripe</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Cliente">
 <a class="viewcode-back" href="../../clientes.html#clientes.models.Cliente">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Cliente</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo que representa un cliente del sistema.</span>
+
+<span class="sd">    Este modelo almacena toda la información relevante de los clientes,</span>
+<span class="sd">    incluyendo datos personales, de contacto, segmentación comercial e</span>
+<span class="sd">    integración con servicios de pago externos como Stripe.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        TIPO_CLIENTE_CHOICES (list): Opciones para el tipo de cliente (Física/Jurídica)</span>
+<span class="sd">        TIPO_DOCUMENTO_CHOICES (list): Opciones para el tipo de documento (CI/RUC)</span>
+<span class="sd">        SEGMENTO_CHOICES (list): Opciones para la segmentación de clientes</span>
+<span class="sd">        BENEFICIOS_SEGMENTO (dict): Mapeo de beneficios por segmento de cliente</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; cliente = Cliente(</span>
+<span class="sd">        ...     nombre=&quot;Juan Pérez&quot;,</span>
+<span class="sd">        ...     tipoDocCliente=&quot;CI&quot;,</span>
+<span class="sd">        ...     docCliente=&quot;12345678&quot;,</span>
+<span class="sd">        ...     correoElecCliente=&quot;juan@email.com&quot;</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; cliente.save()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">TIPO_CLIENTE_CHOICES</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;Persona Física&#39;</span><span class="p">),</span>
         <span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;Persona Jurídica&#39;</span><span class="p">),</span>
@@ -88,6 +171,11 @@
         <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;clientes_operados&#39;</span><span class="p">,</span>
         <span class="n">verbose_name</span><span class="o">=</span><span class="s1">&#39;Usuarios operadores&#39;</span>
     <span class="p">)</span>
+    <span class="n">id_stripe</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">updated_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -95,7 +183,17 @@
 <a class="viewcode-back" href="../../clientes.html#clientes.models.Cliente.clean">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validaciones del modelo</span>
+<span class="sd">        Realiza validaciones personalizadas del modelo Cliente.</span>
+
+<span class="sd">        Valida la coherencia entre el tipo de cliente y el tipo de documento,</span>
+<span class="sd">        asegurando que las personas jurídicas utilicen RUC como documento.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si existe incoherencia entre tipo de cliente y documento</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Este método se ejecuta automáticamente al llamar full_clean() o</span>
+<span class="sd">            durante la validación del formulario.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
         
@@ -111,7 +209,18 @@
 <a class="viewcode-back" href="../../clientes.html#clientes.models.Cliente.save">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sobrescribir save para ejecutar validaciones</span>
+<span class="sd">        Guarda el cliente aplicando validaciones y actualizaciones automáticas.</span>
+
+<span class="sd">        Actualiza automáticamente el beneficio por segmento basado en el segmento</span>
+<span class="sd">        del cliente y ejecuta todas las validaciones antes de guardar.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Argumentos posicionales pasados al método save padre</span>
+<span class="sd">            **kwargs: Argumentos con nombre pasados al método save padre</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            El beneficio por segmento se actualiza automáticamente según la</span>
+<span class="sd">            configuración definida en BENEFICIOS_SEGMENTO.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Actualizar el beneficio según el segmento</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beneficio_segmento</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BENEFICIOS_SEGMENTO</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segmento</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -121,7 +230,118 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Devuelve la representación en cadena del cliente.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El nombre del cliente</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="Cliente.tiene_tarjetas_activas">
+<a class="viewcode-back" href="../../clientes.html#clientes.models.Cliente.tiene_tarjetas_activas">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tiene_tarjetas_activas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifica si el cliente tiene tarjetas de crédito activas en Stripe.</span>
+
+<span class="sd">        Consulta la API de Stripe para determinar si el cliente tiene al menos</span>
+<span class="sd">        una tarjeta de crédito registrada y activa.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True si el cliente tiene al menos una tarjeta activa, False en caso contrario</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Requiere que el cliente tenga un id_stripe válido. Si ocurre algún error</span>
+<span class="sd">            en la consulta a Stripe, se registra en el log y retorna False.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; cliente = Cliente.objects.get(id=1)</span>
+<span class="sd">            &gt;&gt;&gt; if cliente.tiene_tarjetas_activas():</span>
+<span class="sd">            ...     print(&quot;Cliente puede realizar pagos con tarjeta&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;id_stripe&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Obtener los métodos de pago del cliente desde Stripe</span>
+            <span class="n">payment_methods</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">list</span><span class="p">(</span>
+                <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id_stripe</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;card&#39;</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Verificar si hay al menos una tarjeta activa</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">StripeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error al consultar tarjetas de Stripe para cliente </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error inesperado al verificar tarjetas para cliente </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Cliente.obtener_tarjetas_stripe">
+<a class="viewcode-back" href="../../clientes.html#clientes.models.Cliente.obtener_tarjetas_stripe">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obtener_tarjetas_stripe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtiene la información detallada de las tarjetas de crédito del cliente desde Stripe.</span>
+
+<span class="sd">        Consulta la API de Stripe para obtener todos los métodos de pago tipo tarjeta</span>
+<span class="sd">        asociados al cliente y formatea la información en una estructura de datos útil.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Lista de diccionarios, cada uno conteniendo la información de una tarjeta:</span>
+<span class="sd">                - id (str): ID del método de pago en Stripe</span>
+<span class="sd">                - brand (str): Marca de la tarjeta (VISA, MASTERCARD, etc.)</span>
+<span class="sd">                - last4 (str): Últimos 4 dígitos de la tarjeta</span>
+<span class="sd">                - exp_month (int): Mes de expiración</span>
+<span class="sd">                - exp_year (int): Año de expiración</span>
+<span class="sd">                - funding (str): Tipo de financiamiento (credit, debit, etc.)</span>
+<span class="sd">                - created (int): Timestamp de creación en Stripe</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Requiere que el cliente tenga un id_stripe válido. Si ocurre algún error,</span>
+<span class="sd">            se registra en el log y retorna una lista vacía.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; cliente = Cliente.objects.get(id=1)</span>
+<span class="sd">            &gt;&gt;&gt; tarjetas = cliente.obtener_tarjetas_stripe()</span>
+<span class="sd">            &gt;&gt;&gt; for tarjeta in tarjetas:</span>
+<span class="sd">            ...     print(f&quot;Tarjeta {tarjeta[&#39;brand&#39;]} ****{tarjeta[&#39;last4&#39;]}&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;id_stripe&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Obtener los métodos de pago del cliente desde Stripe</span>
+            <span class="n">payment_methods</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">list</span><span class="p">(</span>
+                <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id_stripe</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;card&#39;</span>
+            <span class="p">)</span>
+            
+            <span class="n">tarjetas</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">payment_method</span> <span class="ow">in</span> <span class="n">payment_methods</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">card</span> <span class="o">=</span> <span class="n">payment_method</span><span class="o">.</span><span class="n">card</span>
+                <span class="n">tarjeta_info</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">payment_method</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s1">&#39;brand&#39;</span><span class="p">:</span> <span class="n">card</span><span class="o">.</span><span class="n">brand</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+                    <span class="s1">&#39;last4&#39;</span><span class="p">:</span> <span class="n">card</span><span class="o">.</span><span class="n">last4</span><span class="p">,</span>
+                    <span class="s1">&#39;exp_month&#39;</span><span class="p">:</span> <span class="n">card</span><span class="o">.</span><span class="n">exp_month</span><span class="p">,</span>
+                    <span class="s1">&#39;exp_year&#39;</span><span class="p">:</span> <span class="n">card</span><span class="o">.</span><span class="n">exp_year</span><span class="p">,</span>
+                    <span class="s1">&#39;funding&#39;</span><span class="p">:</span> <span class="n">card</span><span class="o">.</span><span class="n">funding</span><span class="p">,</span>
+                    <span class="s1">&#39;created&#39;</span><span class="p">:</span> <span class="n">payment_method</span><span class="o">.</span><span class="n">created</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">tarjetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tarjeta_info</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">tarjetas</span>
+            
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">StripeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error al obtener tarjetas de Stripe para cliente </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error inesperado al obtener tarjetas para cliente </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
+
         
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;clientes&#39;</span>
@@ -136,11 +356,35 @@
 <div class="viewcode-block" id="UsuarioCliente">
 <a class="viewcode-back" href="../../clientes.html#clientes.models.UsuarioCliente">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UsuarioCliente</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo intermedio para la relación muchos-a-muchos entre Usuario y Cliente.</span>
+
+<span class="sd">    Esta tabla intermedia permite establecer qué usuarios pueden operar con qué clientes,</span>
+<span class="sd">    proporcionando un sistema de permisos granular donde los usuarios solo pueden</span>
+<span class="sd">    acceder a los clientes específicos asignados a ellos.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        usuario (ForeignKey): Referencia al usuario operador</span>
+<span class="sd">        cliente (ForeignKey): Referencia al cliente que puede operar</span>
+<span class="sd">        created_at (DateTimeField): Fecha de creación de la relación</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; usuario = Usuario.objects.get(id=1)</span>
+<span class="sd">        &gt;&gt;&gt; cliente = Cliente.objects.get(id=1)</span>
+<span class="sd">        &gt;&gt;&gt; relacion = UsuarioCliente.objects.create(usuario=usuario, cliente=cliente)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">usuario</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;usuarios.Usuario&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
     <span class="n">cliente</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;Cliente&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Metadatos del modelo UsuarioCliente.</span>
+
+<span class="sd">        Define la tabla de base de datos, restricciones de unicidad,</span>
+<span class="sd">        nombres para mostrar y permisos personalizados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;usuarios_clientes&#39;</span>
         <span class="n">unique_together</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;usuario&#39;</span><span class="p">,</span> <span class="s1">&#39;cliente&#39;</span><span class="p">]</span>
         <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">&#39;Relación Usuario-Cliente&#39;</span>
@@ -148,77 +392,41 @@
         <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Deshabilita permisos predeterminados</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Devuelve la representación en cadena de la relación usuario-cliente.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Cadena con formato &quot;email_usuario - nombre_cliente&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 </pre></div>
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">Global Exchange</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-
-<search id="searchbox" style="display: none" role="search">
-    <div class="searchformwrapper">
-    <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
-      <input type="submit" value="Ir a" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegación</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../medios_pago.html">Medios de Pago</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Configuración Proyecto</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Código de módulo</a><ul>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &#169;2025, Grupo 1.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
-      
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>

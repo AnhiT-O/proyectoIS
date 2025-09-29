@@ -7,6 +7,17 @@ from .models import Usuario
 from clientes.models import Cliente
 
 class RegistroUsuarioForm(UserCreationForm):
+    """
+    Formulario personalizado para el registro de usuarios.
+
+    Attributes:
+        username (CharField): Campo para el nombre de usuario.
+        email (EmailField): Campo para el correo electrónico.
+        first_name (CharField): Campo para el nombre.
+        last_name (CharField): Campo para el apellido.
+        tipo_documento (ChoiceField): Campo para el tipo de cédula.
+        numero_documento (CharField): Campo para la cédula de identidad.
+    """
     username = forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control', 
@@ -40,11 +51,11 @@ class RegistroUsuarioForm(UserCreationForm):
             'max_length': "El apellido no puede tener más de 40 caracteres."
         }
     )
-    tipo_cedula = forms.ChoiceField(
-        choices=Usuario.TIPO_CEDULA_CHOICES,
+    tipo_documento = forms.ChoiceField(
+        choices=Usuario.tipo_documento_CHOICES,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    cedula_identidad = forms.CharField(
+    numero_documento = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': "La cédula de identidad es obligatoria.",
@@ -54,23 +65,52 @@ class RegistroUsuarioForm(UserCreationForm):
     )
 
     class Meta:
+        """
+        Meta información para el formulario.
+
+        Attributes:
+            model (Model): El modelo asociado al formulario.
+            fields (tuple): Campos incluidos en el formulario.
+        """
         model = Usuario
-        fields = ('username', 'first_name', 'last_name', 'email', 'tipo_cedula', 'cedula_identidad', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'tipo_documento', 'numero_documento', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario y personaliza los widgets de los campos de contraseña.
+        """
         super().__init__(*args, **kwargs)
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
-    def clean_cedula_identidad(self):
-        cedula = self.cleaned_data.get('cedula_identidad')
-        if not cedula.isdigit():
-            raise ValidationError("La cédula de identidad debe ser numérica.")
-        if len(cedula) < 4:
-            raise ValidationError("La cédula de identidad debe tener al menos 4 dígitos.")
-        return cedula
+    def clean_numero_documento(self):
+        """
+        Valida que el número de documento sea numérico y tenga al menos 4 dígitos.
+
+        Raises:
+            ValidationError: Si el número de documento no es numérico o tiene menos de 4 dígitos.
+
+        Returns:
+            Cadena de texto: El número de documento validado.
+        """
+        documento = self.cleaned_data.get('numero_documento')
+        if not documento.isdigit():
+            raise ValidationError("El número de documento debe ser numérico.")
+        if len(documento) < 4:
+            raise ValidationError("El número de documento debe tener al menos 4 dígitos.")
+        return documento
 
     def clean_password1(self):
+        """
+        Validación personalizada para el campo de contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+        contenga al menos un caracter especial y al menos un número.
+
+        Raises:
+            ValidationError: Si la contraseña no cumple con los requisitos.
+
+        Returns:
+            Cadena de texto: La contraseña validada.
+        """
         password1 = self.cleaned_data.get('password1')
 
         if not password1:
@@ -88,6 +128,15 @@ class RegistroUsuarioForm(UserCreationForm):
         return password1
 
     def clean_password2(self):
+        """
+        Verifica que las contraseñas ingresadas en los campos password1 y password2 coincidan.
+
+        Raises:
+            ValidationError: Si las contraseñas no coinciden.
+
+        Returns:
+            Cadena de texto: La contraseña confirmada.
+        """
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
         
@@ -97,19 +146,33 @@ class RegistroUsuarioForm(UserCreationForm):
         return password2
 
     def save(self, commit=True):
+        """
+        Guarda el usuario con los datos del formulario.
+
+        Args:
+            commit (bool): Si es True, guarda el usuario en la base de datos.
+
+        Returns:
+            Usuario: La instancia del usuario guardado.
+        """
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
-        user.tipo_cedula = self.cleaned_data['tipo_cedula']
-        user.cedula_identidad = self.cleaned_data['cedula_identidad']
+        user.tipo_documento = self.cleaned_data['tipo_documento']
+        user.numero_documento = self.cleaned_data['numero_documento']
         if commit:
             user.save()
         return user
 
 
 class RecuperarPasswordForm(PasswordResetForm):
-    """Formulario personalizado para recuperación de contraseña"""
+    """
+    Formulario personalizado para recuperación de contraseña.
+
+    Attributes:
+        email (EmailField): Campo para el correo electrónico desde el cual se solicita la recuperación.
+    """
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
@@ -122,6 +185,15 @@ class RecuperarPasswordForm(PasswordResetForm):
     )
 
     def clean_email(self):
+        """
+        Valida que el correo electrónico exista en la base de datos y que el usuario esté activo.
+
+        Raises:
+            ValidationError: Si no existe una cuenta activa asociada al correo electrónico.
+        
+        Returns:
+            Cadena de texto: El correo electrónico validado.
+        """
         email = self.cleaned_data.get('email')
         if email:
             # Verificar que el email esté registrado y que el usuario esté activo
@@ -133,7 +205,13 @@ class RecuperarPasswordForm(PasswordResetForm):
 
 
 class EstablecerPasswordForm(SetPasswordForm):
-    """Formulario personalizado para establecer nueva contraseña"""
+    """
+    Formulario personalizado para establecer nueva contraseña.
+
+    Attributes:
+        new_password1 (CharField): Campo para la nueva contraseña.
+        new_password2 (CharField): Campo para confirmar la nueva contraseña.
+    """
     new_password1 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
@@ -151,6 +229,16 @@ class EstablecerPasswordForm(SetPasswordForm):
     )
 
     def clean_new_password1(self):
+        """
+        Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+        contenga al menos un caracter especial y al menos un número.
+
+        Raises:
+            ValidationError: Si la contraseña no cumple con los requisitos.
+        
+        Returns:
+            Cadena de texto: La nueva contraseña validada.
+        """
         password1 = self.cleaned_data.get('new_password1')
 
         if not password1:
@@ -169,7 +257,15 @@ class EstablecerPasswordForm(SetPasswordForm):
 
 
 class AsignarRolForm(forms.Form):
-    """Formulario para asignar roles a usuarios"""
+    """
+    Formulario para asignar roles a usuarios.
+
+    Attributes:
+        rol (ModelMultipleChoiceField): Campo para seleccionar múltiples roles.
+    
+    Note:
+        El rol 'Administrador' está excluido de las opciones disponibles.
+    """
     rol = forms.ModelMultipleChoiceField(
         queryset=Group.objects.exclude(name='Administrador').order_by('name'),
         widget=forms.CheckboxSelectMultiple(attrs={
@@ -182,6 +278,12 @@ class AsignarRolForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario y personaliza el queryset del campo de roles para excluir los roles que el usuario ya tiene.
+
+        Note:
+            El rol 'Administrador' está excluido de las opciones disponibles.
+        """
         usuario = kwargs.pop('usuario', None)
         super().__init__(*args, **kwargs)
         
@@ -196,7 +298,12 @@ class AsignarRolForm(forms.Form):
 
 
 class AsignarClienteForm(forms.Form):
-    """Formulario para asignar clientes a usuarios"""
+    """
+    Formulario para asignar clientes a usuarios.
+
+    Attributes:
+        clientes (ModelMultipleChoiceField): Campo para seleccionar múltiples clientes.
+    """
     clientes = forms.ModelMultipleChoiceField(
         queryset=Cliente.objects.all().order_by('nombre'),
         widget=forms.CheckboxSelectMultiple(attrs={
@@ -209,6 +316,9 @@ class AsignarClienteForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario y personaliza el queryset del campo de clientes para excluir los clientes que el usuario ya tiene asignados.
+        """
         usuario = kwargs.pop('usuario', None)
         super().__init__(*args, **kwargs)
         

@@ -25,8 +25,8 @@ class TestLoginForm:
             first_name='Test',
             last_name='User',
             email='test@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='12345678',
+            tipo_documento='CI',
+            numero_documento='12345678',
             bloqueado=False,
             is_active=True
         )
@@ -58,8 +58,8 @@ class TestLoginForm:
             first_name='Blocked',
             last_name='User',
             email='blocked@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='87654321',
+            tipo_documento='CI',
+            numero_documento='87654321',
             bloqueado=True,  # Usuario bloqueado
             is_active=True
         )
@@ -89,8 +89,8 @@ class TestLoginForm:
             first_name='Blocked',
             last_name='User2',
             email='blocked2@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='11223344',
+            tipo_documento='CI',
+            numero_documento='11223344',
             bloqueado=True,
             is_active=True
         )
@@ -121,8 +121,8 @@ class TestLoginForm:
             first_name='Valid',
             last_name='User',
             email='valid@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='55667788',
+            tipo_documento='CI',
+            numero_documento='55667788',
             bloqueado=False,
             is_active=True
         )

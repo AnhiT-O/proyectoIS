@@ -10,7 +10,12 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 def inicio(request):
-    """Vista para la página de inicio"""
+    """
+    Vista para la página de inicio. Muestra las cotizaciones de las monedas activas.
+    -   Si el usuario es un operador con un cliente seleccionado, muestra los precios personalizados.
+    -   Si el usuario es un administrador, puede seleccionar un segmento para ver precios con beneficios específicos.
+    -   Si el usuario no está autenticado, muestra los precios base sin beneficios.
+    """
     context = {}
     
     # Obtener las monedas activas
@@ -36,47 +41,48 @@ def inicio(request):
             porcentaje_beneficio_admin = Cliente.BENEFICIOS_SEGMENTO[segmento_id]
         context['segmento_seleccionado'] = segmento_seleccionado
     
-    # Solo mostrar cotizaciones si el usuario está autenticado
-    if request.user.is_authenticated:
-        cotizaciones = []
-        for moneda in monedas_activas:
-            if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
-                # Usuario u operador con cliente seleccionado
-                cliente = request.user.cliente_activo
-                precios = moneda.get_precios_cliente(cliente)
-            elif segmento_seleccionado:
-                # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
-                precios = {
-                    'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
-                    'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
-                }
-            else:
-                # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
-                precios = {
-                    'precio_compra': moneda.calcular_precio_compra(0),
-                    'precio_venta': moneda.calcular_precio_venta(0)
-                }
-            
-            cotizaciones.append({
-                'moneda': moneda,
-                'simbolo': moneda.simbolo,
-                'precio_compra': precios['precio_compra'],
-                'precio_venta': precios['precio_venta'],
-                'fecha': moneda.fecha_cotizacion
-            })
-        cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
-        context['cotizaciones'] = cotizaciones
+    cotizaciones = []
+    for moneda in monedas_activas:
+        if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+            # Usuario u operador con cliente seleccionado
+            cliente = request.user.cliente_activo
+            precios = moneda.get_precios_cliente(cliente)
+        elif segmento_seleccionado:
+            # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+            precios = {
+                'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
+                'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+            }
+        else:
+            # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
+            precios = {
+                'precio_compra': moneda.calcular_precio_compra(0),
+                'precio_venta': moneda.calcular_precio_venta(0)
+            }
+        
+        cotizaciones.append({
+            'moneda': moneda,
+            'simbolo': moneda.simbolo,
+            'precio_compra': precios['precio_compra'],
+            'precio_venta': precios['precio_venta'],
+            'fecha': moneda.fecha_cotizacion
+        })
+    cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
+    context['cotizaciones'] = cotizaciones
     
     return render(request, 'inicio.html', context)
 
 def custom_permission_denied_view(request, exception):
     """
-    Vista personalizada para manejar errores 403 (Permission Denied)
+    Vista personalizada para manejar errores 403 (Permission Denied). 
     Se renderiza cuando un usuario autenticado no tiene permisos para acceder a una vista
     """
     return HttpResponseForbidden(render(request, '403.html').content)
 
 def login_usuario(request):
+    """
+    Vista para manejar el inicio de sesión de usuarios.
+    """
     if request.user.is_authenticated:
         return redirect('usuarios:perfil')
     
@@ -97,11 +103,20 @@ def login_usuario(request):
     return render(request, 'login.html', {'form': form})
 
 def logout_usuario(request):
+    """
+    Vista para manejar el cierre de sesión de usuarios.
+    """
     logout(request)
     messages.success(request, 'Has cerrado sesión exitosamente.')
     return redirect('inicio')
 
 def simular(request):
+    """
+    Vista para manejar el simulador de conversiones de moneda.
+
+    Note:
+        El resultado se devuelve en formato JSON para facilitar su uso en aplicaciones AJAX.
+    """
     if request.method == 'GET':
         monedas = Moneda.objects.filter(activa=True)
         # Obtener el cliente activo si el usuario está autenticado

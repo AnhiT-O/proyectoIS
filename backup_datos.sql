@@ -96,7 +96,7 @@ COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, tipo_cedula, cedula_identidad, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
+COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, tipo_documento, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
 pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	CI	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
 pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	CI	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
 pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	CI	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
