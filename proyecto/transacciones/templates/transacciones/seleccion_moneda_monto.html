@@ -44,21 +44,12 @@
         <h2>{{ titulo_paso }}</h2>
         <div style="margin: 2rem;">
         <div class="info-cliente">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 3rem;">
-                <div>
-                    <div class="info-titulo">Cliente seleccionado:</div>
-                    <div class="info-valor">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
-                    <div style="margin-top: 0.5rem;"></div>
-                    <div class="info-titulo">Segmento:</div>
-                    <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
-                </div>
-                <div>
-                    <div class="info-titulo">Monto para transacciones disponible este día:</div>
-                    <div class="info-valor">Gs. {{ limites_disponibles.diario|intcomma|default:"N/A" }}</div>
-                    <div style="margin-top: 0.5rem;"></div>
-                    <div class="info-titulo">Monto para transacciones disponible este mes:</div>
-                    <div class="info-valor">Gs. {{ limites_disponibles.mensual|intcomma|default:"N/A" }}</div>
-                </div>
+            <div>
+                <div class="info-titulo">Monto para transacciones disponible este día:</div>
+                <div class="info-valor">Gs. {{ limites_disponibles.diario|intcomma|default:"N/A" }}</div>
+                <div style="margin-top: 0.5rem;"></div>
+                <div class="info-titulo">Monto para transacciones disponible este mes:</div>
+                <div class="info-valor">Gs. {{ limites_disponibles.mensual|intcomma|default:"N/A" }}</div>
             </div>
         </div>
         <p class="subtitulo">

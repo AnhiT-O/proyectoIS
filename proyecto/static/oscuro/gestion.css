@@ -2,7 +2,7 @@
     display: block;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 80vh;
     padding: 1rem;
 }  
 
@@ -10,7 +10,7 @@
     background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     border-radius: 15px;
     padding: 2rem;
-    margin: 2rem auto;
+    margin: 0 auto;
     max-width: 1300px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     border: 1px solid #4b5563;

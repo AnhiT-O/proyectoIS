@@ -45,13 +45,6 @@
     <div class="form-cabecera">
         <h2>{{ titulo_paso }}</h2>
         <div style="margin: 2rem;">
-            <div class="info-cliente">
-                <div class="info-titulo">Cliente seleccionado:</div>
-                <div class="info-valor">{{ user.cliente_activo.nombre }}</div>
-                <div style="margin-top: 0.5rem;"></div>
-                <div class="info-titulo">Segmento:</div>
-                <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
-            </div>
             <p class="subtitulo">
                 Complete la información requerida para continuar con su operación de 
             {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %}.

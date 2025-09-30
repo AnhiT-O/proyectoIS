@@ -9,26 +9,6 @@
 <link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
-<style>
-    .perfil-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 2px solid var(--color-borde, #667eea); 
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    }
-
-    .perfil-header .perfil-titulo {
-    margin: 0;
-    }
-
-    .perfil-header .acciones {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: -0.3rem; 
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -41,7 +21,9 @@
 
     <div class="zona-perfil">
         <div class="perfil-info">
-            <h2 class="perfil-titulo">Información Personal</h2>
+            <div class="info-cabecera">
+                <h2 class="perfil-titulo">Información Personal</h2>
+            </div>
             <div class="info-campos">
                 <div class="info-campo">
                     <div class="info-titulo">Nombre Completo</div>
@@ -88,9 +70,9 @@
             </div>
         </div>
         <div class="perfil-info">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px">
-                <h2 class="perfil-titulo" style="margin: 0; border-bottom: none; padding-bottom: 0;">Tarjetas de Crédito</h2>
-                <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-primario" style="padding:0.5rem 1rem">
+            <div class="info-cabecera">
+                <h2 class="perfil-titulo">Tarjetas de Crédito</h2>
+                <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                     Agregar Tarjeta
                 </a>
             </div>
@@ -126,9 +108,9 @@
             {% endif %}
         </div>
         <!-- Sección de Medios de Acreditación -->
-        <div class="perfil-info" style="margin-top: 2rem;">
-            <div class="perfil-header" style="align-items: end">
-                <h2 class="perfil-titulo" style="border-bottom: none">Medios de Acreditación</h2>
+        <div class="perfil-info">
+            <div class="info-cabecera">
+                <h2 class="perfil-titulo">Medios de Acreditación</h2>
                 <div class="acciones">
                     <a href="{% url 'clientes:cliente_agregar_cuenta_bancaria' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                         Agregar Cuenta Bancaria
@@ -138,7 +120,6 @@
                     </a>
                 </div>
             </div>
-
             {% if cuentas_bancarias or billeteras %}
                 <div class="info-campos">
                     <!-- Cuentas Bancarias -->
@@ -191,11 +172,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: center; padding: 2rem; background: var(--color-fondo-tarjeta); border-radius: 8px; border: 1px solid var(--color-borde);">
-                    <span style="font-size: 3rem; opacity: 0.5;">💰</span>
-                    <h3 style="color: var(--color-texto-secundario); margin: 1rem 0 0.5rem 0;">Sin medios de acreditación</h3>
-                    <p style="color: var(--color-texto-secundario); margin: 0;">Este cliente no tiene medios de acreditación asociados.</p>
-                </div>
+                <p style="color: #6c757d; margin-bottom: 15px;">Este cliente no tiene medios de acreditación registrados.</p>
             {% endif %}
         </div>
         
