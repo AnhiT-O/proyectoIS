@@ -43,17 +43,28 @@ COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
 -- Data for Name: clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, id_stripe, created_at, updated_at) FROM stdin;
-Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	cus_T6oluR2pptn5i1	2025-09-20 12:26:10.67909-03	2025-09-20 12:26:10.679125-03
-Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	\N	2025-09-20 12:27:38.687681-03	2025-09-20 12:27:38.687718-03
-Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	\N	2025-09-20 12:29:50.697586-03	2025-09-20 12:29:50.697627-03
-Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	\N	2025-09-20 12:30:54.408672-03	2025-09-20 12:30:54.408708-03
-Miguel Torres	CI	5675675	miguel.torres@example.com	0985675675	F	Luque, Paraguay	Contador	t	minorista	0	\N	2025-09-20 12:31:53.579782-03	2025-09-20 12:31:53.579816-03
-Sofía Martínez	RUC	6786786	sofia.martinez@example.com	0986786786	F	Capiatá, Paraguay	Médica	t	vip	10	\N	2025-09-20 12:33:32.910055-03	2025-09-20 12:33:32.910098-03
-Diego Alonso	CI	7897897	diego.alonso@example.com	0987897897	F	Fernando de la Mora, Paraguay	Arquitecto	t	minorista	0	\N	2025-09-20 12:34:33.754898-03	2025-09-20 12:34:33.754934-03
-Valentina Rivas	CI	8908908	valentina.rivas@example.com	0988908908	F	Lambaré, Paraguay	Diseñadora	t	corporativo	5	\N	2025-09-20 12:35:39.80619-03	2025-09-20 12:35:39.806227-03
-Camila Acosta	RUC	1234567	camila_acosta@example.com	0981234567	F	Areguá, Paraguay	Psicóloga	t	vip	10	\N	2025-09-20 12:36:39.958919-03	2025-09-20 12:36:39.958954-03
-Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Venta de artículos	t	corporativo	5	\N	2025-09-20 12:38:01.427257-03	2025-09-20 12:38:01.427291-03
+COPY public.clientes (nombre, "tipoDocCliente", "docCliente", "correoElecCliente", telefono, "tipoCliente", direccion, ocupacion, declaracion_jurada, segmento, beneficio_segmento, id_stripe, consumo_diario, consumo_mensual, ultimo_consumo, created_at) FROM stdin;
+Juan Pérez	CI	1231231	juanperez@example.com	0981123123	F	Asunción, Paraguay	Estudiante	t	minorista	0	cus_T6oluR2pptn5i1	0	0	2025-09-20	2025-09-20 12:26:10.67909-03
+Lucía Gómez	CI	2342342	lucia.gomez@example.com	0982342342	F	Encarnación, Paraguay	Ingeniera	t	minorista	0	\N	0	0	2025-09-20	2025-09-20 12:27:38.687681-03
+Carlos Ramírez	RUC	3453453	carlos_ramirez@example.com	0983453453	F	Ciudad del Este, Paraguay	Comerciante	t	minorista	0	\N	0	0	2025-09-20	2025-09-20 12:29:50.697586-03
+Ana Fernández	CI	4564564	ana.fernandez@example.com	0984564564	F	San Lorenzo, Paraguay	Abogada	t	vip	10	\N	0	0	2025-09-20	2025-09-20 12:30:54.408672-03
+Miguel Torres	CI	5675675	miguel.torres@example.com	0985675675	F	Luque, Paraguay	Contador	t	minorista	0	\N	0	0	2025-09-20	2025-09-20 12:31:53.579782-03
+Sofía Martínez	RUC	6786786	sofia.martinez@example.com	0986786786	F	Capiatá, Paraguay	Médica	t	vip	10	\N	0	0	2025-09-20	2025-09-20 12:33:32.910055-03
+Diego Alonso	CI	7897897	diego.alonso@example.com	0987897897	F	Fernando de la Mora, Paraguay	Arquitecto	t	minorista	0	\N	0	0	2025-09-20	2025-09-20 12:34:33.754898-03
+Valentina Rivas	CI	8908908	valentina.rivas@example.com	0988908908	F	Lambaré, Paraguay	Diseñadora	t	corporativo	5	\N	0	0	2025-09-20	2025-09-20 12:35:39.80619-03
+Camila Acosta	RUC	1234567	camila_acosta@example.com	0981234567	F	Areguá, Paraguay	Psicóloga	t	vip	10	\N	0	0	2025-09-20	2025-09-20 12:36:39.958919-03
+Empresa S.A.	RUC	3456789	empresa@example.com	021456789	J	Asunción, Paraguay	Venta de artículos	t	corporativo	5	\N	0	0	2025-09-20	2025-09-20 12:38:01.427257-03
+\.
+
+COPY public.cuenta_bancaria (banco, numero_cuenta, nombre_titular, nro_documento, cliente_id) FROM stdin;
+Banco Atlas	593406	Juan Pérez	1231231	1
+Banco Familiar	39784	Juan Pérez	1231231	1
+ueno bank	969643	Juan Pérez	1231231	1
+Banco Basa	426868	Carlos Ramírez	3453453	3
+Cooperativa Universitaria	32329	Ana Fernández	4564564	4
+Banco Itaú	753971	Ubaldo Torres	543420	5
+Banco Familiar	254591	Camila Acosta	1234567	9
+ueno bank	783750	Empresa S.A.	3456789	10
 \.
 
 --
@@ -66,21 +77,6 @@ Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	10000000
 Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	100000000
 \.
 
---
--- Data for Name: consumo_limite_cliente
---
-COPY public.consumo_limite_cliente (fecha, consumo_diario, consumo_mensual, cliente_id) FROM stdin;
-2025-09-20	0	0	1
-2025-09-20	0	0	2
-2025-09-20	0	0	3
-2025-09-20	0	0	4
-2025-09-20	0	0	5
-2025-09-20	0	0	6
-2025-09-20	0	0	7
-2025-09-20	0	0	8
-2025-09-20	0	0	9
-2025-09-20	0	0	10
-\.
 
 --
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -109,17 +105,17 @@ pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px
 -- Data for Name: usuarios_clientes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios_clientes (created_at, cliente_id, usuario_id) FROM stdin;
-2025-09-20 13:03:50.590517-03	4	4
-2025-09-20 13:03:50.599811-03	7	4
-2025-09-20 13:03:50.607862-03	1	4
-2025-09-20 13:03:50.615836-03	5	4
-2025-09-20 13:03:50.624227-03	6	4
-2025-09-20 13:04:11.700055-03	4	2
-2025-09-20 13:04:11.707592-03	3	2
-2025-09-20 13:04:11.714918-03	7	2
-2025-09-20 13:04:11.72165-03	10	2
-2025-09-20 13:04:11.72892-03	6	2
+COPY public.clientes_usuarios (cliente_id, usuario_id) FROM stdin;
+4	4
+7	4
+1	4
+5	4
+6	4
+4	2
+3	2
+7	2
+10	2
+6	2
 \.
 
 

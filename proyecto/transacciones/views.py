@@ -26,7 +26,6 @@ from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda
-from monedas.services import LimiteService
 from .forms import SeleccionMonedaMontoForm, RecargoForm
 from .models import Transaccion, Recargos
 from decimal import Decimal
@@ -37,46 +36,13 @@ import base64
 import ast
 import stripe
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.db import models
 import stripe
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
-
-def realizar_conversion(transaccion_id):
-    precios = Moneda.objects.get(id=transaccion_id.moneda_id).get_precios_cliente(Cliente.objects.get(id=transaccion_id.cliente_id))
-    if transaccion_id.tipo == 'compra':
-        resultado = transaccion_id.monto * precios['precio_venta']
-    else:
-        resultado = transaccion_id.monto * precios['precio_compra']
-    return resultado
-
-def convertir(monto, cliente, moneda, tipo, medio_pago, medio_cobro):
-    precios = moneda.get_precios_cliente(cliente)
-    if tipo == 'compra':
-        if medio_pago in ['Efectivo', 'Cheque']:
-            resultado = monto * precios['precio_venta']
-        elif Recargos.objects.filter(nombre=medio_pago).exists():
-            resultado = monto * precios['precio_venta']
-            recargo = Recargos.objects.get(nombre=medio_pago).recargo
-            resultado *= (Decimal('1') + (Decimal(str(recargo)) / Decimal('100')))
-        else:
-            resultado = monto * precios['precio_venta']
-            recargo = Recargos.objects.get(nombre='Tarjeta de Crédito').recargo
-            resultado *= (Decimal('1') + (Decimal(str(recargo)) / Decimal('100')))
-    else:
-        if medio_pago == 'Efectivo':
-            resultado = monto * precios['precio_compra']
-        else:
-            resultado = monto * precios['precio_compra']
-            recargo = Recargos.objects.get(nombre='Tarjeta de Crédito').recargo
-            resultado *= (Decimal('1') - (Decimal(str(recargo)) / Decimal('100')))
-        if Recargos.objects.filter(nombre=medio_cobro).exists():
-            recargo = Recargos.objects.get(nombre=medio_cobro).recargo
-            resultado *= (Decimal('1') - (Decimal(str(recargo)) / Decimal('100')))
-    return int(resultado)
 
 def procesar_pago_stripe(transaccion_id, payment_method_id):
     """
@@ -326,46 +292,6 @@ def extraer_mensaje_error(validation_error):
             return mensaje[2:-2]
         return mensaje
 
-def obtener_contexto_limites(cliente):
-    """
-    Obtiene información completa de límites de transacción para un cliente.
-    
-    Consulta el servicio de límites para obtener información detallada sobre
-    los límites diarios y mensuales del cliente, incluyendo consumo actual
-    y porcentajes de uso.
-    
-    Args:
-        cliente (Cliente): Instancia del cliente para consultar límites
-        
-    Returns:
-        dict: Diccionario con información de límites o diccionario vacío si hay error
-            - limites_disponibles: Información detallada de límites
-            - limite_diario_total: Límite diario configurado
-            - limite_mensual_total: Límite mensual configurado
-            - consumo_diario: Consumo actual del día
-            - consumo_mensual: Consumo actual del mes
-            - porcentaje_uso_diario: Porcentaje usado del límite diario
-            - porcentaje_uso_mensual: Porcentaje usado del límite mensual
-    """
-    try:
-        limites_info = LimiteService.obtener_limites_disponibles(cliente)
-        if 'error' not in limites_info:
-            return {
-                'limites_disponibles': {
-                    'diario': limites_info['disponible_diario'],
-                    'mensual': limites_info['disponible_mensual'],
-                    'limite_diario_total': limites_info['limite_diario'],
-                    'limite_mensual_total': limites_info['limite_mensual'],
-                    'consumo_diario': limites_info['consumo_diario'],
-                    'consumo_mensual': limites_info['consumo_mensual'],
-                    'porcentaje_uso_diario': limites_info['porcentaje_uso_diario'],
-                    'porcentaje_uso_mensual': limites_info['porcentaje_uso_mensual']
-                }
-            }
-    except Exception:
-        pass
-    return {}
-
 # ============================================================================
 # PROCESO DE COMPRA DE MONEDAS
 # ============================================================================
@@ -464,6 +390,10 @@ def compra_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
+        if request.user.cliente_activo.ultimo_consumo != date.today():
+            request.user.cliente_activo.consumo_diario = 0
+        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+            request.user.cliente_activo.consumo_mensual = 0
         form = SeleccionMonedaMontoForm()
     
     context = {

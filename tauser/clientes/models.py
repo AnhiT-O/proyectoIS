@@ -55,7 +55,6 @@ class Cliente(models.Model):
     beneficio_segmento = models.IntegerField(default=0)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
-        through='UsuarioCliente',
         related_name='clientes_operados',
         verbose_name='Usuarios operadores'
     )
@@ -163,18 +162,3 @@ class Cliente(models.Model):
         permissions = [
             ("gestion", "Puede gestionar clientes (crear y editar)")
         ]
-
-class UsuarioCliente(models.Model):
-    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'usuarios_clientes'
-        unique_together = ['usuario', 'cliente']
-        verbose_name = 'Relación Usuario-Cliente'
-        verbose_name_plural = 'Relaciones Usuario-Cliente'
-        default_permissions = []  # Deshabilita permisos predeterminados
-
-    def __str__(self):
-        return f"{self.usuario.email} - {self.cliente.nombre}"

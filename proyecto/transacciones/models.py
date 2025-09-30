@@ -13,51 +13,35 @@ Author: Equipo de desarrollo Global Exchange
 Date: 2024
 """
 
+import ast
+from decimal import Decimal
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
 
-
 class Recargos(models.Model):
     """
-    Modelo para gestionar los recargos aplicables por tipo de medio de pago.
-    
-    Los recargos son porcentajes adicionales que se aplican a las transacciones
-    según el medio de pago utilizado (ej: tarjeta de crédito, billeteras digitales).
-    
-    Attributes:
-        nombre (CharField): Nombre del medio de pago (ej: "Tarjeta de Crédito")
-        recargo (SmallIntegerField): Porcentaje de recargo a aplicar (0-100)
-        
-    Meta:
-        verbose_name: "Recargo"
-        verbose_name_plural: "Recargos"
-        db_table: "recargos"
-        permissions: [('edicion', 'Puede editar recargos')]
+    Modelo para almacenar recargos aplicables según el medio de pago.
     """
-    nombre = models.CharField(max_length=50)
-    recargo = models.SmallIntegerField(default=0)
+    medio = models.CharField(max_length=50)
+    marca = models.CharField(max_length=100, unique=True)
+    recargo = models.DecimalField(max_digits=4, decimal_places=1)
 
     class Meta:
         verbose_name = "Recargo"
         verbose_name_plural = "Recargos"
         db_table = "recargos"
-        default_permissions = []  # Deshabilita permisos predeterminados
-        permissions = [
-            ('edicion', 'Puede editar recargos'),
-        ]
 
     def __str__(self):
         """
         Representación en cadena del modelo Recargos.
         
         Returns:
-            str: El nombre del medio de pago
+            str: La marca del recargo
         """
-        return self.nombre
-
+        return self.marca
 
 @receiver(post_migrate)
 def crear_recargos(sender, **kwargs):
@@ -68,7 +52,8 @@ def crear_recargos(sender, **kwargs):
     Crea los recargos estándar para diferentes medios de pago si no existen.
     
     Recargos creados:
-        - Tarjeta de Crédito: 1%
+        - VISA: 1%
+        - MASTERCARD: 1,5%
         - Tigo Money: 2%
         - Billetera Personal: 2%
         - Zimple: 3%
@@ -80,28 +65,39 @@ def crear_recargos(sender, **kwargs):
     # Solo crear si la migración es de la app transacciones
     if kwargs['app_config'].name == 'transacciones':
 
-        if not Recargos.objects.filter(nombre='Tarjeta de Crédito').exists():
+        if not Recargos.objects.filter(marca='VISA').exists():
             Recargos.objects.create(
-                nombre='Tarjeta de Crédito',
-                recargo=1
+                marca='VISA',
+                medio='Tarjeta de Crédito',
+                recargo='1'
             )
 
-        if not Recargos.objects.filter(nombre='Tigo Money').exists():
+        if not Recargos.objects.filter(marca='MASTERCARD').exists():
             Recargos.objects.create(
-                nombre='Tigo Money',
-                recargo=2
+                marca='MASTERCARD',
+                medio='Tarjeta de Crédito',
+                recargo='1.5'
             )
 
-        if not Recargos.objects.filter(nombre='Billetera Personal').exists():
+        if not Recargos.objects.filter(marca='Tigo Money').exists():
             Recargos.objects.create(
-                nombre='Billetera Personal',
-                recargo=2
+                marca='Tigo Money',
+                medio='Billetera Electrónica',
+                recargo='2'
             )
 
-        if not Recargos.objects.filter(nombre='Zimple').exists():
+        if not Recargos.objects.filter(marca='Billetera Personal').exists():
             Recargos.objects.create(
-                nombre='Zimple',
-                recargo=3
+                marca='Billetera Personal',
+                medio='Billetera Electrónica',
+                recargo='2'
+            )
+
+        if not Recargos.objects.filter(marca='Zimple').exists():
+            Recargos.objects.create(
+                marca='Zimple',
+                medio='Billetera Electrónica',
+                recargo='3'
             )
 
 class Transaccion(models.Model):
@@ -285,3 +281,50 @@ class Transaccion(models.Model):
                 pass
         
         super().save(*args, **kwargs)
+
+def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
+
+    if pago.startswith('{'):
+        dict_pago = ast.literal_eval(pago)
+    else:
+        dict_pago = pago
+    if cobro.startswith('{'):
+        dict_cobro = ast.literal_eval(cobro)
+    else:
+        dict_cobro = cobro
+    if operacion == 'compra':
+        cotizacion = monto * (moneda.tasa_base + moneda.comision_venta)
+        if segmentacion == 'corporativo':
+            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * 0.95))
+        elif segmentacion == 'vip':
+            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * 0.9))
+        else:
+            monto_final = cotizacion
+    else:
+        cotizacion = monto * (moneda.tasa_base - moneda.comision_compra)
+        if segmentacion == 'corporativo':
+            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * 0.95))
+        elif segmentacion == 'vip':
+            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * 0.9))
+        else:
+            monto_final = cotizacion
+    beneficio_segmento = abs(cotizacion - monto_final)
+    if isinstance(dict_pago, dict) and 'brand' in dict_pago:
+        monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+    elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
+        monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
+    else:
+        monto_recargo_pago = 0
+
+    if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
+        monto_recargo_cobro =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
+    else:
+        monto_recargo_cobro = 0
+    monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
+    return {
+        'cotizacion': cotizacion,
+        'beneficio_segmento': beneficio_segmento,
+        'monto_recargo_pago': monto_recargo_pago,
+        'monto_recargo_cobro': monto_recargo_cobro,
+        'monto_final': monto_final
+    }

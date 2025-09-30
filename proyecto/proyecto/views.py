@@ -8,6 +8,7 @@ from monedas.models import Moneda
 from decimal import Decimal
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from transacciones.models import calcular_conversion
 
 def inicio(request):
     """
@@ -144,8 +145,32 @@ def simular(request):
             
             if form.is_valid():
                 # Si el formulario es válido, realizar la conversión
-                resultado = form.realizar_conversion()
-                return JsonResponse(resultado)
+                monto = form.cleaned_data['monto']
+                moneda = form.cleaned_data['moneda']
+                operacion = form.cleaned_data['operacion']
+                medio_pago = form.cleaned_data['medio_pago']
+                medio_cobro = form.cleaned_data['medio_cobro']
+
+                resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmentacion if cliente is not None else 'minorista')
+                tipo_resultado = 'guaranies'
+                resultado_numerico = resultado['monto_final']
+                simbolo = 'Gs.'
+                decimales = 0
+                response_data = {
+                    'success': True,
+                    'tipo_resultado': tipo_resultado,
+                    'resultado_numerico': resultado_numerico,
+                    'simbolo': simbolo,
+                    'decimales': decimales,
+                    # Información adicional para debugging
+                    'cotizacion_base': float(resultado['cotizacion']),
+                    'beneficio_segmento': float(resultado['beneficio_segmento']),
+                    'monto_recargo_pago': float(resultado['monto_recargo_pago']),
+                    'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),
+                    'monto_final': float(resultado['monto_final'])
+                }
+                
+                return JsonResponse(response_data)
             else:
                 # Si hay errores de validación, devolverlos
                 return JsonResponse({

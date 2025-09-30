@@ -39,10 +39,6 @@ urlpatterns = [
     # URLs para edicion de recargos
     path('recargos/', views.editar_recargos, name='editar_recargos'),
     
-    # URLs para funcionalidades auxiliares de límites
-    path('limites/cliente/', views.obtener_limites_cliente, name='obtener_limites_cliente'),
-    path('limites/simular/', views.simular_transaccion_limites, name='simular_transaccion_limites'),
-    
     # URLs para historial de transacciones
     path('historial/', views.historial_transacciones, name='historial'),
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),

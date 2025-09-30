@@ -89,7 +89,6 @@ class Cliente(models.Model):
     beneficio_segmento = models.IntegerField(default=0)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
-        through='UsuarioCliente',
         related_name='clientes_operados',
         verbose_name='Usuarios operadores'
     )
@@ -98,8 +97,10 @@ class Cliente(models.Model):
         blank=True, 
         null=True
     )
+    consumo_diario = models.BigIntegerField(default=0)
+    consumo_mensual = models.BigIntegerField(default=0)
+    ultimo_consumo = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
         """
@@ -261,48 +262,3 @@ class Cliente(models.Model):
         permissions = [
             ("gestion", "Puede gestionar clientes (crear y editar)")
         ]
-
-class UsuarioCliente(models.Model):
-    """
-    Modelo intermedio para la relación muchos-a-muchos entre Usuario y Cliente.
-
-    Esta tabla intermedia permite establecer qué usuarios pueden operar con qué clientes,
-    proporcionando un sistema de permisos granular donde los usuarios solo pueden
-    acceder a los clientes específicos asignados a ellos.
-
-    Attributes:
-        usuario (ForeignKey): Referencia al usuario operador
-        cliente (ForeignKey): Referencia al cliente que puede operar
-        created_at (DateTimeField): Fecha de creación de la relación
-
-    Examples:
-        >>> usuario = Usuario.objects.get(id=1)
-        >>> cliente = Cliente.objects.get(id=1)
-        >>> relacion = UsuarioCliente.objects.create(usuario=usuario, cliente=cliente)
-    """
-    
-    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        """
-        Metadatos del modelo UsuarioCliente.
-
-        Define la tabla de base de datos, restricciones de unicidad,
-        nombres para mostrar y permisos personalizados.
-        """
-        db_table = 'usuarios_clientes'
-        unique_together = ['usuario', 'cliente']
-        verbose_name = 'Relación Usuario-Cliente'
-        verbose_name_plural = 'Relaciones Usuario-Cliente'
-        default_permissions = []  # Deshabilita permisos predeterminados
-
-    def __str__(self):
-        """
-        Devuelve la representación en cadena de la relación usuario-cliente.
-
-        Returns:
-            str: Cadena con formato "email_usuario - nombre_cliente"
-        """
-        return f"{self.usuario.email} - {self.cliente.nombre}"

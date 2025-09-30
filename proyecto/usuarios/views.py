@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied
 from functools import wraps
 from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
 from .models import Usuario
-from clientes.models import Cliente, UsuarioCliente
+from clientes.models import Cliente
 from clientes.views import procesar_medios_acreditacion_cliente
 from roles.models import Roles
 from django.db.models import Q
@@ -526,15 +526,18 @@ def remover_rol(request, pk, rol_id):
     if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
-    
+
+    if usuario.groups.count() == 1:
+        messages.warning(request, 'El usuario no puede quedarse sin roles.')
+        return redirect('usuarios:administrar_usuarios')
+
     # Si el rol a remover es 'Operador', desasociar todos los clientes del usuario
     if rol.name == 'Operador':
         clientes_asociados = usuario.clientes_operados.all()
         for cliente in clientes_asociados:
             try:
-                relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
-                relacion.delete()
-            except UsuarioCliente.DoesNotExist:
+                cliente.usuarios.remove(usuario)
+            except cliente.usuarios.DoesNotExist:
                 pass
     usuario.groups.remove(rol)
     messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.nombre_completo()}.')
@@ -580,11 +583,7 @@ def asignar_clientes(request, pk):
             clientes = form.cleaned_data['clientes']
             # Crear las relaciones usuario-cliente
             for cliente in clientes:
-                UsuarioCliente.objects.get_or_create(
-                    usuario=usuario,
-                    cliente=cliente
-                )
-            
+                cliente.usuarios.add(usuario)
             if len(clientes) == 1:
                 messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.nombre_completo()}.')
             else:
@@ -631,13 +630,12 @@ def remover_cliente(request, pk, cliente_id):
     
     # Verificar que la relación existe
     try:
-        relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
-        relacion.delete()
+        cliente.usuarios.remove(usuario)
         if usuario.cliente_activo == cliente:
             usuario.cliente_activo = None
             usuario.save()
         messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.nombre_completo()}.')
-    except UsuarioCliente.DoesNotExist:
+    except cliente.usuarios.DoesNotExist:
         messages.error(request, 'La asignación no se hizo correctamente.')
 
     return redirect('usuarios:usuario_detalle', pk=usuario.pk)

@@ -9,16 +9,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="cuerpo">
-    <div class="contenido">
-        <div class="form-cabecera">
-            <div class="logo">Simulador de Conversiones</div>
-            <p class="subtitulo">Calcule el cambio de monedas en tiempo real</p>
-        </div>
-        
-        <form id="simulador-form" method="post" novalidate>
-            {% csrf_token %}
-            
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <div class="logo">Simulador de Conversiones</div>
+        <p class="subtitulo">Calcule el cambio de monedas en tiempo real</p>
+    </div>
+    
+    <form id="simulador-form" method="post" novalidate>
+        {% csrf_token %}
             <div class="form-campo">
                 <div class="tipo-operacion" style="display: flex; justify-content: center; gap: 10px;">
                     <button type="button" class="btn-primario activo" data-operacion="compra">Compra</button>
@@ -26,54 +24,45 @@
                 </div>
             </div>
 
-            <div class="form-campo">
-                <label for="moneda">Seleccionar moneda:</label>
-                <select id="moneda" 
-                        name="moneda" 
-                        class="form-control" 
-                        required>
-                    <option value="" disabled selected hidden>Selecciona una moneda</option>
-                    {% for moneda in monedas %}
-                        <option value="{{ moneda.id }}" data-simbolo="{{ moneda.simbolo }}">
-                            {{ moneda.simbolo }} - {{ moneda.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <div id="moneda-errors" class="form-errores" style="display: none;"></div>
-            </div>
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.moneda.id_for_label }}">Seleccionar moneda:</label>
+                    {{ form.moneda }}
+                    <div id="moneda-errors" class="form-errores" style="display: none;"></div>
+                </div>
 
-            <div class="form-campo">
-                <label for="monto">Monto:</label>
-                <input type="number" 
-                        id="monto" 
-                        name="monto" 
-                        class="form-control" 
-                        step="0.01" 
-                        min="0.01"
-                        placeholder="Seleccione primero una moneda"
-                        required>
-                <div id="monto-errors" class="form-errores" style="display: none;"></div>
+                <div class="form-campo">
+                <label for="{{ form.monto.id_for_label }}">Monto:</label>
+                {{ form.monto }}
+                    <div id="monto-errors" class="form-errores" style="display: none;"></div>
+                </div>  
             </div>
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.medio_pago.id_for_label }}">Medio de pago:</label>
+                    {{ form.medio_pago }}
+                    <div id="medio_pago-errors" class="form-errores" style="display: none;"></div>
+                </div>
 
-            <div class="form-campo" id="recargo-campo">
-                <label for="recargo">Medio de pago:</label>
-                {{ form.recargo }}
-                <div id="recargo-errors" class="form-errores" style="display: none;"></div>
-            </div>
-
-            <div class="form-campo">
-                <label for="resultado">Resultado:</label>
-                <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
-                    <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
+                <div class="form-campo">
+                    <label for="{{ form.medio_cobro.id_for_label }}">Medio de acreditación:</label>
+                    {{ form.medio_cobro }}
+                    <div id="medio_cobro-errors" class="form-errores" style="display: none;"></div>
                 </div>
             </div>
 
-            <div class="zona-botones">
-                <button type="submit" class="btn-enviar">Calcular</button>
-                <a href="{% url 'inicio' %}" class="btn-atras">Volver</a>
+        <div class="form-campo" style="justify-content: center; text-align: center;">
+            <label for="resultado">Resultado:</label>
+            <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
+                <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">Calcular</button>
+            <a href="{% url 'inicio' %}" class="btn-atras">Volver</a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
@@ -144,11 +133,6 @@
             }
             tipoOperacion = btn.dataset.operacion;
             
-            // Mostrar campo de recargo para ambas operaciones
-            const recargoCampo = document.getElementById('recargo-campo');
-            const recargoSelect = document.getElementById('recargo');
-            recargoCampo.style.display = 'block';
-            
             // Actualizar placeholder según operación
             const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
             if (monedaSeleccionada && monedaSeleccionada.value) {
@@ -171,12 +155,6 @@
             // Limpiar campos
             montoInput.value = '';
             resultadoDiv.textContent = '\u00A0';
-            
-            // Ocultar información de recargo
-            const recargoInfo = document.getElementById('recargo-info');
-            if (recargoInfo) {
-                recargoInfo.style.display = 'none';
-            }
             
             // Limpiar errores
             clearErrors();
@@ -213,10 +191,6 @@
 
         // Inicializar step por defecto
         actualizarStepMonto();
-        
-        // Inicializar visibilidad del campo de recargo (visible para ambas operaciones)
-        const recargoCampo = document.getElementById('recargo-campo');
-        recargoCampo.style.display = 'block';
 
         // Manejar envío del formulario
         form.addEventListener('submit', function(e) {
@@ -247,18 +221,6 @@
                     } else {
                         // Fallback para compatibilidad
                         resultadoDiv.textContent = data.resultado;
-                    }
-                    
-                    // Mostrar/ocultar información de recargo
-                    const recargoInfo = document.getElementById('recargo-info');
-                    const recargoTexto = document.getElementById('recargo-texto');
-                    if (recargoInfo && recargoTexto) {
-                        if (data.recargo_aplicado) {
-                            recargoTexto.textContent = `Recargo aplicado: ${data.porcentaje_recargo}%`;
-                            recargoInfo.style.display = 'block';
-                        } else {
-                            recargoInfo.style.display = 'none';
-                        }
                     }
                 } else if (data.errors) {
                     // Mostrar errores de validación específicos
@@ -303,17 +265,6 @@
         // Limpiar errores cuando el usuario empiece a escribir o cambiar campos
         montoInput.addEventListener('input', clearErrors);
         monedaSelect.addEventListener('change', clearErrors);
-        recargoSelect.addEventListener('change', clearErrors);
-        
-        // Limpiar resultado cuando cambie el select de recargo
-        const recargoSelect = document.getElementById('recargo');
-        recargoSelect.addEventListener('change', function() {
-            resultadoDiv.textContent = '\u00A0';
-            const recargoInfo = document.getElementById('recargo-info');
-            if (recargoInfo) {
-                recargoInfo.style.display = 'none';
-            }
-        });
     });
 
     function resetForm() {
@@ -321,16 +272,6 @@
         const btnCompra = document.querySelector('[data-operacion="compra"]');
         form.reset();
         toggleOperacion(btnCompra);
-        
-        // Resetear el select de recargo al primer valor (vacío)
-        const recargoSelect = document.getElementById('recargo');
-        recargoSelect.selectedIndex = 0;
-        
-        // Ocultar información de recargo
-        const recargoInfo = document.getElementById('recargo-info');
-        if (recargoInfo) {
-            recargoInfo.style.display = 'none';
-        }
     }
     </script>
 {% endblock %}

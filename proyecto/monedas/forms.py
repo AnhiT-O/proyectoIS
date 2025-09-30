@@ -188,62 +188,21 @@ class LimiteGlobalForm(forms.ModelForm):
         },
         help_text='Límite mensual en guaraníes'
     )
-    
-    fecha_inicio = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        error_messages={
-            'required': 'Debes seleccionar la fecha de inicio.',
-            'invalid': 'Formato de fecha inválido.',
-        },
-        help_text='Fecha desde cuando rige este límite'
-    )
-    
-    fecha_fin = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        error_messages={
-            'invalid': 'Formato de fecha inválido.',
-        },
-        help_text='Fecha hasta cuando rige este límite (opcional)'
-    )
-    
-    activo = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'class': 'form-check-input'
-        }),
-        help_text='Marcar si este límite está vigente'
-    )
 
     class Meta:
         model = LimiteGlobal
-        fields = ['limite_diario', 'limite_mensual', 'fecha_inicio', 'fecha_fin', 'activo']
+        fields = ['limite_diario', 'limite_mensual']
 
     def clean(self):
         cleaned_data = super().clean()
         limite_diario = cleaned_data.get('limite_diario')
         limite_mensual = cleaned_data.get('limite_mensual')
-        fecha_inicio = cleaned_data.get('fecha_inicio')
-        fecha_fin = cleaned_data.get('fecha_fin')
 
         # Validar que el límite diario no sea mayor al mensual
         if limite_diario and limite_mensual:
             if limite_diario > limite_mensual:
                 raise ValidationError(
                     'El límite diario no puede ser mayor al límite mensual.'
-                )
-
-        # Validar fechas
-        if fecha_inicio and fecha_fin:
-            if fecha_fin <= fecha_inicio:
-                raise ValidationError(
-                    'La fecha de fin debe ser posterior a la fecha de inicio.'
                 )
 
         return cleaned_data
