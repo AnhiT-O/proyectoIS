@@ -114,22 +114,11 @@ def logout_usuario(request):
 def simular(request):
     """
     Vista para manejar el simulador de conversiones de moneda.
-
-    Note:
-        El resultado se devuelve en formato JSON para facilitar su uso en aplicaciones AJAX.
     """
     if request.method == 'GET':
-        monedas = Moneda.objects.filter(activa=True)
-        # Obtener el cliente activo si el usuario está autenticado
-        cliente = None
-        if request.user.is_authenticated and hasattr(request.user, 'cliente_activo'):
-            cliente = request.user.cliente_activo
-        
-        # Crear el formulario para pasar las opciones de recargo
-        form = SimuladorForm(cliente=cliente)
+        form = SimuladorForm()
         
         return render(request, 'simulador.html', {
-            'monedas': monedas,
             'form': form
         })
 
@@ -139,10 +128,9 @@ def simular(request):
             cliente = None
             if request.user.is_authenticated and hasattr(request.user, 'cliente_activo'):
                 cliente = request.user.cliente_activo
-            
-            # Crear el formulario con los datos POST y el cliente
-            form = SimuladorForm(request.POST, cliente=cliente)
-            
+
+            # Crear el formulario con los datos POST
+            form = SimuladorForm(request.POST)
             if form.is_valid():
                 # Si el formulario es válido, realizar la conversión
                 monto = form.cleaned_data['monto']
@@ -151,26 +139,17 @@ def simular(request):
                 medio_pago = form.cleaned_data['medio_pago']
                 medio_cobro = form.cleaned_data['medio_cobro']
 
-                resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmentacion if cliente is not None else 'minorista')
-                tipo_resultado = 'guaranies'
-                resultado_numerico = resultado['monto_final']
-                simbolo = 'Gs.'
-                decimales = 0
-                response_data = {
+                resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmento if cliente is not None else 'minorista')
+                respuesta = {
                     'success': True,
-                    'tipo_resultado': tipo_resultado,
-                    'resultado_numerico': resultado_numerico,
-                    'simbolo': simbolo,
-                    'decimales': decimales,
-                    # Información adicional para debugging
                     'cotizacion_base': float(resultado['cotizacion']),
                     'beneficio_segmento': float(resultado['beneficio_segmento']),
                     'monto_recargo_pago': float(resultado['monto_recargo_pago']),
                     'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),
                     'monto_final': float(resultado['monto_final'])
                 }
-                
-                return JsonResponse(response_data)
+
+                return JsonResponse(respuesta)
             else:
                 # Si hay errores de validación, devolverlos
                 return JsonResponse({
@@ -181,5 +160,5 @@ def simular(request):
         except Exception as e:
             return JsonResponse({
                 'success': False,
-                'error': 'Ocurrió un error al procesar la conversión.'
+                'error': str(e)
             })
