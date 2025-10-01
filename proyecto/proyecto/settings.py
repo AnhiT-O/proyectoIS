@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion'
+    'medios_acreditacion',
+    'auditlog'
 ]
 
 MIDDLEWARE = [
@@ -47,7 +48,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware'
+    'django.middleware.common.CommonMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 # Configuración de internacionalización
@@ -98,9 +100,17 @@ DATABASES = {
 # Validaciones de contraseña deshabilitadas - se manejan en forms.py
 AUTH_PASSWORD_VALIDATORS = []
 
+AUDITLOG_INCLUDE_ALL_MODELS = True
 
-
-
+AUDITLOG_EXCLUDE_TRACKING_MODELS = (
+    'sessions.Session',      
+    'contenttypes.ContentType',
+    'auditlog.LogEntry',     
+    'permissions.Permission',
+    'migrations.Migration',
+    'medios_acreditacion.Billetera',
+    'medios_acreditacion.CuentaBancaria'
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
