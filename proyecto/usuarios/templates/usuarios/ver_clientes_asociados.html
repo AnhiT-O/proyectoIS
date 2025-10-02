@@ -22,7 +22,9 @@
         <div class="info-campos">
             {% for cliente in clientes %}
             <div class="perfil-info {% if cliente == cliente_activo %}cliente-activo{% endif %}">
-                <h2 class="perfil-titulo">{{ cliente.nombre }}</h2>
+                <div class="info-cabecera">
+                    <h2 class="perfil-titulo">{{ cliente.nombre }}</h2>
+                </div>
                 <div class="info-campos" style="margin-bottom: 1rem;">
                     <!-- Información del cliente -->
                     <div class="info-campo">

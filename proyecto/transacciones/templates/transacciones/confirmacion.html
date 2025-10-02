@@ -137,9 +137,9 @@
         
     </div>
 
-    <div class="zona-botones">
-        <form method="post">
-        {% csrf_token %}
+    <form method="post">
+    {% csrf_token %}
+        <div class="zona-botones">
             {% if transaccion.tipo == 'venta' %}
                 <button type="submit" name="accion" value="confirmar" class="btn-enviar">
                     Confirmar Venta
@@ -152,7 +152,7 @@
             <button type="submit" name="accion" value="cancelar" class="btn-atras">
                 Cancelar {% if transaccion.tipo == 'venta' %}Venta{% else %}Compra{% endif %}
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 {% endblock %}

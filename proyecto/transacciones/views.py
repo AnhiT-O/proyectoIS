@@ -94,6 +94,7 @@ def procesar_pago_stripe(transaccion, payment_method_id):
                 moneda_usd.save()
             cliente = Cliente.objects.get(id=transaccion.cliente_id)
             cliente.consumo_diario += transaccion.monto_final
+            cliente.consumo_mensual += transaccion.monto_final
             cliente.ultimo_consumo = date.today()
             cliente.save()
             transaccion.estado = 'Confirmada'
