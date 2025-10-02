@@ -66,6 +66,11 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
+                                    {% if perms.transacciones %}
+                                        <a href="{% url 'transacciones:ver_variables' %}" class="gestion-seleccion">
+                                            💳 Gestionar Transacciones
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}

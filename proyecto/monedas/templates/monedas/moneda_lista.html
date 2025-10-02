@@ -65,7 +65,9 @@
                             <th style="width: 25%;">Estado</th>
                             <th style="width: 33%;">Precio de Compra</th>
                             <th style="width: 33%;">Precio de Venta</th>
+                            {% if perms.monedas.gestion %}
                             <th style="width: 34%;">Stock</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -81,9 +83,11 @@
                             <td>
                                 <span style="font-size:1rem; font-weight:700;">Gs. {{ moneda.calcular_precio_venta|intcomma }}</span>
                             </td>
+                            {% if perms.monedas.gestion %}
                             <td>
                                 <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|intcomma }}</span>
                             </td>
+                            {% endif %}
                         </tr>
                     </tbody>
                 </table>

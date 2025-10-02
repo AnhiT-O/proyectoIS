@@ -20,13 +20,13 @@ Date: 2024
 import logging
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
-from .forms import SeleccionMonedaMontoForm
+from .forms import SeleccionMonedaMontoForm, VariablesForm
 from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion
 from decimal import Decimal
 from clientes.models import Cliente
@@ -1613,186 +1613,6 @@ def venta_exito(request):
     return render(request, 'transacciones/exito.html', context)
 
 # ============================================================================
-# VISTAS AUXILIARES Y APIs
-# ============================================================================
-
-@login_required
-def obtener_limites_cliente(request):
-    """
-    API AJAX para consultar límites de transacción del cliente activo.
-    
-    Devuelve información detallada sobre los límites diarios y mensuales
-    del cliente, incluyendo consumo actual y disponibilidad restante.
-    Útil para mostrar información dinámica en las interfaces de usuario.
-    
-    Args:
-        request (HttpRequest): Petición AJAX
-        
-    Returns:
-        JsonResponse: Información de límites en formato JSON
-            - limite_diario: Límite diario total
-            - limite_mensual: Límite mensual total
-            - consumo_diario: Consumo actual del día
-            - consumo_mensual: Consumo actual del mes
-            - disponible_diario: Disponible restante hoy
-            - disponible_mensual: Disponible restante este mes
-            - porcentaje_uso_diario: Porcentaje usado del límite diario
-            - porcentaje_uso_mensual: Porcentaje usado del límite mensual
-            
-    Status Codes:
-        - 200: Información obtenida exitosamente
-        - 400: No hay cliente activo
-        - 500: Error interno del servidor
-    """
-    if not request.user.cliente_activo:
-        return JsonResponse({
-            'error': 'No hay cliente activo'
-        }, status=400)
-    
-    try:
-        limites_info = LimiteService.obtener_limites_disponibles(request.user.cliente_activo)
-        
-        if 'error' in limites_info:
-            return JsonResponse({
-                'error': limites_info['error']
-            }, status=500)
-        
-        return JsonResponse({
-            'limite_diario': limites_info['limite_diario'],
-            'limite_mensual': limites_info['limite_mensual'],
-            'consumo_diario': limites_info['consumo_diario'],
-            'consumo_mensual': limites_info['consumo_mensual'],
-            'disponible_diario': limites_info['disponible_diario'],
-            'disponible_mensual': limites_info['disponible_mensual'],
-            'porcentaje_uso_diario': limites_info['porcentaje_uso_diario'],
-            'porcentaje_uso_mensual': limites_info['porcentaje_uso_mensual']
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'error': 'Error al obtener información de límites'
-        }, status=500)
-
-@login_required
-def simular_transaccion_limites(request):
-    """
-    API AJAX para simular transacciones y validar límites en tiempo real.
-    
-    Permite verificar si una transacción propuesta cumple con los límites
-    del cliente sin procesarla realmente. Útil para validaciones dinámicas
-    en formularios antes de proceder con la transacción real.
-    
-    Args:
-        request (HttpRequest): Petición AJAX con datos de simulación
-            - moneda_id: ID de la moneda a simular
-            - monto: Monto en la moneda seleccionada
-            - tipo_transaccion: 'COMPRA' o 'VENTA'
-        
-    Returns:
-        JsonResponse: Resultado de la simulación
-            - valida (bool): Si la transacción es válida según límites
-            - monto_guaranies: Monto convertido a guaraníes
-            - mensaje: Mensaje descriptivo del resultado
-            - error: Mensaje de error si la transacción no es válida
-            
-    Status Codes:
-        - 200: Simulación realizada exitosamente
-        - 400: Parámetros faltantes o cliente inactivo
-        - 404: Moneda no encontrada
-        - 405: Método no permitido (solo POST)
-        - 500: Error interno del servidor
-    """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-    
-    if not request.user.cliente_activo:
-        return JsonResponse({'error': 'No hay cliente activo'}, status=400)
-    
-    try:
-        moneda_id = request.POST.get('moneda_id')
-        monto = request.POST.get('monto')
-        tipo_transaccion = request.POST.get('tipo_transaccion', '').upper()
-        
-        if not all([moneda_id, monto, tipo_transaccion]):
-            return JsonResponse({
-                'error': 'Faltan parámetros requeridos'
-            }, status=400)
-        
-        if tipo_transaccion not in ['COMPRA', 'VENTA']:
-            return JsonResponse({
-                'error': 'Tipo de transacción inválido'
-            }, status=400)
-        
-        moneda = Moneda.objects.get(id=moneda_id)
-        monto_decimal = Decimal(monto)
-        
-        # Convertir a guaraníes
-        monto_guaranies = LimiteService.convertir_a_guaranies(
-            int(monto_decimal), moneda, tipo_transaccion, request.user.cliente_activo
-        )
-        
-        # Validar límites
-        LimiteService.validar_limite_transaccion(request.user.cliente_activo, monto_guaranies)
-        
-        # Si llega aquí, la transacción es válida
-        return JsonResponse({
-            'valida': True,
-            'monto_guaranies': monto_guaranies,
-            'mensaje': 'La transacción es válida según los límites establecidos'
-        })
-        
-    except Moneda.DoesNotExist:
-        return JsonResponse({
-            'error': 'Moneda no encontrada'
-        }, status=404)
-    except ValidationError as e:
-        return JsonResponse({
-            'valida': False,
-            'error': str(e)
-        })
-    except Exception as e:
-        return JsonResponse({
-            'error': 'Error interno del servidor'
-        }, status=500)
-
-def cancelar_por_timeout(request):
-    """
-    Vista que maneja la cancelación automática por timeout
-    """
-    # Verificar si hay una transacción activa en la sesión y cancelarla
-    token_data = request.session.get('token_transaccion')
-    if token_data:
-        try:
-            transaccion_id = token_data.get('datos', {}).get('transaccion_id')
-            if transaccion_id:
-                transaccion = Transaccion.objects.get(id=transaccion_id)
-                transaccion.delete()
-                messages.warning(request, 'La transacción ha sido cancelada automáticamente por tiempo de espera excedido.')
-            else:
-                messages.warning(request, 'Tiempo de espera excedido.')
-        except Transaccion.DoesNotExist:
-            messages.warning(request, 'Tiempo de espera excedido.')
-        except Exception:
-            messages.warning(request, 'Tiempo de espera excedido.')
-        
-        # Limpiar datos de sesión
-        if 'compra_datos' in request.session:
-            del request.session['compra_datos']
-        if 'venta_datos' in request.session:
-            del request.session['venta_datos']
-        if 'token_transaccion' in request.session:
-            del request.session['token_transaccion']
-    else:
-        messages.warning(request, 'Tiempo de espera excedido.')
-    
-    return redirect('inicio')
-
-# ============================================================================
-# GESTIÓN DE RECARGOS
-# ============================================================================
-
-
-# ============================================================================
 # HISTORIAL Y CONSULTA DE TRANSACCIONES
 # ============================================================================
 
@@ -1968,3 +1788,35 @@ def detalle_transaccion(request, transaccion_id):
     }
     
     return render(request, 'transacciones/detalle_transaccion.html', context)
+
+@login_required
+@permission_required('transacciones.edicion', raise_exception=True)
+def ver_variables(request):
+    """
+    Vista para ver variables de gestión de transacciones.
+    """
+    context = {
+        'limites': LimiteGlobal.objects.first(),
+        'recargos': Recargos.objects.all()
+    }
+    return render(request, 'transacciones/ver_variables.html', context)
+
+@login_required
+@permission_required('transacciones.edicion', raise_exception=True)
+def editar_variables(request):
+    """
+    Vista para editar variables de gestión de transacciones.
+    """
+    if request.method == 'POST':
+        form = VariablesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Variables actualizadas correctamente.')
+            return redirect('transacciones:ver_variables')
+    else:
+        form = VariablesForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'transacciones/editar_variables.html', context)
