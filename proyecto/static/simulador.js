@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (operacionSeleccionada === 'compra') {
             resultadoHTML += `
                     <br>
-                    <span style="font-size: 1.1em; font-weight: bold; color: #2c5530;">
+                    <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
                         Costo: ${formatNumber(data.monto_final)} Gs.
                     </span>
                 </div>

@@ -41,7 +41,7 @@
                     <div class="info-contenido">
                         <div class="info-titulo">Stock Disponible</div>
                         <div class="info-valor">
-                            {{ moneda.stock|intcomma }}
+                            {{ moneda.stock|floatformat:moneda.decimales }}
                         </div>
                     </div>
                 </div>

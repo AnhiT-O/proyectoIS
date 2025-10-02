@@ -377,21 +377,7 @@ def compra_monto_moneda(request):
         if form.is_valid():
             moneda = form.cleaned_data['moneda']
             monto = form.cleaned_data['monto_decimal']
-            # Verificar límites de transacción para compras
-            try:
-                cliente_activo = request.user.cliente_activo
-                consumo = calcular_conversion(monto, moneda, 'compra', 'Cheque', 'Efectivo', cliente_activo.segmento)
-                if consumo['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario):
-                    messages.warning(request, f'El monto excede tu límite diario disponible')
-                    return redirect('transacciones:compra_monto_moneda')
-                if consumo['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
-                    messages.warning(request, f'El monto excede tu límite mensual disponible')
-                    return redirect('transacciones:compra_monto_moneda')
-                
-            except Exception as e:
-                # Si hay error de límites, mostrar mensaje y no proceder
-                messages.error(request, str(e))
-                return redirect('transacciones:compra_monto_moneda')
+            cliente_activo = request.user.cliente_activo
             
             # Si pasa las validaciones, guardar los datos en la sesión
             request.session['compra_datos'] = {
@@ -891,6 +877,12 @@ def compra_confirmacion(request):
             else:
                 str_medio_pago = medio_pago
             datos_transaccion = calcular_conversion(monto, moneda, 'compra', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
+            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
+                messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:compra_monto_moneda')
+            if datos_transaccion['monto'] > moneda.stock:
+                messages.warning(request, 'El monto a comprar excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:compra_monto_moneda')
             transaccion = Transaccion.objects.create(
                 cliente=request.user.cliente_activo,
                 tipo='compra',
@@ -1048,22 +1040,7 @@ def venta_monto_moneda(request):
         if form.is_valid():
             moneda = form.cleaned_data['moneda']
             monto = form.cleaned_data['monto_decimal']
-            # Verificar límites de transacción para ventas
-            try:
-                cliente_activo = request.user.cliente_activo
-                consumo = calcular_conversion(monto, moneda, 'venta', 'Efectivo', 'Efectivo', cliente_activo.segmento)
-                if consumo['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario):
-                    messages.warning(request, f'El monto excede tu límite diario disponible')
-                    return redirect('transacciones:compra_monto_moneda')
-                if consumo['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
-                    messages.warning(request, f'El monto excede tu límite mensual disponible')
-                    return redirect('transacciones:compra_monto_moneda')
-                
-            except Exception as e:
-                # Si hay error de límites, mostrar mensaje y no proceder
-                messages.error(request, str(e))
-                return redirect('transacciones:venta_monto_moneda')
-                
+            cliente_activo = request.user.cliente_activo
             # Si pasa las validaciones, guardar los datos en la sesión
             request.session['venta_datos'] = {
                 'moneda': moneda.id,
@@ -1505,6 +1482,12 @@ def venta_confirmacion(request):
         elif action == 'aceptar':
             transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
             datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'venta', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
+            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
+                messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:venta_monto_moneda')
+            if datos_transaccion['monto_final'] > StockGuaranies.objects.first().cantidad:
+                messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:venta_monto_moneda')
             transaccion.precio_base = datos_transaccion['precio_base']
             transaccion.cotizacion = datos_transaccion['cotizacion']
             transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']

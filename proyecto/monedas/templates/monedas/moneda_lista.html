@@ -85,7 +85,7 @@
                             </td>
                             {% if perms.monedas.gestion %}
                             <td>
-                                <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|intcomma }}</span>
+                                <span style="font-size:1rem; font-weight:700;">{{ moneda.stock|floatformat:moneda.decimales }}</span>
                             </td>
                             {% endif %}
                         </tr>

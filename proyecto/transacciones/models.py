@@ -299,7 +299,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         monto += redondeo_efectivo_monto
     elif dict_pago == 'Efectivo' and operacion == 'venta':
         redondeo_efectivo_monto = monto % moneda.denominaciones[0]
-        monto -= redondeo_efectivo_monto
+        monto += redondeo_efectivo_monto
     if operacion == 'compra':
         cotizacion = moneda.tasa_base + moneda.comision_venta
         precio_base = monto * (moneda.tasa_base + moneda.comision_venta)
@@ -344,7 +344,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
     if dict_pago == 'Efectivo' and operacion == 'compra':
         redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
-        monto_final -= redondeo_efectivo_monto_final
+        monto_final += redondeo_efectivo_monto_final
     if dict_cobro == 'Efectivo' and operacion == 'venta':
         redondeo_efectivo_monto_final = StockGuaranies.objects.first().denominaciones[0] - (monto_final % StockGuaranies.objects.first().denominaciones[0])
         if redondeo_efectivo_monto_final == StockGuaranies.objects.first().denominaciones[0]:

@@ -26,7 +26,7 @@ class Moneda(models.Model):
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
     denominaciones = ArrayField(models.IntegerField(), blank=True, default=list)
-    stock = models.BigIntegerField(default=0)
+    stock = models.DecimalField(max_digits=30, decimal_places=8, default=0)
     
     def save(self, *args, **kwargs):
         if self.pk:
