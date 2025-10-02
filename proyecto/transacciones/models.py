@@ -189,7 +189,10 @@ class Transaccion(models.Model):
         verbose_name_plural = "Transacciones"
         db_table = "transacciones"
         default_permissions = []  # Deshabilitar permisos por defecto
-        permissions = [("edicion", "Puede editar límites de transacción y porcentaje de recargos")]  # De momento no hay permisos necesarios
+        permissions = [
+            ("edicion", "Puede editar límites de transacción y porcentaje de recargos"),
+            ("visualizacion", "Puede ver el historial de todos los clientes")
+            ] 
     
     def __str__(self):
         """

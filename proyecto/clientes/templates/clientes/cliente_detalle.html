@@ -21,12 +21,14 @@
                 {{ cliente.get_tipoCliente_display }}
             </div>
         </div>
+        {% if perms.transacciones.visualizacion %}
         <div style="display: flex; gap: 0.5rem;">
             <!-- Botón para ver historial de transacciones -->
             <a href="{% url 'clientes:cliente_historial' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; z-index: 1;">
                 Historial de Transacciones
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="zona-detalle">
