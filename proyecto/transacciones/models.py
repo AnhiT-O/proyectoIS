@@ -290,8 +290,10 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     redondeo_efectivo_monto_final = 0
     monto_original = monto
     if dict_cobro == 'Efectivo' and operacion == 'compra':
-        redondeo_efectivo_monto = monto % moneda.denominaciones[0]
-        monto -= redondeo_efectivo_monto
+        redondeo_efectivo_monto = moneda.denominaciones[0] - (monto % moneda.denominaciones[0])
+        if redondeo_efectivo_monto == moneda.denominaciones[0]:
+            redondeo_efectivo_monto = 0
+        monto += redondeo_efectivo_monto
     elif dict_pago == 'Efectivo' and operacion == 'venta':
         redondeo_efectivo_monto = monto % moneda.denominaciones[0]
         monto -= redondeo_efectivo_monto
@@ -341,7 +343,9 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
         monto_final -= redondeo_efectivo_monto_final
     if dict_cobro == 'Efectivo' and operacion == 'venta':
-        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
+        redondeo_efectivo_monto_final = StockGuaranies.objects.first().denominaciones[0] - (monto_final % StockGuaranies.objects.first().denominaciones[0])
+        if redondeo_efectivo_monto_final == StockGuaranies.objects.first().denominaciones[0]:
+            redondeo_efectivo_monto_final = 0
         monto_final += redondeo_efectivo_monto_final
     return {
         'cotizacion': int(cotizacion),
