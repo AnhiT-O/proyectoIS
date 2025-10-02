@@ -27,7 +27,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm
-from .models import Transaccion, LimiteGlobal, calcular_conversion
+from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion
 from decimal import Decimal
 from clientes.models import Cliente
 import secrets
@@ -232,7 +232,6 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
         datos_transaccion = request.session.get(datos_key)
         precio_compra_inicial = request.session.get(precio_compra_key)
         precio_venta_inicial = request.session.get(precio_venta_key)
-        
         if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
             return None
             
@@ -244,13 +243,13 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
         precios_actuales = moneda.get_precios_cliente(cliente_activo)
         precio_compra_actual = precios_actuales['precio_compra']
         precio_venta_actual = precios_actuales['precio_venta']
-        
+
         # Verificar si hay cambios
         hay_cambios = (
             precio_compra_actual != precio_compra_inicial and 
             precio_venta_actual != precio_venta_inicial
         )
-        
+        print(precio_venta_inicial)
         if hay_cambios:
             return {
                 'hay_cambios': True,
@@ -375,7 +374,6 @@ def compra_monto_moneda(request):
             # Guardar precios iniciales en la sesión
             precios = moneda.get_precios_cliente(cliente_activo)
             request.session['precio_venta_inicial'] = precios['precio_venta']
-            
             # Redireccionar al siguiente paso sin parámetros en la URL
             return redirect('transacciones:compra_medio_pago')
     else:
@@ -448,6 +446,14 @@ def compra_medio_pago(request):
         messages.error(request, 'Debe completar el primer paso antes de continuar.')
         return redirect('transacciones:compra_monto_moneda')
     
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=compra_datos['moneda'])
+        monto = Decimal(compra_datos['monto'])
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:compra_monto_moneda')
+    
     # VERIFICAR CAMBIOS DE COTIZACIÓN
     cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
     if cambios and cambios.get('hay_cambios'):
@@ -472,20 +478,19 @@ def compra_medio_pago(request):
                 messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
                 return redirect('inicio')
         else:
-            # Mostrar modal de cambio de cotización
-            return render(request, 'transacciones/cotizacion_cambiada.html', {
+            context = {
                 'cambios': cambios,
+                'moneda': 1,
+                'monto': 1,
+                'medios_pago': '',
+                'medio_pago_seleccionado': '',
+                'cliente_activo': request.user.cliente_activo,
                 'paso_actual': 2,
-                'tipo_transaccion': 'compra'
-            })
-    
-    # Recuperar los datos de la sesión
-    try:
-        moneda = Moneda.objects.get(id=compra_datos['moneda'])
-        monto = Decimal(compra_datos['monto'])
-    except (Moneda.DoesNotExist, ValueError, KeyError):
-        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
-        return redirect('transacciones:compra_monto_moneda')
+                'titulo_paso': 'Selección de Medio de Pago',
+                'tipo_transaccion': 'compra'  # Agregar contexto para diferenciar en plantilla
+            }
+            
+            return render(request, 'transacciones/seleccion_medio_pago.html', context)
     
     if request.method == 'POST':
         # Verificar si es selección de medio de pago o avance al siguiente paso
@@ -526,9 +531,12 @@ def compra_medio_pago(request):
     medios_pago_disponibles = [
         'Efectivo',
         'Cheque',
-        'Billetera Electrónica',
         'Transferencia Bancaria'
     ]
+    # Agregar billeteras electrónicas como medio de pago si hay recargos configurados
+    recargos_billetera = Recargos.objects.filter(medio='Billetera Electrónica')
+    for recargo in recargos_billetera:
+        medios_pago_disponibles.append(recargo.marca)
     # Verificar si el cliente tiene tarjetas de crédito activas en Stripe
     if request.user.cliente_activo.tiene_tarjetas_activas():
         for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
@@ -601,6 +609,19 @@ def compra_medio_cobro(request):
         messages.error(request, 'Debe completar el segundo paso antes de continuar.')
         return redirect('transacciones:compra_medio_pago')
     
+    # Recuperar los datos de la sesión
+    try:
+        moneda = Moneda.objects.get(id=compra_datos['moneda'])
+        # Guardar valores iniciales de cotización
+        request.session['tasa_base_inicial'] = moneda.tasa_base
+        request.session['comision_compra_inicial'] = moneda.comision_compra
+        request.session['comision_venta_inicial'] = moneda.comision_venta
+        monto = Decimal(compra_datos['monto'])
+        medio_pago = compra_datos['medio_pago']
+    except (Moneda.DoesNotExist, ValueError, KeyError):
+        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
+        return redirect('transacciones:compra_monto_moneda')
+    
     # VERIFICAR CAMBIOS DE COTIZACIÓN
     cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
     if cambios and cambios.get('hay_cambios'):
@@ -625,25 +646,21 @@ def compra_medio_cobro(request):
                 messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
                 return redirect('inicio')
         else:
-            # Mostrar modal de cambio de cotización
-            return render(request, 'transacciones/cotizacion_cambiada.html', {
+            context = {
                 'cambios': cambios,
+                'moneda': 1,
+                'monto': 1,
+                'medio_pago': '',
+                'medios_cobro': '',
+                'medio_cobro_seleccionado': '',
+                'cliente_activo': request.user.cliente_activo,
                 'paso_actual': 3,
+                'titulo_paso': 'Selección de Medio de Cobro',
                 'tipo_transaccion': 'compra'
-            })
+            }
+            
+            return render(request, 'transacciones/seleccion_medio_cobro.html', context)
     
-    # Recuperar los datos de la sesión
-    try:
-        moneda = Moneda.objects.get(id=compra_datos['moneda'])
-        # Guardar valores iniciales de cotización
-        request.session['tasa_base_inicial'] = moneda.tasa_base
-        request.session['comision_compra_inicial'] = moneda.comision_compra
-        request.session['comision_venta_inicial'] = moneda.comision_venta
-        monto = Decimal(compra_datos['monto'])
-        medio_pago = compra_datos['medio_pago']
-    except (Moneda.DoesNotExist, ValueError, KeyError):
-        messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
-        return redirect('transacciones:compra_monto_moneda')
     if request.method == 'POST':
         # Verificar si es selección de medio de cobro o avance al siguiente paso
         accion = request.POST.get('accion')
@@ -693,7 +710,6 @@ def compra_medio_cobro(request):
         'medio_cobro_seleccionado': medio_cobro_seleccionado,
         'cliente_activo': request.user.cliente_activo,
         'paso_actual': 3,
-        'total_pasos': 4,
         'titulo_paso': 'Selección de Medio de Cobro',
         'tipo_transaccion': 'compra'
     }
@@ -747,81 +763,23 @@ def compra_confirmacion(request):
     if not compra_datos or compra_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:compra_medio_cobro')
-    
-    cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
-    if cambios and cambios.get('hay_cambios'):
-        # Manejar POST del modal de cambio de cotización
-        if request.method == 'POST' and request.POST.get('action'):
-            action = request.POST.get('action')
-            if action == 'aceptar':
-                # Usuario acepta los nuevos precios, actualizar precios en sesión
-                moneda = cambios['moneda']
-                cliente_activo = request.user.cliente_activo
-                precios_actuales = moneda.get_precios_cliente(cliente_activo)
-                request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
-                messages.success(request, 'Precios actualizados. Continuando con la transacción.')
-                # Continuar con el flujo normal
-            elif action == 'cancelar':
-                # Usuario cancela la transacción
-                # Limpiar datos de sesión
-                if 'compra_datos' in request.session:
-                    del request.session['compra_datos']
-                if 'precio_venta_inicial' in request.session:
-                    del request.session['precio_venta_inicial']
-                messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
-                return redirect('inicio')
-        else:
-            # Mostrar modal de cambio de cotización
-            return render(request, 'transacciones/cotizacion_cambiada.html', {
-                'cambios': cambios,
-                'paso_actual': 4,
-                'tipo_transaccion': 'compra'
-            })
 
     if request.method == 'POST':
         accion = request.POST.get('accion')
+        action = request.POST.get('action')
         if accion == 'confirmar':
             cambios = verificar_cambio_cotizacion_sesion(request, 'compra')
             if cambios and cambios.get('hay_cambios'):
-                # Manejar POST del modal de cambio de cotización
-                if request.method == 'POST' and request.POST.get('action'):
-                    action = request.POST.get('action')
-                    if action == 'aceptar':
-                        # Usuario acepta los nuevos precios, confirmando la transaccion
-                        transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
-                        datos_transaccion = calcular_conversion(transaccion.monto, Moneda.objects.get(id=transaccion.moneda), 'compra', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
-                        transaccion.precio_base = datos_transaccion['precio_base']
-                        transaccion.cotizacion = datos_transaccion['cotizacion']
-                        transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
-                        transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
-                        transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
-                        transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
-                        transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
-                        transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                        transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                        transaccion.redondeo_efectivo_monto_final = datos_transaccion['redondeo_efectivo_monto_final']
-                        transaccion.monto_original = datos_transaccion['monto_original']
-                        transaccion.monto = datos_transaccion['monto']
-                        transaccion.monto_final = datos_transaccion['monto_final']
-                        transaccion.save()
-                    elif action == 'cancelar':
-                        # Usuario cancela la transacción
-                        # Limpiar datos de sesión
-                        if 'compra_datos' in request.session:
-                            del request.session['compra_datos']
-                        if 'precio_venta_inicial' in request.session:
-                            del request.session['precio_venta_inicial']
-                        messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
-                        return redirect('inicio')
-                else:
-                    # Mostrar modal de cambio de cotización
-                    return render(request, 'transacciones/cotizacion_cambiada.html', {
-                        'cambios': cambios,
-                        'paso_actual': 4,
-                        'tipo_transaccion': 'compra'
-                    })
+                context = {
+                    'cambios': cambios,
+                    'transaccion': Transaccion.objects.get(id=request.session.get('transaccion_id')),
+                    'paso_actual': 4,
+                    'titulo_paso': 'Confirmación de Compra'
+                }
+                
+                return render(request, 'transacciones/confirmacion.html', context)
             return redirect('transacciones:compra_exito')
-        else:
+        elif accion == 'cancelar':
             messages.info(request, 'Has cancelado la transacción.')
             t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
             if t:
@@ -835,6 +793,48 @@ def compra_confirmacion(request):
                 del request.session['precio_venta_inicial']
             if 'transaccion_id' in request.session:
                 del request.session['transaccion_id']
+            return redirect('inicio')
+        elif action == 'aceptar':
+            transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
+            datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'compra', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
+            transaccion.precio_base = datos_transaccion['precio_base']
+            transaccion.cotizacion = datos_transaccion['cotizacion']
+            transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
+            transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
+            transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
+            transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
+            transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
+            transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
+            transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
+            transaccion.redondeo_efectivo_monto_final = datos_transaccion['redondeo_efectivo_monto_final']
+            transaccion.monto_original = datos_transaccion['monto_original']
+            transaccion.monto = datos_transaccion['monto']
+            transaccion.monto_final = datos_transaccion['monto_final']
+            transaccion.save()
+            precios_actuales = transaccion.moneda.get_precios_cliente(request.user.cliente_activo)
+            request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
+            messages.success(request, 'Precios actualizados. Continuando con la transacción.')
+            context = {
+                'transaccion': Transaccion.objects.get(id=request.session.get('transaccion_id')),
+                'paso_actual': 4,
+                'titulo_paso': 'Confirmación de Compra'
+            }
+            
+            return render(request, 'transacciones/confirmacion.html', context)
+        elif action == 'cancelar':
+            t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
+            if t:
+                t.estado = 'Cancelada'
+                t.razon = 'Usuario cancela debido a cambios de cotización'
+                t.save()
+                # Limpiar datos de sesión
+            if 'compra_datos' in request.session:
+                del request.session['compra_datos']
+            if 'precio_venta_inicial' in request.session:
+                del request.session['precio_venta_inicial']
+            if 'transaccion_id' in request.session:
+                del request.session['transaccion_id']
+            messages.info(request, 'Transacción cancelada debido a cambios en la cotización.')
             return redirect('inicio')
     else:   
         # Recuperar los datos de la sesión

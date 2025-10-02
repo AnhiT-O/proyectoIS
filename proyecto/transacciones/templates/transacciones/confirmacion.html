@@ -194,5 +194,32 @@
             </button>
         </div>
     </form>
+    {% if cambios %}
+    <div class="popup-overlay" style="display: flex">
+        <div class="popup-contenido" style="max-width: 700px;">
+            <div class="popup-cabecera">
+                <h3>¡La cotización ha cambiado!</h3>
+            </div>
+            <div class="popup-cuerpo">
+                {% if transaccion.tipo == 'compra' %}
+                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|intcomma }} a Gs. {{ cambios.valores_actuales.precio_venta|intcomma }}</p>
+                {% else %}
+                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|intcomma }} a Gs. {{ cambios.valores_actuales.precio_compra|intcomma }}</p>
+                {% endif %}
+                <form method="post">
+                {% csrf_token %}
+                    <div class="zona-botones">
+                        <button type="submit" name="action" value="aceptar" class="btn-enviar">
+                            Aceptar Nuevo Precio
+                        </button>
+                        <button type="submit" name="action" value="cancelar" class="btn-atras">
+                            Cancelar Operación
+                        </button>
+                    </div>
+                </form>    
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
