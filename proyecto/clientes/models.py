@@ -86,7 +86,6 @@ class Cliente(models.Model):
         choices=SEGMENTO_CHOICES,
         default='minorista',
     )
-    beneficio_segmento = models.IntegerField(default=0)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
         related_name='clientes_operados',

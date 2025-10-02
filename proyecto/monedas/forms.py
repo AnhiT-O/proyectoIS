@@ -1,7 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from .models import Moneda, LimiteGlobal
+from .models import Moneda
+from transacciones.models import LimiteGlobal
 
 class MonedaForm(forms.ModelForm):
 

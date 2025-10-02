@@ -109,6 +109,7 @@ class CuentaBancaria(MedioAcreditacion):
         db_table = 'cuenta_bancaria'
         verbose_name = 'Cuenta Bancaria'
         verbose_name_plural = 'Cuentas Bancarias'
+        default_permissions = []  # Deshabilitar permisos por defecto
         
     def __str__(self):
         """Representación en cadena de la cuenta bancaria."""
@@ -171,3 +172,4 @@ class Billetera(MedioAcreditacion):
         db_table = 'billetera'
         verbose_name = 'Billetera'
         verbose_name_plural = 'Billeteras'
+        default_permissions = []  # Deshabilitar permisos por defecto

@@ -7,9 +7,6 @@ incluyendo la selección de monedas, montos y configuración de recargos.
 Formularios principales:
     - SeleccionMonedaMontoForm: Selección de moneda y monto para transacciones
     - RecargoForm: Gestión de recargos por medio de pago
-
-Author: Equipo de desarrollo Global Exchange
-Date: 2024
 """
 
 from django import forms
@@ -37,6 +34,7 @@ class SeleccionMonedaMontoForm(forms.Form):
     
     moneda = forms.ModelChoiceField(
         queryset=Moneda.objects.filter(activa=True),
+        empty_label="",
         widget=forms.Select(attrs={
             'class': 'form-control',
             'id': 'id_moneda'
@@ -50,8 +48,8 @@ class SeleccionMonedaMontoForm(forms.Form):
             'class': 'form-control',
             'id': 'id_monto',
             'placeholder': 'Ingresa el monto en la moneda extranjera',
-            'step': '0.01',
-            'min': '0.01'
+            'step': '1',
+            'min': '1'
         }),
         required=True,
         error_messages={'required': 'Debes ingresar un monto numérico.'}
@@ -96,53 +94,6 @@ class SeleccionMonedaMontoForm(forms.Form):
         # Agregar el monto convertido a los datos limpios
         cleaned_data['monto_decimal'] = monto
         return cleaned_data
-
-    def __init__(self, *args, **kwargs):
-        """
-        Inicializador del formulario con configuración personalizada.
-        
-        Configura las opciones del campo moneda con información adicional
-        para JavaScript, personaliza el widget select y establece
-        comportamientos específicos del formulario.
-        
-        Args:
-            *args: Argumentos posicionales del formulario padre
-            **kwargs: Argumentos de palabra clave del formulario padre
-        """
-        super().__init__(*args, **kwargs)
-        
-        # Personalizar el widget de moneda para mostrar símbolo y nombre, con datos para JS
-        monedas_choices = []
-        monedas_data = {}
-        for moneda in Moneda.objects.filter(activa=True):
-            choice_text = f"{moneda.simbolo} - {moneda.nombre}"
-            monedas_choices.append((moneda.pk, choice_text))
-            monedas_data[str(moneda.pk)] = {
-                'simbolo': moneda.simbolo,
-                'decimales': moneda.decimales
-            }
-        
-        self.fields['moneda'].choices = [('', 'Selecciona una moneda')] + monedas_choices
-
-        # Modificar el widget para que la opción inicial sea disabled, selected y hidden
-        self.fields['moneda'].widget.choices = self.fields['moneda'].choices
-        self.fields['moneda'].widget.attrs['onchange'] = "this.options[0].setAttribute('hidden', 'hidden');"
-        # Usar render_option para agregar los atributos (solo para Select, no para ModelChoiceField)
-        original_create_option = self.fields['moneda'].widget.create_option
-        def custom_create_option(*args, **kwargs):
-            option_dict = original_create_option(*args, **kwargs)
-            if option_dict['value'] == '':
-                option_dict['attrs']['disabled'] = True
-                option_dict['attrs']['selected'] = True
-                option_dict['attrs']['hidden'] = True
-            return option_dict
-        self.fields['moneda'].widget.create_option = custom_create_option
-
-        # Agregar atributos data para JavaScript dinámico
-        import json
-        self.fields['moneda'].widget.attrs.update({
-            'data-monedas': json.dumps(monedas_data)
-        })
 
 class RecargoForm(forms.ModelForm):
     """

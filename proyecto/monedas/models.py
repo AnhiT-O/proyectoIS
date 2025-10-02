@@ -48,11 +48,18 @@ class Moneda(models.Model):
             ("cotizacion", "Puede actualizar cotización de monedas")
         ]
 
-    def calcular_precio_venta(self, porcentaje_beneficio=0):
+    def calcular_precio_venta(self, segmento='minorista'):
         """
         Calcula el precio de venta aplicando el beneficio del cliente.
         precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)
         """
+        if segmento == 'corporativo':
+            porcentaje_beneficio = 5  # Beneficio del 5% para clientes corporativos
+        elif segmento == 'vip':
+            porcentaje_beneficio = 10  # Beneficio del 10% para clientes VIP
+        else:
+            porcentaje_beneficio = 0  # Sin beneficio para clientes minoristas
+
         tasa_base = self.tasa_base
         comision_venta = self.comision_venta
         beneficio = porcentaje_beneficio / 100
@@ -60,11 +67,18 @@ class Moneda(models.Model):
         precio = int(tasa_base + comision_venta - (comision_venta * beneficio))
         return precio
 
-    def calcular_precio_compra(self, porcentaje_beneficio=0):
+    def calcular_precio_compra(self, segmento='minorista'):
         """
         Calcula el precio de compra aplicando el beneficio del cliente.
         precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)
         """
+        if segmento == 'corporativo':
+            porcentaje_beneficio = 5  # Beneficio del 5% para clientes corporativos
+        elif segmento == 'vip':
+            porcentaje_beneficio = 10  # Beneficio del 10% para clientes VIP
+        else:
+            porcentaje_beneficio = 0  # Sin beneficio para clientes minoristas
+            
         tasa_base = self.tasa_base
         comision_compra = self.comision_compra
         beneficio = porcentaje_beneficio / 100
@@ -74,8 +88,8 @@ class Moneda(models.Model):
 
     def get_precios_cliente(self, cliente):
         """Obtiene los precios finales para un cliente específico"""
-        precio_compra = self.calcular_precio_compra(cliente.beneficio_segmento)
-        precio_venta = self.calcular_precio_venta(cliente.beneficio_segmento)
+        precio_compra = self.calcular_precio_compra(cliente.segmento)
+        precio_venta = self.calcular_precio_venta(cliente.segmento)
         return {
             'precio_compra': precio_compra,
             'precio_venta': precio_venta
@@ -165,40 +179,6 @@ def crear_moneda_usd(sender, **kwargs):
                 stock=1000000
             )
             print("✓ Moneda USD creada automáticamente")
-
-
-class LimiteGlobal(models.Model):
-    """
-    Modelo para almacenar los límites globales de transacciones
-    que aplican a todos los clientes según la ley de casas de cambio
-    """
-    limite_diario = models.BigIntegerField(
-        default=90000000,
-        help_text="Límite diario global en guaraníes"
-    )
-    limite_mensual = models.BigIntegerField(
-        default=450000000,
-        help_text="Límite mensual global en guaraníes"
-    )
-
-    class Meta:
-        verbose_name = 'Límite Global'
-        verbose_name_plural = 'Límites Globales'
-        db_table = 'limite_global'
-        default_permissions = []
-
-    def __str__(self):
-        return f"Límite Diario: {self.limite_diario:,} - Mensual: {self.limite_mensual:,}"
-
-@receiver(post_migrate)
-def crear_limite_global_inicial(sender, **kwargs):
-    """
-    Crea automáticamente el límite global inicial después de ejecutar las migraciones
-    """
-    if kwargs['app_config'].name == 'monedas':
-        if not LimiteGlobal.objects.exists():
-            LimiteGlobal.objects.create()
-            print("Límite global inicial creado automáticamente")
 
 class StockGuaranies(models.Model):
     """

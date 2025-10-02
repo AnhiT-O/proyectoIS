@@ -33,6 +33,7 @@ class Recargos(models.Model):
         verbose_name = "Recargo"
         verbose_name_plural = "Recargos"
         db_table = "recargos"
+        default_permissions = []  # Deshabilitar permisos por defecto
 
     def __str__(self):
         """
@@ -100,6 +101,39 @@ def crear_recargos(sender, **kwargs):
                 recargo='3'
             )
 
+class LimiteGlobal(models.Model):
+    """
+    Modelo para almacenar los límites globales de transacciones
+    que aplican a todos los clientes según la ley de casas de cambio
+    """
+    limite_diario = models.BigIntegerField(
+        default=90000000,
+        help_text="Límite diario global en guaraníes"
+    )
+    limite_mensual = models.BigIntegerField(
+        default=450000000,
+        help_text="Límite mensual global en guaraníes"
+    )
+
+    class Meta:
+        verbose_name = 'Límite Global'
+        verbose_name_plural = 'Límites Globales'
+        db_table = 'limite_global'
+        default_permissions = []
+
+    def __str__(self):
+        return f"Límite Diario: {self.limite_diario:,} - Mensual: {self.limite_mensual:,}"
+
+@receiver(post_migrate)
+def crear_limite_global_inicial(sender, **kwargs):
+    """
+    Crea automáticamente el límite global inicial después de ejecutar las migraciones
+    """
+    if kwargs['app_config'].name == 'monedas':
+        if not LimiteGlobal.objects.exists():
+            LimiteGlobal.objects.create()
+            print("Límite global inicial creado automáticamente")
+
 class Transaccion(models.Model):
     """
     Modelo principal para representar transacciones de compra y venta de monedas.
@@ -129,25 +163,28 @@ class Transaccion(models.Model):
     tipo = models.CharField(max_length=10)  # 'compra' o 'venta'
     moneda = models.ForeignKey('monedas.Moneda', on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=30, decimal_places=8)
+    cotizacion = models.IntegerField()
+    beneficio_segmento = models.IntegerField()
+    porc_beneficio_segmento = models.CharField(max_length=3)
+    recargo_pago = models.IntegerField()
+    porc_recargo_pago = models.CharField(max_length=4)
+    recargo_cobro = models.IntegerField()
+    porc_recargo_cobro = models.CharField(max_length=4)
+    monto_final = models.IntegerField()
     medio_pago = models.CharField(max_length=50) 
-    medio_cobro = models.CharField(max_length=100, default='')  # Agregar campo medio_cobro 
+    medio_cobro = models.CharField(max_length=100)  # Agregar campo medio_cobro 
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
+    razon = models.CharField(max_length=100, blank=True, null=True)  # Campo para la razón de cancelación
     token = models.CharField(max_length=255, blank=True, null=True)  # Campo para el token
-    token_expiracion = models.DateTimeField(blank=True, null=True)  # Campo para la expiración del token
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
-    
-    # Campos para almacenar cotizaciones originales al crear la transacción
-    precio_compra_original = models.IntegerField(null=True, blank=True)  # Precio de compra al momento de crear la transacción
-    precio_venta_original = models.IntegerField(null=True, blank=True)   # Precio de venta al momento de crear la transacción
-    fecha_cotizacion_original = models.DateTimeField(null=True, blank=True)  # Fecha de cotización original
     
     class Meta:
         verbose_name = "Transacción"
         verbose_name_plural = "Transacciones"
         db_table = "transacciones"
-        default_permissions = []
-        permissions = []  # De momento no hay permisos necesarios
+        default_permissions = []  # Deshabilitar permisos por defecto
+        permissions = [("edicion", "Puede editar límites de transacción y porcentaje de recargos")]  # De momento no hay permisos necesarios
     
     def __str__(self):
         """
@@ -157,54 +194,6 @@ class Transaccion(models.Model):
             str: Descripción de la transacción en formato "Tipo - Cliente - Monto Moneda"
         """
         return f"{self.tipo.title()} - {self.cliente} - {self.monto} {self.moneda.simbolo}"
-    
-    def token_valido(self):
-        """
-        Verifica si el token de la transacción aún es válido.
-        
-        Un token es válido si existe y no ha expirado según su timestamp
-        de expiración configurado.
-        
-        Returns:
-            bool: True si el token es válido, False en caso contrario
-        """
-        if not self.token or not self.token_expiracion:
-            return False
-        return timezone.now() < self.token_expiracion
-    
-    def establecer_token_con_expiracion(self, token):
-        """
-        Asigna un token a la transacción con tiempo de expiración automático.
-        
-        Establece el token y calcula su fecha de expiración (5 minutos desde ahora).
-        Guarda automáticamente los cambios en la base de datos.
-        
-        Args:
-            token (str): Token único generado para la transacción
-        """
-        self.token = token
-        self.token_expiracion = timezone.now() + timedelta(minutes=5)
-        self.save()
-    
-    @classmethod
-    def limpiar_tokens_expirados(cls):
-        """
-        Elimina todas las transacciones con tokens expirados del sistema.
-        
-        Método de clase que busca y elimina transacciones cuyo token ha expirado
-        según el timestamp actual. Útil para limpieza periódica del sistema.
-        
-        Returns:
-            int: Número de transacciones eliminadas
-        """
-        now = timezone.now()
-        transacciones_expiradas = cls.objects.filter(
-            token__isnull=False,
-            token_expiracion__lt=now
-        )
-        count = transacciones_expiradas.count()
-        transacciones_expiradas.delete()
-        return count
 
     def almacenar_cotizacion_original(self):
         """
@@ -295,36 +284,50 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     if operacion == 'compra':
         cotizacion = monto * (moneda.tasa_base + moneda.comision_venta)
         if segmentacion == 'corporativo':
-            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * 0.95))
+            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.95)))
+            porc_beneficio_segmento = 5
         elif segmentacion == 'vip':
-            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * 0.9))
+            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.9)))
+            porc_beneficio_segmento = 10
         else:
             monto_final = cotizacion
+            porc_beneficio_segmento = 0
     else:
         cotizacion = monto * (moneda.tasa_base - moneda.comision_compra)
         if segmentacion == 'corporativo':
-            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * 0.95))
+            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.95)))
+            porc_beneficio_segmento = 5
         elif segmentacion == 'vip':
-            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * 0.9))
+            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.9)))
+            porc_beneficio_segmento = 10
         else:
             monto_final = cotizacion
+            porc_beneficio_segmento = 0
     beneficio_segmento = abs(cotizacion - monto_final)
     if isinstance(dict_pago, dict) and 'brand' in dict_pago:
         monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+        porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
     elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
         monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
+        porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
     else:
         monto_recargo_pago = 0
+        porc_recargo_pago = 0
 
     if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
         monto_recargo_cobro =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
+        porc_recargo_cobro = Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo
     else:
         monto_recargo_cobro = 0
+        porc_recargo_cobro = 0
     monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
     return {
-        'cotizacion': cotizacion,
-        'beneficio_segmento': beneficio_segmento,
-        'monto_recargo_pago': monto_recargo_pago,
-        'monto_recargo_cobro': monto_recargo_cobro,
-        'monto_final': monto_final
+        'cotizacion': int(cotizacion),
+        'beneficio_segmento': int(beneficio_segmento),
+        'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
+        'monto_recargo_pago': int(monto_recargo_pago),
+        'porc_recargo_pago': f'{porc_recargo_pago}%',
+        'monto_recargo_cobro': int(monto_recargo_cobro),
+        'porc_recargo_cobro': f'{porc_recargo_cobro}%',
+        'monto_final': int(monto_final)
     }
