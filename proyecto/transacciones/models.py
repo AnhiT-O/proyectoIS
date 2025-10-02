@@ -20,6 +20,7 @@ from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
+from monedas.models import StockGuaranies
 
 class Recargos(models.Model):
     """
@@ -164,19 +165,23 @@ class Transaccion(models.Model):
     moneda = models.ForeignKey('monedas.Moneda', on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=30, decimal_places=8)
     cotizacion = models.IntegerField()
+    precio_base = models.IntegerField()
+    monto_original = models.DecimalField(max_digits=30, decimal_places=8)
     beneficio_segmento = models.IntegerField()
     porc_beneficio_segmento = models.CharField(max_length=3)
     recargo_pago = models.IntegerField()
     porc_recargo_pago = models.CharField(max_length=4)
     recargo_cobro = models.IntegerField()
     porc_recargo_cobro = models.CharField(max_length=4)
+    redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
+    redondeo_efectivo_monto_final = models.IntegerField()
     monto_final = models.IntegerField()
     medio_pago = models.CharField(max_length=50) 
-    medio_cobro = models.CharField(max_length=100)  # Agregar campo medio_cobro 
+    medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
-    razon = models.CharField(max_length=100, blank=True, null=True)  # Campo para la razón de cancelación
-    token = models.CharField(max_length=255, blank=True, null=True)  # Campo para el token
+    razon = models.CharField(max_length=100, blank=True, null=True) 
+    token = models.CharField(max_length=255, blank=True, null=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
@@ -281,8 +286,18 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         dict_cobro = ast.literal_eval(cobro)
     else:
         dict_cobro = cobro
+    redondeo_efectivo_monto = 0
+    redondeo_efectivo_monto_final = 0
+    monto_original = monto
+    if dict_cobro == 'Efectivo' and operacion == 'compra':
+        redondeo_efectivo_monto = monto % moneda.denominaciones[0]
+        monto -= redondeo_efectivo_monto
+    elif dict_pago == 'Efectivo' and operacion == 'venta':
+        redondeo_efectivo_monto = monto % moneda.denominaciones[0]
+        monto -= redondeo_efectivo_monto
     if operacion == 'compra':
-        cotizacion = monto * (moneda.tasa_base + moneda.comision_venta)
+        cotizacion = moneda.tasa_base + moneda.comision_venta
+        precio_base = monto * (moneda.tasa_base + moneda.comision_venta)
         if segmentacion == 'corporativo':
             monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.95)))
             porc_beneficio_segmento = 5
@@ -290,10 +305,11 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.9)))
             porc_beneficio_segmento = 10
         else:
-            monto_final = cotizacion
+            monto_final = precio_base
             porc_beneficio_segmento = 0
     else:
-        cotizacion = monto * (moneda.tasa_base - moneda.comision_compra)
+        cotizacion = moneda.tasa_base - moneda.comision_compra
+        precio_base = monto * (moneda.tasa_base - moneda.comision_compra)
         if segmentacion == 'corporativo':
             monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.95)))
             porc_beneficio_segmento = 5
@@ -301,9 +317,9 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.9)))
             porc_beneficio_segmento = 10
         else:
-            monto_final = cotizacion
+            monto_final = precio_base
             porc_beneficio_segmento = 0
-    beneficio_segmento = abs(cotizacion - monto_final)
+    beneficio_segmento = abs(precio_base - monto_final)
     if isinstance(dict_pago, dict) and 'brand' in dict_pago:
         monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
         porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
@@ -321,13 +337,24 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         monto_recargo_cobro = 0
         porc_recargo_cobro = 0
     monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
+    if dict_pago == 'Efectivo' and operacion == 'compra':
+        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
+        monto_final -= redondeo_efectivo_monto_final
+    if dict_cobro == 'Efectivo' and operacion == 'venta':
+        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
+        monto_final += redondeo_efectivo_monto_final
     return {
         'cotizacion': int(cotizacion),
+        'precio_base': int(precio_base),
         'beneficio_segmento': int(beneficio_segmento),
         'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
+        'redondeo_efectivo_monto': redondeo_efectivo_monto,
+        'redondeo_efectivo_monto_final': int(redondeo_efectivo_monto_final),
         'monto_recargo_pago': int(monto_recargo_pago),
         'porc_recargo_pago': f'{porc_recargo_pago}%',
         'monto_recargo_cobro': int(monto_recargo_cobro),
         'porc_recargo_cobro': f'{porc_recargo_cobro}%',
+        'monto_original': monto_original,
+        'monto': monto,
         'monto_final': int(monto_final)
     }

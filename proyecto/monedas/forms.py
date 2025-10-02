@@ -113,6 +113,8 @@ class MonedaForm(forms.ModelForm):
 
     def clean_decimales(self):
         value = self.cleaned_data.get('decimales')
+        if value is not None and value > 8:
+            raise ValidationError('El número de decimales no puede ser mayor a 8.')
         return value if value is not None else 3
 
     def clean_tasa_base(self):

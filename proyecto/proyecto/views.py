@@ -142,7 +142,7 @@ def simular(request):
                 resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmento if cliente is not None else 'minorista')
                 respuesta = {
                     'success': True,
-                    'cotizacion_base': float(resultado['cotizacion']),
+                    'precio_base': float(resultado['precio_base']),
                     'beneficio_segmento': float(resultado['beneficio_segmento']),
                     'monto_recargo_pago': float(resultado['monto_recargo_pago']),
                     'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),

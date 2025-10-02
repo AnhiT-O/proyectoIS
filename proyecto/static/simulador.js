@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let resultadoHTML = `
             <div style="text-align: left;">
-                <small>Precio base: ${formatNumber(data.cotizacion_base)} Gs.</small><br>
+                <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
         `;
         
         if (data.beneficio_segmento > 0) {

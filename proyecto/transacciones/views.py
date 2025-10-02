@@ -20,19 +20,17 @@ Date: 2024
 import logging
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm
-from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion
+from .models import Transaccion, LimiteGlobal, calcular_conversion
 from decimal import Decimal
 from clientes.models import Cliente
 import secrets
-import json
-import base64
 import ast
 import stripe
 import logging
@@ -341,6 +339,12 @@ def compra_monto_moneda(request):
                 t.razon = 'Expira el tiempo para confirmar la transacción'
                 t.token = None
                 t.save()
+    if request.session.get('transaccion_id'):
+        t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
+        t.estado = 'Cancelada'
+        t.razon = 'Usuario sale del proceso de compra'
+        t.save()
+        del request.session['transaccion_id']
     if request.method == 'POST':
         form = SeleccionMonedaMontoForm(request.POST)
         if form.is_valid():
@@ -349,7 +353,7 @@ def compra_monto_moneda(request):
             # Verificar límites de transacción para compras
             try:
                 cliente_activo = request.user.cliente_activo
-                consumo = calcular_conversion(monto, moneda, 'compra', 'Efectivo', 'Efectivo', cliente_activo.segmento)
+                consumo = calcular_conversion(monto, moneda, 'compra', 'Cheque', 'Efectivo', cliente_activo.segmento)
                 if consumo['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario):
                     messages.warning(request, f'El monto excede tu límite diario disponible')
                     return redirect('transacciones:compra_monto_moneda')
@@ -786,6 +790,7 @@ def compra_confirmacion(request):
                         # Usuario acepta los nuevos precios, confirmando la transaccion
                         transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
                         datos_transaccion = calcular_conversion(transaccion.monto, Moneda.objects.get(id=transaccion.moneda), 'compra', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
+                        transaccion.precio_base = datos_transaccion['precio_base']
                         transaccion.cotizacion = datos_transaccion['cotizacion']
                         transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
                         transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
@@ -793,6 +798,10 @@ def compra_confirmacion(request):
                         transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
                         transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
                         transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
+                        transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
+                        transaccion.redondeo_efectivo_monto_final = datos_transaccion['redondeo_efectivo_monto_final']
+                        transaccion.monto_original = datos_transaccion['monto_original']
+                        transaccion.monto = datos_transaccion['monto']
                         transaccion.monto_final = datos_transaccion['monto_final']
                         transaccion.save()
                     elif action == 'cancelar':
@@ -828,7 +837,6 @@ def compra_confirmacion(request):
                 del request.session['transaccion_id']
             return redirect('inicio')
     else:   
-    
         # Recuperar los datos de la sesión
         try:
             moneda = Moneda.objects.get(id=compra_datos['moneda'])
@@ -838,6 +846,14 @@ def compra_confirmacion(request):
         except (Moneda.DoesNotExist, ValueError, KeyError):
             messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
             return redirect('transacciones:compra_monto_moneda')
+        if request.session.get('transaccion_id'):
+            transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
+            context = {
+            'transaccion': transaccion,
+            'paso_actual': 4,
+            'titulo_paso': 'Confirmación de Compra'
+            }
+            return render(request, 'transacciones/confirmacion.html', context)
         
         # Crear la transacción en la base de datos
         try:
@@ -851,14 +867,18 @@ def compra_confirmacion(request):
                 cliente=request.user.cliente_activo,
                 tipo='compra',
                 moneda=moneda,
-                monto=monto,
+                monto=datos_transaccion['monto'],
+                monto_original=datos_transaccion['monto_original'],
                 cotizacion=datos_transaccion['cotizacion'],
+                precio_base=datos_transaccion['precio_base'],
                 beneficio_segmento=datos_transaccion['beneficio_segmento'],
                 porc_beneficio_segmento=datos_transaccion['porc_beneficio_segmento'],
                 recargo_pago=datos_transaccion['monto_recargo_pago'],
                 porc_recargo_pago=datos_transaccion['porc_recargo_pago'],
                 recargo_cobro=datos_transaccion['monto_recargo_cobro'],
                 porc_recargo_cobro=datos_transaccion['porc_recargo_cobro'],
+                redondeo_efectivo_monto=datos_transaccion['redondeo_efectivo_monto'],
+                redondeo_efectivo_monto_final=datos_transaccion['redondeo_efectivo_monto_final'],
                 monto_final=datos_transaccion['monto_final'],
                 medio_pago=str_medio_pago,
                 medio_cobro=medio_cobro,
@@ -914,7 +934,6 @@ def compra_exito(request):
         return redirect('transacciones:compra_medio_cobro')
     try:
         medio_pago = compra_datos['medio_pago']
-        medio_cobro = compra_datos['medio_cobro']
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')

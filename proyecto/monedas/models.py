@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import post_migrate
+from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import date
@@ -24,6 +25,7 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
+    denominaciones = ArrayField(models.IntegerField(), blank=True, default=list)
     stock = models.BigIntegerField(default=0)
     
     def save(self, *args, **kwargs):
@@ -176,6 +178,7 @@ def crear_moneda_usd(sender, **kwargs):
                 comision_compra=200,
                 comision_venta=250,
                 decimales=2,
+                denominaciones=[1, 2, 5, 10, 20, 50, 100],
                 stock=1000000
             )
             print("✓ Moneda USD creada automáticamente")
@@ -188,6 +191,7 @@ class StockGuaranies(models.Model):
         default=1000000000,
         help_text="Cantidad de guaraníes disponibles en stock"
     )
+    denominaciones = ArrayField(models.IntegerField(), blank=True, default=list)
 
     class Meta:
         verbose_name = 'Stock de Guaraníes'
@@ -205,5 +209,5 @@ def crear_stock_guaranies_inicial(sender, **kwargs):
     """
     if kwargs['app_config'].name == 'monedas':
         if not StockGuaranies.objects.exists():
-            StockGuaranies.objects.create()
+            StockGuaranies.objects.create(denominaciones=[2000, 5000, 10000, 20000, 50000, 100000])
             print("Stock inicial de guaraníes creado automáticamente")
