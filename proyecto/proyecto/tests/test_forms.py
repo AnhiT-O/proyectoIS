@@ -164,11 +164,11 @@ class TestSimuladorForm:
         # Crear cliente de prueba
         self.cliente = Cliente.objects.create(
             nombre='Cliente Test',
-            tipoDocCliente='CI',
-            docCliente='12345678',
-            correoElecCliente='cliente@test.com',
+            tipo_documento='CI',
+            numero_documento='12345678',
+            correo_electronico='cliente@test.com',
             telefono='099123456',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección Test',
             ocupacion='Empleado',
             segmento='minorista'

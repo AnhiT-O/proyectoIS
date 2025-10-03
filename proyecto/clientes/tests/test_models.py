@@ -18,10 +18,10 @@ class TestClienteModel:
         """
         cliente = Cliente.objects.create(
             nombre='Juan Pérez',
-            tipoCliente='F',
-            tipoDocCliente='CI',
-            docCliente='12345678',
-            correoElecCliente='juan@test.com',
+            tipo='F',
+            tipo_documento='CI',
+            numero_documento='12345678',
+            correo_electronico='juan@test.com',
             telefono='0991234567',
             direccion='Dirección test',
             ocupacion='Empleado',
@@ -29,7 +29,7 @@ class TestClienteModel:
         )
         
         assert cliente.nombre == 'Juan Pérez'
-        assert cliente.tipoCliente == 'F'
+        assert cliente.tipo == 'F'
         assert cliente.segmento == 'minorista'
         assert cliente.beneficio_segmento == 0
 
@@ -40,10 +40,10 @@ class TestClienteModel:
         # Cliente minorista
         cliente_minorista = Cliente.objects.create(
             nombre='Cliente Minorista',
-            tipoCliente='F',
-            tipoDocCliente='CI',
-            docCliente='11111111',
-            correoElecCliente='minorista@test.com',
+            tipo='F',
+            tipo_documento='CI',
+            numero_documento='11111111',
+            correo_electronico='minorista@test.com',
             telefono='0991111111',
             direccion='Dirección',
             ocupacion='Empleado',
@@ -54,10 +54,10 @@ class TestClienteModel:
         # Cliente corporativo
         cliente_corporativo = Cliente.objects.create(
             nombre='Cliente Corporativo',
-            tipoCliente='F',
-            tipoDocCliente='CI',
-            docCliente='22222222',
-            correoElecCliente='corporativo@test.com',
+            tipo='F',
+            tipo_documento='CI',
+            numero_documento='22222222',
+            correo_electronico='corporativo@test.com',
             telefono='0992222222',
             direccion='Dirección',
             ocupacion='Gerente',
@@ -68,10 +68,10 @@ class TestClienteModel:
         # Cliente VIP
         cliente_vip = Cliente.objects.create(
             nombre='Cliente VIP',
-            tipoCliente='F',
-            tipoDocCliente='CI',
-            docCliente='33333333',
-            correoElecCliente='vip@test.com',
+            tipo='F',
+            tipo_documento='CI',
+            numero_documento='33333333',
+            correo_electronico='vip@test.com',
             telefono='0993333333',
             direccion='Dirección',
             ocupacion='Empresario',
@@ -86,10 +86,10 @@ class TestClienteModel:
         # Caso inválido: Persona jurídica con CI
         cliente_invalido = Cliente(
             nombre='Empresa S.A.',
-            tipoCliente='J',  # Jurídica
-            tipoDocCliente='CI',  # CI es incorrecto para jurídica
-            docCliente='12345678',
-            correoElecCliente='empresa@test.com',
+            tipo='J',  # Jurídica
+            tipo_documento='CI',  # CI es incorrecto para jurídica
+            numero_documento='12345678',
+            correo_electronico='empresa@test.com',
             telefono='0991234567',
             direccion='Dirección',
             ocupacion='Comercio',
@@ -113,10 +113,10 @@ class TestClienteModel:
         """
         cliente = Cliente.objects.create(
             nombre='Cliente Sin Stripe',
-            tipoCliente='F',
-            tipoDocCliente='CI',
-            docCliente='55555555',
-            correoElecCliente='sinstripe@test.com',
+            tipo='F',
+            tipo_documento='CI',
+            numero_documento='55555555',
+            correo_electronico='sinstripe@test.com',
             telefono='0995555555',
             direccion='Dirección',
             ocupacion='Empleado',

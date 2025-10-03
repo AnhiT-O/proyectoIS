@@ -10,7 +10,8 @@ Autor: Equipo de desarrollo
 Fecha: 2025
 """
 
-from datetime import timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -246,7 +247,7 @@ def cliente_lista(request):
     if busqueda:
         clientes = clientes.filter(
             Q(nombre__icontains=busqueda) |
-            Q(docCliente__icontains=busqueda)
+            Q(numero_documento__icontains=busqueda)
         )
     
     # Ordenar por nombre

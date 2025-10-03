@@ -330,4 +330,4 @@ class AsignarClienteForm(forms.Form):
             ).order_by('nombre')
             
             # Personalizar la etiqueta de cada cliente
-            self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.docCliente})"
+            self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.numero_documento})"

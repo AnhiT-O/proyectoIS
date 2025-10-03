@@ -25,11 +25,11 @@ class TestCuentaBancariaModel:
         """Fixture para crear un cliente de prueba."""
         return Cliente.objects.create(
             nombre="Juan Pérez",
-            tipoDocCliente="CI",
-            docCliente="12345678",
-            correoElecCliente="juan@test.com",
+            tipo_documento="CI",
+            numero_documento="12345678",
+            correo_electronico="juan@test.com",
             telefono="0981123456",
-            tipoCliente="F",
+            tipo="F",
             direccion="Asunción",
             ocupacion="Empleado",
             segmento="minorista"
@@ -73,11 +73,11 @@ class TestBilleteraModel:
         """Fixture para crear un cliente de prueba."""
         return Cliente.objects.create(
             nombre="María García",
-            tipoDocCliente="CI",
-            docCliente="87654321",
-            correoElecCliente="maria@test.com",
+            tipo_documento="CI",
+            numero_documento="87654321",
+            correo_electronico="maria@test.com",
             telefono="0981654321",
-            tipoCliente="F",
+            tipo="F",
             direccion="Luque",
             ocupacion="Profesional",
             segmento="corporativo"
@@ -203,11 +203,11 @@ class TestMetodosString:
         """Fixture para crear un cliente de prueba."""
         return Cliente.objects.create(
             nombre="Carlos López",
-            tipoDocCliente="CI",
-            docCliente="11223344",
-            correoElecCliente="carlos@test.com",
+            tipo_documento="CI",
+            numero_documento="11223344",
+            correo_electronico="carlos@test.com",
             telefono="0981112233",
-            tipoCliente="F",
+            tipo="F",
             direccion="San Lorenzo",
             ocupacion="Comerciante",
             segmento="vip"

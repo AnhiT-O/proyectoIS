@@ -82,8 +82,8 @@
                     {{ cliente.nombre }}
                 </td>
                 <td>
-                    <strong>{{ cliente.get_tipoDocCliente_display }}</strong><br>
-                    <small>{{ cliente.docCliente }}</small>
+                    <strong>{{ cliente.get_tipo_documento_display }}</strong><br>
+                    <small>{{ cliente.numero_documento }}</small>
                 </td>
                 <td>
                     <div>
@@ -92,7 +92,7 @@
                 </td>
                 <td>
                     <div>
-                        <strong>Cliente:</strong> {{ cliente.correoElecCliente|truncatechars:30 }}<br>
+                        <strong>Cliente:</strong> {{ cliente.correo_electronico|truncatechars:30 }}<br>
                         <strong>Teléfono:</strong> {{ cliente.telefono }}
                     </div>
                 </td>

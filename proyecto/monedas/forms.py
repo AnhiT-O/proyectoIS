@@ -1,8 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.conf import settings
 from .models import Moneda
-from transacciones.models import LimiteGlobal
 
 class MonedaForm(forms.ModelForm):
 
@@ -111,8 +109,9 @@ class MonedaForm(forms.ModelForm):
 
     def clean_decimales(self):
         value = self.cleaned_data.get('decimales')
-        if value is not None and value > 8:
-            raise ValidationError('El número de decimales no puede ser mayor a 8.')
+        if value:
+            if value > 8:
+                raise ValidationError('El número de decimales no puede ser mayor a 8.')
         return value if value is not None else 3
 
     def clean_tasa_base(self):
@@ -120,8 +119,9 @@ class MonedaForm(forms.ModelForm):
         Valida que la tasa base sea un número positivo.
         """
         tasa_base = self.cleaned_data.get('tasa_base')
-        if tasa_base is not None and tasa_base < 0:
-            raise ValidationError('La tasa base debe ser un número positivo.')
+        if tasa_base:
+            if tasa_base < 0:
+                raise ValidationError('La tasa base debe ser un número positivo.')
         return tasa_base
 
     def clean_comision_compra(self):
@@ -129,8 +129,9 @@ class MonedaForm(forms.ModelForm):
         Valida que la comisión de compra sea un número positivo.
         """
         comision_compra = self.cleaned_data.get('comision_compra')
-        if comision_compra is not None and comision_compra < 0:
-            raise ValidationError('La comisión de compra debe ser un número positivo.')
+        if comision_compra:
+            if comision_compra < 0:
+                raise ValidationError('La comisión de compra debe ser un número positivo.')
         return comision_compra
 
     def clean_comision_venta(self):
@@ -138,6 +139,7 @@ class MonedaForm(forms.ModelForm):
         Valida que la comisión de venta sea un número positivo.
         """
         comision_venta = self.cleaned_data.get('comision_venta')
-        if comision_venta is not None and comision_venta < 0:
-            raise ValidationError('La comisión de venta debe ser un número positivo.')
+        if comision_venta:
+            if comision_venta < 0:
+                raise ValidationError('La comisión de venta debe ser un número positivo.')
         return comision_venta

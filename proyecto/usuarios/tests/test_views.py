@@ -483,11 +483,11 @@ class TestAsignarClientesView:
         # Crear cliente
         self.cliente = Cliente.objects.create(
             nombre='Cliente Test',
-            tipoDocCliente='CI',
-            docCliente='12345678',
-            correoElecCliente='cliente@example.com',
+            tipo_documento='CI',
+            numero_documento='12345678',
+            correo_electronico='cliente@example.com',
             telefono='123456789',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección test',
             ocupacion='Ocupación test'
         )

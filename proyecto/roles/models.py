@@ -31,9 +31,7 @@ class Roles(Group):
         verbose_name_plural = 'Roles'
         db_table = 'roles'
         default_permissions = []
-        permissions = [
-            ("gestion", "Puede gestionar roles (crear y editar)"),
-        ]
+        permissions = []
 
     def __str__(self):
         """

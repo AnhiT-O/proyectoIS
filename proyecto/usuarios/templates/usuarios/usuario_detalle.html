@@ -110,8 +110,8 @@
                                                 <strong>{{ cliente.nombre }}</strong>
                                                 <br>
                                                 <small style="color: #6c757d;">
-                                                    {{ cliente.get_tipoDocCliente_display }}: {{ cliente.docCliente }} 
-                                                    | {{ cliente.correoElecCliente }}
+                                                    {{ cliente.get_tipo_documento_display }}: {{ cliente.numero_documento }} 
+                                                    | {{ cliente.correo_electronico }}
                                                 </small>
                                             </div>
                                             {% if perms.usuarios.asignacion_clientes %}

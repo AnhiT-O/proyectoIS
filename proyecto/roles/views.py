@@ -1,11 +1,32 @@
+from functools import wraps
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from .models import Roles
 from .forms import RolForm
+from django.core.exceptions import PermissionDenied
+
+def permiso_administrador(view_func):
+    """
+    Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+    para administrar monedas: creación, edición o activación.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        
+        if request.user.es_admin:
+            return view_func(request, *args, **kwargs)
+
+        # Si no tiene ningún permiso, denegar acceso
+        raise PermissionDenied()
+
+    return _wrapped_view
 
 @login_required
-@permission_required('roles.gestion', raise_exception=True)
+@permiso_administrador
 def listar_roles(request):
     """
     Muestra una lista de todos los roles disponibles para asignar, excepto 'Administrador'.
@@ -19,7 +40,7 @@ def listar_roles(request):
     return render(request, 'roles/listar_roles.html', contexto)
 
 @login_required
-@permission_required('roles.gestion', raise_exception=True)
+@permiso_administrador
 def crear_rol(request):
     """
     Gestiona el formulario para crear un nuevo rol.
@@ -52,7 +73,7 @@ def crear_rol(request):
     return render(request, 'roles/rol_form.html', contexto)
 
 @login_required
-@permission_required('roles.gestion', raise_exception=True)
+@permiso_administrador
 def editar_rol(request, pk):
     """
     Gestiona el formulario para editar un rol existente.
@@ -94,7 +115,7 @@ def editar_rol(request, pk):
     return render(request, 'roles/rol_form.html', contexto)
 
 @login_required
-@permission_required('roles.gestion', raise_exception=True)
+@permiso_administrador
 def detalle_rol(request, pk):
     """
     Muestra los detalles de un rol específico (nombre, descripción y permisos).

@@ -4,20 +4,14 @@ Módulo de modelos para la gestión de clientes.
 Este módulo contiene los modelos de datos relacionados con la gestión de clientes
 del sistema, incluyendo la información personal, segmentación, integración con Stripe
 para métodos de pago y relaciones con usuarios operadores.
-
-Autor: Equipo de desarrollo
-Fecha: 2025
 """
 
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.conf import settings
 import stripe
-import logging
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
-logger = logging.getLogger(__name__)
 
 class Cliente(models.Model):
     """
@@ -36,13 +30,13 @@ class Cliente(models.Model):
     Examples:
         >>> cliente = Cliente(
         ...     nombre="Juan Pérez",
-        ...     tipoDocCliente="CI",
-        ...     docCliente="12345678",
-        ...     correoElecCliente="juan@email.com"
+        ...     tipo_documento="CI",
+        ...     numero_documento="12345678",
+        ...     correo_electronico="juan@email.com"
         ... )
         >>> cliente.save()
     """
-    
+
     TIPO_CLIENTE_CHOICES = [
         ('F', 'Persona Física'),
         ('J', 'Persona Jurídica'),
@@ -57,93 +51,38 @@ class Cliente(models.Model):
         ('vip', 'VIP'),
     ]
     
-    BENEFICIOS_SEGMENTO = {
-        'minorista': 0,
-        'corporativo': 5,
-        'vip': 10,
-    }
-    
     nombre = models.CharField(max_length=100)
-    tipoDocCliente = models.CharField(
-        max_length=3,
-        choices=TIPO_DOCUMENTO_CHOICES
-    )
-    docCliente = models.CharField(
-        max_length=20,
+    tipo_documento = models.CharField(max_length=3,choices=TIPO_DOCUMENTO_CHOICES)
+    numero_documento = models.CharField(
+        max_length=10,
         unique=True
     )
-    correoElecCliente = models.EmailField(unique=True)
+    correo_electronico = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20)
-    tipoCliente = models.CharField(
-        max_length=1,
-        choices=TIPO_CLIENTE_CHOICES
-    )
-    direccion = models.TextField(max_length=100)
+    tipo = models.CharField(max_length=1,choices=TIPO_CLIENTE_CHOICES)
+    direccion = models.TextField()
     ocupacion = models.CharField(max_length=30)
     declaracion_jurada = models.BooleanField(default=False)
-    segmento = models.CharField(
-        max_length=20,
-        choices=SEGMENTO_CHOICES,
-        default='minorista',
-    )
+    segmento = models.CharField(max_length=11,choices=SEGMENTO_CHOICES)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
-        related_name='clientes_operados',
-        verbose_name='Usuarios operadores'
+        related_name='clientes_operados'
     )
     id_stripe = models.CharField(
         max_length=100, 
         blank=True, 
         null=True
     )
-    consumo_diario = models.BigIntegerField(default=0)
-    consumo_mensual = models.BigIntegerField(default=0)
+    consumo_diario = models.IntegerField(default=0)
+    consumo_mensual = models.IntegerField(default=0)
     ultimo_consumo = models.DateField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    def clean(self):
-        """
-        Realiza validaciones personalizadas del modelo Cliente.
-
-        Valida la coherencia entre el tipo de cliente y el tipo de documento,
-        asegurando que las personas jurídicas utilicen RUC como documento.
-
-        Raises:
-            ValidationError: Si existe incoherencia entre tipo de cliente y documento
-
-        Note:
-            Este método se ejecuta automáticamente al llamar full_clean() o
-            durante la validación del formulario.
-        """
-        super().clean()
-        
-        # Validar coherencia entre tipo de cliente y tipo de documento
-        if self.tipoCliente and self.tipoDocCliente:
-            if self.tipoCliente == 'J' and self.tipoDocCliente != 'RUC':
-                raise ValidationError({
-                    'tipoDocCliente': 'Las personas jurídicas deben usar RUC'
-                })
-
-    def save(self, *args, **kwargs):
-        """
-        Guarda el cliente aplicando validaciones y actualizaciones automáticas.
-
-        Actualiza automáticamente el beneficio por segmento basado en el segmento
-        del cliente y ejecuta todas las validaciones antes de guardar.
-
-        Args:
-            *args: Argumentos posicionales pasados al método save padre
-            **kwargs: Argumentos con nombre pasados al método save padre
-
-        Note:
-            El beneficio por segmento se actualiza automáticamente según la
-            configuración definida en BENEFICIOS_SEGMENTO.
-        """
-        # Actualizar el beneficio según el segmento
-        self.beneficio_segmento = self.BENEFICIOS_SEGMENTO.get(self.segmento, 0)
-        
-        self.full_clean()
-        super().save(*args, **kwargs)
+    class Meta:
+        db_table = 'clientes'
+        default_permissions = []
+        permissions = [
+            ("gestion", "Puede gestionar clientes (crear y editar)")
+        ]
 
     def __str__(self):
         """
@@ -177,20 +116,18 @@ class Cliente(models.Model):
             return False
         
         try:
-            # Obtener los métodos de pago del cliente desde Stripe
             payment_methods = stripe.PaymentMethod.list(
                 customer=self.id_stripe,
                 type='card'
             )
             
-            # Verificar si hay al menos una tarjeta activa
             return len(payment_methods.data) > 0
             
         except stripe.error.StripeError as e:
-            logger.error(f"Error al consultar tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            print(f"Error al consultar tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
             return False
         except Exception as e:
-            logger.error(f"Error inesperado al verificar tarjetas para cliente {self.nombre}: {str(e)}")
+            print(f"Error inesperado al verificar tarjetas para cliente {self.nombre}: {str(e)}")
             return False
 
     def obtener_tarjetas_stripe(self):
@@ -224,7 +161,6 @@ class Cliente(models.Model):
             return []
         
         try:
-            # Obtener los métodos de pago del cliente desde Stripe
             payment_methods = stripe.PaymentMethod.list(
                 customer=self.id_stripe,
                 type='card'
@@ -247,17 +183,8 @@ class Cliente(models.Model):
             return tarjetas
             
         except stripe.error.StripeError as e:
-            logger.error(f"Error al obtener tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
+            print(f"Error al obtener tarjetas de Stripe para cliente {self.nombre}: {str(e)}")
             return []
         except Exception as e:
-            logger.error(f"Error inesperado al obtener tarjetas para cliente {self.nombre}: {str(e)}")
+            print(f"Error inesperado al obtener tarjetas para cliente {self.nombre}: {str(e)}")
             return []
-        
-    class Meta:
-        db_table = 'clientes'
-        verbose_name = 'Cliente'
-        verbose_name_plural = 'Clientes'
-        default_permissions = []  # Deshabilita permisos predeterminados
-        permissions = [
-            ("gestion", "Puede gestionar clientes (crear y editar)")
-        ]

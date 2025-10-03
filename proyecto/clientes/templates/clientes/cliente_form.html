@@ -38,11 +38,11 @@
                 {% endif %}
             </div>
             <div class="form-campo">
-                <label for="{{ form.tipoCliente.id_for_label }}">Tipo de Cliente</label>
-                {{ form.tipoCliente }}
-                {% if form.tipoCliente.errors %}
+                <label for="{{ form.tipo.id_for_label }}">Tipo de Cliente</label>
+                {{ form.tipo }}
+                {% if form.tipo.errors %}
                     <div class="form-errores">
-                        {% for error in form.tipoCliente.errors %}
+                        {% for error in form.tipo.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -52,11 +52,11 @@
 
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.tipoDocCliente.id_for_label }}">Tipo de Documento</label>
-                {{ form.tipoDocCliente }}
-                {% if form.tipoDocCliente.errors %}
+                <label for="{{ form.tipo_documento.id_for_label }}">Tipo de Documento</label>
+                {{ form.tipo_documento }}
+                {% if form.tipo_documento.errors %}
                     <div class="form-errores">
-                        {% for error in form.tipoDocCliente.errors %}
+                        {% for error in form.tipo_documento.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -64,11 +64,11 @@
             </div>
 
             <div class="form-campo">
-                <label for="{{ form.docCliente.id_for_label }}">Número de Documento</label>
-                {{ form.docCliente }}
-                {% if form.docCliente.errors %}
+                <label for="{{ form.numero_documento.id_for_label }}">Número de Documento</label>
+                {{ form.numero_documento }}
+                {% if form.numero_documento.errors %}
                     <div class="form-errores">
-                        {% for error in form.docCliente.errors %}
+                        {% for error in form.numero_documento.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -78,11 +78,11 @@
 
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.correoElecCliente.id_for_label }}">Correo Electrónico</label>
-                {{ form.correoElecCliente }}
-                {% if form.correoElecCliente.errors %}
+                <label for="{{ form.correo_electronico.id_for_label }}">Correo Electrónico</label>
+                {{ form.correo_electronico }}
+                {% if form.correo_electronico.errors %}
                     <div class="form-errores">
-                        {% for error in form.correoElecCliente.errors %}
+                        {% for error in form.correo_electronico.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>

@@ -47,7 +47,7 @@
                                     {% endif %}
                                     
                                     <!-- Gestión de Roles -->
-                                    {% if perms.roles %}
+                                    {% if user.es_admin %}
                                         <a href="{% url 'roles:listar_roles' %}" class="gestion-seleccion">
                                             🎭 Gestionar Roles
                                         </a>
@@ -66,7 +66,7 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
-                                    {% if perms.transacciones %}
+                                    {% if perms.transacciones.edicion %}
                                         <a href="{% url 'transacciones:ver_variables' %}" class="gestion-seleccion">
                                             💳 Gestionar Transacciones
                                         </a>

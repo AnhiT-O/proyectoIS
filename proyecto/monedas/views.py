@@ -147,6 +147,7 @@ def moneda_editar(request, pk):
         form.fields.pop('nombre')
         form.fields.pop('simbolo')
         form.fields.pop('decimales')
+        form.fields.pop('minima_denominacion')
 
     # Procesa el formulario
     if request.method == 'POST':

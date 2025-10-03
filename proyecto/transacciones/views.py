@@ -63,7 +63,7 @@ def procesar_pago_stripe(transaccion, payment_method_id):
             monto_centavos = int(transaccion.monto * 100)
             moneda_stripe = 'usd' 
         else:
-            monto_centavos = transaccion.monto_final
+            monto_centavos = transaccion.precio_final
             moneda_stripe = 'pyg' 
         # Crear PaymentIntent
         payment_intent = stripe.PaymentIntent.create(
@@ -83,16 +83,16 @@ def procesar_pago_stripe(transaccion, payment_method_id):
         
         if payment_intent.status == 'succeeded':
             guaranies = StockGuaranies.objects.first()
-            guaranies.cantidad += (transaccion.monto_final - transaccion.recargo_pago)
+            guaranies.cantidad += (transaccion.precio_final - transaccion.recargo_pago)
             guaranies.save()
             if transaccion.medio_cobro != 'Efectivo':
                 try:
                     guaranies = StockGuaranies.objects.first()
-                    guaranies.cantidad -= (transaccion.monto_final + transaccion.recargo_cobro)
+                    guaranies.cantidad -= (transaccion.precio_final + transaccion.recargo_cobro)
                     guaranies.save()
                     cliente = Cliente.objects.get(id=transaccion.cliente_id)
-                    cliente.consumo_diario += transaccion.monto_final
-                    cliente.consumo_mensual += transaccion.monto_final
+                    cliente.consumo_diario += transaccion.precio_final
+                    cliente.consumo_mensual += transaccion.precio_final
                     cliente.ultimo_consumo = date.today()
                     cliente.save()
                     transaccion.estado = 'Completa'
@@ -115,8 +115,8 @@ def procesar_pago_stripe(transaccion, payment_method_id):
                         'error': error_msg
                     }
             cliente = Cliente.objects.get(id=transaccion.cliente_id)
-            cliente.consumo_diario += transaccion.monto_final
-            cliente.consumo_mensual += transaccion.monto_final
+            cliente.consumo_diario += transaccion.precio_final
+            cliente.consumo_mensual += transaccion.precio_final
             cliente.ultimo_consumo = date.today()
             cliente.save()
             transaccion.estado = 'Confirmada'
@@ -815,10 +815,10 @@ def compra_confirmacion(request):
             transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
             transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
             transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-            transaccion.redondeo_efectivo_monto_final = datos_transaccion['redondeo_efectivo_monto_final']
+            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
             transaccion.monto_original = datos_transaccion['monto_original']
             transaccion.monto = datos_transaccion['monto']
-            transaccion.monto_final = datos_transaccion['monto_final']
+            transaccion.precio_final = datos_transaccion['precio_final']
             transaccion.save()
             precios_actuales = transaccion.moneda.get_precios_cliente(request.user.cliente_activo)
             request.session['precio_venta_inicial'] = precios_actuales['precio_venta']
@@ -872,7 +872,7 @@ def compra_confirmacion(request):
             else:
                 str_medio_pago = medio_pago
             datos_transaccion = calcular_conversion(monto, moneda, 'compra', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
-            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
+            if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:compra_monto_moneda')
             transaccion = Transaccion.objects.create(
@@ -890,8 +890,8 @@ def compra_confirmacion(request):
                 recargo_cobro=datos_transaccion['monto_recargo_cobro'],
                 porc_recargo_cobro=datos_transaccion['porc_recargo_cobro'],
                 redondeo_efectivo_monto=datos_transaccion['redondeo_efectivo_monto'],
-                redondeo_efectivo_monto_final=datos_transaccion['redondeo_efectivo_monto_final'],
-                monto_final=datos_transaccion['monto_final'],
+                redondeo_efectivo_precio_final=datos_transaccion['redondeo_efectivo_precio_final'],
+                precio_final=datos_transaccion['precio_final'],
                 medio_pago=str_medio_pago,
                 medio_cobro=medio_cobro,
                 usuario=request.user
@@ -900,6 +900,7 @@ def compra_confirmacion(request):
                 
         except Exception as e:
             messages.error(request, 'Error al crear la transacción. Intente nuevamente.')
+            print(e)
             return redirect('transacciones:compra_medio_cobro')
         
         context = {
@@ -1483,10 +1484,10 @@ def venta_confirmacion(request):
             transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
             transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
             transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-            transaccion.redondeo_efectivo_monto_final = datos_transaccion['redondeo_efectivo_monto_final']
+            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
             transaccion.monto_original = datos_transaccion['monto_original']
             transaccion.monto = datos_transaccion['monto']
-            transaccion.monto_final = datos_transaccion['monto_final']
+            transaccion.precio_final = datos_transaccion['precio_final']
             transaccion.save()
             precios_actuales = transaccion.moneda.get_precios_cliente(request.user.cliente_activo)
             request.session['precio_compra_inicial'] = precios_actuales['precio_compra']
@@ -1545,10 +1546,10 @@ def venta_confirmacion(request):
             else:
                 str_medio_cobro = medio_cobro
             datos_transaccion = calcular_conversion(monto, moneda, 'venta', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
-            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
+            if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:venta_monto_moneda')
-            if datos_transaccion['monto_final'] > StockGuaranies.objects.first().cantidad:
+            if datos_transaccion['precio_final'] > StockGuaranies.objects.first().cantidad:
                 messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:venta_monto_moneda')
             transaccion = Transaccion.objects.create(
@@ -1566,8 +1567,8 @@ def venta_confirmacion(request):
                 recargo_cobro=datos_transaccion['monto_recargo_cobro'],
                 porc_recargo_cobro=datos_transaccion['porc_recargo_cobro'],
                 redondeo_efectivo_monto=datos_transaccion['redondeo_efectivo_monto'],
-                redondeo_efectivo_monto_final=datos_transaccion['redondeo_efectivo_monto_final'],
-                monto_final=datos_transaccion['monto_final'],
+                redondeo_efectivo_precio_final=datos_transaccion['redondeo_efectivo_precio_final'],
+                precio_final=datos_transaccion['precio_final'],
                 medio_pago=str_medio_pago,
                 medio_cobro=str_medio_cobro,
                 usuario=request.user
@@ -1724,7 +1725,7 @@ def historial_transacciones(request, cliente_id):
         # Buscar por cliente o usuario solo cuando no hay cliente filtrado
         transacciones = transacciones.filter(
             models.Q(cliente__nombre__icontains=busqueda) | 
-            models.Q(cliente__docCliente__icontains=busqueda) |
+            models.Q(cliente__numero_documento__icontains=busqueda) |
             models.Q(cliente__usuarios__username__icontains=busqueda)
         )
     

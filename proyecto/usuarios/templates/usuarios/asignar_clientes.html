@@ -30,12 +30,12 @@
                     <div class="tarjeta">
                             <input class="form-casilla" type="checkbox" name="clientes" value="{{ cliente.pk }}" id="cliente_{{ cliente.pk }}">
                             <label class="form-casilla-label" for="cliente_{{ cliente.pk }}">
-                                <strong>{{ cliente.nombre }} ({{ cliente.docCliente }})</strong>
+                                <strong>{{ cliente.nombre }} ({{ cliente.numero_documento }})</strong>
                             </label>
                         <div class="tarjeta-detalles">
-                            Email: {{ cliente.correoElecCliente }}<br>
+                            Email: {{ cliente.correo_electronico }}<br>
                             Teléfono: {{ cliente.telefono }}<br>
-                            Tipo: {% if cliente.tipoCliente == 'F' %}Persona Física{% else %}Persona Jurídica{% endif %}
+                            Tipo: {% if cliente.tipo == 'F' %}Persona Física{% else %}Persona Jurídica{% endif %}
                         </div>
                     </div>
                 {% endfor %}

@@ -34,8 +34,8 @@ class ClienteForm(forms.ModelForm):
     Examples:
         >>> form = ClienteForm(data={
         ...     'nombre': 'Juan Pérez',
-        ...     'tipoDocCliente': 'CI',
-        ...     'docCliente': '12345678'
+        ...     'tipo_documento': 'CI',
+        ...     'numero_documento': '12345678'
         ... })
         >>> if form.is_valid():
         ...     cliente = form.save()
@@ -48,22 +48,22 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    docCliente = forms.CharField(
+    numero_documento = forms.CharField(
         error_messages={
             'required': 'Debes ingresar el número de documento.',
-            'max_length': 'El documento no puede exceder los 20 caracteres.',
+            'max_length': 'El documento no puede exceder los 10 caracteres.',
             'unique': 'Ya existe un cliente con este número de documento.'
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    tipoDocCliente = forms.ChoiceField(
+    tipo_documento = forms.ChoiceField(
         choices=Cliente.TIPO_DOCUMENTO_CHOICES,
         error_messages={
             'required': 'Debes seleccionar un tipo de documento.'
         },
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    correoElecCliente = forms.EmailField(
+    correo_electronico = forms.EmailField(
         error_messages={
             'required': 'Debes ingresar un correo electrónico.',
             'invalid': 'Debes ingresar un correo electrónico válido.',
@@ -78,7 +78,7 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    tipoCliente = forms.ChoiceField(
+    tipo = forms.ChoiceField(
         choices=Cliente.TIPO_CLIENTE_CHOICES,
         error_messages={
             'required': 'Debes seleccionar un tipo de cliente.'
@@ -87,7 +87,6 @@ class ClienteForm(forms.ModelForm):
     )
     direccion = forms.CharField(
         error_messages={
-            'max_length': 'La dirección no puede exceder los 100 caracteres.',
             'required': 'Debes ingresar una dirección.'
         },
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -106,10 +105,6 @@ class ClienteForm(forms.ModelForm):
         },
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    id_stripe = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
     declaracion_jurada = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
@@ -119,15 +114,14 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = [
             'nombre', 
-            'tipoDocCliente',
-            'docCliente',
-            'correoElecCliente',
+            'tipo_documento',
+            'numero_documento',
+            'correo_electronico',
             'telefono',
-            'tipoCliente',
+            'tipo',
             'direccion',
             'ocupacion',
             'segmento',
-            'id_stripe',
             'declaracion_jurada'
         ]
 
@@ -156,7 +150,7 @@ class ClienteForm(forms.ModelForm):
         
         return telefono
 
-    def clean_docCliente(self):
+    def clean_numero_documento(self):
         """
         Valida que el número de documento contenga únicamente dígitos.
 
@@ -174,10 +168,10 @@ class ClienteForm(forms.ModelForm):
             para números RUC, ambos deben ser completamente numéricos.
 
         Examples:
-            >>> form.cleaned_data['docCliente'] = '12345678'  # Válido
-            >>> form.cleaned_data['docCliente'] = '1234-5678-9'  # Inválido
+            >>> form.cleaned_data['numero_documento'] = '12345678'  # Válido
+            >>> form.cleaned_data['numero_documento'] = '1234-5678-9'  # Inválido
         """
-        doc_cliente = self.cleaned_data.get('docCliente')
+        doc_cliente = self.cleaned_data.get('numero_documento')
         
         if doc_cliente:
             # Validar que solo contenga números
@@ -185,6 +179,19 @@ class ClienteForm(forms.ModelForm):
                 raise ValidationError('El documento debe contener solo números')
         
         return doc_cliente
+    
+    def clean_tipo_documento(self):
+        """
+        Valida que el tipo de documento sea consistente con el tipo de cliente.
+        Realiza validación personalizada para asegurar que las personas jurídicas
+        tengan RUC como tipo de documento.
+        """
+
+        tipo_documento = self.cleaned_data.get('tipo_documento')
+        tipo = self.cleaned_data.get('tipo')
+        if tipo == 'J' and tipo_documento != 'RUC':
+            raise ValidationError('Las personas jurídicas deben tener RUC.')
+        
     
     def clean_id_stripe(self):
         """
@@ -323,9 +330,9 @@ class AgregarTarjetaForm(forms.Form):
             if not self.cliente.id_stripe:
                 stripe_customer = stripe.Customer.create(
                     name=self.cliente.nombre,
-                    email=self.cliente.correoElecCliente,
+                    email=self.cliente.correo_electronico,
                     phone=self.cliente.telefono,
-                    description=f"Cliente {self.cliente.docCliente}"
+                    description=f"Cliente con {self.cliente.tipo_documento}: {self.cliente.numero_documento}"
                 )
                 self.cliente.id_stripe = stripe_customer.id
                 self.cliente.save()

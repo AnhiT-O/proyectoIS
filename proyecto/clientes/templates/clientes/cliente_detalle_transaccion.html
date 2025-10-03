@@ -86,7 +86,7 @@
                 {% if transaccion.medio_pago == 'Efectivo' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Redondeo por medio de pago Efectivo:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_monto_final|intcomma }}</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_precio_final|intcomma }}</div>
                 </div>
                 {% endif %}
                 {% if transaccion.medio_cobro == 'Efectivo' %}
@@ -97,7 +97,7 @@
                 {% endif %}
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
-                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.monto_final|intcomma }}</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
@@ -137,7 +137,7 @@
                 {% if transaccion.medio_cobro == 'Efectivo' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_monto_final|intcomma }}</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_precio_final|intcomma }}</div>
                 </div>
                 {% endif %}
                 <div class="detalle-item">
@@ -146,7 +146,7 @@
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
-                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.monto_final|intcomma }}</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
             {% endif %}
         </div>

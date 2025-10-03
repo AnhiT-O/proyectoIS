@@ -78,6 +78,15 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         """
         return list(self.groups.values_list('name', flat=True))
     
+    def es_admin(self):
+        """
+        Verifica si el usuario tiene el rol de 'Administrador'.
+
+        Returns:
+            bool: True si el usuario es administrador, False en caso contrario.
+        """
+        return 'Administrador' in self.obtener_roles()
+    
     def nombre_completo(self):
         """
         Obtiene el nombre completo del usuario.

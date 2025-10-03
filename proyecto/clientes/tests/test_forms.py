@@ -17,11 +17,11 @@ class TestClienteForm:
         """
         form_data = {
             'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '12345678',
-            'correoElecCliente': 'juan@test.com',
+            'tipo_documento': 'CI',
+            'numero_documento': '12345678',
+            'correo_electronico': 'juan@test.com',
             'telefono': '0991234567',
-            'tipoCliente': 'F',
+            'tipo': 'F',
             'direccion': 'Dirección test',
             'ocupacion': 'Empleado',
             'segmento': 'minorista'
@@ -36,11 +36,11 @@ class TestClienteForm:
         """
         form_data = {
             'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '12345678',
-            'correoElecCliente': 'juan@test.com',
+            'tipo_documento': 'CI',
+            'numero_documento': '12345678',
+            'correo_electronico': 'juan@test.com',
             'telefono': '099-123-4567',  # Contiene guiones
-            'tipoCliente': 'F',
+            'tipo': 'F',
             'direccion': 'Dirección test',
             'ocupacion': 'Empleado',
             'segmento': 'minorista'
@@ -56,11 +56,11 @@ class TestClienteForm:
         """
         form_data = {
             'nombre': 'María González',
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234-5678',  # Contiene guión
-            'correoElecCliente': 'maria@test.com',
+            'tipo_documento': 'CI',
+            'numero_documento': '1234-5678',  # Contiene guión
+            'correo_electronico': 'maria@test.com',
             'telefono': '0981234567',
-            'tipoCliente': 'F',
+            'tipo': 'F',
             'direccion': 'Dirección test',
             'ocupacion': 'Empleada',
             'segmento': 'minorista'
@@ -68,7 +68,7 @@ class TestClienteForm:
         
         form = ClienteForm(data=form_data)
         assert not form.is_valid()
-        assert 'docCliente' in form.errors
+        assert 'numero_documento' in form.errors
 
     def test_formulario_invalido_campos_requeridos_vacios(self):
         """
@@ -76,11 +76,11 @@ class TestClienteForm:
         """
         form_data = {
             'nombre': '',  # Campo requerido vacío
-            'tipoDocCliente': '',  # Campo requerido vacío
-            'docCliente': '',  # Campo requerido vacío
-            'correoElecCliente': '',  # Campo requerido vacío
+            'tipo_documento': '',  # Campo requerido vacío
+            'numero_documento': '',  # Campo requerido vacío
+            'correo_electronico': '',  # Campo requerido vacío
             'telefono': '',  # Campo requerido vacío
-            'tipoCliente': '',  # Campo requerido vacío
+            'tipo': '',  # Campo requerido vacío
             'direccion': '',  # Campo requerido vacío
             'ocupacion': '',  # Campo requerido vacío
             'segmento': 'minorista'
@@ -91,8 +91,8 @@ class TestClienteForm:
         
         # Verificar que hay errores en los campos principales
         assert 'nombre' in form.errors
-        assert 'docCliente' in form.errors
-        assert 'correoElecCliente' in form.errors
+        assert 'numero_documento' in form.errors
+        assert 'correo_electronico' in form.errors
 
     def test_crear_cliente_desde_formulario_valido(self):
         """
@@ -100,11 +100,11 @@ class TestClienteForm:
         """
         form_data = {
             'nombre': 'Cliente Test',
-            'tipoDocCliente': 'CI',
-            'docCliente': '87654321',
-            'correoElecCliente': 'cliente@test.com',
+            'tipo_documento': 'CI',
+            'numero_documento': '87654321',
+            'correo_electronico': 'cliente@test.com',
             'telefono': '0987654321',
-            'tipoCliente': 'F',
+            'tipo': 'F',
             'direccion': 'Dirección test',
             'ocupacion': 'Empleado',
             'segmento': 'vip',
@@ -128,11 +128,11 @@ class TestAgregarTarjetaForm:
         """Configurar datos de prueba"""
         self.cliente = Cliente.objects.create(
             nombre='Cliente Tarjeta',
-            tipoDocCliente='CI',
-            docCliente='66666666',
-            correoElecCliente='tarjeta@test.com',
+            tipo_documento='CI',
+            numero_documento='66666666',
+            correo_electronico='tarjeta@test.com',
             telefono='0996666666',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección tarjeta',
             ocupacion='Empleado',
             segmento='minorista'

@@ -367,21 +367,21 @@ class TestAsignarClienteForm:
         # Crear clientes
         cliente1 = Cliente.objects.create(
             nombre='Cliente 1',
-            tipoDocCliente='CI',
-            docCliente='12345678',
-            correoElecCliente='cliente1@example.com',
+            tipo_documento='CI',
+            numero_documento='12345678',
+            correo_electronico='cliente1@example.com',
             telefono='123456789',
-            tipoCliente='F',
+            tipo='F',
             direccion='Direccion 1',
             ocupacion='Ocupacion 1'
         )
         cliente2 = Cliente.objects.create(
             nombre='Cliente 2',
-            tipoDocCliente='CI',
-            docCliente='87654321',
-            correoElecCliente='cliente2@example.com',
+            tipo_documento='CI',
+            numero_documento='87654321',
+            correo_electronico='cliente2@example.com',
             telefono='987654321',
-            tipoCliente='F',
+            tipo='F',
             direccion='Direccion 2',
             ocupacion='Ocupacion 2'
         )
@@ -413,4 +413,4 @@ class TestAsignarClienteForm:
         # Verificar etiqueta personalizada
         label_func = form.fields['clientes'].label_from_instance
         etiqueta = label_func(cliente2)
-        assert etiqueta == f"{cliente2.nombre} ({cliente2.docCliente})"
+        assert etiqueta == f"{cliente2.nombre} ({cliente2.numero_documento})"

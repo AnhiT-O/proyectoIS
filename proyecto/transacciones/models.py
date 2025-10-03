@@ -174,8 +174,8 @@ class Transaccion(models.Model):
     recargo_cobro = models.IntegerField()
     porc_recargo_cobro = models.CharField(max_length=4)
     redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
-    redondeo_efectivo_monto_final = models.IntegerField()
-    monto_final = models.IntegerField()
+    redondeo_efectivo_precio_final = models.IntegerField()
+    precio_final = models.IntegerField()
     medio_pago = models.CharField(max_length=50) 
     medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
@@ -280,7 +280,23 @@ class Transaccion(models.Model):
         super().save(*args, **kwargs)
 
 def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
-
+    """
+    Returns:
+        monto_original (Decimal): Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
+        redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
+        redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
+        cotizacion (int): Cotización de la moneda según el tipo de operación
+        precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
+        porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
+        beneficio_segmento (int): Beneficio aplicado en la operación según el segmento del cliente
+        monto_recargo_pago (int): Monto del recargo aplicado según el medio de pago
+        porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
+        monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
+        porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
+        monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+        precio_final (int): Monto en guaraníes final a pagar o cobrar
+    """
+    # Primero convertimos el pago y cobro a diccionarios si vienen como strings
     if pago.startswith('{'):
         dict_pago = ast.literal_eval(pago)
     else:
@@ -289,79 +305,117 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         dict_cobro = ast.literal_eval(cobro)
     else:
         dict_cobro = cobro
-    redondeo_efectivo_monto = 0
-    redondeo_efectivo_monto_final = 0
+    # Se guarda el monto original
     monto_original = monto
-    if dict_cobro == 'Efectivo' and operacion == 'compra':
+    # Calculos para compra
+    if operacion == 'compra':
+        # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
         redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
         if redondeo_efectivo_monto == moneda.minima_denominacion:
             redondeo_efectivo_monto = 0
         monto += redondeo_efectivo_monto
-    elif dict_pago == 'Efectivo' and operacion == 'venta':
-        redondeo_efectivo_monto = monto % moneda.minima_denominacion
-        monto += redondeo_efectivo_monto
-    if operacion == 'compra':
+        # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base + moneda.comision_venta
-        precio_base = monto * (moneda.tasa_base + moneda.comision_venta)
+        precio_base = monto * cotizacion
+        # Calculo del precio final según el segmento
         if segmentacion == 'corporativo':
-            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.95)))
+            precio_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.95)))
             porc_beneficio_segmento = 5
         elif segmentacion == 'vip':
-            monto_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.9)))
+            precio_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.9)))
             porc_beneficio_segmento = 10
         else:
-            monto_final = precio_base
+            precio_final = precio_base
             porc_beneficio_segmento = 0
-    else:
-        cotizacion = moneda.tasa_base - moneda.comision_compra
-        precio_base = monto * (moneda.tasa_base - moneda.comision_compra)
-        if segmentacion == 'corporativo':
-            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.95)))
-            porc_beneficio_segmento = 5
-        elif segmentacion == 'vip':
-            monto_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.9)))
-            porc_beneficio_segmento = 10
+        # Se guarda el beneficio por segmento
+        beneficio_segmento = abs(precio_base - precio_final)
+        # Calculo de recargos por medio de pago
+        # Si el pago es con tarjeta de crédito
+        if isinstance(dict_pago, dict) and 'brand' in dict_pago:
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
+        # Si el pago es con billetera electrónica
+        elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
+        # Si el pago es en efectivo, cheque o transferencia, no hay recargo
         else:
-            monto_final = precio_base
-            porc_beneficio_segmento = 0
-    beneficio_segmento = abs(precio_base - monto_final)
-    if isinstance(dict_pago, dict) and 'brand' in dict_pago:
-        monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
-        porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
-    elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
-        monto_recargo_pago =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
-        porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
-    else:
-        monto_recargo_pago = 0
-        porc_recargo_pago = 0
-
-    if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
-        monto_recargo_cobro =  Decimal(monto_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
-        porc_recargo_cobro = Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo
-    else:
+            monto_recargo_pago = 0
+            porc_recargo_pago = 0
+        # Calculo del monto en guaraníes a pagar con recargos
+        precio_final += monto_recargo_pago
+        # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
+        if dict_pago == 'Efectivo':
+            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
+            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
+                redondeo_efectivo_precio_final = 0
+            precio_final += redondeo_efectivo_precio_final
+        else:
+            redondeo_efectivo_precio_final = 0
+        # No hay recargo por medio de cobro ya que siempre es en efectivo
         monto_recargo_cobro = 0
         porc_recargo_cobro = 0
-    monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
-    if dict_pago == 'Efectivo' and operacion == 'compra':
-        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().minima_denominacion
-        monto_final += redondeo_efectivo_monto_final
-    if dict_cobro == 'Efectivo' and operacion == 'venta':
-        redondeo_efectivo_monto_final = StockGuaranies.objects.first().minima_denominacion - (monto_final % StockGuaranies.objects.first().minima_denominacion)
-        if redondeo_efectivo_monto_final == StockGuaranies.objects.first().minima_denominacion:
-            redondeo_efectivo_monto_final = 0
-        monto_final -= redondeo_efectivo_monto_final
+    # Calculos para venta
+    else:
+        # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
+        if dict_pago == 'Efectivo':
+            redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
+            if redondeo_efectivo_monto == moneda.minima_denominacion:
+                redondeo_efectivo_monto = 0
+            monto += redondeo_efectivo_monto
+        else:
+            redondeo_efectivo_monto = 0
+        # Se guarda la cotización y el precio base
+        cotizacion = moneda.tasa_base - moneda.comision_compra
+        precio_base = monto * cotizacion
+        # Calculo del precio final según el segmento
+        if segmentacion == 'corporativo':
+            precio_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.95)))
+            porc_beneficio_segmento = 5
+        elif segmentacion == 'vip':
+            precio_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.9)))
+            porc_beneficio_segmento = 10
+        else:
+            precio_final = precio_base
+            porc_beneficio_segmento = 0
+        # Se guarda el beneficio por segmento
+        beneficio_segmento = abs(precio_base - precio_final)
+        # Calculo de recargos por medio de pago y cobro
+        # Si el pago es con tarjeta de crédito
+        if isinstance(dict_pago, dict) and 'brand' in dict_pago:
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
+        # Si el cobro es con billetera electrónica
+        if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
+            monto_recargo_cobro =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
+            porc_recargo_cobro = Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo
+        else:
+        # Si el cobro es en efectivo o cuenta bancaria, no hay recargo
+            monto_recargo_cobro = 0
+            porc_recargo_cobro = 0
+        # Calculo del monto en guaraníes a cobrar con recargos
+        precio_final -= monto_recargo_pago + monto_recargo_cobro
+        # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
+        if dict_cobro == 'Efectivo':
+            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
+            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
+                redondeo_efectivo_precio_final = 0
+            precio_final += redondeo_efectivo_precio_final
+        else:
+            redondeo_efectivo_precio_final = 0
+            
     return {
         'cotizacion': int(cotizacion),
         'precio_base': int(precio_base),
         'beneficio_segmento': int(beneficio_segmento),
         'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
         'redondeo_efectivo_monto': redondeo_efectivo_monto,
-        'redondeo_efectivo_monto_final': int(redondeo_efectivo_monto_final),
+        'redondeo_efectivo_precio_final': int(redondeo_efectivo_precio_final),
         'monto_recargo_pago': int(monto_recargo_pago),
         'porc_recargo_pago': f'{porc_recargo_pago}%',
         'monto_recargo_cobro': int(monto_recargo_cobro),
         'porc_recargo_cobro': f'{porc_recargo_cobro}%',
         'monto_original': monto_original,
         'monto': monto,
-        'monto_final': int(monto_final)
+        'precio_final': int(precio_final)
     }

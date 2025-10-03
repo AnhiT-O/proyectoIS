@@ -19,28 +19,24 @@ def inicio(request):
     -   Si el usuario no está autenticado, muestra los precios base sin beneficios.
     """
     context = {}
-    
     # Obtener las monedas activas
     monedas_activas = Moneda.objects.filter(activa=True)
     
     # Obtener todas las segmentaciones disponibles
-    segmentaciones_lista = []
-    for key, value in Cliente.BENEFICIOS_SEGMENTO.items():
-        segmentaciones_lista.append({
-            'id': key,
-            'nombre': key.title(),
-            'porcentaje_beneficio': value
-        })
-    context['segmentaciones'] = segmentaciones_lista
+    segmentaciones_lista = {
+        'minorista': 0,
+        'corporativo': 5,
+        'vip': 10
+    }
     
     # Obtener el segmento seleccionado
     segmento_seleccionado = None
     porcentaje_beneficio_admin = 0
     if request.user.has_perm('monedas.cotizacion'):
         segmento_id = request.GET.get('segmento')
-        if segmento_id and segmento_id in Cliente.BENEFICIOS_SEGMENTO:
+        if segmento_id and segmento_id in ['minorista', 'corporativo', 'vip']:
             segmento_seleccionado = segmento_id
-            porcentaje_beneficio_admin = Cliente.BENEFICIOS_SEGMENTO[segmento_id]
+            porcentaje_beneficio_admin = segmentaciones_lista[segmento_seleccionado]
         context['segmento_seleccionado'] = segmento_seleccionado
     
     cotizaciones = []
@@ -155,7 +151,7 @@ def simular(request):
                     'beneficio_segmento': float(resultado['beneficio_segmento']),
                     'monto_recargo_pago': float(resultado['monto_recargo_pago']),
                     'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),
-                    'monto_final': float(resultado['monto_final'])
+                    'precio_final': float(resultado['precio_final'])
                 }
 
                 return JsonResponse(respuesta)

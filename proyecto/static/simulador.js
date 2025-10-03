@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resultadoHTML += `
                     <br>
                     <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
-                        Costo: ${formatNumber(data.monto_final)} Gs.
+                        Costo: ${formatNumber(data.precio_final)} Gs.
                     </span>
                 </div>
             `;
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resultadoHTML += `
                     <br>
                     <span style="font-size: 1.1em; font-weight: bold; color: #2c5530;">
-                        Cobro: ${formatNumber(data.monto_final)} Gs.
+                        Cobro: ${formatNumber(data.precio_final)} Gs.
                     </span>
                 </div>
             `;
