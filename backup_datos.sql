@@ -71,10 +71,10 @@ ueno bank	783750	Empresa S.A.	3456789	10
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion, minima_denominacion) FROM stdin;
-Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03	5
-Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	2
-Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	10
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion, denominaciones) FROM stdin;
+Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03	{5,10,20,50,100,200,500}
+Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	{2,5,10,20,50,100,200}
+Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	{10,20,50,100,200,500,1000,2000,10000,20000}
 \.
 
 

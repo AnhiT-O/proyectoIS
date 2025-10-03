@@ -3,7 +3,7 @@ from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
-from datetime import date
+from django.contrib.postgres.fields import ArrayField
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -24,7 +24,10 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
-    minima_denominacion = models.IntegerField(default=1)
+    denominaciones = ArrayField(
+        base_field=models.IntegerField(),
+        default=list
+    )
     
     def save(self, *args, **kwargs):
         if self.pk:
@@ -176,7 +179,7 @@ def crear_moneda_usd(sender, **kwargs):
                 comision_compra=200,
                 comision_venta=250,
                 decimales=2,
-                minima_denominacion=1
+                denominaciones=[1, 2, 5, 10, 20, 50, 100]
             )
             print("✓ Moneda USD creada automáticamente")
 
@@ -187,7 +190,10 @@ class StockGuaranies(models.Model):
     cantidad = models.BigIntegerField(
         default=1000000000
     )
-    minima_denominacion = models.IntegerField(default=2000)
+    denominaciones = ArrayField(
+        base_field=models.IntegerField(),
+        default=[2000, 5000, 10000, 20000, 50000, 100000]
+    )
 
     class Meta:
         verbose_name = 'Stock de Guaraníes'

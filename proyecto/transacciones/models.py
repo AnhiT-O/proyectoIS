@@ -15,12 +15,14 @@ Date: 2024
 
 import ast
 from decimal import Decimal
+import secrets
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
-from datetime import timedelta
-from monedas.models import StockGuaranies
+import stripe
+from monedas.models import Moneda, StockGuaranies
+from django.db import transaction
 
 class Recargos(models.Model):
     """
@@ -310,9 +312,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     # Calculos para compra
     if operacion == 'compra':
         # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
-        redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
-        if redondeo_efectivo_monto == moneda.minima_denominacion:
-            redondeo_efectivo_monto = 0
+        redondeo_efectivo_monto = redondear_efectivo(monto, moneda.denominaciones)
         monto += redondeo_efectivo_monto
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base + moneda.comision_venta
@@ -346,9 +346,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final += monto_recargo_pago
         # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
-            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
-                redondeo_efectivo_precio_final = 0
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, StockGuaranies.objects.first().denominaciones)
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -359,9 +357,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     else:
         # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
-            if redondeo_efectivo_monto == moneda.minima_denominacion:
-                redondeo_efectivo_monto = 0
+            redondeo_efectivo_monto = redondear_efectivo(monto, moneda.denominaciones)
             monto += redondeo_efectivo_monto
         else:
             redondeo_efectivo_monto = 0
@@ -385,6 +381,9 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         if isinstance(dict_pago, dict) and 'brand' in dict_pago:
             monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
+        else:
+            monto_recargo_pago = 0
+            porc_recargo_pago = 0
         # Si el cobro es con billetera electrónica
         if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
             monto_recargo_cobro =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
@@ -397,9 +396,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final -= monto_recargo_pago + monto_recargo_cobro
         # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
         if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
-            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
-                redondeo_efectivo_precio_final = 0
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, StockGuaranies.objects.first().denominaciones)
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -419,3 +416,289 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         'monto': monto,
         'precio_final': int(precio_final)
     }
+
+def procesar_pago_stripe(transaccion, payment_method_id):
+    """
+    Procesa un pago con Stripe para una transacción dada.
+    
+    Args:
+        transaccion (Transaccion): La transacción a procesar
+    
+    Returns:
+        dict: Diccionario con 'token' (str) y 'datos' (dict) de la transacción
+        
+    Raises:
+        ValueError: Si la transacción no existe
+    """
+    try:
+        if transaccion.tipo == 'venta':
+            monto_centavos = int(transaccion.monto * 100)
+            moneda_stripe = 'usd' 
+        else:
+            monto_centavos = transaccion.precio_final
+            moneda_stripe = 'pyg' 
+        # Crear PaymentIntent
+        payment_intent = stripe.PaymentIntent.create(
+            amount=monto_centavos,
+            currency=moneda_stripe,
+            payment_method=payment_method_id,
+            customer=transaccion.cliente.id_stripe,
+            confirmation_method='manual',
+            confirm=True,
+            return_url='https://localhost:8000',  # URL de retorno (puedes personalizar)
+            metadata={
+                'transaccion_id': str(transaccion.id),
+                'tipo': transaccion.tipo,
+                'cliente_id': str(transaccion.cliente.id)
+            }
+        )
+
+        print(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
+        
+        return {
+            'success': True,
+            'payment_intent_id': payment_intent.id,
+            'status': payment_intent.status,
+            'error': None
+        }
+        
+    except Transaccion.DoesNotExist:
+        error_msg = f"Transacción {transaccion.id} no encontrada"
+        print(error_msg)
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.CardError as e:
+        # Error con la tarjeta (declined, insufficient funds, etc.)
+        error_msg = f"Error con la tarjeta: {e.user_message}"
+        print(f"CardError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.RateLimitError as e:
+        error_msg = "Demasiadas solicitudes. Intente nuevamente en unos minutos."
+        print(f"RateLimitError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.InvalidRequestError as e:
+        error_msg = "Parámetros inválidos en la solicitud de pago."
+        print(f"InvalidRequestError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.AuthenticationError as e:
+        error_msg = "Error de autenticación con Stripe."
+        print(f"AuthenticationError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.APIConnectionError as e:
+        error_msg = "Error de conexión con Stripe. Intente nuevamente."
+        print(f"APIConnectionError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except stripe.error.StripeError as e:
+        error_msg = f"Error de Stripe: {str(e)}"
+        print(f"StripeError en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+        
+    except Exception as e:
+        error_msg = f"Error inesperado al procesar el pago: {str(e)}"
+        print(f"Error inesperado en transacción {transaccion.id}: {str(e)}")
+        return {
+            'success': False,
+            'payment_intent_id': None,
+            'error': error_msg
+        }
+
+def generar_token_transaccion(transaccion):
+    """
+    Genera un token único de seguridad para transacciones específicas.
+    
+    Se utiliza para transacciones con medios de pago que requieren verificación
+    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
+    """
+    # Generar token único
+    token = secrets.token_urlsafe(32)
+    
+    # Crear datos del token
+    datos_token = {
+        'token': token,
+        'transaccion_id': transaccion.id
+    }
+    
+    # Actualizar la transacción con el token y su expiración
+    transaccion.token = token
+    transaccion.save()
+
+    return {
+        'token': token,
+        'datos': datos_token
+    }
+
+def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
+    """
+    Verifica si ha habido cambios en la cotización durante el proceso de transacción.
+    
+    Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
+    
+    Args:
+        request (HttpRequest): Petición HTTP con datos de sesión
+        tipo_transaccion (str): 'compra' o 'venta'
+        
+    Returns:
+        dict: Diccionario con información de cambios o None si no hay cambios
+            - 'hay_cambios': boolean indicando si hubo cambios
+            - 'valores_anteriores': dict con precio_compra y precio_venta originales
+            - 'valores_actuales': dict con precio_compra y precio_venta actuales
+            - 'moneda': instancia de la moneda
+    """
+    try:
+        # Obtener datos de la sesión
+        datos_key = f'{tipo_transaccion}_datos'
+        precio_compra_key = 'precio_compra_inicial'
+        precio_venta_key = 'precio_venta_inicial'
+        
+        datos_transaccion = request.session.get(datos_key)
+        precio_compra_inicial = request.session.get(precio_compra_key)
+        precio_venta_inicial = request.session.get(precio_venta_key)
+        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
+            return None
+            
+        # Obtener moneda actual
+        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
+        cliente_activo = request.user.cliente_activo
+        
+        # Calcular precios actuales
+        precios_actuales = moneda.get_precios_cliente(cliente_activo)
+        precio_compra_actual = precios_actuales['precio_compra']
+        precio_venta_actual = precios_actuales['precio_venta']
+
+        # Verificar si hay cambios
+        hay_cambios = (
+            precio_compra_actual != precio_compra_inicial and 
+            precio_venta_actual != precio_venta_inicial
+        )
+        if hay_cambios:
+            return {
+                'hay_cambios': True,
+                'valores_anteriores': {
+                    'precio_compra': precio_compra_inicial,
+                    'precio_venta': precio_venta_inicial
+                },
+                'valores_actuales': {
+                    'precio_compra': precio_compra_actual,
+                    'precio_venta': precio_venta_actual
+                },
+                'moneda': moneda
+            }
+        
+        return {'hay_cambios': False}
+        
+    except Exception:
+        return None
+    
+@transaction.atomic
+def procesar_transaccion(transaccion, recibido=0):
+    
+    if transaccion.medio_pago == 'Transferencia Bancaria':
+        if recibido < transaccion.precio_final:
+            print('Notificar usuario que transferencia es incompleta')
+        else:
+            transaccion.estado = 'Confirmada'
+            transaccion.fecha_hora = timezone.now()
+            stock = StockGuaranies.objects.first()
+            stock.cantidad += recibido
+            stock.save()
+            transaccion.cliente.consumo_diario += transaccion.precio_final
+            transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.save()
+            transaccion.save()
+            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
+    elif transaccion.medio_pago in Recargos.objects.filter(medio='Billetera Electrónica'):
+        if recibido < transaccion.precio_final:
+            print('Notificar usuario que transferencia es incompleta')
+        else:
+            transaccion.estado = 'Confirmada'
+            transaccion.fecha_hora = timezone.now()
+            stock = StockGuaranies.objects.first()
+            monto_recargo_pago = Decimal(recibido) * (Decimal(Recargos.objects.get(marca=transaccion.medio_pago).recargo) / Decimal(100))
+            stock.cantidad += recibido - monto_recargo_pago
+            stock.save()
+            transaccion.cliente.consumo_diario += transaccion.precio_final
+            transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.save()
+            transaccion.save()
+            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
+    elif transaccion.medio_pago.startswith('Tarjeta de Crédito'):
+        if transaccion.tipo == 'compra':
+            transaccion.estado = 'Confirmada'
+            transaccion.fecha_hora = timezone.now()
+            stock = StockGuaranies.objects.first()
+            stock.cantidad += transaccion.precio_final - transaccion.recargo_pago
+            stock.save()
+            transaccion.cliente.consumo_diario += transaccion.precio_final
+            transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.save()
+            transaccion.save()
+        else:
+            transaccion.estado = 'Confirmada'
+            transaccion.fecha_hora = timezone.now()
+            stock = StockGuaranies.objects.first()
+            stock.cantidad += (transaccion.monto * transaccion.moneda.tasa_base) - transaccion.recargo_pago
+            stock.save()
+            transaccion.cliente.consumo_diario += transaccion.precio_final
+            transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.save()
+            transaccion.save()
+            if transaccion.medio_cobro != 'Efectivo':
+                stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
+                stock.save()
+                print('Notificar usuario que se realizó la transferencia en su cuenta o billetera')
+                transaccion.estado = 'Completa'
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+
+def redondear_efectivo(monto, denominaciones):
+    """
+    Redondea un monto al múltiplo más cercano según las denominaciones disponibles.
+    
+    Args:
+        monto (Decimal): Monto a redondear
+        denominaciones (list): Lista de denominaciones disponibles (enteros)
+        
+    Returns:
+        Decimal: Monto redondeado
+    """
+    redondeo = denominaciones[0]
+    for i in denominaciones:
+        if monto % i == 0:
+            redondeo = 0
+            break
+        elif i - (monto % i) < redondeo:
+            redondeo = i - (monto % i)
+    return redondeo

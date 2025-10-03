@@ -25,7 +25,11 @@
             </div>
             <div class="detalle-item">
                 <div class="detalle-titulo">Usuario que procesó:</div>
-                <div class="detalle-valor">{{ transaccion.usuario.nombre_completo|default:transaccion.usuario.username }}</div>
+                <div class="detalle-valor">{{ transaccion.usuario.nombre_completo }}</div>
+            </div>
+            <div class="detalle-item">
+                <div class="detalle-titulo">Nombre de cliente:</div>
+                <div class="detalle-valor">{{ transaccion.cliente.nombre }}</div>
             </div>
             <div class="detalle-item">
                 <div class="detalle-titulo">Segmento del cliente:</div>
@@ -49,6 +53,12 @@
                     </div>
                 </div>
             </div>
+            {% if transaccion.estado == 'Cancelada' %}
+            <div class="detalle-item">
+                <div class="detalle-titulo">Razón de cancelación:</div>
+                <div class="detalle-valor">{{ transaccion.razon }}</div>
+            </div>
+            {% endif %}
             <div class="detalle-item">
                 <div class="detalle-titulo">Medio de pago:</div>
                 <div class="detalle-valor">{{ transaccion.medio_pago }}</div>

@@ -3,13 +3,10 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from clientes.models import Cliente
 from .forms import LoginForm, SimuladorForm
 from monedas.models import Moneda
-from decimal import Decimal
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from transacciones.models import Transaccion, calcular_conversion
+from transacciones.models import Transaccion, calcular_conversion, redondear_efectivo
 
 def inicio(request):
     """

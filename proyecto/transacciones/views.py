@@ -22,15 +22,12 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion
+from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
 from decimal import Decimal
 from clientes.models import Cliente
-import secrets
 import ast
 import stripe
 import logging
@@ -38,285 +35,10 @@ from datetime import date, timedelta
 from django.utils import timezone
 from django.db import models
 import stripe
-from django.db import transaction
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
-
-@transaction.atomic
-def procesar_pago_stripe(transaccion, payment_method_id):
-    """
-    Procesa un pago con Stripe para una transacción dada.
-    
-    Args:
-        transaccion (Transaccion): La transacción a procesar
-    
-    Returns:
-        dict: Diccionario con 'token' (str) y 'datos' (dict) de la transacción
-        
-    Raises:
-        ValueError: Si la transacción no existe
-    """
-    try:
-        if transaccion.tipo == 'venta':
-            monto_centavos = int(transaccion.monto * 100)
-            moneda_stripe = 'usd' 
-        else:
-            monto_centavos = transaccion.precio_final
-            moneda_stripe = 'pyg' 
-        # Crear PaymentIntent
-        payment_intent = stripe.PaymentIntent.create(
-            amount=monto_centavos,
-            currency=moneda_stripe,
-            payment_method=payment_method_id,
-            customer=transaccion.cliente.id_stripe,
-            confirmation_method='manual',
-            confirm=True,
-            return_url='https://localhost:8000',  # URL de retorno (puedes personalizar)
-            metadata={
-                'transaccion_id': str(transaccion.id),
-                'tipo': transaccion.tipo,
-                'cliente_id': str(transaccion.cliente.id)
-            }
-        )
-        
-        if payment_intent.status == 'succeeded':
-            guaranies = StockGuaranies.objects.first()
-            guaranies.cantidad += (transaccion.precio_final - transaccion.recargo_pago)
-            guaranies.save()
-            if transaccion.medio_cobro != 'Efectivo':
-                try:
-                    guaranies = StockGuaranies.objects.first()
-                    guaranies.cantidad -= (transaccion.precio_final + transaccion.recargo_cobro)
-                    guaranies.save()
-                    cliente = Cliente.objects.get(id=transaccion.cliente_id)
-                    cliente.consumo_diario += transaccion.precio_final
-                    cliente.consumo_mensual += transaccion.precio_final
-                    cliente.ultimo_consumo = date.today()
-                    cliente.save()
-                    transaccion.estado = 'Completa'
-                    transaccion.fecha_hora = timezone.now()
-                    transaccion.save()
-                    logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
-    
-                    return {
-                        'success': True,
-                        'payment_intent_id': payment_intent.id,
-                        'status': payment_intent.status,
-                        'error': None
-                    }
-                except Exception as e:
-                    error_msg = f"Error al procesar el cobro. Detalles: {str(e)}"
-                    logger.error(error_msg)
-                    return {
-                        'success': False,
-                        'payment_intent_id': None,
-                        'error': error_msg
-                    }
-            cliente = Cliente.objects.get(id=transaccion.cliente_id)
-            cliente.consumo_diario += transaccion.precio_final
-            cliente.consumo_mensual += transaccion.precio_final
-            cliente.ultimo_consumo = date.today()
-            cliente.save()
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-
-        logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
-        
-        return {
-            'success': True,
-            'payment_intent_id': payment_intent.id,
-            'status': payment_intent.status,
-            'error': None
-        }
-        
-    except Transaccion.DoesNotExist:
-        error_msg = f"Transacción {transaccion.id} no encontrada"
-        logger.error(error_msg)
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.CardError as e:
-        # Error con la tarjeta (declined, insufficient funds, etc.)
-        error_msg = f"Error con la tarjeta: {e.user_message}"
-        logger.error(f"CardError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.RateLimitError as e:
-        error_msg = "Demasiadas solicitudes. Intente nuevamente en unos minutos."
-        logger.error(f"RateLimitError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.InvalidRequestError as e:
-        error_msg = "Parámetros inválidos en la solicitud de pago."
-        logger.error(f"InvalidRequestError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.AuthenticationError as e:
-        error_msg = "Error de autenticación con Stripe."
-        logger.error(f"AuthenticationError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.APIConnectionError as e:
-        error_msg = "Error de conexión con Stripe. Intente nuevamente."
-        logger.error(f"APIConnectionError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.StripeError as e:
-        error_msg = f"Error de Stripe: {str(e)}"
-        logger.error(f"StripeError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except Exception as e:
-        error_msg = f"Error inesperado al procesar el pago: {str(e)}"
-        logger.error(f"Error inesperado en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-
-def generar_token_transaccion(transaccion):
-    """
-    Genera un token único de seguridad para transacciones específicas.
-    
-    Se utiliza para transacciones con medios de pago que requieren verificación
-    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
-    """
-    # Generar token único
-    token = secrets.token_urlsafe(32)
-    
-    # Crear datos del token
-    datos_token = {
-        'token': token,
-        'transaccion_id': transaccion.id
-    }
-    
-    # Actualizar la transacción con el token y su expiración
-    transaccion.token = token
-    transaccion.save()
-
-    return {
-        'token': token,
-        'datos': datos_token
-    }
-
-def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
-    """
-    Verifica si ha habido cambios en la cotización durante el proceso de transacción.
-    
-    Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
-    
-    Args:
-        request (HttpRequest): Petición HTTP con datos de sesión
-        tipo_transaccion (str): 'compra' o 'venta'
-        
-    Returns:
-        dict: Diccionario con información de cambios o None si no hay cambios
-            - 'hay_cambios': boolean indicando si hubo cambios
-            - 'valores_anteriores': dict con precio_compra y precio_venta originales
-            - 'valores_actuales': dict con precio_compra y precio_venta actuales
-            - 'moneda': instancia de la moneda
-    """
-    try:
-        # Obtener datos de la sesión
-        datos_key = f'{tipo_transaccion}_datos'
-        precio_compra_key = 'precio_compra_inicial'
-        precio_venta_key = 'precio_venta_inicial'
-        
-        datos_transaccion = request.session.get(datos_key)
-        precio_compra_inicial = request.session.get(precio_compra_key)
-        precio_venta_inicial = request.session.get(precio_venta_key)
-        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
-            return None
-            
-        # Obtener moneda actual
-        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
-        cliente_activo = request.user.cliente_activo
-        
-        # Calcular precios actuales
-        precios_actuales = moneda.get_precios_cliente(cliente_activo)
-        precio_compra_actual = precios_actuales['precio_compra']
-        precio_venta_actual = precios_actuales['precio_venta']
-
-        # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != precio_compra_inicial and 
-            precio_venta_actual != precio_venta_inicial
-        )
-        if hay_cambios:
-            return {
-                'hay_cambios': True,
-                'valores_anteriores': {
-                    'precio_compra': precio_compra_inicial,
-                    'precio_venta': precio_venta_inicial
-                },
-                'valores_actuales': {
-                    'precio_compra': precio_compra_actual,
-                    'precio_venta': precio_venta_actual
-                },
-                'moneda': moneda
-            }
-        
-        return {'hay_cambios': False}
-        
-    except Exception:
-        return None
-
-def extraer_mensaje_error(validation_error):
-    """
-    Extrae el mensaje de error limpio de un ValidationError de Django.
-    
-    Django a veces agrega corchetes y formateo adicional a los mensajes de error.
-    Esta función extrae el mensaje principal sin el formateo extra.
-    
-    Args:
-        validation_error (ValidationError): Error de validación de Django
-        
-    Returns:
-        str: Mensaje de error limpio sin formateo adicional
-    """
-    if hasattr(validation_error, 'message'):
-        return validation_error.message
-    elif hasattr(validation_error, 'messages') and validation_error.messages:
-        # Si hay múltiples mensajes, tomar el primero
-        return validation_error.messages[0]
-    else:
-        # Fallback a conversión string
-        mensaje = str(validation_error)
-        # Remover corchetes si están presentes
-        if mensaje.startswith("['") and mensaje.endswith("']"):
-            return mensaje[2:-2]
-        return mensaje
 
 # ============================================================================
 # PROCESO DE COMPRA DE MONEDAS
@@ -953,8 +675,10 @@ def compra_exito(request):
 
     if medio_pago.startswith('{'):
         medio_pago_dict = ast.literal_eval(medio_pago)
-        if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
+        pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
+        if pago['success']:
             messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+            procesar_transaccion(transaccion)
             token_data = generar_token_transaccion(transaccion)
         else:
             transaccion.estado = 'Cancelada'
@@ -1545,13 +1269,15 @@ def venta_confirmacion(request):
                 str_medio_cobro = f'{medio_cobro_dict["tipo_billetera"]} ({medio_cobro_dict["telefono"]})'
             else:
                 str_medio_cobro = medio_cobro
+                
             datos_transaccion = calcular_conversion(monto, moneda, 'venta', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
             if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:venta_monto_moneda')
-            if datos_transaccion['precio_final'] > StockGuaranies.objects.first().cantidad:
-                messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
-                return redirect('transacciones:venta_monto_moneda')
+            if str_medio_cobro != 'Efectivo':
+                if datos_transaccion['precio_final'] > StockGuaranies.objects.first().cantidad:
+                    messages.warning(request, 'El monto a recibir excede la disponibilidad actual de guaraníes en el sistema. Reinicie el proceso con un monto menor o diferente medio de cobro.')
+                    return redirect('transacciones:venta_monto_moneda')
             transaccion = Transaccion.objects.create(
                 cliente=request.user.cliente_activo,
                 tipo='venta',
@@ -1632,6 +1358,7 @@ def venta_exito(request):
         medio_pago_dict = ast.literal_eval(medio_pago)
         if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
             messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+            procesar_transaccion(transaccion)
             if medio_cobro == 'Efectivo':
                 token_data = generar_token_transaccion(transaccion)
             else:

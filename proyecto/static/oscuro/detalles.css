@@ -212,3 +212,39 @@
     gap: 5px;
     align-items: center;
 }
+
+/* Estilos para denominaciones - tema oscuro */
+.denominaciones-seccion {
+    margin-top: 1rem;
+}
+
+.denominaciones-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.denominacion-item {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(74, 85, 104, 0.3);
+    transition: all 0.3s ease;
+}
+
+.denominacion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 85, 104, 0.4);
+    background: linear-gradient(135deg, #5a6578 0%, #3d4758 100%);
+}
+
+.texto-vacio {
+    color: #a0aec0;
+    font-style: italic;
+    opacity: 0.7;
+}

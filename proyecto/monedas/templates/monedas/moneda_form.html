@@ -27,7 +27,7 @@
         </p>
     </div>
 
-    <form method="post" id="monedaForm" novalidate>
+    <form method="post" novalidate>
         {% csrf_token %}
         
         {% if not form.instance.pk or perms.monedas.gestion %}
@@ -107,12 +107,16 @@
                     </div>
                 {% endif %}
             </div>
+
             <div class="form-campo">
-                <label for="{{ form.minima_denominacion.id_for_label }}">Mínima Denominación</label>
-                {{ form.minima_denominacion }}
-                {% if form.minima_denominacion.errors %}
+                <label for="{{ form.denominaciones.id_for_label }}">Denominaciones Disponibles</label>
+                {{ form.denominaciones }}
+                <div class="campo-ayuda">
+                    {{ form.denominaciones.help_text }}
+                </div>
+                {% if form.denominaciones.errors %}
                     <div class="form-errores">
-                        {% for error in form.minima_denominacion.errors %}
+                        {% for error in form.denominaciones.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -120,42 +124,16 @@
             </div>
         {% endif %}
 
-                <div class="zona-botones">
+        <div class="zona-botones">
             <button type="submit" class="btn-primario">
-                {% if form.instance.pk %}
-                    Editar Moneda
-                {% else %}
-                    Crear Moneda
-                {% endif %}
+            {% if form.instance.pk %}
+                Editar Moneda
+            {% else %}
+                Crear Moneda
+            {% endif %}
             </button>
             <a href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'monedas:lista_monedas' %}{% endif %}" class="btn-secundario">Cancelar</a>
         </div>
     </form>
-    
-    <script>
-        // Si el formulario se envía exitosamente, redirigir a la página de retorno si existe
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const returnUrl = '{{ request.GET.return_url|escapejs }}';
-            if (returnUrl) {
-                e.preventDefault();
-                fetch(this.action, {
-                    method: 'POST',
-                    body: new FormData(this),
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.href = returnUrl;
-                    } else {
-                        this.submit();
-                    }
-                }).catch(() => {
-                    this.submit();
-                });
-            }
-        });
-    </script>
-    </div>
 </div>
 {% endblock %}

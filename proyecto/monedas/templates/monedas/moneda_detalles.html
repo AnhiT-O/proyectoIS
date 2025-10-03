@@ -36,13 +36,6 @@
                     </div>
                 </div>
                 <div class="info-celda">
-                    <span class="info-icono">💵</span>
-                    <div class="info-contenido">
-                        <div class="info-titulo">Mínima Denominación</div>
-                        <div class="info-valor">{{ moneda.minima_denominacion }}</div>
-                    </div>
-                </div>
-                <div class="info-celda">
                     <span class="info-icono">🔒</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Estado</div>
@@ -89,6 +82,29 @@
                     <div class="info-contenido">
                         <div class="info-titulo">Última Actualización de Cotización</div>
                         <div class="info-valor">{{ moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Denominaciones -->
+        <div class="seccion-info">
+            <div class="info-columna denominaciones-seccion" style="grid-column: 1 / -1;">
+                <div class="info-celda">
+                    <span class="info-icono">💵</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Denominaciones Disponibles</div>
+                        <div class="info-valor">
+                            <div class="denominaciones-lista">
+                                {% for denominacion in moneda.denominaciones %}
+                                    <span class="denominacion-item">
+                                        {{ moneda.simbolo }} {{ denominacion|intcomma }}
+                                    </span>
+                                {% empty %}
+                                    <span class="texto-vacio">No hay denominaciones configuradas</span>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
