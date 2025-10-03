@@ -82,43 +82,38 @@ def procesar_pago_stripe(transaccion, payment_method_id):
         )
         
         if payment_intent.status == 'succeeded':
-            if moneda_stripe == 'pyg':
-                guaranies = StockGuaranies.objects.first()
-                guaranies.cantidad += (transaccion.monto_final - transaccion.recargo_pago)
-                guaranies.save()
-            elif moneda_stripe == 'usd':
-                moneda_usd = Moneda.objects.get(simbolo='USD')
-                moneda_usd.stock += (transaccion.monto_final * transaccion.monto) / transaccion.precio_base
-                moneda_usd.save()
-                if transaccion.medio_cobro != 'Efectivo':
-                    try:
-                        guaranies = StockGuaranies.objects.first()
-                        guaranies.cantidad -= (transaccion.monto_final + transaccion.recargo_cobro)
-                        guaranies.save()
-                        cliente = Cliente.objects.get(id=transaccion.cliente_id)
-                        cliente.consumo_diario += transaccion.monto_final
-                        cliente.consumo_mensual += transaccion.monto_final
-                        cliente.ultimo_consumo = date.today()
-                        cliente.save()
-                        transaccion.estado = 'Completada'
-                        transaccion.fecha_hora = timezone.now()
-                        transaccion.save()
-                        logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
-        
-                        return {
-                            'success': True,
-                            'payment_intent_id': payment_intent.id,
-                            'status': payment_intent.status,
-                            'error': None
-                        }
-                    except Exception as e:
-                        error_msg = f"Error al procesar el cobro. Detalles: {str(e)}"
-                        logger.error(error_msg)
-                        return {
-                            'success': False,
-                            'payment_intent_id': None,
-                            'error': error_msg
-                        }
+            guaranies = StockGuaranies.objects.first()
+            guaranies.cantidad += (transaccion.monto_final - transaccion.recargo_pago)
+            guaranies.save()
+            if transaccion.medio_cobro != 'Efectivo':
+                try:
+                    guaranies = StockGuaranies.objects.first()
+                    guaranies.cantidad -= (transaccion.monto_final + transaccion.recargo_cobro)
+                    guaranies.save()
+                    cliente = Cliente.objects.get(id=transaccion.cliente_id)
+                    cliente.consumo_diario += transaccion.monto_final
+                    cliente.consumo_mensual += transaccion.monto_final
+                    cliente.ultimo_consumo = date.today()
+                    cliente.save()
+                    transaccion.estado = 'Completa'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
+                    logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
+    
+                    return {
+                        'success': True,
+                        'payment_intent_id': payment_intent.id,
+                        'status': payment_intent.status,
+                        'error': None
+                    }
+                except Exception as e:
+                    error_msg = f"Error al procesar el cobro. Detalles: {str(e)}"
+                    logger.error(error_msg)
+                    return {
+                        'success': False,
+                        'payment_intent_id': None,
+                        'error': error_msg
+                    }
             cliente = Cliente.objects.get(id=transaccion.cliente_id)
             cliente.consumo_diario += transaccion.monto_final
             cliente.consumo_mensual += transaccion.monto_final
@@ -880,9 +875,6 @@ def compra_confirmacion(request):
             if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:compra_monto_moneda')
-            if datos_transaccion['monto'] > moneda.stock:
-                messages.warning(request, 'El monto a comprar excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
-                return redirect('transacciones:compra_monto_moneda')
             transaccion = Transaccion.objects.create(
                 cliente=request.user.cliente_activo,
                 tipo='compra',
@@ -1482,12 +1474,6 @@ def venta_confirmacion(request):
         elif action == 'aceptar':
             transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
             datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'venta', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
-            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
-                messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
-                return redirect('transacciones:venta_monto_moneda')
-            if datos_transaccion['monto_final'] > StockGuaranies.objects.first().cantidad:
-                messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
-                return redirect('transacciones:venta_monto_moneda')
             transaccion.precio_base = datos_transaccion['precio_base']
             transaccion.cotizacion = datos_transaccion['cotizacion']
             transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
@@ -1559,6 +1545,12 @@ def venta_confirmacion(request):
             else:
                 str_medio_cobro = medio_cobro
             datos_transaccion = calcular_conversion(monto, moneda, 'venta', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
+            if datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['monto_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
+                messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:venta_monto_moneda')
+            if datos_transaccion['monto_final'] > StockGuaranies.objects.first().cantidad:
+                messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
+                return redirect('transacciones:venta_monto_moneda')
             transaccion = Transaccion.objects.create(
                 cliente=request.user.cliente_activo,
                 tipo='venta',
@@ -1713,6 +1705,14 @@ def historial_transacciones(request, cliente_id):
     if not request.user.clientes_operados.filter(id=cliente.id).exists():
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
         return redirect('inicio')
+    transacciones_pasadas = Transaccion.objects.filter(cliente=cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.token = None
+                t.save()
     # Obtener parámetros de filtrado
     busqueda = request.GET.get('busqueda', '')
     tipo_operacion = request.GET.get('tipo_operacion', '')
@@ -1788,6 +1788,11 @@ def detalle_historial(request, transaccion_id):
     except Transaccion.DoesNotExist:
         messages.error(request, 'La transacción solicitada no existe.')
         return redirect('transacciones:historial')
+    if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
+        transaccion.estado = 'Cancelada'
+        transaccion.razon = 'Expira el tiempo para confirmar la transacción'
+        transaccion.token = None
+        transaccion.save()
     if transaccion.cliente not in request.user.clientes_operados.all() and not request.user.has_perm('transacciones.visualizacion'):
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
         return redirect('inicio')

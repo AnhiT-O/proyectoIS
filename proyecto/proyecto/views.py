@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
@@ -8,7 +9,7 @@ from monedas.models import Moneda
 from decimal import Decimal
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from transacciones.models import calcular_conversion
+from transacciones.models import Transaccion, calcular_conversion
 
 def inicio(request):
     """
@@ -32,7 +33,7 @@ def inicio(request):
         })
     context['segmentaciones'] = segmentaciones_lista
     
-    # Obtener el segmento seleccionado (solo para administradores)
+    # Obtener el segmento seleccionado
     segmento_seleccionado = None
     porcentaje_beneficio_admin = 0
     if request.user.has_perm('monedas.cotizacion'):
@@ -95,6 +96,14 @@ def login_usuario(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                transacciones_pasadas = Transaccion.objects.filter(usuario=request.user, estado='Pendiente')
+                if transacciones_pasadas:
+                    for t in transacciones_pasadas:
+                        if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                            t.estado = 'Cancelada'
+                            t.razon = 'Expira el tiempo para confirmar la transacción'
+                            t.token = None
+                            t.save()
                 messages.success(request, f'¡Bienvenido a Global Exchange, {user.first_name}!')
                 next_page = request.GET.get('next', 'inicio')
                 return redirect(next_page)

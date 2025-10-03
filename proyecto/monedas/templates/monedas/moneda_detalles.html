@@ -35,17 +35,13 @@
                         <div class="info-valor">{{ moneda.decimales }}</div>
                     </div>
                 </div>
-                {% if perms.monedas.gestion %}
                 <div class="info-celda">
-                    <span class="info-icono">📦</span>
+                    <span class="info-icono">💵</span>
                     <div class="info-contenido">
-                        <div class="info-titulo">Stock Disponible</div>
-                        <div class="info-valor">
-                            {{ moneda.stock|floatformat:moneda.decimales }}
-                        </div>
+                        <div class="info-titulo">Mínima Denominación</div>
+                        <div class="info-valor">{{ moneda.minima_denominacion }}</div>
                     </div>
                 </div>
-                {% endif %}
                 <div class="info-celda">
                     <span class="info-icono">🔒</span>
                     <div class="info-contenido">

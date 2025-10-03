@@ -50,12 +50,12 @@
                     <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Precio base para compra:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
-                </div>
-                <div class="detalle-item">
                     <div class="detalle-titulo">Monto ingresado para compra:</div>
                     <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Precio base para compra:</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Beneficio por segmento sobre comisión ({{ transaccion.porc_beneficio_segmento }}):</div>
@@ -82,12 +82,12 @@
                 </div>
                 {% endif %}
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Monto a pagar:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.monto_final|intcomma }}</div>
+                    <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.monto_final|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Monto a recibir:</div>
-                    <div class="detalle-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
             {% else %}
             <div class="detalle-item">
@@ -95,12 +95,12 @@
                     <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Precio base para venta:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
-                </div>
-                <div class="detalle-item">
                     <div class="detalle-titulo">Monto ingresado para venta:</div>
                     <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Precio base para venta:</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Beneficio por segmento sobre comisión ({{ transaccion.porc_beneficio_segmento }}):</div>
@@ -127,12 +127,12 @@
                 </div>
                 {% endif %}
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Monto a pagar:</div>
-                    <div class="detalle-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Monto a recibir:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.monto_final|intcomma }}</div>
+                    <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.monto_final|intcomma }}</div>
                 </div>
             {% endif %}
         </div>

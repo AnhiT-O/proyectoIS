@@ -78,24 +78,22 @@ class MonedaForm(forms.ModelForm):
             'value': '3'
         })
     )
-
-    stock = forms.IntegerField(
-        required= True,
+    minima_denominacion = forms.IntegerField(
+        required=True,
         error_messages={
-            'required': 'Debe ingresar una cantidad de stock'
+            'min_value': 'La mínima denominación debe ser un número positivo.',
+            'required': 'Debes ingresar una mínima denominación.'
         },
-        widget= forms.NumberInput(attrs={
+        widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'min': '0',
             'type': 'number'
         })
-
     )
-
 
     class Meta:
         model = Moneda
-        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'stock']
+        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'minima_denominacion']
 
     def clean_simbolo(self):
         """
@@ -143,81 +141,3 @@ class MonedaForm(forms.ModelForm):
         if comision_venta is not None and comision_venta < 0:
             raise ValidationError('La comisión de venta debe ser un número positivo.')
         return comision_venta
-
-    def es_moneda_base(self):
-        """
-        Verifica si la moneda actual es la moneda base del sistema (Guaraní).
-        """
-        simbolo = self.cleaned_data.get('simbolo', '').upper()
-        moneda_base = settings.MONEDA_BASE_GUARANIES
-        return simbolo == moneda_base['simbolo']
-
-    def get_moneda_base_info(self):
-        """
-        Retorna la información de la moneda base del sistema.
-        """
-        return settings.MONEDA_BASE_GUARANIES
-
-
-class LimiteGlobalForm(forms.ModelForm):
-    """
-    Formulario para gestionar los límites globales de transacciones
-    """
-    
-    limite_diario = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'min': '1',
-            'step': '1000',
-        }),
-        error_messages={
-            'required': 'Debes ingresar el límite diario.',
-            'invalid': 'El límite diario debe ser un número entero.',
-            'min_value': 'El límite diario debe ser mayor a 0.',
-        },
-        help_text='Límite diario en guaraníes'
-    )
-    
-    limite_mensual = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'min': '1',
-            'step': '1000',
-        }),
-        error_messages={
-            'required': 'Debes ingresar el límite mensual.',
-            'invalid': 'El límite mensual debe ser un número entero.',
-            'min_value': 'El límite mensual debe ser mayor a 0.',
-        },
-        help_text='Límite mensual en guaraníes'
-    )
-
-    class Meta:
-        model = LimiteGlobal
-        fields = ['limite_diario', 'limite_mensual']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        limite_diario = cleaned_data.get('limite_diario')
-        limite_mensual = cleaned_data.get('limite_mensual')
-
-        # Validar que el límite diario no sea mayor al mensual
-        if limite_diario and limite_mensual:
-            if limite_diario > limite_mensual:
-                raise ValidationError(
-                    'El límite diario no puede ser mayor al límite mensual.'
-                )
-
-        return cleaned_data
-
-    def clean_limite_diario(self):
-        limite_diario = self.cleaned_data.get('limite_diario')
-        if limite_diario and limite_diario <= 0:
-            raise ValidationError('El límite diario debe ser mayor a 0.')
-        return limite_diario
-
-    def clean_limite_mensual(self):
-        limite_mensual = self.cleaned_data.get('limite_mensual')
-        if limite_mensual and limite_mensual <= 0:
-            raise ValidationError('El límite mensual debe ser mayor a 0.')
-        return limite_mensual

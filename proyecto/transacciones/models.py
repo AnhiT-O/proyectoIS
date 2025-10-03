@@ -293,12 +293,12 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     redondeo_efectivo_monto_final = 0
     monto_original = monto
     if dict_cobro == 'Efectivo' and operacion == 'compra':
-        redondeo_efectivo_monto = moneda.denominaciones[0] - (monto % moneda.denominaciones[0])
-        if redondeo_efectivo_monto == moneda.denominaciones[0]:
+        redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
+        if redondeo_efectivo_monto == moneda.minima_denominacion:
             redondeo_efectivo_monto = 0
         monto += redondeo_efectivo_monto
     elif dict_pago == 'Efectivo' and operacion == 'venta':
-        redondeo_efectivo_monto = monto % moneda.denominaciones[0]
+        redondeo_efectivo_monto = monto % moneda.minima_denominacion
         monto += redondeo_efectivo_monto
     if operacion == 'compra':
         cotizacion = moneda.tasa_base + moneda.comision_venta
@@ -343,13 +343,13 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         porc_recargo_cobro = 0
     monto_final = monto_final - monto_recargo_pago - monto_recargo_cobro if operacion == 'venta' else monto_final + monto_recargo_pago + monto_recargo_cobro
     if dict_pago == 'Efectivo' and operacion == 'compra':
-        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().denominaciones[0]
+        redondeo_efectivo_monto_final = monto_final % StockGuaranies.objects.first().minima_denominacion
         monto_final += redondeo_efectivo_monto_final
     if dict_cobro == 'Efectivo' and operacion == 'venta':
-        redondeo_efectivo_monto_final = StockGuaranies.objects.first().denominaciones[0] - (monto_final % StockGuaranies.objects.first().denominaciones[0])
-        if redondeo_efectivo_monto_final == StockGuaranies.objects.first().denominaciones[0]:
+        redondeo_efectivo_monto_final = StockGuaranies.objects.first().minima_denominacion - (monto_final % StockGuaranies.objects.first().minima_denominacion)
+        if redondeo_efectivo_monto_final == StockGuaranies.objects.first().minima_denominacion:
             redondeo_efectivo_monto_final = 0
-        monto_final += redondeo_efectivo_monto_final
+        monto_final -= redondeo_efectivo_monto_final
     return {
         'cotizacion': int(cotizacion),
         'precio_base': int(precio_base),

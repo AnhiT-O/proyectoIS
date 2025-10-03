@@ -121,31 +121,31 @@
 /* Estilos para la página de confirmación de transacciones - Modo Oscuro */
 .info-transaccion {
     background: #1f2937;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    border-left: 4px solid #22c55e;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 3px solid #22c55e;
     background-color: #111827;
     border: 1px solid #374151;
 }
 
 .info-transaccion h3 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5rem 0;
     color: #f3f4f6;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
 .detalles-transaccion {
     display: grid;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .detalle-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.3rem 0;
     border-bottom: 1px solid #374151;
 }
 
@@ -156,11 +156,11 @@
 .detalle-titulo {
     font-weight: 600;
     color: #9ca3af;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .detalle-valor {
     color: #f3f4f6;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
 }
