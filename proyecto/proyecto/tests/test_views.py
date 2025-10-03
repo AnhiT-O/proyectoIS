@@ -37,8 +37,8 @@ class TestLoginUsuarioView:
             first_name='Auth',
             last_name='User',
             email='auth@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='11111111',
+            tipo_documento='CI',
+            numero_documento='11111111',
             bloqueado=False,
             is_active=True
         )
@@ -64,8 +64,8 @@ class TestLoginUsuarioView:
             first_name='Login',
             last_name='User',
             email='login@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='22222222',
+            tipo_documento='CI',
+            numero_documento='22222222',
             bloqueado=False,
             is_active=True
         )
@@ -97,8 +97,8 @@ class TestLoginUsuarioView:
             first_name='Valid',
             last_name='User',
             email='valid@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='33333333',
+            tipo_documento='CI',
+            numero_documento='33333333',
             bloqueado=False,
             is_active=True
         )
@@ -134,8 +134,8 @@ class TestLogoutUsuarioView:
             first_name='Logout',
             last_name='User',
             email='logout@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='44444444',
+            tipo_documento='CI',
+            numero_documento='44444444',
             bloqueado=False,
             is_active=True
         )
@@ -185,8 +185,8 @@ class TestInicioView:
             first_name='Auth',
             last_name='User',
             email='auth@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='55555555',
+            tipo_documento='CI',
+            numero_documento='55555555',
             bloqueado=False,
             is_active=True
         )
@@ -211,16 +211,16 @@ class TestInicioView:
 
     def test_renderiza_correctamente_usuario_no_autenticado(self):
         """
-        Prueba 10: Renderizar correctamente para usuario no autenticado (sin cotizaciones)
+        Prueba 10: Renderiza correctamente cotizaciones para usuario no autenticado.
         """
         # Acceder sin autenticar
         response = self.client.get(reverse('inicio'))
         
         # Verificar respuesta exitosa
         assert response.status_code == 200
-        
-        # Verificar que no hay cotizaciones para usuario no autenticado
-        assert 'cotizaciones' not in response.context
+
+        # Verificar que hay cotizaciones para usuario no autenticado
+        assert 'cotizaciones' in response.context
 
     def test_muestra_precios_segun_segmento_seleccionado(self):
         """
@@ -232,8 +232,8 @@ class TestInicioView:
             first_name='Admin',
             last_name='User',
             email='admin@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='66666666',
+            tipo_documento='CI',
+            numero_documento='66666666',
             bloqueado=False,
             is_active=True,
             is_superuser=True
@@ -274,8 +274,8 @@ class TestSimularView:
             first_name='Sim',
             last_name='User',
             email='sim@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='77777777',
+            tipo_documento='CI',
+            numero_documento='77777777',
             bloqueado=False,
             is_active=True
         )

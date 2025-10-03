@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block title %}
-    {% if tipo_transaccion == 'venta' %}
+    {% if transaccion.tipo == 'venta' %}
         Vender Monedas - Confirmación - Global Exchange
     {% else %}
         Comprar Monedas - Confirmación - Global Exchange
@@ -37,7 +37,7 @@
             <div class="paso {% if paso_actual == 4 %}activo{% elif paso_actual > 4 %}completado{% endif %}">
                 <div class="paso-numero">4</div>
                 <div class="paso-titulo">Confirmación de<br>
-                    {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
+                    {% if transaccion.tipo == 'venta' %}Venta{% else %}Compra{% endif %}
                 </div>
             </div>
         </div>
@@ -57,139 +57,169 @@
             <div class="detalles-transaccion">
                 <div class="detalle-item">
                     <div class="detalle-titulo">Nombre del cliente:</div>
-                    <div class="detalle-valor">{{ user.cliente_activo.nombre }}</div>
+                    <div class="detalle-valor">{{ transaccion.cliente.nombre }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Segmento del cliente:</div>
-                    <div class="detalle-valor">{{ user.cliente_activo.get_segmento_display }}</div>
+                    <div class="detalle-valor">{{ transaccion.cliente.segmento }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Tipo de transacción:</div>
                     <div class="detalle-valor">
-                        {% if tipo_transaccion == 'venta' %}
-                            Venta de {{ moneda.nombre }}
+                        {% if transaccion.tipo == 'venta' %}
+                            Venta de {{ transaccion.moneda.nombre }}
                         {% else %}
-                            Compra de {{ moneda.nombre }}
+                            Compra de {{ transaccion.moneda.nombre }}
                         {% endif %}
                     </div>
                 </div>
-                {% if tipo_transaccion == 'compra' %}
-                    <div class="detalle-item">
-                        <div class="detalle-titulo">Monto a pagar:</div>
-                        <div class="detalle-valor">Gs. {{ dar|intcomma }}</div>
-                    </div>
-                    <div class="detalle-item">
-                        <div class="detalle-titulo">Monto a recibir:</div>
-                        <div class="detalle-valor">{{ recibir|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
-                    </div>
-                {% else %}
-                    <div class="detalle-item">
-                        <div class="detalle-titulo">Monto a pagar:</div>
-                        <div class="detalle-valor">{{ dar|floatformat:moneda.decimales }} {{ moneda.simbolo }}</div>
-                    </div>
-                    <div class="detalle-item">
-                        <div class="detalle-titulo">Monto a recibir:</div>
-                        <div class="detalle-valor"> Gs. {{ recibir|intcomma }}</div>
-                    </div>
-                {% endif %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Medio de pago:</div>
-                    {% if medio_pago.last4 %}
-                        <div class="detalle-valor">Tarjeta de Crédito (**** **** **** {{ medio_pago.last4 }})</div>
-                    {% else %}
-                        <div class="detalle-valor">{{ medio_pago }}</div>
-                    {% endif %}
+                    <div class="detalle-valor">{{ transaccion.medio_pago }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Medio de cobro:</div>
-                    {% if medio_cobro.tipo_billetera %}
-                        <div class="detalle-valor">{{ medio_cobro.tipo_billetera }} ({{ medio_cobro.telefono }})</div>
-                    {% else %}
-                        <div class="detalle-valor">{{ medio_cobro }}</div>
-                    {% endif %}
+                    <div class="detalle-valor">{{ transaccion.medio_cobro }}</div>
                 </div>
+                {% if transaccion.tipo == 'compra' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Cotización base para compra:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto ingresado para compra:</div>
+                        <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Precio base para compra:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Beneficio por segmento:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.beneficio_segmento|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Recargo por medio de pago ({{ transaccion.porc_recargo_pago }}):</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.recargo_pago|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Recargo por medio de cobro ({{ transaccion.porc_recargo_cobro }}):</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.recargo_cobro|intcomma }}</div>
+                    </div>
+                    {% if transaccion.medio_pago == 'Efectivo' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Redondeo por medio de pago Efectivo:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_precio_final|intcomma }}</div>
+                    </div>
+                    {% endif %}
+                    {% if transaccion.medio_cobro == 'Efectivo' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
+                        <div class="detalle-valor">{{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
+                        <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                        <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                {% else %}
+                <div class="detalle-item">
+                        <div class="detalle-titulo">Cotización base para venta:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Monto ingresado para venta:</div>
+                        <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Precio base para venta:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Beneficio por segmento:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.beneficio_segmento|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Recargo por medio de pago ({{ transaccion.porc_recargo_pago }}):</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.recargo_pago|intcomma }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Recargo por medio de cobro ({{ transaccion.porc_recargo_cobro }}):</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.recargo_cobro|intcomma }}</div>
+                    </div>
+                    {% if transaccion.medio_pago == 'Efectivo' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Redondeo por medio de pago Efectivo:</div>
+                        <div class="detalle-valor">{{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                    {% endif %}
+                    {% if transaccion.medio_cobro == 'Efectivo' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
+                        <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_precio_final|intcomma }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
+                        <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    </div>
+                    <div class="detalle-item">
+                        <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                        <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
         
     </div>
-    
+
     <form method="post">
     {% csrf_token %}
-    <div class="zona-botones">
-        {% if tipo_transaccion == 'venta' %}
-            <a href="{% url 'transacciones:venta_exito' %}" class="btn-enviar">
-                Confirmar Venta
-            </a>
-        {% else %}
-            <a href="{% url 'transacciones:compra_exito' %}" class="btn-enviar">
-                Confirmar Compra
-            </a>
-        {% endif %}
-        <a href="{% url 'inicio' %}" class="btn-atras">
-            Cancelar {% if tipo_transaccion == 'venta' %}Venta{% else %}Compra{% endif %}
-        </a>
-    </div>
+        <div class="zona-botones">
+            {% if transaccion.tipo == 'venta' %}
+                <button type="submit" name="accion" value="confirmar" class="btn-enviar">
+                    Confirmar Venta
+                </button>
+            {% else %}
+                <button type="submit" name="accion" value="confirmar" class="btn-enviar">
+                    Confirmar Compra
+                </button>
+            {% endif %}
+            <button type="submit" name="accion" value="cancelar" class="btn-atras">
+                Cancelar {% if transaccion.tipo == 'venta' %}Venta{% else %}Compra{% endif %}
+            </button>
+        </div>
     </form>
+    {% if cambios %}
+    <div class="popup-overlay" style="display: flex">
+        <div class="popup-contenido" style="max-width: 700px;">
+            <div class="popup-cabecera">
+                <h3>¡La cotización ha cambiado!</h3>
+            </div>
+            <div class="popup-cuerpo">
+                {% if transaccion.tipo == 'compra' %}
+                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|intcomma }} a Gs. {{ cambios.valores_actuales.precio_venta|intcomma }}</p>
+                {% else %}
+                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|intcomma }} a Gs. {{ cambios.valores_actuales.precio_compra|intcomma }}</p>
+                {% endif %}
+                <form method="post">
+                {% csrf_token %}
+                    <div class="zona-botones">
+                        <button type="submit" name="action" value="aceptar" class="btn-enviar">
+                            Aceptar Nuevo Precio
+                        </button>
+                        <button type="submit" name="action" value="cancelar" class="btn-atras">
+                            Cancelar Operación
+                        </button>
+                    </div>
+                </form>    
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Función para verificar cambios cada 3 segundos
-    function verificarCambios() {
-        fetch(`/operaciones/verificar-cambios/{{ transaccion.id }}/`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                // La línea que fallaba: ahora el elemento existe cuando se llama.
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Manejo básico de errores de red
-                console.error("Fallo la petición de polling. Estado:", response.status);
-                // No programar la próxima llamada si hay un error HTTP grave.
-                return Promise.reject(new Error("Error HTTP"));
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.hubo_cambio) {
-                // Detener el polling si hubo un cambio para evitar redirecciones múltiples
-                clearInterval(window.verificacionIntervalo); 
-                window.location.href = `/operaciones/cotizacion-cambiada/{{ transaccion.id }}/`;
-            }
-        })
-        .catch(error => {
-            console.error("Polling error:", error);
-            // Opcional: Podrías detener el polling si la transacción es inválida
-        });
-    }
-    
-    // ----------------------------------------------------------------------
-    // 🚨 SOLUCIÓN AL PROBLEMA DE SINCRONIZACIÓN
-    // ----------------------------------------------------------------------
-
-    // Aseguramos que la variable 'intervalo' sea global o esté accesible.
-    let verificacionIntervalo;
-
-    // Ejecutar todo el código DOM-dependiente solo cuando la página está lista.
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // 1. Iniciar verificación periódica (AHORA SE EJECUTA TARDE)
-        // Guardamos la referencia en una variable accesible (verificacionIntervalo)
-        verificacionIntervalo = setInterval(verificarCambios, 3000);
-
-        // 2. Detener verificación al enviar el formulario
-        // Usamos el querySelector sin '?' ya que estamos en DOMContentLoaded
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', () => {
-                // Usamos la variable global
-                clearInterval(verificacionIntervalo); 
-                console.log("Polling detenido al enviar formulario.");
-            });
-        }
-    });
-</script>
 {% endblock %}

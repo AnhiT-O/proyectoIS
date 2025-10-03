@@ -31,7 +31,7 @@ class Cotizacion(models.Model):
     monto_base = models.DecimalField(max_digits=10, decimal_places=2)
     
     @property
-    def monto_final(self):
+    def precio_final(self):
         # Calcula el monto con el beneficio aplicado
         beneficio = self.cliente.beneficio_segmento
         descuento = (self.monto_base * beneficio) / 100

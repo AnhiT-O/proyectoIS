@@ -15,11 +15,11 @@ def cliente():
     """Fixture para crear un cliente de prueba."""
     return Cliente.objects.create(
         nombre='Cliente Test',
-        tipoCliente='F',
-        tipoDocCliente='CI',
-        docCliente='12345678',
+        tipo='F',
+        tipo_documento='CI',
+        numero_documento='12345678',
         telefono='0981234567',
-        correoElecCliente='cliente@test.com',
+        correo_electronico='cliente@test.com',
         direccion='Direccion Test',
         ocupacion='Empleado',
         segmento='minorista'

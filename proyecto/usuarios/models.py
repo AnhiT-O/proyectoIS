@@ -1,11 +1,30 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager, Group
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
-    TIPO_CEDULA_CHOICES = [
+    """
+    Modelo personalizado de usuario que extiende AbstractBaseUser y PermissionsMixin.
+    
+    Attributes:
+        username (CharField): Nombre de usuario. Debe ser único. Máximo 30 caracteres. Utiliza UnicodeUsernameValidator para validación.
+        first_name (CharField): Nombre del usuario. Máximo 40 caracteres.
+        last_name (CharField): Apellido del usuario. Máximo 40 caracteres.
+        email (EmailField): Correo electrónico del usuario. Debe ser único.
+        tipo_documento (CharField): Tipo de cédula del usuario. Opciones: 'CI' (Cédula de Identidad), 'RUC' (Registro Único de Contribuyente).
+        numero_documento (CharField): Número de cédula de identidad del usuario. Debe ser único. Máximo 13 caracteres.
+        cliente_activo (ForeignKey): Referencia a un cliente seleccionado para operar con él. Puede ser nulo.
+        bloqueado (BooleanField): Indica si el usuario está bloqueado en el sistema. Por defecto es False.
+        is_active (BooleanField): Indica si el usuario activó su cuenta. Por defecto es False.
+        date_joined (DateTimeField): Fecha y hora en que el usuario se creó. Por defecto es la fecha y hora en que lo hizo.
+
+    Note:
+        -   El modelo utiliza UserManager como su gestor de objetos.
+        -   Se deshabilitan los permisos predeterminados de Django.
+        -   Se definen permisos personalizados para bloquear/desbloquear usuarios, asignar/desasignar clientes y roles a usuarios.
+    """
+    tipo_documento_CHOICES = [
         ('CI', 'Cédula de Identidad'),
         ('RUC', 'Registro Único de Contribuyente')
     ]
@@ -21,13 +40,13 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
 
-    tipo_cedula = models.CharField(
+    tipo_documento = models.CharField(
         max_length=3,
-        choices=TIPO_CEDULA_CHOICES,
+        choices=tipo_documento_CHOICES,
         null=False,
         blank=False
     )
-    cedula_identidad = models.CharField(
+    numero_documento = models.CharField(
         max_length=13,
         unique=True
     )
@@ -51,20 +70,50 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     
     def obtener_roles(self):
-        """Obtiene una lista de nombres de roles a los que pertenece el usuario"""
+        """
+        Obtiene una lista de nombres de roles a los que pertenece el usuario.
+
+        Returns:
+            Lista: Lista de nombres de los roles.
+        """
         return list(self.groups.values_list('name', flat=True))
     
-    def get_full_name(self):
+    def es_admin(self):
         """
-        Retorna el nombre completo del usuario.
+        Verifica si el usuario tiene el rol de 'Administrador'.
+
+        Returns:
+            bool: True si el usuario es administrador, False en caso contrario.
+        """
+        return 'Administrador' in self.obtener_roles()
+    
+    def nombre_completo(self):
+        """
+        Obtiene el nombre completo del usuario.
+
+        Returns:
+            Cadena de texto: Nombre completo en el formato "Nombre Apellido".
         """
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}".strip()
 
     def __str__(self):
+        """
+        Retorna una representación legible del usuario.
+        Returns:
+            Cadena de texto: Representación del usuario en el formato "Nombre Apellido (username)".
+        """
         return f"{self.first_name} {self.last_name} ({self.username})"
     
     class Meta:
+        """
+        Metadatos del modelo Usuario.
+
+        Attributes:
+            db_table (str): Nombre de la tabla en la base de datos.
+            default_permissions (list): Lista de permisos predeterminados deshabilitados.
+            permissions (list): Lista de permisos personalizados para el modelo.
+        """
         db_table = 'usuarios'
         default_permissions = []  # Deshabilita permisos predeterminados
         permissions = [

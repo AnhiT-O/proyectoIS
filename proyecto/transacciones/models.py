@@ -13,51 +13,37 @@ Author: Equipo de desarrollo Global Exchange
 Date: 2024
 """
 
+import ast
+from decimal import Decimal
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
-
+from monedas.models import StockGuaranies
 
 class Recargos(models.Model):
     """
-    Modelo para gestionar los recargos aplicables por tipo de medio de pago.
-    
-    Los recargos son porcentajes adicionales que se aplican a las transacciones
-    según el medio de pago utilizado (ej: tarjeta de crédito, billeteras digitales).
-    
-    Attributes:
-        nombre (CharField): Nombre del medio de pago (ej: "Tarjeta de Crédito")
-        recargo (SmallIntegerField): Porcentaje de recargo a aplicar (0-100)
-        
-    Meta:
-        verbose_name: "Recargo"
-        verbose_name_plural: "Recargos"
-        db_table: "recargos"
-        permissions: [('edicion', 'Puede editar recargos')]
+    Modelo para almacenar recargos aplicables según el medio de pago.
     """
-    nombre = models.CharField(max_length=50)
-    recargo = models.SmallIntegerField(default=0)
+    medio = models.CharField(max_length=50)
+    marca = models.CharField(max_length=100, unique=True)
+    recargo = models.DecimalField(max_digits=4, decimal_places=1)
 
     class Meta:
         verbose_name = "Recargo"
         verbose_name_plural = "Recargos"
         db_table = "recargos"
-        default_permissions = []  # Deshabilita permisos predeterminados
-        permissions = [
-            ('edicion', 'Puede editar recargos'),
-        ]
+        default_permissions = []  # Deshabilitar permisos por defecto
 
     def __str__(self):
         """
         Representación en cadena del modelo Recargos.
         
         Returns:
-            str: El nombre del medio de pago
+            str: La marca del recargo
         """
-        return self.nombre
-
+        return self.marca
 
 @receiver(post_migrate)
 def crear_recargos(sender, **kwargs):
@@ -68,7 +54,8 @@ def crear_recargos(sender, **kwargs):
     Crea los recargos estándar para diferentes medios de pago si no existen.
     
     Recargos creados:
-        - Tarjeta de Crédito: 1%
+        - VISA: 1%
+        - MASTERCARD: 1,5%
         - Tigo Money: 2%
         - Billetera Personal: 2%
         - Zimple: 3%
@@ -80,29 +67,73 @@ def crear_recargos(sender, **kwargs):
     # Solo crear si la migración es de la app transacciones
     if kwargs['app_config'].name == 'transacciones':
 
-        if not Recargos.objects.filter(nombre='Tarjeta de Crédito').exists():
+        if not Recargos.objects.filter(marca='VISA').exists():
             Recargos.objects.create(
-                nombre='Tarjeta de Crédito',
-                recargo=1
+                marca='VISA',
+                medio='Tarjeta de Crédito',
+                recargo='1'
             )
 
-        if not Recargos.objects.filter(nombre='Tigo Money').exists():
+        if not Recargos.objects.filter(marca='MASTERCARD').exists():
             Recargos.objects.create(
-                nombre='Tigo Money',
-                recargo=2
+                marca='MASTERCARD',
+                medio='Tarjeta de Crédito',
+                recargo='1.5'
             )
 
-        if not Recargos.objects.filter(nombre='Billetera Personal').exists():
+        if not Recargos.objects.filter(marca='Tigo Money').exists():
             Recargos.objects.create(
-                nombre='Billetera Personal',
-                recargo=2
+                marca='Tigo Money',
+                medio='Billetera Electrónica',
+                recargo='2'
             )
 
-        if not Recargos.objects.filter(nombre='Zimple').exists():
+        if not Recargos.objects.filter(marca='Billetera Personal').exists():
             Recargos.objects.create(
-                nombre='Zimple',
-                recargo=3
+                marca='Billetera Personal',
+                medio='Billetera Electrónica',
+                recargo='2'
             )
+
+        if not Recargos.objects.filter(marca='Zimple').exists():
+            Recargos.objects.create(
+                marca='Zimple',
+                medio='Billetera Electrónica',
+                recargo='3'
+            )
+
+class LimiteGlobal(models.Model):
+    """
+    Modelo para almacenar los límites globales de transacciones
+    que aplican a todos los clientes según la ley de casas de cambio
+    """
+    limite_diario = models.BigIntegerField(
+        default=90000000,
+        help_text="Límite diario global en guaraníes"
+    )
+    limite_mensual = models.BigIntegerField(
+        default=450000000,
+        help_text="Límite mensual global en guaraníes"
+    )
+
+    class Meta:
+        verbose_name = 'Límite Global'
+        verbose_name_plural = 'Límites Globales'
+        db_table = 'limite_global'
+        default_permissions = []
+
+    def __str__(self):
+        return f"Límite Diario: {self.limite_diario:,} - Mensual: {self.limite_mensual:,}"
+
+@receiver(post_migrate)
+def crear_limite_global_inicial(sender, **kwargs):
+    """
+    Crea automáticamente el límite global inicial después de ejecutar las migraciones
+    """
+    if kwargs['app_config'].name == 'monedas':
+        if not LimiteGlobal.objects.exists():
+            LimiteGlobal.objects.create()
+            print("Límite global inicial creado automáticamente")
 
 class Transaccion(models.Model):
     """
@@ -133,25 +164,35 @@ class Transaccion(models.Model):
     tipo = models.CharField(max_length=10)  # 'compra' o 'venta'
     moneda = models.ForeignKey('monedas.Moneda', on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=30, decimal_places=8)
+    cotizacion = models.IntegerField()
+    precio_base = models.IntegerField()
+    monto_original = models.DecimalField(max_digits=30, decimal_places=8)
+    beneficio_segmento = models.IntegerField()
+    porc_beneficio_segmento = models.CharField(max_length=3)
+    recargo_pago = models.IntegerField()
+    porc_recargo_pago = models.CharField(max_length=4)
+    recargo_cobro = models.IntegerField()
+    porc_recargo_cobro = models.CharField(max_length=4)
+    redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
+    redondeo_efectivo_precio_final = models.IntegerField()
+    precio_final = models.IntegerField()
     medio_pago = models.CharField(max_length=50) 
-    medio_cobro = models.CharField(max_length=100, default='')  # Agregar campo medio_cobro 
+    medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
-    token = models.CharField(max_length=255, blank=True, null=True)  # Campo para el token
-    token_expiracion = models.DateTimeField(blank=True, null=True)  # Campo para la expiración del token
+    razon = models.CharField(max_length=100, blank=True, null=True) 
+    token = models.CharField(max_length=255, blank=True, null=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
-    
-    # Campos para almacenar cotizaciones originales al crear la transacción
-    precio_compra_original = models.IntegerField(null=True, blank=True)  # Precio de compra al momento de crear la transacción
-    precio_venta_original = models.IntegerField(null=True, blank=True)   # Precio de venta al momento de crear la transacción
-    fecha_cotizacion_original = models.DateTimeField(null=True, blank=True)  # Fecha de cotización original
     
     class Meta:
         verbose_name = "Transacción"
         verbose_name_plural = "Transacciones"
         db_table = "transacciones"
-        default_permissions = []
-        permissions = []  # De momento no hay permisos necesarios
+        default_permissions = []  # Deshabilitar permisos por defecto
+        permissions = [
+            ("edicion", "Puede editar límites de transacción y porcentaje de recargos"),
+            ("visualizacion", "Puede ver el historial de todos los clientes")
+            ] 
     
     def __str__(self):
         """
@@ -161,54 +202,6 @@ class Transaccion(models.Model):
             str: Descripción de la transacción en formato "Tipo - Cliente - Monto Moneda"
         """
         return f"{self.tipo.title()} - {self.cliente} - {self.monto} {self.moneda.simbolo}"
-    
-    def token_valido(self):
-        """
-        Verifica si el token de la transacción aún es válido.
-        
-        Un token es válido si existe y no ha expirado según su timestamp
-        de expiración configurado.
-        
-        Returns:
-            bool: True si el token es válido, False en caso contrario
-        """
-        if not self.token or not self.token_expiracion:
-            return False
-        return timezone.now() < self.token_expiracion
-    
-    def establecer_token_con_expiracion(self, token):
-        """
-        Asigna un token a la transacción con tiempo de expiración automático.
-        
-        Establece el token y calcula su fecha de expiración (5 minutos desde ahora).
-        Guarda automáticamente los cambios en la base de datos.
-        
-        Args:
-            token (str): Token único generado para la transacción
-        """
-        self.token = token
-        self.token_expiracion = timezone.now() + timedelta(minutes=5)
-        self.save()
-    
-    @classmethod
-    def limpiar_tokens_expirados(cls):
-        """
-        Elimina todas las transacciones con tokens expirados del sistema.
-        
-        Método de clase que busca y elimina transacciones cuyo token ha expirado
-        según el timestamp actual. Útil para limpieza periódica del sistema.
-        
-        Returns:
-            int: Número de transacciones eliminadas
-        """
-        now = timezone.now()
-        transacciones_expiradas = cls.objects.filter(
-            token__isnull=False,
-            token_expiracion__lt=now
-        )
-        count = transacciones_expiradas.count()
-        transacciones_expiradas.delete()
-        return count
 
     def almacenar_cotizacion_original(self):
         """
@@ -285,3 +278,144 @@ class Transaccion(models.Model):
                 pass
         
         super().save(*args, **kwargs)
+
+def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
+    """
+    Returns:
+        monto_original (Decimal): Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
+        redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
+        redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
+        cotizacion (int): Cotización de la moneda según el tipo de operación
+        precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
+        porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
+        beneficio_segmento (int): Beneficio aplicado en la operación según el segmento del cliente
+        monto_recargo_pago (int): Monto del recargo aplicado según el medio de pago
+        porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
+        monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
+        porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
+        monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+        precio_final (int): Monto en guaraníes final a pagar o cobrar
+    """
+    # Primero convertimos el pago y cobro a diccionarios si vienen como strings
+    if pago.startswith('{'):
+        dict_pago = ast.literal_eval(pago)
+    else:
+        dict_pago = pago
+    if cobro.startswith('{'):
+        dict_cobro = ast.literal_eval(cobro)
+    else:
+        dict_cobro = cobro
+    # Se guarda el monto original
+    monto_original = monto
+    # Calculos para compra
+    if operacion == 'compra':
+        # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
+        redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
+        if redondeo_efectivo_monto == moneda.minima_denominacion:
+            redondeo_efectivo_monto = 0
+        monto += redondeo_efectivo_monto
+        # Se guarda la cotización y el precio base
+        cotizacion = moneda.tasa_base + moneda.comision_venta
+        precio_base = monto * cotizacion
+        # Calculo del precio final según el segmento
+        if segmentacion == 'corporativo':
+            precio_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.95)))
+            porc_beneficio_segmento = 5
+        elif segmentacion == 'vip':
+            precio_final = monto * (moneda.tasa_base + (moneda.comision_venta * Decimal(0.9)))
+            porc_beneficio_segmento = 10
+        else:
+            precio_final = precio_base
+            porc_beneficio_segmento = 0
+        # Se guarda el beneficio por segmento
+        beneficio_segmento = abs(precio_base - precio_final)
+        # Calculo de recargos por medio de pago
+        # Si el pago es con tarjeta de crédito
+        if isinstance(dict_pago, dict) and 'brand' in dict_pago:
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
+        # Si el pago es con billetera electrónica
+        elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
+        # Si el pago es en efectivo, cheque o transferencia, no hay recargo
+        else:
+            monto_recargo_pago = 0
+            porc_recargo_pago = 0
+        # Calculo del monto en guaraníes a pagar con recargos
+        precio_final += monto_recargo_pago
+        # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
+        if dict_pago == 'Efectivo':
+            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
+            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
+                redondeo_efectivo_precio_final = 0
+            precio_final += redondeo_efectivo_precio_final
+        else:
+            redondeo_efectivo_precio_final = 0
+        # No hay recargo por medio de cobro ya que siempre es en efectivo
+        monto_recargo_cobro = 0
+        porc_recargo_cobro = 0
+    # Calculos para venta
+    else:
+        # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
+        if dict_pago == 'Efectivo':
+            redondeo_efectivo_monto = moneda.minima_denominacion - (monto % moneda.minima_denominacion)
+            if redondeo_efectivo_monto == moneda.minima_denominacion:
+                redondeo_efectivo_monto = 0
+            monto += redondeo_efectivo_monto
+        else:
+            redondeo_efectivo_monto = 0
+        # Se guarda la cotización y el precio base
+        cotizacion = moneda.tasa_base - moneda.comision_compra
+        precio_base = monto * cotizacion
+        # Calculo del precio final según el segmento
+        if segmentacion == 'corporativo':
+            precio_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.95)))
+            porc_beneficio_segmento = 5
+        elif segmentacion == 'vip':
+            precio_final = monto * (moneda.tasa_base - (moneda.comision_compra * Decimal(0.9)))
+            porc_beneficio_segmento = 10
+        else:
+            precio_final = precio_base
+            porc_beneficio_segmento = 0
+        # Se guarda el beneficio por segmento
+        beneficio_segmento = abs(precio_base - precio_final)
+        # Calculo de recargos por medio de pago y cobro
+        # Si el pago es con tarjeta de crédito
+        if isinstance(dict_pago, dict) and 'brand' in dict_pago:
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
+        # Si el cobro es con billetera electrónica
+        if isinstance(dict_cobro, dict) and 'tipo_billetera' in dict_cobro:
+            monto_recargo_cobro =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo) / Decimal(100))
+            porc_recargo_cobro = Recargos.objects.get(marca=dict_cobro['tipo_billetera']).recargo
+        else:
+        # Si el cobro es en efectivo o cuenta bancaria, no hay recargo
+            monto_recargo_cobro = 0
+            porc_recargo_cobro = 0
+        # Calculo del monto en guaraníes a cobrar con recargos
+        precio_final -= monto_recargo_pago + monto_recargo_cobro
+        # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
+        if dict_cobro == 'Efectivo':
+            redondeo_efectivo_precio_final = StockGuaranies.objects.first().minima_denominacion - (precio_final % StockGuaranies.objects.first().minima_denominacion)
+            if redondeo_efectivo_precio_final == StockGuaranies.objects.first().minima_denominacion:
+                redondeo_efectivo_precio_final = 0
+            precio_final += redondeo_efectivo_precio_final
+        else:
+            redondeo_efectivo_precio_final = 0
+            
+    return {
+        'cotizacion': int(cotizacion),
+        'precio_base': int(precio_base),
+        'beneficio_segmento': int(beneficio_segmento),
+        'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
+        'redondeo_efectivo_monto': redondeo_efectivo_monto,
+        'redondeo_efectivo_precio_final': int(redondeo_efectivo_precio_final),
+        'monto_recargo_pago': int(monto_recargo_pago),
+        'porc_recargo_pago': f'{porc_recargo_pago}%',
+        'monto_recargo_cobro': int(monto_recargo_cobro),
+        'porc_recargo_cobro': f'{porc_recargo_cobro}%',
+        'monto_original': monto_original,
+        'monto': monto,
+        'precio_final': int(precio_final)
+    }

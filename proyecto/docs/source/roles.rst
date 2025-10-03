@@ -1,22 +1,29 @@
 Roles
 ======
-Documentación de los roles del proyecto.
-Los roles por defecto son:
+
+Modelo de Roles personalizado que extiende auth.Group de Django.
+Incluye la creación automática de roles predefinidos y gestión de permisos.
+
+Roles predefinidos:
+
+- Operador
+- Analista cambiario
 - Administrador
-- Analista Cambiario
-- Operador: Que es el rol por defecto de cada usuario.
 
 .. automodule:: roles.models
     :members:
-    :undoc-members:
+    :exclude-members: DoesNotExist, MultipleObjectsReturned
     :show-inheritance:
 
 .. automodule:: roles.views
     :members:
-    :undoc-members:
     :show-inheritance:
     
 .. automodule:: roles.forms
     :members:
-    :undoc-members:
+    :exclude-members: media
+    :show-inheritance:
+
+.. automodule:: roles.signals
+    :members:
     :show-inheritance:

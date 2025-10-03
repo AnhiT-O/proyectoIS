@@ -36,12 +36,10 @@
                     </div>
                 </div>
                 <div class="info-celda">
-                    <span class="info-icono">📦</span>
+                    <span class="info-icono">💵</span>
                     <div class="info-contenido">
-                        <div class="info-titulo">Stock Disponible</div>
-                        <div class="info-valor">
-                            {{ moneda.stock|intcomma }}
-                        </div>
+                        <div class="info-titulo">Mínima Denominación</div>
+                        <div class="info-valor">{{ moneda.minima_denominacion }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
@@ -73,14 +71,14 @@
                     </div>
                 </div>
                 <div class="info-celda">
-                    <span class="info-icono">📈</span>
+                    <span class="info-icono">📉</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Comisión de Compra</div>
                         <div class="info-valor">Gs. {{ moneda.comision_compra|intcomma }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
-                    <span class="info-icono">📉</span>
+                    <span class="info-icono">📈</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Comisión de Venta</div>
                         <div class="info-valor">Gs. {{ moneda.comision_venta|intcomma }}</div>

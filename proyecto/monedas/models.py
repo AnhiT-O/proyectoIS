@@ -24,7 +24,7 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
-    stock = models.IntegerField(default=0)
+    minima_denominacion = models.IntegerField(default=1)
     
     def save(self, *args, **kwargs):
         if self.pk:
@@ -48,11 +48,18 @@ class Moneda(models.Model):
             ("cotizacion", "Puede actualizar cotización de monedas")
         ]
 
-    def calcular_precio_venta(self, porcentaje_beneficio=0):
+    def calcular_precio_venta(self, segmento='minorista'):
         """
         Calcula el precio de venta aplicando el beneficio del cliente.
         precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)
         """
+        if segmento == 'corporativo':
+            porcentaje_beneficio = 5  # Beneficio del 5% para clientes corporativos
+        elif segmento == 'vip':
+            porcentaje_beneficio = 10  # Beneficio del 10% para clientes VIP
+        else:
+            porcentaje_beneficio = 0  # Sin beneficio para clientes minoristas
+
         tasa_base = self.tasa_base
         comision_venta = self.comision_venta
         beneficio = porcentaje_beneficio / 100
@@ -60,11 +67,18 @@ class Moneda(models.Model):
         precio = int(tasa_base + comision_venta - (comision_venta * beneficio))
         return precio
 
-    def calcular_precio_compra(self, porcentaje_beneficio=0):
+    def calcular_precio_compra(self, segmento='minorista'):
         """
         Calcula el precio de compra aplicando el beneficio del cliente.
         precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)
         """
+        if segmento == 'corporativo':
+            porcentaje_beneficio = 5  # Beneficio del 5% para clientes corporativos
+        elif segmento == 'vip':
+            porcentaje_beneficio = 10  # Beneficio del 10% para clientes VIP
+        else:
+            porcentaje_beneficio = 0  # Sin beneficio para clientes minoristas
+            
         tasa_base = self.tasa_base
         comision_compra = self.comision_compra
         beneficio = porcentaje_beneficio / 100
@@ -74,8 +88,8 @@ class Moneda(models.Model):
 
     def get_precios_cliente(self, cliente):
         """Obtiene los precios finales para un cliente específico"""
-        precio_compra = self.calcular_precio_compra(cliente.beneficio_segmento)
-        precio_venta = self.calcular_precio_venta(cliente.beneficio_segmento)
+        precio_compra = self.calcular_precio_compra(cliente.segmento)
+        precio_venta = self.calcular_precio_venta(cliente.segmento)
         return {
             'precio_compra': precio_compra,
             'precio_venta': precio_venta
@@ -162,137 +176,34 @@ def crear_moneda_usd(sender, **kwargs):
                 comision_compra=200,
                 comision_venta=250,
                 decimales=2,
-                stock=1000000
+                minima_denominacion=1
             )
             print("✓ Moneda USD creada automáticamente")
 
-
-class LimiteGlobal(models.Model):
+class StockGuaranies(models.Model):
     """
-    Modelo para almacenar los límites globales de transacciones
-    que aplican a todos los clientes según la ley de casas de cambio
+    Modelo para almacenar el stock de guaraníes disponible en la casa de cambio
     """
-    limite_diario = models.IntegerField(
-        default=90000000,
-        help_text="Límite diario global en guaraníes"
+    cantidad = models.BigIntegerField(
+        default=1000000000
     )
-    limite_mensual = models.IntegerField(
-        default=450000000,
-        help_text="Límite mensual global en guaraníes"
-    )
-    fecha_inicio = models.DateField(
-        default=date.today,
-        help_text="Fecha desde cuando rige este límite"
-    )
-    fecha_fin = models.DateField(
-        null=True, 
-        blank=True,
-        help_text="Fecha hasta cuando rige este límite (opcional)"
-    )
-    activo = models.BooleanField(
-        default=True,
-        help_text="Indica si este límite está vigente"
-    )
+    minima_denominacion = models.IntegerField(default=2000)
 
     class Meta:
-        verbose_name = 'Límite Global'
-        verbose_name_plural = 'Límites Globales'
-        db_table = 'limite_global'
-        default_permissions = []
-        permissions = [
-            ("gestion", "Puede gestionar límites globales"),
-        ]
-
-    def clean(self):
-        super().clean()
-        if self.limite_diario <= 0:
-            raise ValidationError({'limite_diario': 'El límite diario debe ser mayor a 0'})
-        if self.limite_mensual <= 0:
-            raise ValidationError({'limite_mensual': 'El límite mensual debe ser mayor a 0'})
-        if self.limite_diario > self.limite_mensual:
-            raise ValidationError({'limite_diario': 'El límite diario no puede ser mayor al mensual'})
-
-    def __str__(self):
-        return f"Límite Diario: {self.limite_diario:,} - Mensual: {self.limite_mensual:,}"
-
-    @classmethod
-    def obtener_limite_vigente(cls):
-        """
-        Retorna el límite global vigente para la fecha actual
-        """
-        hoy = date.today()
-        return cls.objects.filter(
-            activo=True,
-            fecha_inicio__lte=hoy
-        ).filter(
-            models.Q(fecha_fin__isnull=True) | models.Q(fecha_fin__gte=hoy)
-        ).first()
-
-
-class ConsumoLimiteCliente(models.Model):
-    """
-    Modelo para registrar el consumo acumulado de límites por cliente
-    Se actualiza con cada transacción y se resetea diaria/mensualmente
-    """
-    cliente = models.ForeignKey(
-        'clientes.Cliente',
-        on_delete=models.CASCADE,
-        related_name='consumos_limite'
-    )
-    fecha = models.DateField(
-        default=date.today,
-        help_text="Fecha del registro de consumo"
-    )
-    consumo_diario = models.IntegerField(
-        default=0,
-        help_text="Consumo acumulado del día en guaraníes"
-    )
-    consumo_mensual = models.IntegerField(
-        default=0,
-        help_text="Consumo acumulado del mes en guaraníes"
-    )
-
-    class Meta:
-        verbose_name = 'Consumo de Límite Cliente'
-        verbose_name_plural = 'Consumos de Límites Clientes'
-        db_table = 'consumo_limite_cliente'
-        unique_together = ['cliente', 'fecha']
+        verbose_name = 'Stock de Guaraníes'
+        verbose_name_plural = 'Stock de Guaraníes'
+        db_table = 'stock_guaranies'
         default_permissions = []
 
-    def clean(self):
-        super().clean()
-        if self.consumo_diario < 0:
-            raise ValidationError({'consumo_diario': 'El consumo diario no puede ser negativo'})
-        if self.consumo_mensual < 0:
-            raise ValidationError({'consumo_mensual': 'El consumo mensual no puede ser negativo'})
-
     def __str__(self):
-        return f"{self.cliente.nombre} - {self.fecha} - Diario: {self.consumo_diario:,}"
-
-
+        return f"Stock: Gs. {self.cantidad:,}"
+    
 @receiver(post_migrate)
-def crear_limite_global_inicial(sender, **kwargs):
+def crear_stock_guaranies_inicial(sender, **kwargs):
     """
-    Crea automáticamente el límite global inicial después de ejecutar las migraciones
+    Crea automáticamente el stock inicial de guaraníes después de ejecutar las migraciones
     """
     if kwargs['app_config'].name == 'monedas':
-        if not LimiteGlobal.objects.exists():
-            LimiteGlobal.objects.create(
-                limite_diario=90000000,  # 90 millones
-                limite_mensual=450000000,  # 450 millones
-                activo=True
-            )
-            print("Límite global inicial creado automáticamente")
-
-@receiver(models.signals.post_save, sender='clientes.Cliente')
-def crear_consumo_limite_cliente(sender, instance, created, **kwargs):
-    """
-    Crea automáticamente un registro de ConsumoLimiteCliente cuando se crea un nuevo cliente
-    """
-    if created:
-        ConsumoLimiteCliente.objects.create(
-            cliente=instance,
-            fecha=date.today(),
-            consumo_diario=0,
-            consumo_mensual=0
-        )
+        if not StockGuaranies.objects.exists():
+            StockGuaranies.objects.create()
+            print("Stock inicial de guaraníes creado automáticamente")

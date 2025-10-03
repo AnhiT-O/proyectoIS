@@ -35,20 +35,11 @@ urlpatterns = [
     path('vender/medio-cobro/', views.venta_medio_cobro, name='venta_medio_cobro'),
     path('vender/confirmacion/', views.venta_confirmacion, name='venta_confirmacion'),
     path('vender/exito/', views.venta_exito, name='venta_exito'),
-
-    # URLs para edicion de recargos
-    path('recargos/', views.editar_recargos, name='editar_recargos'),
-    
-    # URLs para funcionalidades auxiliares de límites
-    path('limites/cliente/', views.obtener_limites_cliente, name='obtener_limites_cliente'),
-    path('limites/simular/', views.simular_transaccion_limites, name='simular_transaccion_limites'),
     
     # URLs para historial de transacciones
-    path('historial/', views.historial_transacciones, name='historial'),
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),
-    path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
-    path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
+    path('detalle/<int:transaccion_id>/', views.detalle_historial, name='historial_detalle'),
 
-    # URL para timeout
-    path('cancelar-por-timeout/', views.cancelar_por_timeout, name='cancelar_por_timeout'),
+    path('gestion-transacciones/', views.ver_variables, name='ver_variables'),
+    path('edicion-transacciones/', views.editar_variables, name='editar_variables')
 ]

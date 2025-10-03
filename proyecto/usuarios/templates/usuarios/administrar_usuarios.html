@@ -66,7 +66,7 @@
         <tbody>
             {% for usuario in usuarios %}
             <tr>
-                <td>{{ usuario.get_full_name }}</td>
+                <td>{{ usuario.nombre_completo }}</td>
                 <td>{{ usuario.username }}</td>
 
                 <td>
@@ -79,7 +79,7 @@
                                         <form style="display: inline;" method="post" action="{% url 'usuarios:remover_rol' usuario.pk group.pk %}">
                                             {% csrf_token %}
                                             <button type="submit" class="btn-remover-rol" 
-                                                    onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.get_full_name }}?')"
+                                                    onclick="return confirm('¿Estás seguro de que deseas desasignar el rol {{ group.name }} de {{ usuario.nombre_completo }}?')"
                                                     title="Desasignar rol">×</button>
                                         </form>
                                     {% endif %}
@@ -107,13 +107,13 @@
                                 {% if not usuario.bloqueado %}
                                     <button type="submit" class="btn-desactivar"
                                             title="Bloquear usuario"
-                                            onclick="return confirm('¿Estás seguro de que deseas bloquear al usuario {{ usuario.get_full_name }}?')">
+                                            onclick="return confirm('¿Estás seguro de que deseas bloquear al usuario {{ usuario.nombre_completo }}?')">
                                         Bloquear
                                     </button>
                                 {% else %}
                                     <button type="submit" class="btn-activar"
                                             title="Desbloquear usuario"
-                                            onclick="return confirm('¿Estás seguro de que deseas desbloquear al usuario {{ usuario.get_full_name }}?')">
+                                            onclick="return confirm('¿Estás seguro de que deseas desbloquear al usuario {{ usuario.nombre_completo }}?')">
                                         Desbloquear
                                     </button>
                                 {% endif %}

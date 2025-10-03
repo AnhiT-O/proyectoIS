@@ -25,11 +25,11 @@ class TestClienteViews:
         # Crear cliente real
         cliente = Cliente.objects.create(
             nombre='Cliente Test',
-            tipoDocCliente='CI',
-            docCliente='11111111',
-            correoElecCliente='cliente@test.com',
+            tipo_documento='CI',
+            numero_documento='11111111',
+            correo_electronico='cliente@test.com',
             telefono='0991111111',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección test',
             ocupacion='Empleado',
             segmento='minorista'
@@ -50,11 +50,11 @@ class TestClienteViews:
         # Crear cliente real
         cliente = Cliente.objects.create(
             nombre='Cliente Admin',
-            tipoDocCliente='CI',
-            docCliente='22222222',
-            correoElecCliente='clienteadmin@test.com',
+            tipo_documento='CI',
+            numero_documento='22222222',
+            correo_electronico='clienteadmin@test.com',
             telefono='0992222222',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección admin',
             ocupacion='Empleado',
             segmento='corporativo'
@@ -71,11 +71,11 @@ class TestClienteViews:
         # Crear cliente real
         cliente = Cliente.objects.create(
             nombre='Cliente Asociado',
-            tipoDocCliente='CI',
-            docCliente='33333333',
-            correoElecCliente='clienteasociado@test.com',
+            tipo_documento='CI',
+            numero_documento='33333333',
+            correo_electronico='clienteasociado@test.com',
             telefono='0993333333',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección asociado',
             ocupacion='Empleado',
             segmento='vip'
@@ -96,11 +96,11 @@ class TestClienteViews:
         """
         cliente = Cliente.objects.create(
             nombre='Cliente Básico',
-            tipoDocCliente='CI',
-            docCliente='44444444',
-            correoElecCliente='basico@test.com',
+            tipo_documento='CI',
+            numero_documento='44444444',
+            correo_electronico='basico@test.com',
             telefono='0994444444',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección básica',
             ocupacion='Empleado',
             segmento='corporativo'
@@ -116,11 +116,11 @@ class TestClienteViews:
         """
         cliente = Cliente.objects.create(
             nombre='Cliente String Test',
-            tipoDocCliente='CI',
-            docCliente='55555555',
-            correoElecCliente='string@test.com',
+            tipo_documento='CI',
+            numero_documento='55555555',
+            correo_electronico='string@test.com',
             telefono='0995555555',
-            tipoCliente='F',
+            tipo='F',
             direccion='Dirección string',
             ocupacion='Empleado',
             segmento='minorista'

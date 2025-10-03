@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Gestionar Transacciones - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Gestionar Transacciones</h2>
+        {% if perms.transacciones %}
+        <a href="{% url 'transacciones:editar_variables' %}" class="btn-primario">
+            Editar Variables
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="zona-monedas">
+        <div class="tarjeta-moneda">
+            <div class="tarjeta-cabecera">
+                <h3>Límites de Transacciones</h3>
+            </div>
+            <table class="gestion-tabla">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Límite de transacciones diarias</th>
+                        <th style="width: 50%;">Límite de transacciones mensuales</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_diario|intcomma }}</span>
+                        </td>
+                        <td>
+                            <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_mensual|intcomma }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tarjeta-moneda">
+            <div class="tarjeta-cabecera">
+                <h3>Porcentajes de Recargo</h3>
+            </div>
+            <table class="gestion-tabla">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Tarjetas VISA</th>
+                        <th style="width: 25%;">Tarjetas MASTERCARD</th>
+                        <th style="width: 20%;">Tigo Money</th>
+                        <th style="width: 20%;">Billetera Personal</th>
+                        <th style="width: 20%;">Zimple</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        {% for r in recargos %}
+                        <td>
+                            <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

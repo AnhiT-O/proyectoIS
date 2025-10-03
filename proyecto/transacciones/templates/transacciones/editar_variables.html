@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Editar Variables - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <h2>
+            Editar Variables
+        </h2>
+        <p class="subtitulo">
+            Modifica los valores para la gestión de transacciones.
+        </p>
+    </div>
+
+    <form method="post" novalidate>
+    {% csrf_token %}
+        <div class="form-campo">
+            <label for="{{ form.nombre.id_for_label }}">Límite Diario de Transacciones</label>
+            {{ form.limite_diario }}
+            {% if form.limite_diario.errors %}
+                <div class="form-errores">
+                    {% for error in form.limite_diario.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.simbolo.id_for_label }}">Límite Mensual de Transacciones</label>
+            {{ form.limite_mensual }}
+            {% if form.limite_mensual.errors %}
+                <div class="form-errores">
+                    {% for error in form.limite_mensual.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.tasa_base.id_for_label }}">Recargo para la Tarjeta de Crédito VISA</label>
+            {{ form.recargo_visa }}
+            {% if form.recargo_visa.errors %}
+                <div class="form-errores">
+                    {% for error in form.recargo_visa.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    
+        <div class="form-campo">
+            <label for="{{ form.comision_compra.id_for_label }}">Recargo para la Tarjeta de Crédito MASTERCARD</label>
+            {{ form.recargo_mastercard }}
+            {% if form.recargo_mastercard.errors %}
+                <div class="form-errores">
+                    {% for error in form.recargo_mastercard.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-campo">
+            <label for="{{ form.comision_venta.id_for_label }}">Recargo para Tigo Money</label>
+            {{ form.recargo_tigo_money }}
+            {% if form.recargo_tigo_money.errors %}
+                <div class="form-errores">
+                    {% for error in form.recargo_tigo_money.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.decimales.id_for_label }}">Recargo para Billetera Personal</label>
+            {{ form.recargo_billetera_personal }}
+            {% if form.recargo_billetera_personal.errors %}
+                <div class="form-errores">
+                    {% for error in form.recargo_billetera_personal.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.stock.id_for_label }}">Recargo para Zimple</label>
+            {{ form.recargo_zimple }}
+            {% if form.recargo_zimple.errors %}
+                <div class="form-errores">
+                    {% for error in form.recargo_zimple.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-primario">Editar Variables</button>
+            <a href="{% url 'transacciones:ver_variables' %}" class="btn-secundario">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

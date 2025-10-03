@@ -30,17 +30,17 @@ class Cliente(models.Model):
     }
     
     nombre = models.CharField(max_length=100)
-    tipoDocCliente = models.CharField(
+    tipo_documento = models.CharField(
         max_length=3,
         choices=TIPO_DOCUMENTO_CHOICES
     )
-    docCliente = models.CharField(
+    numero_documento = models.CharField(
         max_length=20,
         unique=True
     )
-    correoElecCliente = models.EmailField(unique=True)
+    correo_electronico = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20)
-    tipoCliente = models.CharField(
+    tipo = models.CharField(
         max_length=1,
         choices=TIPO_CLIENTE_CHOICES
     )
@@ -55,7 +55,6 @@ class Cliente(models.Model):
     beneficio_segmento = models.IntegerField(default=0)
     usuarios = models.ManyToManyField(
         'usuarios.Usuario',
-        through='UsuarioCliente',
         related_name='clientes_operados',
         verbose_name='Usuarios operadores'
     )
@@ -74,10 +73,10 @@ class Cliente(models.Model):
         super().clean()
         
         # Validar coherencia entre tipo de cliente y tipo de documento
-        if self.tipoCliente and self.tipoDocCliente:
-            if self.tipoCliente == 'J' and self.tipoDocCliente != 'RUC':
+        if self.tipo and self.tipo_documento:
+            if self.tipo == 'J' and self.tipo_documento != 'RUC':
                 raise ValidationError({
-                    'tipoDocCliente': 'Las personas jurídicas deben usar RUC'
+                    'tipo_documento': 'Las personas jurídicas deben usar RUC'
                 })
 
     def save(self, *args, **kwargs):
@@ -163,18 +162,3 @@ class Cliente(models.Model):
         permissions = [
             ("gestion", "Puede gestionar clientes (crear y editar)")
         ]
-
-class UsuarioCliente(models.Model):
-    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'usuarios_clientes'
-        unique_together = ['usuario', 'cliente']
-        verbose_name = 'Relación Usuario-Cliente'
-        verbose_name_plural = 'Relaciones Usuario-Cliente'
-        default_permissions = []  # Deshabilita permisos predeterminados
-
-    def __str__(self):
-        return f"{self.usuario.email} - {self.cliente.nombre}"

@@ -264,7 +264,12 @@
 
 .zona-alertas {
     max-width: 1200px;
-    margin: 0 auto 2rem;
+    position: fixed;
+    top: 109px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: 100%;
 }
 
 .alerta-success {
@@ -325,7 +330,7 @@
 }
 
 .barra-contenido {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -340,12 +345,18 @@
     margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
 }
 
-.barra-navegacion {
+.barra-derecha {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex: 1; /* Toma el espacio disponible */
     justify-content: flex-end; /* Alinea el contenido hacia la derecha */
+}
+
+.barra-izquierda {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-start; /* Alinea el contenido hacia la izquierda */
 }
 
 .zona-usuario {
@@ -358,6 +369,44 @@
 .usuario-nombre {
     color: #e0e6ed;
     font-weight: bold;
+}
+
+/* Estilos para el cliente seleccionado */
+.cliente-seleccionado {
+    background-color: #033528;
+    border: 1px solid #10b981;
+    border-radius: 10px;
+    padding: 0.6rem;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+    transition: all 0.3s ease;
+    min-width: 220px;
+    text-align: center;
+}
+
+.cliente-etiqueta {
+    font-size: 0.75rem;
+    color: #8b5cf6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.cliente-etiqueta::before {
+    content: "👤";
+    margin-right: 0.5rem;
+}
+
+.cliente-nombre {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* Estilos para el dropdown del panel de administración */

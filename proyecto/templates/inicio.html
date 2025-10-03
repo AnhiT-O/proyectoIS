@@ -12,15 +12,6 @@
 {% block content %}
 <div class="contenido">
     <div class="logo">💰 Global Exchange</div>
-    {% if user.cliente_activo %}
-    <div class="info-cliente">
-        <div class="info-titulo">Cliente seleccionado:</div>
-        <div class="info-valor">{{ user.cliente_activo.nombre }} {{ user.cliente_activo.apellido }}</div>
-        <div style="margin-top: 0.5rem;"></div>
-        <div class="info-titulo">Segmento:</div>
-        <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
-    </div>
-    {% endif %}
     
     {% if perms.monedas.cotizacion %}
         <div class="zona-segmento">

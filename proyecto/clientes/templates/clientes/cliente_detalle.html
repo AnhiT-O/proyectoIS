@@ -18,15 +18,17 @@
                 {{ cliente.nombre }}
             </h1>
             <div class="detalle-tipo">
-                {{ cliente.get_tipoCliente_display }}
+                {{ cliente.get_tipo_display }}
             </div>
         </div>
+        {% if perms.transacciones.visualizacion %}
         <div style="display: flex; gap: 0.5rem;">
             <!-- Botón para ver historial de transacciones -->
-            <a href="{% url 'clientes:cliente_historial' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; border: 2px solid white; color: white;">
+            <a href="{% url 'clientes:cliente_historial' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; z-index: 1;">
                 Historial de Transacciones
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="zona-detalle">
@@ -37,14 +39,14 @@
                     <span class="info-icono">📄</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Tipo de Documento</div>
-                        <div class="info-valor">{{ cliente.get_tipoDocCliente_display }}</div>
+                        <div class="info-valor">{{ cliente.get_tipo_documento_display }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
                     <span class="info-icono">🔢</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Número de Documento</div>
-                        <div class="info-valor">{{ cliente.docCliente }}</div>
+                        <div class="info-valor">{{ cliente.numero_documento }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
@@ -75,7 +77,7 @@
                     <span class="info-icono">📧</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Correo Electrónico</div>
-                        <div class="info-valor">{{ cliente.correoElecCliente }}</div>
+                        <div class="info-valor">{{ cliente.correo_electronico }}</div>
                     </div>
                 </div>
                 <div class="info-celda">

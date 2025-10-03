@@ -194,8 +194,8 @@ class TestVistasMonedas:
             email='admin@test.com',
             first_name='Admin',
             last_name='Test',
-            tipo_cedula='CI',
-            cedula_identidad='12345678',
+            tipo_documento='CI',
+            numero_documento='12345678',
             is_active=True
         )
         user.set_password('testpass123')

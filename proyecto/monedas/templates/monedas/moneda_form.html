@@ -107,13 +107,12 @@
                     </div>
                 {% endif %}
             </div>
-
             <div class="form-campo">
-                <label for="{{ form.stock.id_for_label }}">Stock</label>
-                {{ form.stock }}
-                {% if form.stock.errors %}
+                <label for="{{ form.minima_denominacion.id_for_label }}">Mínima Denominación</label>
+                {{ form.minima_denominacion }}
+                {% if form.minima_denominacion.errors %}
                     <div class="form-errores">
-                        {% for error in form.stock.errors %}
+                        {% for error in form.minima_denominacion.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
