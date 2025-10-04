@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <title>Tauser - Global Exchange</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'claro/global.css' %}" media="(prefers-color-scheme: light)">
     <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
 </head>
 <body>
     {% if messages %}
@@ -22,7 +23,7 @@
         <div class="contenido">
             <div class="logo">💰 Tauser - Global Exchange</div>
             <p class="subtitulo">Realiza depósitos y retiros seguros y rápidos.</p>
-            <a href="{% url 'codigo' %}" class="btn-enviar">Continuar transacción</a>
+            <a href="{% url 'ingreso_token' %}" class="btn-enviar">Ingresar Token de Transacción</a>
         </div>
     </main>
 </body>

@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <title>Tauser - Global Exchange</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'claro/global.css' %}" media="(prefers-color-scheme: light)">
     <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 </head>
 <body>
     {% if messages %}
@@ -19,10 +20,10 @@
     </div>
     {% endif %}
     <main class="cuerpo">
-        <div class="contenido">
+        <div class="contenido" style="max-width: 516px;">
             <div class="form-cabecera">
                 <div class="logo">💰Tauser - Global Exchange</div>
-                <p class="subtitulo">Ingresa el código de transacción</p>
+                <p class="subtitulo">Ingresa el token de transacción</p>
             </div>
             
             <form method="post" novalidate>
@@ -37,12 +38,14 @@
                         </div>
                     {% endif %}
                 </div>
-                <button type="submit" class="btn-primario">
-                    Enviar código
-                </button>
-                <a href="{% url 'inicio' %}" class="btn-secundario">
-                    Volver al Inicio
-                </a>
+                <div class="zona-botones">
+                    <button type="submit" class="btn-enviar">
+                        Enviar código
+                    </button>
+                    <a href="{% url 'inicio' %}" class="btn-atras">
+                        Volver al Inicio
+                    </a>
+                </div>
             </form>
         </div>
     </main>
