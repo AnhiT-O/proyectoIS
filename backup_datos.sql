@@ -78,12 +78,87 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion, denominaciones) FROM stdin;
-Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03	{5,10,20,50,100,200,500}
-Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	{2,5,10,20,50,100,200}
-Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	{10,20,50,100,200,500,1000,2000,10000,20000}
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
+Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03
+Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03
+Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03
 \.
 
+
+COPY public.denominaciones (valor, moneda_id) FROM stdin;
+5	2
+10	2
+20	2
+50	2
+100	2
+200	2
+500	2
+2	3
+5	3
+10	3
+20	3
+50	3
+100	3
+200	3
+10	4
+20	4
+50	4
+100	4
+200	4
+500	4
+1000	4
+2000	4
+10000	4
+20000	4
+\.
+
+COPY public.tausers (puerto, activo) FROM stdin;
+8001	t
+8002	t
+8003	t
+8004	t
+8005	t
+\.
+
+COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
+1	1	100
+1	2	100
+1	2	100
+1	3	100
+1	4	100
+1	5	100
+1	6	100
+1	7	100
+1	8	100
+1	9	100
+1	10	100
+1	11	100
+1	12	100
+1	13	100
+1	14	100
+1	15	100
+1	16	100
+1	17	100
+1	18	100
+1	19	100
+1	20	100
+1	21	100
+1	22	100
+1	23	100
+1	24	100
+1	25	100
+1	26	100
+1	27	100
+1	28	100
+1	29	100
+1	30	100
+1	31	100
+1	32	100
+1	33	100
+1	34	100
+1	35	100
+1	36	100
+\.
 
 --
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres

@@ -22,7 +22,7 @@ from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 import stripe
-from monedas.models import Moneda, StockGuaranies
+from monedas.models import Moneda, StockGuaranies, Denominacion
 from django.db import transaction
 
 class Recargos(models.Model):
@@ -138,6 +138,40 @@ def crear_limite_global_inicial(sender, **kwargs):
             LimiteGlobal.objects.create()
             print("Límite global inicial creado automáticamente")
 
+class Tauser(models.Model):
+    puerto = models.SmallIntegerField(unique=True)
+    billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Tauser"
+        verbose_name_plural = "Tausers"
+        db_table = "tausers"
+        default_permissions = []
+        permissions = [
+            ("revision", "Puede revisar información de tausers")
+        ]
+    
+    def __str__(self):
+        """
+        Representación en cadena del TAUser.
+        
+        Returns:
+            str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
+        """
+        return f"TAUser Puerto {self.puerto}"
+    
+class BilletesTauser(models.Model):
+    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
+    denominacion = models.ForeignKey(Denominacion, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Billete Tauser"
+        verbose_name_plural = "Billetes Tauser"
+        db_table = "billetes_tauser"
+        default_permissions = []
+
 class Transaccion(models.Model):
     """
     Modelo principal para representar transacciones de compra y venta de monedas.
@@ -237,7 +271,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     # Calculos para compra
     if operacion == 'compra':
         # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
-        redondeo_efectivo_monto = redondear_efectivo(monto, moneda.denominaciones)
+        redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
         monto += redondeo_efectivo_monto
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base + moneda.comision_venta
@@ -271,7 +305,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final += monto_recargo_pago
         # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, StockGuaranies.objects.first().denominaciones)
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -282,7 +316,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     else:
         # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, moneda.denominaciones)
+            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
             monto += redondeo_efectivo_monto
         else:
             redondeo_efectivo_monto = 0
@@ -321,7 +355,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final -= monto_recargo_pago + monto_recargo_cobro
         # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
         if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, StockGuaranies.objects.first().denominaciones)
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0

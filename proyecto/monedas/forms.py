@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Moneda
+from .models import Moneda, Denominacion
 
 class NoBracketsArrayWidget(forms.TextInput):
     """
@@ -184,10 +184,35 @@ class MonedaForm(forms.ModelForm):
         except ValueError:
             raise ValidationError('Las denominaciones deben ser números enteros separados por comas.')
 
+    def save(self, commit=True):
+        """
+        Guarda el formulario y maneja las denominaciones como objetos relacionados.
+        """
+        moneda = super().save(commit=commit)
+        
+        if commit:
+            # Obtener las denominaciones del campo limpio
+            denominaciones_list = self.cleaned_data.get('denominaciones', [])
+            
+            # Eliminar denominaciones existentes para esta moneda
+            Denominacion.objects.filter(moneda=moneda).delete()
+            
+            # Crear nuevas denominaciones
+            for valor in denominaciones_list:
+                Denominacion.objects.create(moneda=moneda, valor=valor)
+        
+        return moneda
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si estamos editando una moneda existente, convertir la lista a string
-        if self.instance and self.instance.pk and self.instance.denominaciones:
-            # Convertir la lista de enteros a string separado por comas
-            denominaciones_str = ','.join(map(str, self.instance.denominaciones))
-            self.fields['denominaciones'].initial = denominaciones_str
+        # Si estamos editando una moneda existente, cargar las denominaciones
+        if self.instance and self.instance.pk:
+            # Obtener las denominaciones existentes para esta moneda
+            denominaciones_existentes = Denominacion.objects.filter(
+                moneda=self.instance
+            ).values_list('valor', flat=True).order_by('valor')
+            
+            if denominaciones_existentes:
+                # Convertir la lista de valores a string separado por comas
+                denominaciones_str = ','.join(map(str, denominaciones_existentes))
+                self.fields['denominaciones'].initial = denominaciones_str

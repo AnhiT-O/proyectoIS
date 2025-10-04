@@ -71,6 +71,11 @@
                                             💳 Gestionar Transacciones
                                         </a>
                                     {% endif %}
+                                    {% if perms.transacciones.revision %}
+                                        <a href="{% url 'transacciones:revisar_tausers' %}" class="gestion-seleccion">
+                                            🏧 Revisar Tausers
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}

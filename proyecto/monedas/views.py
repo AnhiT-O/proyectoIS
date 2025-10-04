@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Moneda
+from .models import Moneda, Denominacion
 from .forms import MonedaForm
 
 
@@ -165,9 +165,11 @@ def moneda_editar(request, pk):
 def moneda_detalle(request, pk):
     """Vista para mostrar los detalles completos de una moneda"""
     moneda = get_object_or_404(Moneda, pk=pk)
+    denominaciones = Denominacion.objects.filter(moneda=moneda).order_by('valor')
     
     context = {
-        'moneda': moneda
+        'moneda': moneda,
+        'denominaciones': denominaciones
     }
     return render(request, 'monedas/moneda_detalles.html', context)
 

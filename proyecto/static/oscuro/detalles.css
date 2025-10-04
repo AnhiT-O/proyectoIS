@@ -247,4 +247,69 @@
     color: #a0aec0;
     font-style: italic;
     opacity: 0.7;
+    text-align: center;
+    display: block;
+    padding: 2rem;
+}
+
+/* Estilos para tabla de billetes */
+.tabla-billetes {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla-billetes th,
+.tabla-billetes td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #4b5563;
+}
+
+.tabla-billetes th {
+    background-color: #374151;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.tabla-billetes tr:hover {
+    background-color: #374151;
+}
+
+/* Estilos para filtros */
+.filtros-zona {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #374151;
+    border-radius: 8px;
+    border: 1px solid #4b5563;
+}
+
+.filtro-grupo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filtro-etiqueta {
+    font-weight: 600;
+    color: #d1d5db;
+    min-width: 140px;
+}
+
+.filtro-select {
+    padding: 0.5rem;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    background-color: #2d3748;
+    color: #f3f4f6;
+    font-size: 0.9rem;
+    min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.filtro-select:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
 }

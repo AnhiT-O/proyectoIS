@@ -19,13 +19,13 @@ Date: 2024
 
 import logging
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
+from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
 from decimal import Decimal
 from clientes.models import Cliente
 import ast
@@ -1555,3 +1555,141 @@ def editar_variables(request):
         'form': form
     }
     return render(request, 'transacciones/editar_variables.html', context)
+
+@login_required
+@permission_required('transacciones.revision', raise_exception=True)
+def revisar_tausers(request):
+    """
+    Vista para revisar la información de los TAUsers.
+    
+    Muestra un listado de todos los TAUsers del sistema con su información básica
+    incluyendo puerto, estado de activación y opciones de acción.
+    
+    Funcionalidades:
+        - Listado completo de TAUsers
+        - Búsqueda por puerto
+        - Filtrado por estado (activo/inactivo)  
+        - Estadísticas de TAUsers activos e inactivos
+        - Opción de ver detalles de cada TAUser
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro opcionales
+        
+    Returns:
+        HttpResponse: Renderiza listado de TAUsers
+        
+    Template:
+        transacciones/tausers_lista.html
+        
+    Context:
+        - tausers: QuerySet de TAUsers filtrados
+        - busqueda: Término de búsqueda aplicado
+        - tausers_activos: Cantidad de TAUsers activos
+        - tausers_inactivos: Cantidad de TAUsers inactivos
+        - total_tausers_sistema: Total de TAUsers en el sistema
+    """
+    # Obtener todos los TAUsers
+    todos_los_tausers = Tauser.objects.all()
+    tausers = todos_los_tausers
+    
+    # Manejar búsqueda por puerto
+    busqueda = request.GET.get('busqueda', '').strip()
+    if busqueda:
+        tausers = tausers.filter(puerto__icontains=busqueda)
+    
+    # Ordenar por puerto
+    tausers = tausers.order_by('puerto')
+    
+    # Calcular estadísticas
+    tausers_activos = tausers.filter(activo=True).count()
+    tausers_inactivos = tausers.filter(activo=False).count()
+    
+    # Total de TAUsers en el sistema (sin filtrar)
+    total_tausers_sistema = todos_los_tausers.count()
+    
+    context = {
+        'tausers': tausers,
+        'tausers_activos': tausers_activos,
+        'tausers_inactivos': tausers_inactivos,
+        'busqueda': busqueda,
+        'total_tausers_sistema': total_tausers_sistema,
+    }
+    return render(request, 'transacciones/tausers_lista.html', context)
+
+@login_required
+@permission_required('transacciones.revision', raise_exception=True)
+def tauser_detalle(request, pk):
+    """
+    Vista para mostrar los detalles completos de un TAUser específico.
+    
+    Muestra información detallada del TAUser incluyendo puerto, estado,
+    billetes asociados y sus cantidades disponibles. Incluye filtrado por moneda.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        pk (int): ID del TAUser a mostrar
+        
+    Returns:
+        HttpResponse: Página de detalle del TAUser
+        
+    Template:
+        transacciones/tauser_detalles.html
+        
+    Context:
+        - tauser: Instancia del TAUser
+        - billetes_tauser: QuerySet de billetes asociados al TAUser
+        - monedas_disponibles: Lista de monedas que tienen billetes en este TAUser
+        - moneda_filtro: Moneda seleccionada para filtrar (si aplica)
+    """
+    from .models import BilletesTauser
+    from monedas.models import Moneda
+    
+    tauser = get_object_or_404(Tauser, pk=pk)
+    
+    # Obtener todos los billetes del TAUser (sin filtrar para obtener todas las monedas disponibles)
+    todos_billetes_tauser = BilletesTauser.objects.filter(tauser=tauser)
+    
+    # Obtener todas las monedas que tienen billetes en este TAUser (antes de aplicar filtros)
+    monedas_con_billetes = todos_billetes_tauser.values_list('denominacion__moneda', flat=True).distinct()
+    monedas_disponibles = []
+    
+    # Agregar guaraní si hay billetes sin moneda (denominación de guaraníes)
+    if None in monedas_con_billetes:
+        monedas_disponibles.append({'id': 'guarani', 'nombre': 'Guaraní'})
+    
+    # Agregar monedas extranjeras
+    for moneda_id in monedas_con_billetes:
+        if moneda_id is not None:
+            try:
+                moneda = Moneda.objects.get(id=moneda_id)
+                monedas_disponibles.append({'id': moneda.id, 'nombre': moneda.nombre})
+            except Moneda.DoesNotExist:
+                pass
+    
+    # Ahora aplicar el filtro para mostrar los billetes
+    billetes_tauser_query = todos_billetes_tauser
+    
+    # Obtener parámetro de filtro de moneda
+    moneda_filtro = request.GET.get('moneda', '')
+    
+    # Aplicar filtro de moneda si se especifica
+    if moneda_filtro:
+        if moneda_filtro == 'guarani':
+            billetes_tauser_query = billetes_tauser_query.filter(denominacion__moneda__isnull=True)
+        else:
+            try:
+                moneda_id = int(moneda_filtro)
+                billetes_tauser_query = billetes_tauser_query.filter(denominacion__moneda_id=moneda_id)
+            except (ValueError, TypeError):
+                pass
+    
+    billetes_tauser = billetes_tauser_query.order_by('denominacion__moneda', 'denominacion__valor')
+    
+    context = {
+        'tauser': tauser,
+        'billetes_tauser': billetes_tauser,
+        'monedas_disponibles': monedas_disponibles,
+        'moneda_filtro': moneda_filtro
+    }
+    return render(request, 'transacciones/tauser_detalles.html', context)
+    

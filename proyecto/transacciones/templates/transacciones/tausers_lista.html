@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Revisar Tausers - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h2>Revisión de Tausers</h2>
+    </div>
+    
+    <!-- Formulario de búsqueda -->
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-busqueda">
+                <input type="text" 
+                        name="busqueda" 
+                        class="texto-busqueda" 
+                        value="{{ busqueda }}" 
+                        placeholder="Buscar tauser por puerto...">
+            </div>
+            <div class="botones-busqueda">
+                <button type="submit" class="btn-buscar">
+                    Buscar
+                </button>
+                {% if busqueda %}
+                <a href="{% url 'transacciones:revisar_tausers' %}" class="btn-limpiar">
+                    Limpiar
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            <span>Total: <span class="conteo">{{ tausers|length }}</span></span>
+            <span style="margin-left: 1rem;">Activos: <span class="conteo" style="background: #28a745;">{{ tausers_activos }}</span></span>
+            <span style="margin-left: 0.5rem;">Inactivos: <span class="conteo" style="background: #dc3545;">{{ tausers_inactivos }}</span></span>
+        </div>
+    </div>
+
+    <div class="zona-monedas" id="tausersGrid">
+        {% for tauser in tausers %}
+        <div class="tarjeta-moneda" data-search="{{ tauser.puerto }}">
+            <!-- Cabecera con puerto del TAUser -->
+            <div class="tarjeta-cabecera">
+                <h3>Tauser #{{ tauser.id }}</h3>
+            </div>
+            
+            <!-- Información en formato tabla -->
+            <table class="gestion-tabla">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Puerto</th>
+                        <th style="width: 30%;">Estado</th>
+                        <th style="width: 40%;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span style="font-size:1rem; font-weight:700;">{{ tauser.puerto }}</span>
+                        </td>
+                        <td>
+                            <span class="{% if tauser.activo %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
+                                {% if tauser.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'transacciones:tauser_detalle' tauser.pk %}" class="btn-detalles" title="Ver detalles del TAUser">
+                                Ver Billetes
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% empty %}
+            {% if busqueda %}
+                <h3>No se encontraron Tausers</h3>
+            {% else %}
+                <h3>No hay Tausers registrados</h3>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
