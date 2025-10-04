@@ -95,7 +95,6 @@ def login_usuario(request):
                         if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                             t.estado = 'Cancelada'
                             t.razon = 'Expira el tiempo para confirmar la transacción'
-                            t.token = None
                             t.save()
                 messages.success(request, f'¡Bienvenido a Global Exchange, {user.first_name}!')
                 next_page = request.GET.get('next', 'inicio')

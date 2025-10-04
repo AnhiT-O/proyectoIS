@@ -1,98 +1,5 @@
 /* ESTILOS DE BOTONES */
 
-.cuerpo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80vh;
-    padding: 1rem;
-}
-
-.contenido {
-    background: #1f2937;
-    padding: 3rem;
-    border-radius: 15px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    text-align: center;
-    max-width: 800px;
-    width: auto;
-    margin: 0 auto;
-    border: 1px solid #374151;
-}
-
-.logo {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #8b5cf6;
-    margin-bottom: 1rem;
-}
-
-.subtitulo {
-    color: #9ca3af;
-    font-size: 1.1rem;
-    margin-left: 4rem;
-    margin-right: 4rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    line-height: 1.6;
-}
-
-.form-cabecera {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-form-campo {
-    margin-bottom: 1.5rem;
-}
-
-.form-campo label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #f3f4f6;
-    font-weight: 500;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid #4b5563;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    background-color: #374151;
-    color: #f3f4f6;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-}
-
-.form-control.error {
-    border-color: #dc3545;
-}
-
-.form-errores {
-    margin-top: 0.5rem;
-}
-
-.mensaje-error {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.zona-botones {
-    display: flex;
-    gap: 1rem;
-    flex-direction: column;
-    align-items: stretch;
-    margin-top: 1.5rem;
-}
-
-
 /* Botón primario - Acción principal */
 .btn-primario {
     background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
@@ -353,47 +260,16 @@ form-campo {
     transform: scale(1.1);
 }
 
-/* ESTILOS PARA LAS ALERTAS Y MENSAJES */
-
-.mensajes {
-    margin-bottom: 1.5rem;
-}
-
-.mensaje {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: #1f2937;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.mensaje-success {
-    background-color: #064e3b;
-    color: #10b981;
-    border-left: 4px solid #10b981;
-}
-
-.mensaje-error {
-    background-color: #7f1d1d;
-    color: #ef4444;
-    border-left: 4px solid #ef4444;
-}
-
-.mensaje-info {
-    background-color: #0c4a6e;
-    color: #0ea5e9;
-    border-left: 4px solid #0ea5e9;
-}
-
-.mensaje-warning {
-    background-color: #78350f;
-    color: #f59e0b;
-    border-left: 4px solid #f59e0b;
-}
+/* ESTILOS PARA LAS ALERTAS */
 
 .zona-alertas {
     max-width: 1200px;
-    margin: 0 auto 2rem;
+    position: fixed;
+    top: 109px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: 100%;
 }
 
 .alerta-success {
@@ -454,7 +330,7 @@ form-campo {
 }
 
 .barra-contenido {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -469,12 +345,18 @@ form-campo {
     margin-right: 2rem; /* Más espacio hacia la derecha para mejor distribución */
 }
 
-.barra-navegacion {
+.barra-derecha {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex: 1; /* Toma el espacio disponible */
     justify-content: flex-end; /* Alinea el contenido hacia la derecha */
+}
+
+.barra-izquierda {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-start; /* Alinea el contenido hacia la izquierda */
 }
 
 .zona-usuario {
@@ -487,6 +369,44 @@ form-campo {
 .usuario-nombre {
     color: #e0e6ed;
     font-weight: bold;
+}
+
+/* Estilos para el cliente seleccionado */
+.cliente-seleccionado {
+    background-color: #033528;
+    border: 1px solid #10b981;
+    border-radius: 10px;
+    padding: 0.6rem;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+    transition: all 0.3s ease;
+    min-width: 220px;
+    text-align: center;
+}
+
+.cliente-etiqueta {
+    font-size: 0.75rem;
+    color: #8b5cf6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.cliente-etiqueta::before {
+    content: "👤";
+    margin-right: 0.5rem;
+}
+
+.cliente-nombre {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* Estilos para el dropdown del panel de administración */

@@ -2,7 +2,11 @@
 {% load static %}
 
 {% block title %}
-    En construccion
+    {% if transaccion.tipo == 'compra' %}
+        Compra Exitosa
+    {% elif transaccion.tipo == 'venta' %}
+        Venta Exitosa
+    {% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -15,40 +19,55 @@
 {% block content %}
 <div class="contenido extendido">
     <div class="form-cabecera">
-        {% if tipo == 'compra' %}
-            {% if medio_pago == 'Efectivo' or medio_pago == 'Cheque' or medio_pago == 'Transferencia Bancaria' or medio_pago == 'Tigo Money' or medio_pago == 'Billetera Personal' or medio_pago == 'Zimple' %}
+        {% if transaccion.tipo == 'compra' %}
+            {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
                 <p class="subtitulo">
                     Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
-                <div class="info-campo">{{ token }}</div>
+                <p class="subtitulo">
+                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                </p>
+                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El token vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
+                <div class="info-campo">{{ transaccion.token }}</div>
             {% else %}
                 <div class="logo">Transacción Confirmada</div>
                 <p class="subtitulo">
                     Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
-                <div class="info-campo">{{ token }}</div>
+                <p class="subtitulo">
+                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                </p>
+                <div class="info-campo" style="margin-top: 2rem;">{{ transaccion.token }}</div>
             {% endif %}
-        {% elif tipo == 'venta' %}
-            {% if medio_pago == 'Efectivo' %}
+        {% else %}
+            {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
                 <p class="subtitulo">
                     Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la venta.
                 </p>
-                <div class="info-campo">{{ token }}</div>
-            {% else %}
-                {% if medio_cobro == 'Efectivo' %}
-                    <div class="logo">Transacción Confirmada</div>
-                    <p class="subtitulo">
-                        Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
-                    </p>
-                    <div class="info-campo">{{ token }}</div>
-                {% else %}
-                    <div class="logo">¡Transacción Completa!</div>
-                    <p class="subtitulo">
-                        La compra de monedas se ha realizado exitosamente. Tu dinero se ha acreditado automáticamente.
-                    </p>
-                {% endif %}
+                <p class="subtitulo">
+                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                </p>
+                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El token vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
+                <div class="info-campo">{{ transaccion.token }}</div>
+            {% elif transaccion.estado == 'Confirmada' %}
+                <div class="logo">Transacción Confirmada</div>
+                <p class="subtitulo">
+                    Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la venta.
+                </p>
+                <p class="subtitulo">
+                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                </p>
+                <div class="info-campo" style="margin-top: 2rem;">{{ transaccion.token }}</div>
+            {% elif transaccion.estado == 'Completa' %}
+                <div class="logo">¡Transacción Completa!</div>
+                <p class="subtitulo">
+                    La compra de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente. ¡Gracias por confiar en Global Exchange!.
+                </p>
+                <p class="subtitulo">
+                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                </p>
             {% endif %}
         {% endif %}
     </div>

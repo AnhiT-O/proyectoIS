@@ -694,7 +694,6 @@ def historial_transacciones(request, cliente_id):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     
     # Obtener parámetros de filtrado
@@ -781,7 +780,6 @@ def cliente_detalle_transaccion(request, cliente_id, transaccion_id):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     
     context = {

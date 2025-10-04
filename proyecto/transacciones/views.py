@@ -81,7 +81,6 @@ def compra_monto_moneda(request):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     if request.session.get('transaccion_id'):
         t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
@@ -658,7 +657,6 @@ def compra_exito(request):
     try:
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
-        del request.session['transaccion_id']
     except:
         messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
@@ -672,33 +670,32 @@ def compra_exito(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-
-    if medio_pago.startswith('{'):
-        medio_pago_dict = ast.literal_eval(medio_pago)
-        pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
-        if pago['success']:
-            messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
-            procesar_transaccion(transaccion)
-            token_data = generar_token_transaccion(transaccion)
+    
+    if transaccion.token is None:
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
+            if pago['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+                procesar_transaccion(transaccion)
+                generar_token_transaccion(transaccion)
+            else:
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
+                transaccion.save()
+                messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
+                return redirect('transacciones:compra_monto_moneda')
         else:
-            transaccion.estado = 'Cancelada'
-            transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
-            transaccion.save()
-            messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
-            return redirect('transacciones:compra_monto_moneda')
-    else:
-        try:
-            token_data = generar_token_transaccion(transaccion)
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-        except Exception as e:
-            messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-            return redirect('transacciones:compra_medio_cobro')
+            try:
+                generar_token_transaccion(transaccion)
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:compra_medio_cobro')
     
     context = {
-        'token': token_data['token'],
-        'medio_pago': medio_pago,
-        'tipo': 'compra'
+        'transaccion': transaccion
     }
     
     return render(request, 'transacciones/exito.html', context)
@@ -744,7 +741,6 @@ def venta_monto_moneda(request):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     if request.session.get('transaccion_id'):
         t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
@@ -1338,7 +1334,6 @@ def venta_exito(request):
     try:
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
-        del request.session['transaccion_id']
     except:
         messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
@@ -1354,34 +1349,31 @@ def venta_exito(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
-    if medio_pago.startswith('{'):
-        medio_pago_dict = ast.literal_eval(medio_pago)
-        if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
-            messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
-            procesar_transaccion(transaccion)
-            if medio_cobro == 'Efectivo':
-                token_data = generar_token_transaccion(transaccion)
+    if transaccion.token is not None and transaccion.estado != 'Pendiente':
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+                procesar_transaccion(transaccion)
+                if medio_cobro == 'Efectivo':
+                    generar_token_transaccion(transaccion)
             else:
-                token_data = {'token': None}
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error en la transacción automática de venta'
+                transaccion.save()
+                messages.error(request, 'Hubo un error de pago o de cobro automático. Intente nuevamente.')
+                return redirect('transacciones:venta_monto_moneda')
         else:
-            transaccion.estado = 'Cancelada'
-            transaccion.razon = 'Error en la transacción automática de venta'
-            transaccion.save()
-            messages.error(request, 'Hubo un error de pago o de cobro automático. Intente nuevamente.')
-            return redirect('transacciones:venta_monto_moneda')
-    else:
-        try:
-            token_data = generar_token_transaccion(transaccion)
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-        except Exception as e:
-            messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-            return redirect('transacciones:venta_medio_cobro')
+            try:
+                generar_token_transaccion(transaccion)
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:venta_medio_cobro')
+            
     context = {
-        'token': token_data['token'],
-        'medio_pago': medio_pago,
-        'medio_cobro': medio_cobro,
-        'tipo': 'venta'
+        'transaccion': transaccion
     }
     
     return render(request, 'transacciones/exito.html', context)
@@ -1439,7 +1431,6 @@ def historial_transacciones(request, cliente_id):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     # Obtener parámetros de filtrado
     busqueda = request.GET.get('busqueda', '')
@@ -1522,7 +1513,6 @@ def detalle_historial(request, transaccion_id):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     if transaccion.cliente not in request.user.clientes_operados.all() and not request.user.has_perm('transacciones.visualizacion'):
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
