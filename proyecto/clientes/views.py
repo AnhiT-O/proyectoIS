@@ -775,11 +775,14 @@ def cliente_detalle_transaccion(request, cliente_id, transaccion_id):
         messages.error(request, 'La transacción solicitada no existe para este cliente.')
         return redirect('clientes:cliente_historial', cliente_id=cliente_id)
 
-    if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
-        transaccion.estado = 'Cancelada'
-        transaccion.razon = 'Expira el tiempo para confirmar la transacción'
-        transaccion.token = None
-        transaccion.save()
+    transacciones_pasadas = Transaccion.objects.filter(cliente=cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.token = None
+                t.save()
     
     context = {
         'transaccion': transaccion,

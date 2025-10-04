@@ -16,6 +16,7 @@ from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswor
 from .models import Usuario
 from clientes.models import Cliente
 from clientes.views import procesar_medios_acreditacion_cliente
+from clientes.exceptions import TarjetaNoPermitida, MarcaNoPermitida
 from roles.models import Roles
 from django.db.models import Q
 from django.contrib.sessions.models import Session
@@ -752,6 +753,10 @@ def agregar_tarjeta_cliente(request, pk):
                 messages.success(request, 'Tarjeta agregada exitosamente.')
                 return redirect('usuarios:detalle_cliente', cliente_id=pk)
                 
+            except TarjetaNoPermitida:
+                messages.error(request, 'Solo se permiten tarjetas de crédito.')
+            except MarcaNoPermitida:
+                messages.error(request, 'La marca de la tarjeta no está permitida.')
             except Exception as e:
                 messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
     else:

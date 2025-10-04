@@ -14,6 +14,7 @@ Date: 2024
 """
 
 import ast
+from datetime import date
 from decimal import Decimal
 import secrets
 from django.db import models
@@ -204,82 +205,6 @@ class Transaccion(models.Model):
             str: Descripción de la transacción en formato "Tipo - Cliente - Monto Moneda"
         """
         return f"{self.tipo.title()} - {self.cliente} - {self.monto} {self.moneda.simbolo}"
-
-    def almacenar_cotizacion_original(self):
-        """
-        Almacena los precios de compra y venta originales al momento de crear la transacción.
-        
-        Calcula y guarda los precios según la configuración actual de la moneda
-        para poder detectar cambios posteriores.
-        """
-        if self.moneda:
-            # Calcular precios según el tipo de transacción
-            precio_compra = self.moneda.tasa_base + self.moneda.comision_compra
-            precio_venta = self.moneda.tasa_base - self.moneda.comision_venta
-            
-            self.precio_compra_original = precio_compra
-            self.precio_venta_original = precio_venta
-            self.fecha_cotizacion_original = self.moneda.fecha_cotizacion
-            self.save(update_fields=['precio_compra_original', 'precio_venta_original', 'fecha_cotizacion_original'])
-
-    def verificar_cambio_cotizacion(self):
-        """
-        Verifica si la cotización ha cambiado desde que se creó la transacción.
-        
-        Returns:
-            dict: Diccionario con información de cambios o None si no hay cambios
-                - 'hay_cambios': boolean indicando si hubo cambios
-                - 'valores_anteriores': dict con precio_compra y precio_venta originales
-                - 'valores_actuales': dict con precio_compra y precio_venta actuales
-        """
-        if not self.moneda or not self.precio_compra_original or not self.precio_venta_original:
-            return None
-            
-        # Calcular precios actuales
-        precio_compra_actual = self.moneda.tasa_base + self.moneda.comision_compra
-        precio_venta_actual = self.moneda.tasa_base - self.moneda.comision_venta
-        
-        # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != self.precio_compra_original or 
-            precio_venta_actual != self.precio_venta_original
-        )
-        
-        if hay_cambios:
-            return {
-                'hay_cambios': True,
-                'valores_anteriores': {
-                    'precio_compra': self.precio_compra_original,
-                    'precio_venta': self.precio_venta_original
-                },
-                'valores_actuales': {
-                    'precio_compra': precio_compra_actual,
-                    'precio_venta': precio_venta_actual
-                }
-            }
-        
-        return {'hay_cambios': False}
-
-    def save(self, *args, **kwargs):
-        """
-        Sobrescribe el método save para actualizar timestamp en cambios de estado.
-        
-        Cuando el estado de una transacción cambia, actualiza automáticamente
-        el campo fecha_hora con el timestamp actual.
-        
-        Args:
-            *args: Argumentos posicionales para el método save del padre
-            **kwargs: Argumentos de palabra clave para el método save del padre
-        """
-        if self.pk:  # Si la instancia ya existe
-            try:
-                old_instance = Transaccion.objects.get(pk=self.pk)
-                if old_instance.estado != self.estado:
-                    self.fecha_hora = timezone.now()
-            except Transaccion.DoesNotExist:
-                pass
-        
-        super().save(*args, **kwargs)
 
 def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
     """
@@ -636,6 +561,7 @@ def procesar_transaccion(transaccion, recibido=0):
             stock.save()
             transaccion.cliente.consumo_diario += transaccion.precio_final
             transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.ultimo_consumo = date.today()
             transaccion.cliente.save()
             transaccion.save()
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
@@ -651,6 +577,7 @@ def procesar_transaccion(transaccion, recibido=0):
             stock.save()
             transaccion.cliente.consumo_diario += transaccion.precio_final
             transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.ultimo_consumo = date.today()
             transaccion.cliente.save()
             transaccion.save()
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
@@ -663,6 +590,7 @@ def procesar_transaccion(transaccion, recibido=0):
             stock.save()
             transaccion.cliente.consumo_diario += transaccion.precio_final
             transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.ultimo_consumo = date.today()
             transaccion.cliente.save()
             transaccion.save()
         else:
@@ -673,6 +601,7 @@ def procesar_transaccion(transaccion, recibido=0):
             stock.save()
             transaccion.cliente.consumo_diario += transaccion.precio_final
             transaccion.cliente.consumo_mensual += transaccion.precio_final
+            transaccion.cliente.ultimo_consumo = date.today()
             transaccion.cliente.save()
             transaccion.save()
             if transaccion.medio_cobro != 'Efectivo':

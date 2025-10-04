@@ -1516,11 +1516,14 @@ def detalle_historial(request, transaccion_id):
     except Transaccion.DoesNotExist:
         messages.error(request, 'La transacción solicitada no existe.')
         return redirect('transacciones:historial')
-    if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
-        transaccion.estado = 'Cancelada'
-        transaccion.razon = 'Expira el tiempo para confirmar la transacción'
-        transaccion.token = None
-        transaccion.save()
+    transacciones_pasadas = Transaccion.objects.filter(cliente=transaccion.cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.token = None
+                t.save()
     if transaccion.cliente not in request.user.clientes_operados.all() and not request.user.has_perm('transacciones.visualizacion'):
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
         return redirect('inicio')

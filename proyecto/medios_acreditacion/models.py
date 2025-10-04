@@ -13,7 +13,6 @@ Clases:
 
 from django.db import models
 
-
 class MedioAcreditacion(models.Model):
     """
     Modelo abstracto base para medios de acreditación.

@@ -2,6 +2,16 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Moneda
 
+class NoBracketsArrayWidget(forms.TextInput):
+    """
+    Widget personalizado para renderizar ArrayField como una cadena separada por comas.
+    """
+    def render(self, name, value, attrs=None, renderer=None):
+        if value is not None and isinstance(value, (list, tuple)):
+            # Convierte la lista/tupla en una cadena separada por comas
+            value = ', '.join(map(str, value))
+        return super().render(name, value, attrs, renderer)
+
 class MonedaForm(forms.ModelForm):
 
     nombre = forms.CharField(
@@ -81,7 +91,7 @@ class MonedaForm(forms.ModelForm):
         error_messages={
             'required': 'Debes ingresar las denominaciones disponibles.'
         },
-        widget=forms.TextInput(attrs={
+        widget=NoBracketsArrayWidget(attrs={
             'class': 'form-control',
             'placeholder': 'Ej: 1,2,5,10,20,50,100',
             'data-toggle': 'tooltip',
@@ -178,4 +188,6 @@ class MonedaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Si estamos editando una moneda existente, convertir la lista a string
         if self.instance and self.instance.pk and self.instance.denominaciones:
-            self.fields['denominaciones'].initial = ','.join(map(str, self.instance.denominaciones))
+            # Convertir la lista de enteros a string separado por comas
+            denominaciones_str = ','.join(map(str, self.instance.denominaciones))
+            self.fields['denominaciones'].initial = denominaciones_str
