@@ -158,6 +158,12 @@
                     {% endif %}
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
+                {% if transaccion.estado == 'Pendiente' or transaccion.estado == 'Confirmada' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Token de la transacción:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.token }}</div>
+                </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

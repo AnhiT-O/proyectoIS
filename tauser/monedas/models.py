@@ -3,7 +3,6 @@ from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
-from django.contrib.postgres.fields import ArrayField
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -24,10 +23,6 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
-    denominaciones = ArrayField(
-        base_field=models.IntegerField(),
-        default=list
-    )
     
     def save(self, *args, **kwargs):
         if self.pk:
@@ -106,16 +101,32 @@ class Moneda(models.Model):
     def __str__(self):
         return self.nombre
 
+@receiver(post_migrate)
+def crear_moneda_usd(sender, **kwargs):
+    """
+    Crea automáticamente la moneda USD después de ejecutar las migraciones
+    """
+    # Solo crear si la migración es de la app monedas
+    if kwargs['app_config'].name == 'monedas':
+        # Verificar si ya existe la moneda USD
+        if not Moneda.objects.filter(simbolo='USD').exists():
+            Moneda.objects.create(
+                nombre='Dólar estadounidense',
+                simbolo='USD',
+                activa=True,
+                tasa_base=7400,
+                comision_compra=200,
+                comision_venta=250,
+                decimales=2
+            )
+            print("✓ Moneda USD creada automáticamente")
+
 class StockGuaranies(models.Model):
     """
     Modelo para almacenar el stock de guaraníes disponible en la casa de cambio
     """
     cantidad = models.BigIntegerField(
         default=1000000000
-    )
-    denominaciones = ArrayField(
-        base_field=models.IntegerField(),
-        default=[2000, 5000, 10000, 20000, 50000, 100000]
     )
 
     class Meta:
@@ -126,3 +137,46 @@ class StockGuaranies(models.Model):
 
     def __str__(self):
         return f"Stock: Gs. {self.cantidad:,}"
+    
+@receiver(post_migrate)
+def crear_stock_guaranies_inicial(sender, **kwargs):
+    """
+    Crea automáticamente el stock inicial de guaraníes después de ejecutar las migraciones
+    """
+    if kwargs['app_config'].name == 'monedas':
+        if not StockGuaranies.objects.exists():
+            StockGuaranies.objects.create()
+            print("Stock inicial de guaraníes creado automáticamente")
+
+class Denominacion(models.Model):
+    """
+    Modelo para representar las denominaciones de una moneda específica
+    """
+    moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True)
+    valor = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Denominación'
+        verbose_name_plural = 'Denominaciones'
+        db_table = 'denominaciones'
+        default_permissions = []
+
+    def __str__(self):
+        return f"{self.valor}"
+    
+@receiver(post_migrate)
+def crear_denominaciones_iniciales(sender, **kwargs):
+    """
+    Crea automáticamente algunas denominaciones iniciales para USD y el stock de guaraníes
+    después de ejecutar las migraciones
+    """
+    if kwargs['app_config'].name == 'monedas':
+        usd = Moneda.objects.filter(simbolo='USD').first()
+        if usd:
+            for valor in [1, 5, 10, 20, 50, 100]:
+                Denominacion.objects.create(moneda=usd, valor=valor)
+            print("Denominaciones iniciales para USD creadas automáticamente")
+
+        for valor in [2000, 5000, 10000, 20000, 50000, 100000]:
+            Denominacion.objects.create(valor=valor)
+        print("Denominaciones iniciales para Stock de Guaraníes creadas automáticamente")

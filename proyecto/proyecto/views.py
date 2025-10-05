@@ -1,4 +1,5 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout

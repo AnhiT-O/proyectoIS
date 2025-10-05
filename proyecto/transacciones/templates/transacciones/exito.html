@@ -22,9 +22,15 @@
         {% if transaccion.tipo == 'compra' %}
             {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
+                {% if transaccion.medio_pago == 'Efectivo' or transaccion.medio_pago == 'Cheque' %}
                 <p class="subtitulo">
                     Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
+                {% else %}
+                <p class="subtitulo">
+                    Se ha generado un token para la transacción. Usalo para realizar el pago de la transacción en línea.
+                </p>
+                {% endif %}
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.
                 </p>

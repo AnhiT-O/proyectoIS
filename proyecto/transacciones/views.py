@@ -658,8 +658,7 @@ def compra_exito(request):
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
     except:
-        messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
-        return redirect('transacciones:compra_monto_moneda')
+        return redirect('inicio')
     
     compra_datos = request.session.get('compra_datos')
     if not compra_datos:
@@ -694,6 +693,7 @@ def compra_exito(request):
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
     
+    del request.session['transaccion_id']
     context = {
         'transaccion': transaccion
     }
@@ -1335,8 +1335,7 @@ def venta_exito(request):
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
     except:
-        messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
-        return redirect('transacciones:venta_monto_moneda')
+        return redirect('inicio')
 
     venta_datos = request.session.get('venta_datos')
     if not venta_datos:
@@ -1349,7 +1348,7 @@ def venta_exito(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
-    if transaccion.token is not None and transaccion.estado != 'Pendiente':
+    if transaccion.token is None:
         if medio_pago.startswith('{'):
             medio_pago_dict = ast.literal_eval(medio_pago)
             if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
@@ -1372,6 +1371,7 @@ def venta_exito(request):
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
             
+    del request.session['transaccion_id']
     context = {
         'transaccion': transaccion
     }
