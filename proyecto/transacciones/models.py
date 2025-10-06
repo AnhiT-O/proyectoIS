@@ -17,6 +17,8 @@ import ast
 from datetime import date
 from decimal import Decimal
 import secrets
+import socket
+import requests
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
@@ -141,7 +143,6 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
-    activo = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Tauser"
@@ -160,6 +161,53 @@ class Tauser(models.Model):
             str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
         """
         return f"TAUser Puerto {self.puerto}"
+    
+    def esta_activo(self):
+        """
+        Verifica si hay un servidor Django corriendo en el puerto del TAUser.
+        
+        Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP
+        para confirmar que es un servidor Django.
+        
+        Returns:
+            bool: True si hay un servidor Django corriendo, False en caso contrario
+        """
+        try:
+            # Verificar si el puerto está en uso
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)  # Timeout de 1 segundo
+                result = sock.connect_ex(('localhost', self.puerto))
+                
+                if result != 0:
+                    # Puerto no está en uso
+                    return False
+            
+            # Si el puerto está en uso, verificar si es un servidor Django
+            try:
+                response = requests.get(
+                    f'http://localhost:{self.puerto}/',
+                    timeout=2,
+                    headers={'User-Agent': 'TAUser-Checker/1.0'}
+                )
+                
+                # Verificar si la respuesta contiene indicadores de Django
+                # Django típicamente incluye estos headers o contenido
+                django_indicators = [
+                    'django' in response.headers.get('server', '').lower(),
+                    'csrftoken' in response.text.lower(),
+                    'django' in response.text.lower(),
+                    response.status_code in [200, 302, 404]  # Códigos típicos de Django
+                ]
+                
+                return any(django_indicators)
+                
+            except requests.exceptions.RequestException:
+                # Si hay error en la petición HTTP pero el puerto está abierto,
+                # asumimos que podría ser Django pero no responde correctamente
+                return True
+                
+        except Exception:
+            return False
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)

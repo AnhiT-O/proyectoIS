@@ -46,4 +46,5 @@ urlpatterns = [
     # URLs para gestión de TAUsers
     path('tausers/', views.revisar_tausers, name='revisar_tausers'),
     path('tausers/<int:pk>/', views.tauser_detalle, name='tauser_detalle'),
+    path('tausers/<int:tauser_id>/verificar-estado/', views.verificar_estado_tauser, name='verificar_estado_tauser'),
 ]

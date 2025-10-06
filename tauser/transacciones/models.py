@@ -141,7 +141,6 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
-    activo = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Tauser"

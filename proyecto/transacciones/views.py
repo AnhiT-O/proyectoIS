@@ -1563,12 +1563,12 @@ def revisar_tausers(request):
     Vista para revisar la información de los TAUsers.
     
     Muestra un listado de todos los TAUsers del sistema con su información básica
-    incluyendo puerto, estado de activación y opciones de acción.
+    incluyendo puerto, estado de activación (detectado dinámicamente) y opciones de acción.
     
     Funcionalidades:
         - Listado completo de TAUsers
         - Búsqueda por puerto
-        - Filtrado por estado (activo/inactivo)  
+        - Filtrado por estado (activo/inactivo) detectado automáticamente
         - Estadísticas de TAUsers activos e inactivos
         - Opción de ver detalles de cada TAUser
     
@@ -1582,36 +1582,62 @@ def revisar_tausers(request):
         transacciones/tausers_lista.html
         
     Context:
-        - tausers: QuerySet de TAUsers filtrados
+        - tausers: Lista de TAUsers con estado detectado dinámicamente
         - busqueda: Término de búsqueda aplicado
         - tausers_activos: Cantidad de TAUsers activos
         - tausers_inactivos: Cantidad de TAUsers inactivos
         - total_tausers_sistema: Total de TAUsers en el sistema
+        - filtro_estado: Estado seleccionado para filtrar
     """
     # Obtener todos los TAUsers
     todos_los_tausers = Tauser.objects.all()
-    tausers = todos_los_tausers
+    tausers_query = todos_los_tausers
     
     # Manejar búsqueda por puerto
     busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
-        tausers = tausers.filter(puerto__icontains=busqueda)
+        tausers_query = tausers_query.filter(puerto__icontains=busqueda)
     
     # Ordenar por puerto
-    tausers = tausers.order_by('puerto')
+    tausers_query = tausers_query.order_by('puerto')
     
-    # Calcular estadísticas
-    tausers_activos = tausers.filter(activo=True).count()
-    tausers_inactivos = tausers.filter(activo=False).count()
+    # Obtener filtro de estado
+    filtro_estado = request.GET.get('estado', '')
+    
+    # Convertir QuerySet a lista y agregar estado dinámico
+    tausers_con_estado = []
+    tausers_activos_count = 0
+    tausers_inactivos_count = 0
+    
+    for tauser in tausers_query:
+        # Detectar estado dinámicamente
+        esta_activo = tauser.esta_activo()
+        
+        # Aplicar filtro de estado si se especifica
+        if filtro_estado == 'activo' and not esta_activo:
+            continue
+        elif filtro_estado == 'inactivo' and esta_activo:
+            continue
+        
+        # Agregar el tauser con su estado detectado
+        tauser.activo = esta_activo  # Agregar atributo temporal
+        tausers_con_estado.append(tauser)
+        
+        # Contar para estadísticas
+        if esta_activo:
+            tausers_activos_count += 1
+        else:
+            tausers_inactivos_count += 1
     
     # Total de TAUsers en el sistema (sin filtrar)
     total_tausers_sistema = todos_los_tausers.count()
     
     context = {
-        'tausers': tausers,
-        'tausers_activos': tausers_activos,
-        'tausers_inactivos': tausers_inactivos,
+        'tausers': tausers_con_estado,
+        'tausers_activos': tausers_activos_count,
+        'tausers_inactivos': tausers_inactivos_count,
         'busqueda': busqueda,
+        'filtro_estado': filtro_estado,
         'total_tausers_sistema': total_tausers_sistema,
     }
     return render(request, 'transacciones/tausers_lista.html', context)
@@ -1727,4 +1753,45 @@ def tauser_detalle(request, pk):
         'totales_por_moneda': totales_por_moneda
     }
     return render(request, 'transacciones/tauser_detalles.html', context)
+
+@login_required
+@permission_required('transacciones.revision', raise_exception=True) 
+def verificar_estado_tauser(request, tauser_id):
+    """
+    Vista AJAX para verificar el estado de un TAUser específico.
+    
+    Útil para verificaciones individuales sin recargar toda la página.
+    
+    Args:
+        request (HttpRequest): Petición HTTP (debe ser AJAX)
+        tauser_id (int): ID del TAUser a verificar
+        
+    Returns:
+        JsonResponse: Estado del TAUser y información adicional
+    """
+    from django.http import JsonResponse
+    
+    try:
+        tauser = get_object_or_404(Tauser, pk=tauser_id)
+        esta_activo = tauser.esta_activo()
+        
+        return JsonResponse({
+            'success': True,
+            'tauser_id': tauser.id,
+            'puerto': tauser.puerto,
+            'activo': esta_activo,
+            'estado_texto': 'Activo' if esta_activo else 'Inactivo',
+            'url': f'http://localhost:{tauser.puerto}'
+        })
+        
+    except Tauser.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'TAUser no encontrado'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
     

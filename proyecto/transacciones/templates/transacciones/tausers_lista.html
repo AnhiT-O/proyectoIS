@@ -13,9 +13,12 @@
 <div class="contenido">
     <div class="gestion-cabecera">
         <h2>Revisión de Tausers</h2>
+        <button onclick="location.reload();" class="btn-primario" title="Actualizar estado de todos los Tausers">
+            Actualizar Estados
+        </button>
     </div>
     
-    <!-- Formulario de búsqueda -->
+    <!-- Formulario de búsqueda y filtros -->
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
             <div class="campo-busqueda">
@@ -25,11 +28,18 @@
                         value="{{ busqueda }}" 
                         placeholder="Buscar tauser por puerto...">
             </div>
+            <div class="campo-filtro">
+                <select name="estado" class="select-filtro">
+                    <option value="">Todos los estados</option>
+                    <option value="activo" {% if filtro_estado == 'activo' %}selected{% endif %}>Solo activos</option>
+                    <option value="inactivo" {% if filtro_estado == 'inactivo' %}selected{% endif %}>Solo inactivos</option>
+                </select>
+            </div>
             <div class="botones-busqueda">
                 <button type="submit" class="btn-buscar">
-                    Buscar
+                    Filtrar
                 </button>
-                {% if busqueda %}
+                {% if busqueda or filtro_estado %}
                 <a href="{% url 'transacciones:revisar_tausers' %}" class="btn-limpiar">
                     Limpiar
                 </a>
@@ -40,7 +50,8 @@
 
     <div class="zona-conteo">
         <div class="conteo-info">
-            <span>Total: <span class="conteo">{{ tausers|length }}</span></span>
+            <span>Total: <span class="conteo">{{ total_tausers_sistema }}</span></span>
+            <span style="margin-left: 1rem;">Mostrando: <span class="conteo">{{ tausers|length }}</span></span>
             <span style="margin-left: 1rem;">Activos: <span class="conteo" style="background: #28a745;">{{ tausers_activos }}</span></span>
             <span style="margin-left: 0.5rem;">Inactivos: <span class="conteo" style="background: #dc3545;">{{ tausers_inactivos }}</span></span>
         </div>
@@ -58,9 +69,9 @@
             <table class="gestion-tabla">
                 <thead>
                     <tr>
-                        <th style="width: 30%;">Puerto</th>
-                        <th style="width: 30%;">Estado</th>
-                        <th style="width: 40%;">Acciones</th>
+                        <th style="width: 25%;">Puerto</th>
+                        <th style="width: 25%;">Estado</th>
+                        <th style="width: 25%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,13 +81,21 @@
                         </td>
                         <td>
                             <span class="{% if tauser.activo %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">
-                                {% if tauser.activo %}Activo{% else %}Inactivo{% endif %}
+                                {% if tauser.activo %}
+                                    Activo
+                                {% else %}
+                                    Inactivo
+                                {% endif %}
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'transacciones:tauser_detalle' tauser.pk %}" class="btn-detalles" title="Ver detalles del Tauser">
-                                Ver Billetes
-                            </a>
+                            <div class="botones-accion">
+                                <a href="{% url 'transacciones:tauser_detalle' tauser.pk %}" 
+                                   class="btn-detalles" 
+                                   title="Ver detalles del Tauser">
+                                    Ver Detalles
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -91,4 +110,115 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Función para verificar el estado de un TAUser específico
+function verificarEstadoTauser(tauserId, elemento) {
+    const botonOriginal = elemento.innerHTML;
+    elemento.innerHTML = '🔄 Verificando...';
+    elemento.disabled = true;
+    
+    fetch(`/transacciones/tausers/${tauserId}/verificar-estado/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar el estado en la interfaz
+            const tarjeta = elemento.closest('.tarjeta-moneda');
+            const estadoSpan = tarjeta.querySelector('.etiqueta-activo, .etiqueta-bloqueado');
+            const botonesDiv = tarjeta.querySelector('.botones-accion');
+            
+            if (data.activo) {
+                estadoSpan.className = 'etiqueta-activo';
+                estadoSpan.innerHTML = 'Activo';
+                
+                // Agregar botón "Abrir" si no existe
+                if (!botonesDiv.querySelector('.btn-externo')) {
+                    const botonAbrir = document.createElement('a');
+                    botonAbrir.href = data.url;
+                    botonAbrir.target = '_blank';
+                    botonAbrir.className = 'btn-externo';
+                    botonAbrir.title = 'Abrir TAUser en nueva pestaña';
+                    botonAbrir.innerHTML = '🔗 Abrir';
+                    botonesDiv.appendChild(botonAbrir);
+                }
+            } else {
+                estadoSpan.className = 'etiqueta-bloqueado';
+                estadoSpan.innerHTML = 'Inactivo';
+                
+                // Remover botón "Abrir" si existe
+                const botonAbrir = botonesDiv.querySelector('.btn-externo');
+                if (botonAbrir) {
+                    botonAbrir.remove();
+                }
+            }
+            
+            // Mostrar mensaje de éxito
+            mostrarMensaje(`TAUser ${data.puerto}: ${data.estado_texto}`, 'success');
+        } else {
+            mostrarMensaje(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarMensaje('Error al verificar el estado del TAUser', 'error');
+    })
+    .finally(() => {
+        elemento.innerHTML = botonOriginal;
+        elemento.disabled = false;
+    });
+}
+
+// Función para mostrar mensajes temporales
+function mostrarMensaje(mensaje, tipo) {
+    // Crear elemento de mensaje
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        z-index: 1000;
+        max-width: 300px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    `;
+    
+    if (tipo === 'success') {
+        messageDiv.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+    } else {
+        messageDiv.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+    }
+    
+    messageDiv.textContent = mensaje;
+    document.body.appendChild(messageDiv);
+    
+    // Animar entrada
+    setTimeout(() => {
+        messageDiv.style.transform = 'translateX(0)';
+        messageDiv.style.opacity = '1';
+    }, 100);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        messageDiv.style.transform = 'translateX(100%)';
+        messageDiv.style.opacity = '0';
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 300);
+    }, 3000);
+}
+</script>
 {% endblock %}
