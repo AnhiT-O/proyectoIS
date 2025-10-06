@@ -3,7 +3,6 @@ from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
-from datetime import date
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -24,7 +23,6 @@ class Moneda(models.Model):
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=3)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
-    minima_denominacion = models.IntegerField(default=1)
     
     def save(self, *args, **kwargs):
         if self.pk:
@@ -103,62 +101,6 @@ class Moneda(models.Model):
     def __str__(self):
         return self.nombre
 
-    def verificar_cambio_cotizacion(self, precio_original):
-        """
-        Verifica si hubo cambios en la cotización comparando con el precio original
-        Args:
-            precio_original: El precio que se mostró inicialmente al cliente
-        Returns:
-            dict: Diccionario con información sobre el cambio de cotización
-        """
-        precio_actual = self.calcular_precio_venta()  # O calcular_precio_compra según el caso
-        if precio_actual != precio_original:
-            return {
-                'hubo_cambio': True,
-                'precio_original': precio_original,
-                'precio_actual': precio_actual,
-                'diferencia': precio_actual - precio_original
-            }
-        return {'hubo_cambio': False}
-
-    def ha_cambiado_cotizacion(self, tasa_base_anterior, comision_compra_anterior, comision_venta_anterior):
-        """
-        Verifica si algún componente de la cotización ha cambiado
-        Args:
-            tasa_base_anterior: Valor anterior de la tasa base
-            comision_compra_anterior: Valor anterior de la comisión de compra
-            comision_venta_anterior: Valor anterior de la comisión de venta
-        Returns:
-            dict: Información sobre los cambios en la cotización
-        """
-        cambios = {
-            'tasa_base': self.tasa_base != tasa_base_anterior,
-            'comision_compra': self.comision_compra != comision_compra_anterior,
-            'comision_venta': self.comision_venta != comision_venta_anterior,
-            'hubo_cambio': False
-        }
-        
-        # Verifica si hubo algún cambio
-        if any([cambios['tasa_base'], cambios['comision_compra'], cambios['comision_venta']]):
-            cambios['hubo_cambio'] = True
-            # Calcular las diferencias en los precios finales
-            precio_compra_anterior = tasa_base_anterior - comision_compra_anterior
-            precio_venta_anterior = tasa_base_anterior + comision_venta_anterior
-            precio_compra_actual = self.tasa_base - self.comision_compra
-            precio_venta_actual = self.tasa_base + self.comision_venta
-            
-            cambios.update({
-                'precio_compra_anterior': precio_compra_anterior,
-                'precio_venta_anterior': precio_venta_anterior,
-                'precio_compra_actual': precio_compra_actual,
-                'precio_venta_actual': precio_venta_actual,
-                'diferencia_compra': precio_compra_actual - precio_compra_anterior,
-                'diferencia_venta': precio_venta_actual - precio_venta_anterior
-            })
-            
-        return cambios
-
-
 @receiver(post_migrate)
 def crear_moneda_usd(sender, **kwargs):
     """
@@ -175,8 +117,7 @@ def crear_moneda_usd(sender, **kwargs):
                 tasa_base=7400,
                 comision_compra=200,
                 comision_venta=250,
-                decimales=2,
-                minima_denominacion=1
+                decimales=2
             )
             print("✓ Moneda USD creada automáticamente")
 
@@ -187,7 +128,6 @@ class StockGuaranies(models.Model):
     cantidad = models.BigIntegerField(
         default=1000000000
     )
-    minima_denominacion = models.IntegerField(default=2000)
 
     class Meta:
         verbose_name = 'Stock de Guaraníes'
@@ -207,3 +147,36 @@ def crear_stock_guaranies_inicial(sender, **kwargs):
         if not StockGuaranies.objects.exists():
             StockGuaranies.objects.create()
             print("Stock inicial de guaraníes creado automáticamente")
+
+class Denominacion(models.Model):
+    """
+    Modelo para representar las denominaciones de una moneda específica
+    """
+    moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True)
+    valor = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Denominación'
+        verbose_name_plural = 'Denominaciones'
+        db_table = 'denominaciones'
+        default_permissions = []
+
+    def __str__(self):
+        return f"{self.valor}"
+    
+@receiver(post_migrate)
+def crear_denominaciones_iniciales(sender, **kwargs):
+    """
+    Crea automáticamente algunas denominaciones iniciales para USD y el stock de guaraníes
+    después de ejecutar las migraciones
+    """
+    if kwargs['app_config'].name == 'monedas':
+        usd = Moneda.objects.filter(simbolo='USD').first()
+        if usd:
+            for valor in [1, 5, 10, 20, 50, 100]:
+                Denominacion.objects.create(moneda=usd, valor=valor)
+            print("Denominaciones iniciales para USD creadas automáticamente")
+
+        for valor in [2000, 5000, 10000, 20000, 50000, 100000]:
+            Denominacion.objects.create(valor=valor)
+        print("Denominaciones iniciales para Stock de Guaraníes creadas automáticamente")

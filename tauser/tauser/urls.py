@@ -19,5 +19,5 @@ from . import views
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
-    path('codigo/', views.codigo, name='codigo')
+    path('ingreso/', views.ingreso_token, name='ingreso_token'),
 ]

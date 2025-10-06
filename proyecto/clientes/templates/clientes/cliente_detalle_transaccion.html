@@ -24,8 +24,12 @@
                 <div class="detalle-valor">{{ transaccion.fecha_hora|date:"d/m/Y H:i:s" }}</div>
             </div>
             <div class="detalle-item">
-                <div class="detalle-titulo">Usuario que procesó:</div>
-                <div class="detalle-valor">{{ transaccion.usuario.nombre_completo|default:transaccion.usuario.username }}</div>
+                <div class="detalle-titulo">Usuario que operó:</div>
+                <div class="detalle-valor">{{ transaccion.usuario.nombre_completo }}</div>
+            </div>
+            <div class="detalle-item">
+                <div class="detalle-titulo">Nombre de cliente:</div>
+                <div class="detalle-valor">{{ transaccion.cliente.nombre }}</div>
             </div>
             <div class="detalle-item">
                 <div class="detalle-titulo">Segmento del cliente:</div>
@@ -42,13 +46,19 @@
                 </div>
             </div>
             <div class="detalle-item">
-                <div class="detalle-titulo">Estado:</div>
+                <div class="detalle-titulo">Estado de transacción:</div>
                 <div class="detalle-valor">
                     <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">
                         {{ transaccion.estado }}
                     </div>
                 </div>
             </div>
+            {% if transaccion.estado == 'Cancelada' %}
+            <div class="detalle-item">
+                <div class="detalle-titulo">Razón de cancelación:</div>
+                <div class="detalle-valor">{{ transaccion.razon }}</div>
+            </div>
+            {% endif %}
             <div class="detalle-item">
                 <div class="detalle-titulo">Medio de pago:</div>
                 <div class="detalle-valor">{{ transaccion.medio_pago }}</div>
@@ -60,28 +70,32 @@
             
             {% if transaccion.tipo == 'compra' %}
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Cotización base para compra:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
-                </div>
-                <div class="detalle-item">
                     <div class="detalle-titulo">Monto ingresado para compra:</div>
                     <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
+                    <div class="detalle-valor">{{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Monto a comprar:</div>
+                    <div class="detalle-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Cotización para compra:</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Precio base para compra:</div>
                     <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Beneficio por segmento sobre comisión ({{ transaccion.porc_beneficio_segmento }}):</div>
+                    <div class="detalle-titulo">Beneficio por segmento:</div>
                     <div class="detalle-valor">Gs. {{ transaccion.beneficio_segmento|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Recargo por medio de pago ({{ transaccion.porc_recargo_pago }}):</div>
                     <div class="detalle-valor">Gs. {{ transaccion.recargo_pago|intcomma }}</div>
-                </div>
-                <div class="detalle-item">
-                    <div class="detalle-titulo">Recargo por medio de cobro ({{ transaccion.porc_recargo_cobro }}):</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.recargo_cobro|intcomma }}</div>
                 </div>
                 {% if transaccion.medio_pago == 'Efectivo' %}
                 <div class="detalle-item">
@@ -89,35 +103,47 @@
                     <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_precio_final|intcomma }}</div>
                 </div>
                 {% endif %}
-                {% if transaccion.medio_cobro == 'Efectivo' %}
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
-                    <div class="detalle-valor">{{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
-                </div>
-                {% endif %}
-                <div class="detalle-item">
+                    {% if transaccion.estado == 'Completa' or transaccion.estado == 'Confirmada' %}
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    {% else %}
                     <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
+                    {% endif %}
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
+                    {% if transaccion.estado == 'Completa' %}
+                    <div class="detalle-titulo" style="font-size:large">Monto recibido:</div>
+                    {% else %}
                     <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                    {% endif %}
                     <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
             {% else %}
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Cotización base para venta:</div>
-                    <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
-                </div>
-                <div class="detalle-item">
                     <div class="detalle-titulo">Monto ingresado para venta:</div>
                     <div class="detalle-valor">{{ transaccion.monto_original|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                {% if transaccion.medio_pago == 'Efectivo' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Redondeo por medio de pago Efectivo:</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Monto a vender:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                {% endif %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo">Cotización para venta:</div>
+                    <div class="detalle-valor">Gs. {{ transaccion.cotizacion|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-titulo">Precio base para venta:</div>
                     <div class="detalle-valor">Gs. {{ transaccion.precio_base|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo">Beneficio por segmento sobre comisión ({{ transaccion.porc_beneficio_segmento }}):</div>
+                    <div class="detalle-titulo">Beneficio por segmento:</div>
                     <div class="detalle-valor">Gs. {{ transaccion.beneficio_segmento|intcomma }}</div>
                 </div>
                 <div class="detalle-item">
@@ -128,12 +154,6 @@
                     <div class="detalle-titulo">Recargo por medio de cobro ({{ transaccion.porc_recargo_cobro }}):</div>
                     <div class="detalle-valor">Gs. {{ transaccion.recargo_cobro|intcomma }}</div>
                 </div>
-                {% if transaccion.medio_pago == 'Efectivo' %}
-                <div class="detalle-item">
-                    <div class="detalle-titulo">Redondeo por medio de pago Efectivo:</div>
-                    <div class="detalle-valor">{{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
-                </div>
-                {% endif %}
                 {% if transaccion.medio_cobro == 'Efectivo' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Redondeo por medio de cobro Efectivo:</div>
@@ -141,11 +161,19 @@
                 </div>
                 {% endif %}
                 <div class="detalle-item">
+                    {% if transaccion.estado == 'Completa' or transaccion.estado == 'Confirmada' %}
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    {% else %}
                     <div class="detalle-titulo" style="font-size:large">Monto a pagar:</div>
-                    <div class="detalle-valor" style="font-size:large">{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    {% endif %}
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 <div class="detalle-item">
+                    {% if transaccion.estado == 'Completa' %}
+                    <div class="detalle-titulo" style="font-size:large">Monto recibido:</div>
+                    {% else %}
                     <div class="detalle-titulo" style="font-size:large">Monto a recibir:</div>
+                    {% endif %}
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
             {% endif %}
@@ -156,9 +184,6 @@
         <div class="acciones-contenido">
             <a href="{% url 'clientes:cliente_historial' cliente.id %}" class="btn-secundario">
                 Volver al Historial
-            </a>
-            <a href="{% url 'clientes:cliente_detalle' cliente.id %}" class="btn-primario">
-                Volver al Cliente
             </a>
         </div>
     </div> 

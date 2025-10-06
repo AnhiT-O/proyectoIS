@@ -1,90 +1,58 @@
+from datetime import timedelta
 from decimal import Decimal
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from monedas.services import LimiteService, Moneda
 from clientes.models import Cliente
+from monedas.models import Moneda
 from transacciones.models import Recargos, Transaccion
-from .forms import CodigoForm
-
-def realizar_conversion(transaccion_id):
-    precios = Moneda.objects.get(id=transaccion_id.moneda_id).get_precios_cliente(Cliente.objects.get(id=transaccion_id.cliente_id))
-    if transaccion_id.tipo == 'compra':
-        resultado = transaccion_id.monto * precios['precio_venta']
-    else:
-        resultado = transaccion_id.monto * precios['precio_compra']
-        if transaccion_id.medio_cobro.startswith('Tigo Money'):
-            resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Tigo Money').recargo)) / Decimal('100')))
-        elif transaccion_id.medio_cobro.startswith('Billetera Personal'):
-            resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Billetera Personal').recargo)) / Decimal('100')))
-        elif transaccion_id.medio_cobro.startswith('Zimple'):
-            resultado = resultado * (Decimal('1') - (Decimal(str(Recargos.objects.get(nombre='Zimple').recargo)) / Decimal('100')))
-    return resultado
+from .forms import TokenForm
 
 def inicio(request):
     return render(request, 'inicio.html')
 
-def codigo(request):
+def ingreso_token(request):
     if request.method == 'POST':
-        form = CodigoForm(request.POST)
+        form = TokenForm(request.POST)
         if form.is_valid():
-            codigo_ingresado = form.cleaned_data['codigo']
+            codigo = form.cleaned_data['codigo']
             try:
-                transaccion = Transaccion.objects.get(token=codigo_ingresado)
-                
-                # Verificar si el token ha expirado
-                if not transaccion.token_valido():
-                    # Token expirado, eliminar la transacción
-                    transaccion.estado = 'Cancelada'
-                    transaccion.token = None
-                    transaccion.token_expiracion = None
-                    transaccion.save()
-                    messages.error(request, 'El código ha expirado. La transacción ha sido cancelada.')
-                    return render(request, 'codigo.html', {'form': CodigoForm()})
-                
+                transaccion = Transaccion.objects.get(token=codigo)
             except Transaccion.DoesNotExist:
-                messages.error(request, 'Código inválido.')
-                return render(request, 'codigo.html', {'form': form})
+                messages.error(request, 'Transacción no encontrada.')
+                return redirect('ingreso_token')
             
-            if transaccion.tipo == 'compra':
-                if transaccion.medio_pago not in ['Efectivo', 'Cheque']:
-                    messages.info(request, 'Cliente retira del tauser el dinero comprado. Transacción completada.')
+            if transaccion.estado == 'Cancelada':
+                messages.error(request, 'Este token corresponde a una transacción ya cancelada.')
+                return redirect('ingreso_token')
+            
+            if transaccion.estado == 'Completa':
+                messages.error(request, 'Este token corresponde a una transacción ya completada.')
+                return redirect('ingreso_token')
+            
+            if transaccion.estado == 'Pendiente':
+                if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
+                    transaccion.estado = 'Cancelada'
+                    transaccion.razon = 'Expira el tiempo para confirmar la transacción'
+                    transaccion.save()
+                    messages.error(request, 'El token ha expirado.')
+                    return redirect('ingreso_token')
+                
+                if transaccion.medio_pago == 'Cheque':
+                    print('Ingreso de cheque')
+                elif transaccion.medio_pago == 'Efectivo':
+                    if transaccion.tipo == 'compra':
+                        print('Ingreso de guaraníes')
+                    else:
+                        print('Ingreso de moneda extranjera')
                 else:
-                    messages.info(request, 'Cliente ingresa, luego retira del tauser en el momento. Transacción completada.')
-                consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
-                consumo.consumo_diario += realizar_conversion(transaccion)
-                consumo.consumo_mensual += realizar_conversion(transaccion)
-                print(realizar_conversion(transaccion))
-                print(transaccion.monto)
-                consumo.save()
-                transaccion.estado = 'Completa'
-                transaccion.token = None
-                transaccion.token_expiracion = None
-                transaccion.save()
-                return redirect('inicio')
+                    messages.error(request, 'El token no corresponde a una operación de Tauser.')
+                    return redirect('ingreso_token')
             else:
-                if transaccion.medio_cobro == 'Efectivo':
-                    messages.info(request, 'Cliente ingresa, luego retira del tauser en el momento. Transacción completada.')
-                    consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
-                    consumo.consumo_diario += realizar_conversion(transaccion)
-                    consumo.consumo_mensual += realizar_conversion(transaccion)
-                    consumo.save()
-                    transaccion.estado = 'Completa'
-                    transaccion.token = None
-                    transaccion.token_expiracion = None
-                    transaccion.save()
-                    return redirect('inicio')
+                if transaccion.tipo == 'compra':
+                    print('Extracción de moneda extranjera')
                 else:
-                    messages.info(request, 'Cliente ingresa, el sistema automáticamente envía su dinero. Transacción completada.')
-                    consumo = LimiteService.obtener_o_crear_consumo(transaccion.cliente_id)
-                    consumo.consumo_diario += realizar_conversion(transaccion)
-                    consumo.consumo_mensual += realizar_conversion(transaccion)
-                    consumo.save()
-                    transaccion.estado = 'Completa'
-                    transaccion.token = None
-                    transaccion.token_expiracion = None
-                    transaccion.save()
-                    return redirect('inicio')
+                    print('Extracción de guaraníes')
     else:
-        form = CodigoForm()
-    return render(request, 'codigo.html', {'form': form})
+        form = TokenForm()
+    return render(request, 'ingreso_token.html', {'form': form})

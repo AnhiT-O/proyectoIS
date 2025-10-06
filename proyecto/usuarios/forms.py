@@ -15,7 +15,6 @@ class RegistroUsuarioForm(UserCreationForm):
         email (EmailField): Campo para el correo electrónico.
         first_name (CharField): Campo para el nombre.
         last_name (CharField): Campo para el apellido.
-        tipo_documento (ChoiceField): Campo para el tipo de cédula.
         numero_documento (CharField): Campo para la cédula de identidad.
     """
     username = forms.CharField(
@@ -51,10 +50,6 @@ class RegistroUsuarioForm(UserCreationForm):
             'max_length': "El apellido no puede tener más de 40 caracteres."
         }
     )
-    tipo_documento = forms.ChoiceField(
-        choices=Usuario.tipo_documento_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
     numero_documento = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
@@ -73,7 +68,7 @@ class RegistroUsuarioForm(UserCreationForm):
             fields (tuple): Campos incluidos en el formulario.
         """
         model = Usuario
-        fields = ('username', 'first_name', 'last_name', 'email', 'tipo_documento', 'numero_documento', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'numero_documento', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         """
@@ -159,7 +154,6 @@ class RegistroUsuarioForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
-        user.tipo_documento = self.cleaned_data['tipo_documento']
         user.numero_documento = self.cleaned_data['numero_documento']
         if commit:
             user.save()

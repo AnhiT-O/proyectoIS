@@ -107,9 +107,6 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = []
 
 
-
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -150,6 +147,3 @@ SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
-
-STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2GvbbBBNVzYHjiA6YaF4KAXeSnvjsO2LY7d0VwJm00WsPp8Oxu'
-STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'

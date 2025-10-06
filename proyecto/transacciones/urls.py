@@ -41,5 +41,9 @@ urlpatterns = [
     path('detalle/<int:transaccion_id>/', views.detalle_historial, name='historial_detalle'),
 
     path('gestion-transacciones/', views.ver_variables, name='ver_variables'),
-    path('edicion-transacciones/', views.editar_variables, name='editar_variables')
+    path('edicion-transacciones/', views.editar_variables, name='editar_variables'),
+    
+    # URLs para gestión de TAUsers
+    path('tausers/', views.revisar_tausers, name='revisar_tausers'),
+    path('tausers/<int:pk>/', views.tauser_detalle, name='tauser_detalle'),
 ]

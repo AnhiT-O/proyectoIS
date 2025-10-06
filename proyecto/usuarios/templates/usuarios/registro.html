@@ -76,18 +76,6 @@
 
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.tipo_documento.id_for_label }}">Tipo de documento</label>
-                {{ form.tipo_documento }}
-                {% if form.tipo_documento.errors %}
-                    <div class="form-errores">
-                        {% for error in form.tipo_documento.errors %}
-                            <div class="mensaje-error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-campo">
                 <label for="{{ form.numero_documento.id_for_label }}">Número de documento</label>
                 {{ form.numero_documento }}
                 {% if form.numero_documento.errors %}

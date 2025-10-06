@@ -31,7 +31,6 @@ class Roles(Group):
         verbose_name_plural = 'Roles'
         db_table = 'roles'
         default_permissions = []
-        permissions = []
 
     def __str__(self):
         """

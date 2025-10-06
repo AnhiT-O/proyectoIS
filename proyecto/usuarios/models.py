@@ -39,13 +39,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
-
-    tipo_documento = models.CharField(
-        max_length=3,
-        choices=tipo_documento_CHOICES,
-        null=False,
-        blank=False
-    )
     numero_documento = models.CharField(
         max_length=13,
         unique=True
@@ -69,15 +62,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'username'
     
-    def obtener_roles(self):
-        """
-        Obtiene una lista de nombres de roles a los que pertenece el usuario.
-
-        Returns:
-            Lista: Lista de nombres de los roles.
-        """
-        return list(self.groups.values_list('name', flat=True))
-    
     def es_admin(self):
         """
         Verifica si el usuario tiene el rol de 'Administrador'.
@@ -85,7 +69,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         Returns:
             bool: True si el usuario es administrador, False en caso contrario.
         """
-        return 'Administrador' in self.obtener_roles()
+        return self.groups.filter(name='Administrador').exists()
     
     def nombre_completo(self):
         """

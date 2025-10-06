@@ -18,7 +18,7 @@
             <form class="segmento-form" method="get" action="{% url 'inicio' %}">
                 <label for="segmento">Ver cotizaciones para segmento:</label>
                 <select class="select-filtro" name="segmento" id="segmento" onchange="this.form.submit()">
-                    {% for seg in segmentaciones %}
+                    {% for seg in segmentaciones_listas %}
                         <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id %}selected{% endif %}>
                             {{ seg.nombre }} ({{ seg.porcentaje_beneficio }}%)
                         </option>

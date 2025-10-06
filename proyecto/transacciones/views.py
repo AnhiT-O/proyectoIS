@@ -19,18 +19,15 @@ Date: 2024
 
 import logging
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, calcular_conversion
+from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
 from decimal import Decimal
 from clientes.models import Cliente
-import secrets
 import ast
 import stripe
 import logging
@@ -38,285 +35,10 @@ from datetime import date, timedelta
 from django.utils import timezone
 from django.db import models
 import stripe
-from django.db import transaction
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
-
-@transaction.atomic
-def procesar_pago_stripe(transaccion, payment_method_id):
-    """
-    Procesa un pago con Stripe para una transacción dada.
-    
-    Args:
-        transaccion (Transaccion): La transacción a procesar
-    
-    Returns:
-        dict: Diccionario con 'token' (str) y 'datos' (dict) de la transacción
-        
-    Raises:
-        ValueError: Si la transacción no existe
-    """
-    try:
-        if transaccion.tipo == 'venta':
-            monto_centavos = int(transaccion.monto * 100)
-            moneda_stripe = 'usd' 
-        else:
-            monto_centavos = transaccion.precio_final
-            moneda_stripe = 'pyg' 
-        # Crear PaymentIntent
-        payment_intent = stripe.PaymentIntent.create(
-            amount=monto_centavos,
-            currency=moneda_stripe,
-            payment_method=payment_method_id,
-            customer=transaccion.cliente.id_stripe,
-            confirmation_method='manual',
-            confirm=True,
-            return_url='https://localhost:8000',  # URL de retorno (puedes personalizar)
-            metadata={
-                'transaccion_id': str(transaccion.id),
-                'tipo': transaccion.tipo,
-                'cliente_id': str(transaccion.cliente.id)
-            }
-        )
-        
-        if payment_intent.status == 'succeeded':
-            guaranies = StockGuaranies.objects.first()
-            guaranies.cantidad += (transaccion.precio_final - transaccion.recargo_pago)
-            guaranies.save()
-            if transaccion.medio_cobro != 'Efectivo':
-                try:
-                    guaranies = StockGuaranies.objects.first()
-                    guaranies.cantidad -= (transaccion.precio_final + transaccion.recargo_cobro)
-                    guaranies.save()
-                    cliente = Cliente.objects.get(id=transaccion.cliente_id)
-                    cliente.consumo_diario += transaccion.precio_final
-                    cliente.consumo_mensual += transaccion.precio_final
-                    cliente.ultimo_consumo = date.today()
-                    cliente.save()
-                    transaccion.estado = 'Completa'
-                    transaccion.fecha_hora = timezone.now()
-                    transaccion.save()
-                    logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
-    
-                    return {
-                        'success': True,
-                        'payment_intent_id': payment_intent.id,
-                        'status': payment_intent.status,
-                        'error': None
-                    }
-                except Exception as e:
-                    error_msg = f"Error al procesar el cobro. Detalles: {str(e)}"
-                    logger.error(error_msg)
-                    return {
-                        'success': False,
-                        'payment_intent_id': None,
-                        'error': error_msg
-                    }
-            cliente = Cliente.objects.get(id=transaccion.cliente_id)
-            cliente.consumo_diario += transaccion.precio_final
-            cliente.consumo_mensual += transaccion.precio_final
-            cliente.ultimo_consumo = date.today()
-            cliente.save()
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-
-        logger.info(f"Pago Stripe procesado exitosamente para transacción {transaccion.id}. PaymentIntent: {payment_intent.id}")
-        
-        return {
-            'success': True,
-            'payment_intent_id': payment_intent.id,
-            'status': payment_intent.status,
-            'error': None
-        }
-        
-    except Transaccion.DoesNotExist:
-        error_msg = f"Transacción {transaccion.id} no encontrada"
-        logger.error(error_msg)
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.CardError as e:
-        # Error con la tarjeta (declined, insufficient funds, etc.)
-        error_msg = f"Error con la tarjeta: {e.user_message}"
-        logger.error(f"CardError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.RateLimitError as e:
-        error_msg = "Demasiadas solicitudes. Intente nuevamente en unos minutos."
-        logger.error(f"RateLimitError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.InvalidRequestError as e:
-        error_msg = "Parámetros inválidos en la solicitud de pago."
-        logger.error(f"InvalidRequestError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.AuthenticationError as e:
-        error_msg = "Error de autenticación con Stripe."
-        logger.error(f"AuthenticationError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.APIConnectionError as e:
-        error_msg = "Error de conexión con Stripe. Intente nuevamente."
-        logger.error(f"APIConnectionError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except stripe.error.StripeError as e:
-        error_msg = f"Error de Stripe: {str(e)}"
-        logger.error(f"StripeError en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-        
-    except Exception as e:
-        error_msg = f"Error inesperado al procesar el pago: {str(e)}"
-        logger.error(f"Error inesperado en transacción {transaccion.id}: {str(e)}")
-        return {
-            'success': False,
-            'payment_intent_id': None,
-            'error': error_msg
-        }
-
-def generar_token_transaccion(transaccion):
-    """
-    Genera un token único de seguridad para transacciones específicas.
-    
-    Se utiliza para transacciones con medios de pago que requieren verificación
-    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
-    """
-    # Generar token único
-    token = secrets.token_urlsafe(32)
-    
-    # Crear datos del token
-    datos_token = {
-        'token': token,
-        'transaccion_id': transaccion.id
-    }
-    
-    # Actualizar la transacción con el token y su expiración
-    transaccion.token = token
-    transaccion.save()
-
-    return {
-        'token': token,
-        'datos': datos_token
-    }
-
-def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
-    """
-    Verifica si ha habido cambios en la cotización durante el proceso de transacción.
-    
-    Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
-    
-    Args:
-        request (HttpRequest): Petición HTTP con datos de sesión
-        tipo_transaccion (str): 'compra' o 'venta'
-        
-    Returns:
-        dict: Diccionario con información de cambios o None si no hay cambios
-            - 'hay_cambios': boolean indicando si hubo cambios
-            - 'valores_anteriores': dict con precio_compra y precio_venta originales
-            - 'valores_actuales': dict con precio_compra y precio_venta actuales
-            - 'moneda': instancia de la moneda
-    """
-    try:
-        # Obtener datos de la sesión
-        datos_key = f'{tipo_transaccion}_datos'
-        precio_compra_key = 'precio_compra_inicial'
-        precio_venta_key = 'precio_venta_inicial'
-        
-        datos_transaccion = request.session.get(datos_key)
-        precio_compra_inicial = request.session.get(precio_compra_key)
-        precio_venta_inicial = request.session.get(precio_venta_key)
-        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
-            return None
-            
-        # Obtener moneda actual
-        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
-        cliente_activo = request.user.cliente_activo
-        
-        # Calcular precios actuales
-        precios_actuales = moneda.get_precios_cliente(cliente_activo)
-        precio_compra_actual = precios_actuales['precio_compra']
-        precio_venta_actual = precios_actuales['precio_venta']
-
-        # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != precio_compra_inicial and 
-            precio_venta_actual != precio_venta_inicial
-        )
-        if hay_cambios:
-            return {
-                'hay_cambios': True,
-                'valores_anteriores': {
-                    'precio_compra': precio_compra_inicial,
-                    'precio_venta': precio_venta_inicial
-                },
-                'valores_actuales': {
-                    'precio_compra': precio_compra_actual,
-                    'precio_venta': precio_venta_actual
-                },
-                'moneda': moneda
-            }
-        
-        return {'hay_cambios': False}
-        
-    except Exception:
-        return None
-
-def extraer_mensaje_error(validation_error):
-    """
-    Extrae el mensaje de error limpio de un ValidationError de Django.
-    
-    Django a veces agrega corchetes y formateo adicional a los mensajes de error.
-    Esta función extrae el mensaje principal sin el formateo extra.
-    
-    Args:
-        validation_error (ValidationError): Error de validación de Django
-        
-    Returns:
-        str: Mensaje de error limpio sin formateo adicional
-    """
-    if hasattr(validation_error, 'message'):
-        return validation_error.message
-    elif hasattr(validation_error, 'messages') and validation_error.messages:
-        # Si hay múltiples mensajes, tomar el primero
-        return validation_error.messages[0]
-    else:
-        # Fallback a conversión string
-        mensaje = str(validation_error)
-        # Remover corchetes si están presentes
-        if mensaje.startswith("['") and mensaje.endswith("']"):
-            return mensaje[2:-2]
-        return mensaje
 
 # ============================================================================
 # PROCESO DE COMPRA DE MONEDAS
@@ -359,7 +81,6 @@ def compra_monto_moneda(request):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     if request.session.get('transaccion_id'):
         t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
@@ -936,10 +657,8 @@ def compra_exito(request):
     try:
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
-        del request.session['transaccion_id']
     except:
-        messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
-        return redirect('transacciones:compra_monto_moneda')
+        return redirect('inicio')
     
     compra_datos = request.session.get('compra_datos')
     if not compra_datos:
@@ -950,31 +669,33 @@ def compra_exito(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-
-    if medio_pago.startswith('{'):
-        medio_pago_dict = ast.literal_eval(medio_pago)
-        if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
-            messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
-            token_data = generar_token_transaccion(transaccion)
-        else:
-            transaccion.estado = 'Cancelada'
-            transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
-            transaccion.save()
-            messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
-            return redirect('transacciones:compra_monto_moneda')
-    else:
-        try:
-            token_data = generar_token_transaccion(transaccion)
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-        except Exception as e:
-            messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-            return redirect('transacciones:compra_medio_cobro')
     
+    if transaccion.token is None:
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
+            if pago['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+                procesar_transaccion(transaccion)
+                generar_token_transaccion(transaccion)
+            else:
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
+                transaccion.save()
+                messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
+                return redirect('transacciones:compra_monto_moneda')
+        else:
+            try:
+                generar_token_transaccion(transaccion)
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:compra_medio_cobro')
+    
+    del request.session['transaccion_id']
     context = {
-        'token': token_data['token'],
-        'medio_pago': medio_pago,
-        'tipo': 'compra'
+        'transaccion': transaccion
     }
     
     return render(request, 'transacciones/exito.html', context)
@@ -1020,7 +741,6 @@ def venta_monto_moneda(request):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     if request.session.get('transaccion_id'):
         t = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
@@ -1545,13 +1265,15 @@ def venta_confirmacion(request):
                 str_medio_cobro = f'{medio_cobro_dict["tipo_billetera"]} ({medio_cobro_dict["telefono"]})'
             else:
                 str_medio_cobro = medio_cobro
+                
             datos_transaccion = calcular_conversion(monto, moneda, 'venta', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
             if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:venta_monto_moneda')
-            if datos_transaccion['precio_final'] > StockGuaranies.objects.first().cantidad:
-                messages.warning(request, 'El monto a recibir excede la disponibilidad actual de la moneda. Reinicie el proceso con un monto menor.')
-                return redirect('transacciones:venta_monto_moneda')
+            if str_medio_cobro != 'Efectivo':
+                if datos_transaccion['precio_final'] > StockGuaranies.objects.first().cantidad:
+                    messages.warning(request, 'El monto a recibir excede la disponibilidad actual de guaraníes en el sistema. Reinicie el proceso con un monto menor o diferente medio de cobro.')
+                    return redirect('transacciones:venta_monto_moneda')
             transaccion = Transaccion.objects.create(
                 cliente=request.user.cliente_activo,
                 tipo='venta',
@@ -1612,10 +1334,8 @@ def venta_exito(request):
     try:
         idt = request.session.get('transaccion_id')
         transaccion = Transaccion.objects.get(id=idt)
-        del request.session['transaccion_id']
     except:
-        messages.error(request, 'No se encontró la transacción. Reinicie el proceso.')
-        return redirect('transacciones:venta_monto_moneda')
+        return redirect('inicio')
 
     venta_datos = request.session.get('venta_datos')
     if not venta_datos:
@@ -1628,33 +1348,32 @@ def venta_exito(request):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:venta_monto_moneda')
     
-    if medio_pago.startswith('{'):
-        medio_pago_dict = ast.literal_eval(medio_pago)
-        if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
-            messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
-            if medio_cobro == 'Efectivo':
-                token_data = generar_token_transaccion(transaccion)
+    if transaccion.token is None:
+        if medio_pago.startswith('{'):
+            medio_pago_dict = ast.literal_eval(medio_pago)
+            if procesar_pago_stripe(transaccion, medio_pago_dict["id"])['success']:
+                messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+                procesar_transaccion(transaccion)
+                if medio_cobro == 'Efectivo':
+                    generar_token_transaccion(transaccion)
             else:
-                token_data = {'token': None}
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error en la transacción automática de venta'
+                transaccion.save()
+                messages.error(request, 'Hubo un error de pago o de cobro automático. Intente nuevamente.')
+                return redirect('transacciones:venta_monto_moneda')
         else:
-            transaccion.estado = 'Cancelada'
-            transaccion.razon = 'Error en la transacción automática de venta'
-            transaccion.save()
-            messages.error(request, 'Hubo un error de pago o de cobro automático. Intente nuevamente.')
-            return redirect('transacciones:venta_monto_moneda')
-    else:
-        try:
-            token_data = generar_token_transaccion(transaccion)
-            transaccion.fecha_hora = timezone.now()
-            transaccion.save()
-        except Exception as e:
-            messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
-            return redirect('transacciones:venta_medio_cobro')
+            try:
+                generar_token_transaccion(transaccion)
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+            except Exception as e:
+                messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
+                return redirect('transacciones:venta_medio_cobro')
+            
+    del request.session['transaccion_id']
     context = {
-        'token': token_data['token'],
-        'medio_pago': medio_pago,
-        'medio_cobro': medio_cobro,
-        'tipo': 'venta'
+        'transaccion': transaccion
     }
     
     return render(request, 'transacciones/exito.html', context)
@@ -1712,7 +1431,6 @@ def historial_transacciones(request, cliente_id):
             if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
-                t.token = None
                 t.save()
     # Obtener parámetros de filtrado
     busqueda = request.GET.get('busqueda', '')
@@ -1789,11 +1507,13 @@ def detalle_historial(request, transaccion_id):
     except Transaccion.DoesNotExist:
         messages.error(request, 'La transacción solicitada no existe.')
         return redirect('transacciones:historial')
-    if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
-        transaccion.estado = 'Cancelada'
-        transaccion.razon = 'Expira el tiempo para confirmar la transacción'
-        transaccion.token = None
-        transaccion.save()
+    transacciones_pasadas = Transaccion.objects.filter(cliente=transaccion.cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.save()
     if transaccion.cliente not in request.user.clientes_operados.all() and not request.user.has_perm('transacciones.visualizacion'):
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
         return redirect('inicio')
@@ -1835,3 +1555,176 @@ def editar_variables(request):
         'form': form
     }
     return render(request, 'transacciones/editar_variables.html', context)
+
+@login_required
+@permission_required('transacciones.revision', raise_exception=True)
+def revisar_tausers(request):
+    """
+    Vista para revisar la información de los TAUsers.
+    
+    Muestra un listado de todos los TAUsers del sistema con su información básica
+    incluyendo puerto, estado de activación y opciones de acción.
+    
+    Funcionalidades:
+        - Listado completo de TAUsers
+        - Búsqueda por puerto
+        - Filtrado por estado (activo/inactivo)  
+        - Estadísticas de TAUsers activos e inactivos
+        - Opción de ver detalles de cada TAUser
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro opcionales
+        
+    Returns:
+        HttpResponse: Renderiza listado de TAUsers
+        
+    Template:
+        transacciones/tausers_lista.html
+        
+    Context:
+        - tausers: QuerySet de TAUsers filtrados
+        - busqueda: Término de búsqueda aplicado
+        - tausers_activos: Cantidad de TAUsers activos
+        - tausers_inactivos: Cantidad de TAUsers inactivos
+        - total_tausers_sistema: Total de TAUsers en el sistema
+    """
+    # Obtener todos los TAUsers
+    todos_los_tausers = Tauser.objects.all()
+    tausers = todos_los_tausers
+    
+    # Manejar búsqueda por puerto
+    busqueda = request.GET.get('busqueda', '').strip()
+    if busqueda:
+        tausers = tausers.filter(puerto__icontains=busqueda)
+    
+    # Ordenar por puerto
+    tausers = tausers.order_by('puerto')
+    
+    # Calcular estadísticas
+    tausers_activos = tausers.filter(activo=True).count()
+    tausers_inactivos = tausers.filter(activo=False).count()
+    
+    # Total de TAUsers en el sistema (sin filtrar)
+    total_tausers_sistema = todos_los_tausers.count()
+    
+    context = {
+        'tausers': tausers,
+        'tausers_activos': tausers_activos,
+        'tausers_inactivos': tausers_inactivos,
+        'busqueda': busqueda,
+        'total_tausers_sistema': total_tausers_sistema,
+    }
+    return render(request, 'transacciones/tausers_lista.html', context)
+
+@login_required
+@permission_required('transacciones.revision', raise_exception=True)
+def tauser_detalle(request, pk):
+    """
+    Vista para mostrar los detalles completos de un TAUser específico.
+    
+    Muestra información detallada del TAUser incluyendo puerto, estado,
+    billetes asociados y sus cantidades disponibles. Incluye filtrado por moneda.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        pk (int): ID del TAUser a mostrar
+        
+    Returns:
+        HttpResponse: Página de detalle del TAUser
+        
+    Template:
+        transacciones/tauser_detalles.html
+        
+    Context:
+        - tauser: Instancia del TAUser
+        - billetes_tauser: QuerySet de billetes asociados al TAUser
+        - monedas_disponibles: Lista de monedas que tienen billetes en este TAUser
+        - moneda_filtro: Moneda seleccionada para filtrar (si aplica)
+        - totales_por_moneda: Diccionario con totales por moneda
+    """
+    from .models import BilletesTauser
+    from monedas.models import Moneda
+    from django.db.models import Sum, F
+    
+    tauser = get_object_or_404(Tauser, pk=pk)
+    
+    # Obtener todos los billetes del TAUser (sin filtrar para obtener todas las monedas disponibles)
+    todos_billetes_tauser = BilletesTauser.objects.filter(tauser=tauser)
+    
+    # Calcular totales por moneda
+    totales_por_moneda = {}
+    
+    # Total para guaraníes (denominaciones sin moneda)
+    total_guaranies = todos_billetes_tauser.filter(
+        denominacion__moneda__isnull=True
+    ).aggregate(
+        total=Sum(F('cantidad') * F('denominacion__valor'))
+    )['total'] or 0
+    
+    if total_guaranies > 0:
+        totales_por_moneda['guarani'] = {
+            'nombre': 'Guaraní',
+            'total': total_guaranies,
+            'simbolo': 'Gs.'
+        }
+    
+    # Totales para monedas extranjeras
+    for moneda in Moneda.objects.all():
+        total_moneda = todos_billetes_tauser.filter(
+            denominacion__moneda=moneda
+        ).aggregate(
+            total=Sum(F('cantidad') * F('denominacion__valor'))
+        )['total']
+        
+        if total_moneda and total_moneda > 0:
+            totales_por_moneda[moneda.id] = {
+                'nombre': moneda.nombre,
+                'total': total_moneda,
+                'simbolo': moneda.simbolo
+            }
+    
+    # Obtener todas las monedas que tienen billetes en este TAUser (antes de aplicar filtros)
+    monedas_con_billetes = todos_billetes_tauser.values_list('denominacion__moneda', flat=True).distinct()
+    monedas_disponibles = []
+    
+    # Agregar guaraní si hay billetes sin moneda (denominación de guaraníes)
+    if None in monedas_con_billetes:
+        monedas_disponibles.append({'id': 'guarani', 'nombre': 'Guaraní'})
+    
+    # Agregar monedas extranjeras
+    for moneda_id in monedas_con_billetes:
+        if moneda_id is not None:
+            try:
+                moneda = Moneda.objects.get(id=moneda_id)
+                monedas_disponibles.append({'id': moneda.id, 'nombre': moneda.nombre})
+            except Moneda.DoesNotExist:
+                pass
+    
+    # Ahora aplicar el filtro para mostrar los billetes
+    billetes_tauser_query = todos_billetes_tauser
+    
+    # Obtener parámetro de filtro de moneda
+    moneda_filtro = request.GET.get('moneda', '')
+    
+    # Aplicar filtro de moneda si se especifica
+    if moneda_filtro:
+        if moneda_filtro == 'guarani':
+            billetes_tauser_query = billetes_tauser_query.filter(denominacion__moneda__isnull=True)
+        else:
+            try:
+                moneda_id = int(moneda_filtro)
+                billetes_tauser_query = billetes_tauser_query.filter(denominacion__moneda_id=moneda_id)
+            except (ValueError, TypeError):
+                pass
+    
+    billetes_tauser = billetes_tauser_query.order_by('denominacion__moneda', 'denominacion__valor')
+    
+    context = {
+        'tauser': tauser,
+        'billetes_tauser': billetes_tauser,
+        'monedas_disponibles': monedas_disponibles,
+        'moneda_filtro': moneda_filtro,
+        'totales_por_moneda': totales_por_moneda
+    }
+    return render(request, 'transacciones/tauser_detalles.html', context)
+    

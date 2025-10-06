@@ -12,6 +12,8 @@ Fecha: 2025
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Cliente
+from .exceptions import TarjetaNoPermitida, MarcaNoPermitida
+from transacciones.models import Recargos
 from django.conf import settings
 import stripe
 
@@ -292,7 +294,7 @@ class AgregarTarjetaForm(forms.Form):
         if not token:
             raise ValidationError('Token de Stripe inválido.')
         return token
-    
+
     def save(self):
         """
         Procesa el token de Stripe y agrega la tarjeta al cliente.
@@ -305,14 +307,16 @@ class AgregarTarjetaForm(forms.Form):
             stripe.PaymentMethod: El método de pago creado y asociado al cliente
 
         Raises:
-            ValidationError: Si no se especifica cliente o si ocurre algún error
-                           durante el procesamiento en Stripe
+            ValidationError: Si no se especifica cliente, si la tarjeta no es de 
+                           crédito, si la marca no está en recargos, o si ocurre 
+                           algún error durante el procesamiento en Stripe
 
         Process:
             1. Verifica que se haya especificado un cliente
             2. Si el cliente no tiene ID de Stripe, lo crea en la plataforma
             3. Crea el método de pago desde el token proporcionado
-            4. Asocia el método de pago al cliente en Stripe
+            4. Verifica que la tarjeta sea de crédito y su marca esté en Recargos
+            5. Asocia el método de pago al cliente en Stripe
 
         Examples:
             >>> form = AgregarTarjetaForm(data={'stripe_token': token}, cliente=cliente)
@@ -342,7 +346,15 @@ class AgregarTarjetaForm(forms.Form):
                 type='card',
                 card={'token': token}
             )
+
+            if payment_method.card.funding != 'credit':
+                raise TarjetaNoPermitida
             
+            # Verificar que la marca de la tarjeta esté en Recargos
+            marca_tarjeta = payment_method.card.brand.upper()
+            if not Recargos.objects.filter(marca=marca_tarjeta, medio='Tarjeta de Crédito').exists():
+                raise MarcaNoPermitida
+
             # Adjuntar el método de pago al cliente
             payment_method.attach(customer=self.cliente.id_stripe)
             
@@ -354,5 +366,3 @@ class AgregarTarjetaForm(forms.Form):
             raise ValidationError(f'Error en la solicitud: {str(e)}')
         except stripe.error.StripeError as e:
             raise ValidationError(f'Error de Stripe: {str(e)}')
-        except Exception as e:
-            raise ValidationError(f'Error inesperado: {str(e)}')

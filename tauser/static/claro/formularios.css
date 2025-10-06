@@ -7,14 +7,13 @@
 }  
 
 .contenido {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     padding: 2.5rem;
     border-radius: 15px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 450px;
+    max-width: 600px;
     margin: 0 auto;
-    border: 1px solid #4b5563;
 }
 
 .extendido {
@@ -29,12 +28,12 @@
 .logo {
     font-size: 2rem;
     font-weight: bold;
-    color: #8b5cf6;
+    color: #667eea;
     margin-bottom: 0.5rem;
 }
 
 .subtitulo {
-    color: #9ca3af;
+    color: #666;
     font-size: 1rem;
 }
 
@@ -52,25 +51,24 @@
 .form-campo label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #f3f4f6;
+    color: #333;
     font-weight: 500;
 }
 
 .form-control {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid #4b5563;
+    border: 2px solid #e1e5e9;
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
-    background-color: #374151;
-    color: #f3f4f6;
+    background-color: #fff;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-control.error {
@@ -91,12 +89,12 @@
     text-align: center;
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #4b5563;
+    border-top: 1px solid #eee;
     font-size: 0.875rem;
 }
 
 .enlace {
-    color: #8b5cf6;
+    color: #667eea;
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -126,17 +124,16 @@
 }
 
 .instrucciones {
-    background: #2d3748;
-    border-left: 4px solid #8b5cf6;
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
     padding: 1rem;
     margin: 1rem 0;
     border-radius: 0 8px 8px 0;
-    border: 1px solid #4b5563;
 }
 
 .instrucciones h4 {
     margin: 0 0 0.5rem 0;
-    color: #f3f4f6;
+    color: #333;
     font-size: 0.9rem;
     font-weight: 600;
 }
@@ -145,7 +142,7 @@
     margin: 0;
     padding-left: 1.2rem;
     font-size: 0.85rem;
-    color: #d1d5db;
+    color: #666;
 }
 
 .instrucciones li {
@@ -160,28 +157,26 @@
 }
 
 .tarjeta {
-    background: #374151;
+    background: white;
     padding: 1rem;
     border-radius: 8px;
-    border: 1px solid #4b5563;
+    border: 1px solid #e9ecef;
     transition: all 0.2s;
-    color: #d1d5db;
 }
 
 .tarjeta:hover {
-    border-color: #8b5cf6;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
 }
 
 .tarjeta.selected {
-    border-color: #8b5cf6;
-    background-color: #2d3748;
-    color: #f3f4f6;
+    border-color: #007bff;
+    background-color: #f8f9ff;
 }
 
 .tarjeta-detalles {
     font-size: 0.9rem;
-    color: #9ca3af;
+    color: #6c757d;
     margin-top: 0.5rem;
 }
 
@@ -190,17 +185,17 @@
 }
 
 .zona-declaracion {
-    background: linear-gradient(135deg, #2d3748 0%, #374151 100%);
-    border: 2px solid #8b5cf6;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
+    border: 2px solid #667eea;
     border-radius: 12px;
     padding: 1.5rem;
     margin: 2rem 0;
     position: relative;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .declaracion-titulo {
-    color: #8b5cf6;
+    color: #667eea;
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 1rem;
@@ -213,67 +208,65 @@
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    background: #374151;
+    background: #f8f9ff;
     padding: 1rem;
     border-radius: 8px;
-    border: 2px solid #4b5563;
+    border: 2px solid #e1e5e9;
     transition: all 0.3s ease;
 }
 
 .declaracion-casilla:hover {
-    border-color: #8b5cf6;
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .declaracion-casilla input[type="checkbox"] {
     width: 18px;
     height: 18px;
     margin: 0;
-    accent-color: #8b5cf6;
+    accent-color: #667eea;
     cursor: pointer;
 }
 
 .seccion-permisos {
-    border: 1px solid #4b5563;
+    border: 1px solid #e9ecef;
     border-radius: 8px;
     padding: 1rem;
     max-height: 300px;
     overflow-y: auto;
-    background: #374151;
-    color: #d1d5db;
+    background: #f8f9fa;
 }
 
 .info-usuario {
-    background: #1f2937;
+    background: white;
     padding: 1.5rem;
     border-radius: 10px;
     margin-bottom: 2rem;
-    border-left: 4px solid #8b5cf6;
+    border-left: 4px solid #007bff;
     display:inline-block;
     width: 100%;
-    border: 1px solid #4b5563;
     transition: all 0.3s ease;
 }
 
 .info-cliente {
-    background: #1f2937;
+    background: white;
     padding: 1.5rem;
     border-radius: 10px;
     margin-bottom: 2rem;
-    border-left: 4px solid #0ea5e9;
+    border-left: 4px solid #007bff;
     display:inline-block;
-    background-color: #064e3b;
+    background-color: #f0fdf3;
 }
 
 .info-titulo {
     font-weight: 600;
-    color: #9ca3af;
+    color: #555;
     font-size: 0.9rem;
     margin-bottom: 0.25rem;
 }
 
 .info-valor {
-    color: #f3f4f6;
+    color: #333;
     font-size: 1rem;
 }
 
@@ -285,7 +278,7 @@
 
 .info-usuario:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Barra de progreso */
@@ -293,11 +286,11 @@
     margin: 20px auto;
     margin-top: 0;
     max-width: 800px;
-    background: #1f2937;
+    background: white;
     border-radius: 10px;
     padding: 25px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    border: 1px solid #374151;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
 }
 
 .barra-progreso {
@@ -315,7 +308,7 @@
     left: 60px;
     right: 60px;
     height: 4px;
-    background: linear-gradient(90deg, #374151 0%, #374151 100%);
+    background: linear-gradient(90deg, #e5e7eb 0%, #e5e7eb 100%);
     z-index: 1;
     border-radius: 2px;
 }
@@ -326,7 +319,7 @@
     top: 20px;
     left: 60px;
     height: 4px;
-    background: #8b5cf6;
+    background: #667eea;
     z-index: 2;
     border-radius: 2px;
     width: 0%;
@@ -354,30 +347,30 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 4px solid #374151;
+    border: 4px solid #e5e7eb;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     margin-bottom: 8px;
-    background: #1f2937;
+    background: white;
     transition: all 0.4s ease;
-    color: #9ca3af;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: #6b7280;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .paso.activo .paso-numero {
-    background: #8b5cf6;
-    border-color: #8b5cf6;
+    background: #667eea;
+    border-color: #667eea;
     color: white;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .paso.completado .paso-numero {
-    background: #8b5cf6;
-    border-color: #8b5cf6;
+    background: #667eea;
+    border-color: #667eea;
     color: white;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .paso.completado .paso-numero::before {
@@ -388,26 +381,26 @@
 .paso-titulo {
     font-size: 12px;
     text-align: center;
-    color: #9ca3af;
+    color: #6b7280;
     line-height: 1.2;
     font-weight: 500;
     margin-top: 4px;
 }
 
 .paso.activo .paso-titulo {
-    color: #8b5cf6;
+    color: #667eea;
     font-weight: 600;
 }
 
 .paso.completado .paso-titulo {
-    color: #8b5cf6;
+    color: #667eea;
     font-weight: 600;
 }
 
-/* Estilos para campo de denominaciones - tema oscuro */
+/* Estilos para campo de denominaciones */
 .campo-ayuda {
     font-size: 0.85rem;
-    color: #9ca3af;
+    color: #6c757d;
     margin-top: 0.25rem;
     font-style: italic;
 }
@@ -417,6 +410,6 @@
 }
 
 .form-campo input[data-toggle="tooltip"]:focus {
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }

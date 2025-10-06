@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Moneda
+from .models import Moneda, Denominacion
 from .forms import MonedaForm
 
 
@@ -23,7 +23,8 @@ def tiene_algun_permiso(view_func):
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
             'monedas.gestion',
-            'monedas.activacion'    # Permiso para activar/desactivar monedas
+            'monedas.activacion',
+            'monedas.cotizacion'   # Permiso para activar/desactivar monedas
         ]
         
         # Verificar si el usuario tiene al menos uno de los permisos
@@ -147,7 +148,7 @@ def moneda_editar(request, pk):
         form.fields.pop('nombre')
         form.fields.pop('simbolo')
         form.fields.pop('decimales')
-        form.fields.pop('minima_denominacion')
+        form.fields.pop('denominaciones')
 
     # Procesa el formulario
     if request.method == 'POST':
@@ -164,9 +165,11 @@ def moneda_editar(request, pk):
 def moneda_detalle(request, pk):
     """Vista para mostrar los detalles completos de una moneda"""
     moneda = get_object_or_404(Moneda, pk=pk)
+    denominaciones = Denominacion.objects.filter(moneda=moneda).order_by('valor')
     
     context = {
-        'moneda': moneda
+        'moneda': moneda,
+        'denominaciones': denominaciones
     }
     return render(request, 'monedas/moneda_detalles.html', context)
 

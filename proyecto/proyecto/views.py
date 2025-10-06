@@ -1,15 +1,13 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from clientes.models import Cliente
 from .forms import LoginForm, SimuladorForm
 from monedas.models import Moneda
-from decimal import Decimal
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from transacciones.models import Transaccion, calcular_conversion
+from transacciones.models import Transaccion, calcular_conversion, redondear_efectivo
 
 def inicio(request):
     """
@@ -98,7 +96,6 @@ def login_usuario(request):
                         if t.fecha_hora < timezone.now() - timedelta(minutes=5):
                             t.estado = 'Cancelada'
                             t.razon = 'Expira el tiempo para confirmar la transacción'
-                            t.token = None
                             t.save()
                 messages.success(request, f'¡Bienvenido a Global Exchange, {user.first_name}!')
                 next_page = request.GET.get('next', 'inicio')

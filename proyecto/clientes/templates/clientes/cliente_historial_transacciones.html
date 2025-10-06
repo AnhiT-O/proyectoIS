@@ -95,8 +95,7 @@
                 <th>Fecha/Hora</th>
                 <th>Usuario</th>
                 <th>Operación</th>
-                <th>Origen</th>
-                <th>Destino</th>
+                <th>Monto y Moneda</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
@@ -121,18 +120,7 @@
                     </div>
                 </td>
                 <td>
-                    {% if transaccion.tipo == 'compra' %}
-                        {{ transaccion.monto_origen|floatformat:0 }} PYG
-                    {% else %}
-                        {{ transaccion.monto_origen|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if transaccion.tipo == 'compra' %}
-                        {{ transaccion.monto_destino|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
-                    {% else %}
-                        {{ transaccion.monto_destino|floatformat:0 }} PYG
-                    {% endif %}
+                    {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
                 </td>
                 <td>
                     <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">
@@ -161,7 +149,7 @@
         </tbody>
     </table>
 
-    <div class="zona-acciones">
+    <div class="zona-acciones" style="margin-top: 2rem">
         <div class="acciones-contenido">
             <a href="{% url 'clientes:cliente_detalle' cliente.id %}" class="btn-secundario">
                 Volver al Cliente

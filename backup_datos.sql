@@ -67,16 +67,98 @@ Banco Familiar	254591	Camila Acosta	1234567	9
 ueno bank	783750	Empresa S.A.	3456789	10
 \.
 
+COPY public.billetera (nombre_titular, nro_documento, tipo_billetera, telefono, cliente_id) FROM stdin;
+Juan Pérez	1231231	Tigo Money	0981123123	1
+Juan Pérez	1231231	Zimple	0981123123	1
+Sofía Martínez	6786786	Billetera Personal	0986786786	6
+Valentina Rivas	8908908	Tigo Money	0988908908	8
+\.
+
 --
 -- Data for Name: monedas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion, minima_denominacion) FROM stdin;
-Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03	5
-Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03	2
-Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03	10
+COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
+Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03
+Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03
+Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03
 \.
 
+
+COPY public.denominaciones (valor, moneda_id) FROM stdin;
+5	2
+10	2
+20	2
+50	2
+100	2
+200	2
+500	2
+2	3
+5	3
+10	3
+20	3
+50	3
+100	3
+200	3
+10	4
+20	4
+50	4
+100	4
+200	4
+500	4
+1000	4
+2000	4
+10000	4
+20000	4
+\.
+
+COPY public.tausers (puerto, activo) FROM stdin;
+8001	t
+8002	t
+8003	t
+8004	t
+8005	t
+\.
+
+COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
+1	1	100
+1	2	100
+1	2	100
+1	3	100
+1	4	100
+1	5	100
+1	6	100
+1	7	100
+1	8	100
+1	9	100
+1	10	100
+1	11	100
+1	12	100
+1	13	100
+1	14	100
+1	15	100
+1	16	100
+1	17	100
+1	18	100
+1	19	100
+1	20	100
+1	21	100
+1	22	100
+1	23	100
+1	24	100
+1	25	100
+1	26	100
+1	27	100
+1	28	100
+1	29	100
+1	30	100
+1	31	100
+1	32	100
+1	33	100
+1	34	100
+1	35	100
+1	36	100
+\.
 
 --
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -92,12 +174,12 @@ COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, tipo_documento, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
-pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	CI	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
-pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	CI	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
-pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	CI	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
-pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	CI	5167191	f	t	2025-09-20 12:56:51.22464-03	1
-pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	CI	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
+COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
+pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
+pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
+pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
+pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	5167191	f	t	2025-09-20 12:56:51.22464-03	1
+pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
 
 
