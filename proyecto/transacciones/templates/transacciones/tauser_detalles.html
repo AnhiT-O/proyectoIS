@@ -19,6 +19,30 @@
 
     <div class="zona-detalle">
         {% if billetes_tauser or monedas_disponibles %}
+        {% if totales_por_moneda %}
+        <div class="seccion-info">
+            <div class="info-columna" style="grid-column: 1 / -1;">
+                <div class="info-celda">
+                    <div class="info-icono">💰</div>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Totales por Moneda</div>
+                        <div class="seccion-info" style="grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); justify-content: start;">
+                            {% for key, total in totales_por_moneda.items %}
+                            <div class="info-columna" style="padding: 1rem; min-width: fit-content; width: auto; border-color: #01881e;">
+                                <div class="info-celda">
+                                    <div class="info-contenido">
+                                        <div class="info-titulo">{{ total.nombre }}</div>
+                                        <div class="info-valor">{{ total.total|intcomma }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="seccion-info">
             <div class="info-columna denominaciones-seccion" style="grid-column: 1 / -1;">
                 <div class="info-celda">

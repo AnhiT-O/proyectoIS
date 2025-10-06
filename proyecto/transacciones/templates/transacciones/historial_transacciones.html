@@ -169,5 +169,12 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="zona-acciones" style="margin-top: 2rem">
+        <div class="acciones-contenido">
+            <a href="{% url 'usuarios:detalle_cliente' cliente_filtrado.id %}" class="btn-secundario">
+                Volver al Cliente
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1640,14 +1640,48 @@ def tauser_detalle(request, pk):
         - billetes_tauser: QuerySet de billetes asociados al TAUser
         - monedas_disponibles: Lista de monedas que tienen billetes en este TAUser
         - moneda_filtro: Moneda seleccionada para filtrar (si aplica)
+        - totales_por_moneda: Diccionario con totales por moneda
     """
     from .models import BilletesTauser
     from monedas.models import Moneda
+    from django.db.models import Sum, F
     
     tauser = get_object_or_404(Tauser, pk=pk)
     
     # Obtener todos los billetes del TAUser (sin filtrar para obtener todas las monedas disponibles)
     todos_billetes_tauser = BilletesTauser.objects.filter(tauser=tauser)
+    
+    # Calcular totales por moneda
+    totales_por_moneda = {}
+    
+    # Total para guaraníes (denominaciones sin moneda)
+    total_guaranies = todos_billetes_tauser.filter(
+        denominacion__moneda__isnull=True
+    ).aggregate(
+        total=Sum(F('cantidad') * F('denominacion__valor'))
+    )['total'] or 0
+    
+    if total_guaranies > 0:
+        totales_por_moneda['guarani'] = {
+            'nombre': 'Guaraní',
+            'total': total_guaranies,
+            'simbolo': 'Gs.'
+        }
+    
+    # Totales para monedas extranjeras
+    for moneda in Moneda.objects.all():
+        total_moneda = todos_billetes_tauser.filter(
+            denominacion__moneda=moneda
+        ).aggregate(
+            total=Sum(F('cantidad') * F('denominacion__valor'))
+        )['total']
+        
+        if total_moneda and total_moneda > 0:
+            totales_por_moneda[moneda.id] = {
+                'nombre': moneda.nombre,
+                'total': total_moneda,
+                'simbolo': moneda.simbolo
+            }
     
     # Obtener todas las monedas que tienen billetes en este TAUser (antes de aplicar filtros)
     monedas_con_billetes = todos_billetes_tauser.values_list('denominacion__moneda', flat=True).distinct()
@@ -1689,7 +1723,8 @@ def tauser_detalle(request, pk):
         'tauser': tauser,
         'billetes_tauser': billetes_tauser,
         'monedas_disponibles': monedas_disponibles,
-        'moneda_filtro': moneda_filtro
+        'moneda_filtro': moneda_filtro,
+        'totales_por_moneda': totales_por_moneda
     }
     return render(request, 'transacciones/tauser_detalles.html', context)
     
