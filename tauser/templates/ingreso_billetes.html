@@ -1,0 +1,48 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera" style="margin-bottom: 1rem;">
+        <h2>Ingresar Billetes</h2>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Tipo de Operación:</div>
+            <div class="info-valor">
+                {% if transaccion.tipo == 'venta' %}
+                    Venta de {{ transaccion.moneda.nombre }}
+                {% else %}
+                    Compra de {{ transaccion.moneda.nombre }}
+                {% endif %}
+            </div>
+            <div class="info-titulo">Monto a Ingresar:</div>
+            <div class="info-valor">Gs. {{ transaccion.precio_final }}</div>
+            <div class="info-titulo">Monto a Comprar:</div>
+            <div class="info-valor">{{ transaccion.monto }} {{ transaccion.moneda.simbolo }}</div>
+        </div>
+    </div>
+    <p class="subtitulo" style="text-align: center;">Ingresa el monto en billetes:</p>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-campo">
+            {{ form.archivo }}
+            {% if form.archivo.errors %}
+                <div class="form-errores">
+                    {% for error in form.archivo.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <a href="#" class="btn-enviar">Ingresar</a>
+            <a href="{% url 'inicio' %}" class="btn-atras">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
