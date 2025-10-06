@@ -266,7 +266,7 @@ class Transaccion(models.Model):
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
     razon = models.CharField(max_length=100, blank=True, null=True) 
-    token = models.CharField(max_length=255, blank=True, null=True)  
+    token = models.CharField(max_length=8, blank=True, null=True, unique=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
@@ -549,8 +549,28 @@ def generar_token_transaccion(transaccion):
     Se utiliza para transacciones con medios de pago que requieren verificación
     adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
     """
-    # Generar token único
-    token = secrets.token_urlsafe(32)
+    # Generar token único de 8 caracteres (números y letras mayúsculas)
+    import string
+    import random
+    caracteres = string.ascii_uppercase + string.digits
+    
+    # Verificar unicidad del token
+    token = None
+    max_intentos = 100  # Evitar bucle infinito
+    intentos = 0
+    
+    while token is None and intentos < max_intentos:
+        token_candidato = ''.join(random.choice(caracteres) for _ in range(8))
+        # Verificar si el token ya existe en la base de datos
+        if not Transaccion.objects.filter(token=token_candidato).exists():
+            token = token_candidato
+        intentos += 1
+    
+    # Si no se pudo generar un token único, usar fallback con timestamp
+    if token is None:
+        import time
+        timestamp_suffix = str(int(time.time()))[-2:]  # Últimos 2 dígitos del timestamp
+        token = ''.join(random.choice(caracteres) for _ in range(6)) + timestamp_suffix
     
     # Crear datos del token
     datos_token = {
