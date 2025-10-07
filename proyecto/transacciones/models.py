@@ -261,6 +261,7 @@ class Transaccion(models.Model):
     redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
     redondeo_efectivo_precio_final = models.IntegerField()
     precio_final = models.IntegerField()
+    pagado = models.IntegerField(default=0)
     medio_pago = models.CharField(max_length=50) 
     medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
@@ -364,7 +365,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     else:
         # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
+            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
             monto += redondeo_efectivo_monto
         else:
             redondeo_efectivo_monto = 0
@@ -403,7 +404,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final -= monto_recargo_pago + monto_recargo_cobro
         # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
         if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -653,6 +654,7 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
 def procesar_transaccion(transaccion, recibido=0):
     
     if transaccion.medio_pago == 'Transferencia Bancaria':
+        transaccion.pagado = recibido
         if recibido < transaccion.precio_final:
             print('Notificar usuario que transferencia es incompleta')
         else:
@@ -668,6 +670,7 @@ def procesar_transaccion(transaccion, recibido=0):
             transaccion.save()
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
     elif transaccion.medio_pago in Recargos.objects.filter(medio='Billetera Electrónica'):
+        transaccion.pagado = recibido
         if recibido < transaccion.precio_final:
             print('Notificar usuario que transferencia es incompleta')
         else:
@@ -685,6 +688,7 @@ def procesar_transaccion(transaccion, recibido=0):
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
     elif transaccion.medio_pago.startswith('Tarjeta de Crédito'):
         if transaccion.tipo == 'compra':
+            transaccion.pagado = transaccion.precio_final
             transaccion.estado = 'Confirmada'
             transaccion.fecha_hora = timezone.now()
             stock = StockGuaranies.objects.first()
@@ -696,6 +700,7 @@ def procesar_transaccion(transaccion, recibido=0):
             transaccion.cliente.save()
             transaccion.save()
         else:
+            transaccion.pagado = transaccion.precio_final
             transaccion.estado = 'Confirmada'
             transaccion.fecha_hora = timezone.now()
             stock = StockGuaranies.objects.first()

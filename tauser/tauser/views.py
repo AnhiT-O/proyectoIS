@@ -2,51 +2,79 @@ from datetime import timedelta
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from transacciones.models import Transaccion
-from .forms import TokenForm, BilleteForm, CajaFuerteForm
+from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, leer_cheque
+from .forms import TokenForm, IngresoForm
 from monedas.models import Denominacion
-from transacciones.models import Tauser, BilletesTauser
 
 def inicio(request):
     return render(request, 'inicio.html')
 
 def caja_fuerte(request):
     if request.method == 'POST':
-        form = CajaFuerteForm(request.POST, request.FILES)
+        form = IngresoForm(request.POST, request.FILES)
         if form.is_valid():
+            accion = None
+            billetes = []
+            valores = []
+            cantidades = []
             try:
                 archivo = form.cleaned_data['archivo']
                 lineas = archivo.readlines()
                 if lineas:
                     accion = lineas[0].decode('utf-8').strip()
                     for linea in lineas[1:]:
-                        billetes = linea.decode('utf-8').strip().split('\t')
-                        denominacion_valor = int(billetes[1])
-                        tauser = Tauser.objects.get(puerto=int(request.get_port()))
-                        cantidad = int(billetes[2])
-                        if billetes[0] == 'Guaraní':
-                            denominacion = Denominacion.objects.get(valor=denominacion_valor, moneda=None)
-                        else:
-                            denominacion = Denominacion.objects.get(valor=denominacion_valor, moneda__nombre=billetes[0])
-                        if accion == 'Ingreso':
-                            tauser_billete, creado = BilletesTauser.objects.get_or_create(denominacion=denominacion, tauser=tauser)
-                            tauser_billete.cantidad += cantidad
-                            tauser_billete.save()
-                        else:
-                            tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
-                            if not tauser_billete or tauser_billete.cantidad < cantidad:
-                                raise ValueError('No hay suficientes billetes para la extracción.')
-                            tauser_billete.cantidad -= cantidad
-                            tauser_billete.save()
-                return redirect('inicio')
+                        lectura_billetes = linea.decode('utf-8').strip().split('\t')
+                        billetes.append(lectura_billetes[0])
+                        valores.append(int(lectura_billetes[1]))
+                        cantidades.append(int(lectura_billetes[2]))
             except Exception as e:
-                messages.error(request, f'Error al procesar el archivo: {e}')
+                print(e)
                 return redirect('caja_fuerte')
+            tauser = Tauser.objects.get(puerto=int(request.get_port()))
+            if accion == 'Ingreso':
+                for i in range(len(billetes)):
+                    try:
+                        if billetes[i] == 'Guaraní':
+                            denominacion = Denominacion.objects.get(valor=valores[i], moneda=None)
+                        else:
+                            denominacion = Denominacion.objects.get(valor=valores[i], moneda__nombre=billetes[i])
+                    except Denominacion.DoesNotExist:
+                        print(f'La denominación {billetes[i]} {valores[i]} no se reconoce.')
+                    tauser_billete, creado = BilletesTauser.objects.get_or_create(denominacion=denominacion, tauser=tauser)
+                    tauser_billete.cantidad += cantidades[i]
+                    tauser_billete.save()
+                    print(f'Se han ingresado {cantidades[i]} billetes de {billetes[i]} {valores[i]}')
+            else:
+                for i in range(len(billetes)):
+                    try:
+                        if billetes[i] == 'Guaraní':
+                            denominacion = Denominacion.objects.get(valor=valores[i], moneda=None)
+                        else:
+                            denominacion = Denominacion.objects.get(valor=valores[i], moneda__nombre=billetes[i])
+                    except Denominacion.DoesNotExist:
+                        print(f'La denominación {billetes[i]} {valores[i]} no se reconoce.')
+                        return redirect('caja_fuerte')
+                    try:
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                    except BilletesTauser.DoesNotExist:
+                        tauser_billete = None
+                    if not tauser_billete or tauser_billete.cantidad < cantidades[i]:
+                        print(f'No hay suficientes billetes de {billetes[i]} {valores[i]} para la extracción.')
+                        return redirect('caja_fuerte')
+                for i in range(len(billetes)):
+                    if billetes[i] == 'Guaraní':
+                        denominacion = Denominacion.objects.get(valor=valores[i], moneda=None)
+                    else:
+                        denominacion = Denominacion.objects.get(valor=valores[i], moneda__nombre=billetes[i])
+                    tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                    tauser_billete.cantidad -= cantidades[i]
+                    tauser_billete.save()
+                    print(f'Se han extraído {cantidades[i]} billetes de {billetes[i]} {valores[i]}')
         else:
-            messages.error(request, 'No se reconoce la acción.')
-            return redirect('inicio')
+            print(request, 'No se reconoce la acción.')
+            return redirect('caja_fuerte')
     else:
-        form = CajaFuerteForm()
+        form = IngresoForm()
     return render(request, 'caja_fuerte.html', {'form': form})
 
 def ingreso_token(request):
@@ -73,11 +101,14 @@ def ingreso_token(request):
                     transaccion.estado = 'Cancelada'
                     transaccion.razon = 'Expira el tiempo para confirmar la transacción'
                     transaccion.save()
-                    messages.error(request, 'El token ha expirado.')
+                    if transaccion.pagado > 0:
+                        messages.info(request, 'El token ha expirado. Contacta a soporte para el reembolso de lo pagado.')
+                    else:
+                        messages.error(request, 'El token ha expirado.')
                     return redirect('ingreso_token')
                 
                 if transaccion.medio_pago == 'Cheque':
-                    print('Ingreso de cheque')
+                    return redirect('ingreso_cheque', codigo=codigo)
                 elif transaccion.medio_pago == 'Efectivo':
                     return redirect('ingreso_billetes', codigo=codigo)
                 else:
@@ -92,20 +123,144 @@ def ingreso_token(request):
         form = TokenForm()
     return render(request, 'ingreso_token.html', {'form': form})
 
-def ingreso_billetes(request, codigo):
+def ingreso_cheque(request, codigo):
+    try:
+        transaccion = Transaccion.objects.get(token=codigo)
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'Transacción no encontrada.')
+        return redirect('ingreso_token')
     if request.method == 'POST':
-        form = BilleteForm(request.POST, request.FILES)
+        form = IngresoForm(request.POST, request.FILES)
         if form.is_valid():
-            print('Procesar billetes')
-            return redirect('inicio')
+            archivo = form.cleaned_data['archivo']
+            lineas = archivo.readlines()
+            lineas = [linea.decode('utf-8').strip() for linea in lineas]
+            if leer_cheque(lineas):
+                print('Procesar transacción')
+            else:
+                messages.error(request, 'Cheque no válido. Intente nuevamente.')
+                return redirect('ingreso_cheque', codigo=codigo)
+    else:
+        form = IngresoForm()
+    return render(request, 'ingreso_cheque.html', {'form': form, 'transaccion': transaccion})
+
+def ingreso_billetes(request, codigo):
+    try:
+        transaccion = Transaccion.objects.get(token=codigo)
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'Transacción no encontrada.')
+        return redirect('ingreso_token')
+    if request.method == 'POST':
+        form = IngresoForm(request.POST, request.FILES)
+        if form.is_valid():
+            billetes = []
+            valores = []
+            cantidades = []
+            try:
+                archivo = form.cleaned_data['archivo']
+                lineas = archivo.readlines()
+                if lineas:
+                    for linea in lineas:
+                        lectura_billetes = linea.decode('utf-8').strip().split('\t')
+                        billetes.append(lectura_billetes[0])
+                        valores.append(int(lectura_billetes[1]))
+                        cantidades.append(int(lectura_billetes[2]))
+            except Exception as e:
+                messages.error(request, 'Billetes no reconocidos. Se devuelve lo ingresado.')
+                print(e)
+                return redirect('ingreso_billetes', codigo=codigo)
+            tauser = Tauser.objects.get(puerto=int(request.get_port()))
+            if transaccion.tipo == 'compra':
+                for i in range(len(billetes)):
+                    if billetes[i] != 'Guaraní':
+                        messages.error(request, 'Solo se aceptan billetes en Guaraníes para compras. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                    if valores[i] not in [den.valor for den in Denominacion.objects.filter(moneda=None)]:
+                        messages.error(request, f'La denominación {valores[i]} no se reconoce. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                total = 0
+                for i in range(len(billetes)):
+                    total += valores[i] * cantidades[i]
+                if total > transaccion.precio_final - transaccion.pagado:
+                    v_denominaciones = list(Denominacion.objects.filter(moneda=None).order_by('valor').values_list('valor', flat=True))
+                    v_cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=None, tauser=tauser).order_by('denominacion__valor')
+                    v_cantidades = {b.denominacion.valor: b.cantidad for b in v_cantidades_qs}
+                    vuelto = billetes_necesarios(total - transaccion.precio_final, v_denominaciones, v_cantidades)
+                    if not vuelto:
+                        messages.error(request, 'No hay billetes suficientes para dar el vuelto. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                for i in range(len(billetes)):
+                    denominacion = Denominacion.objects.get(valor=valores[i], moneda=None)
+                    tauser_billete, creado = BilletesTauser.objects.get_or_create(denominacion=denominacion, tauser=tauser)
+                    tauser_billete.cantidad += cantidades[i]
+                    tauser_billete.save()
+                    transaccion.pagado += valores[i] * cantidades[i]
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
+                if transaccion.pagado < transaccion.precio_final:
+                    messages.warning(request, f'Se ha ingresado Gs. {transaccion.pagado:,.0f}'.replace(",", ".") + ',' + f' aún faltan Gs. {transaccion.precio_final - transaccion.pagado:,.0f}'.replace(",", "."))
+                    return redirect('ingreso_billetes', codigo=codigo)
+                elif transaccion.pagado > transaccion.precio_final:
+                    v_denominaciones = list(Denominacion.objects.filter(moneda=None).order_by('valor').values_list('valor', flat=True))
+                    v_cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=None, tauser=tauser).order_by('denominacion__valor')
+                    v_cantidades = {b.denominacion.valor: b.cantidad for b in v_cantidades_qs}
+                    vuelto = billetes_necesarios(total - transaccion.precio_final, v_denominaciones, v_cantidades)
+                    for valor, cantidad in vuelto.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=None)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    messages.success(request, f'Tu vuelto es Gs. {(transaccion.pagado - transaccion.precio_final):,.0f}'.replace(",", ".") + '. Retiralo.')
+                    print('Procesar transacción')
+                else:
+                    print('Procesar transacción')
+            else:
+                for i in range(len(billetes)):
+                    if billetes[i] != transaccion.moneda.nombre:
+                        messages.error(request, f'Solo se aceptan billetes de {transaccion.moneda.nombre} para ventas. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                    if valores[i] not in [den.valor for den in Denominacion.objects.filter(moneda=transaccion.moneda)]:
+                        messages.error(request, f'La denominación {valores[i]} no se reconoce. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                total = 0
+                for i in range(len(billetes)):
+                    total += valores[i] * cantidades[i]
+                if total > transaccion.monto - transaccion.pagado:
+                    denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
+                    cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
+                    cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                    vuelto = billetes_necesarios(total - transaccion.monto, denominaciones, cantidades)
+                    if not vuelto:
+                        messages.error(request, 'No hay billetes suficientes para dar el vuelto. Se devuelve lo ingresado.')
+                        return redirect('ingreso_billetes', codigo=codigo)
+                for i in range(len(billetes)):
+                    denominacion = Denominacion.objects.get(valor=valores[i], moneda__nombre=billetes[i])
+                    tauser_billete, creado = BilletesTauser.objects.get_or_create(denominacion=denominacion, tauser=tauser)
+                    tauser_billete.cantidad += cantidades[i]
+                    tauser_billete.save()
+                    transaccion.pagado += valores[i] * cantidades[i]
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
+                if transaccion.pagado < transaccion.monto:
+                    messages.warning(request, f'Se ha ingresado {transaccion.pagado:,.0f}'.replace(",", ".") + f' {transaccion.moneda.simbolo},' + f' aún faltan {transaccion.monto - transaccion.pagado:,.0f}'.replace(",", ".") + f' {transaccion.moneda.simbolo}')
+                    return redirect('ingreso_billetes', codigo=codigo)
+                elif transaccion.pagado > transaccion.monto:
+                    denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
+                    cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
+                    cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                    vuelto = billetes_necesarios(transaccion.pagado - transaccion.monto, denominaciones, cantidades)
+                    for valor, cantidad in vuelto.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=transaccion.moneda)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    messages.success(request, f'Tu vuelto es {(transaccion.pagado - transaccion.monto):,.0f}'.replace(",", ".") + f' {transaccion.moneda.simbolo}. Retiralo.')
+                    print('Procesar transacción')
+                else:
+                    print('Procesar transacción')
         else:
-            messages.error(request, 'Billete no reconocido.')
+            print(request, 'Billetes no reconocidos. Se devuelve lo ingresado.')
             return redirect('ingreso_billetes', codigo=codigo)
     else:
-        try:
-            transaccion = Transaccion.objects.get(token=codigo)
-        except Transaccion.DoesNotExist:
-            messages.error(request, 'Transacción no encontrada.')
-            return redirect('ingreso_token')
-        form = BilleteForm()
+        form = IngresoForm()
     return render(request, 'ingreso_billetes.html', {'form': form, 'transaccion': transaccion})

@@ -21,5 +21,6 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('ingreso/', views.ingreso_token, name='ingreso_token'),
     path('caja-fuerte/', views.caja_fuerte, name='caja_fuerte'),
-    path('ingreso-billetes/<str:codigo>/', views.ingreso_billetes, name='ingreso_billetes')
+    path('ingreso-billetes/<str:codigo>/', views.ingreso_billetes, name='ingreso_billetes'),
+    path('ingreso-cheque/<str:codigo>/', views.ingreso_cheque, name='ingreso_cheque')
 ]

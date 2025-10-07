@@ -212,6 +212,7 @@ class Transaccion(models.Model):
     redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
     redondeo_efectivo_precio_final = models.IntegerField()
     precio_final = models.IntegerField()
+    pagado = models.IntegerField(default=0)
     medio_pago = models.CharField(max_length=50) 
     medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
@@ -664,3 +665,45 @@ def redondear_efectivo(monto, denominaciones):
         elif i - (monto % i) < redondeo:
             redondeo = i - (monto % i)
     return redondeo
+
+def billetes_necesarios(monto, denominaciones, disponible):
+    """
+    Calcula la cantidad de billetes necesarios para cubrir un monto dado.
+    
+    Args:
+        monto (int): Monto total a cubrir
+        denominaciones (list): Lista de denominaciones disponibles (enteros)
+        disponible (dict): Diccionario con la cantidad disponible por denominación
+        
+    Returns:
+        dict: Diccionario con la cantidad de billetes por denominación necesarios
+    """
+    resultado = {}
+    for valor in sorted(denominaciones, reverse=True):
+        if monto <= 0:
+            break
+        if valor in disponible and disponible[valor] > 0:
+            max_billetes = monto // valor
+            billetes_a_usar = min(max_billetes, disponible[valor])
+            if billetes_a_usar > 0:
+                resultado[valor] = billetes_a_usar
+                monto -= billetes_a_usar * valor
+    if monto > 0:
+        return None  # No se pudo cubrir el monto con los billetes disponibles
+    return resultado
+
+def leer_cheque(lineas):
+    print(lineas)
+    if lineas:
+        if lineas[0] == 'Páguese a la orden de Global Exchange':
+            if lineas[1].startswith('La suma de Guaraníes: '):
+                monto_numeros = lineas[1].replace('La suma de Guaraníes: ', '').replace('.', '').strip()
+                if monto_numeros:
+                    if lineas[2].startswith('Firma: '):
+                        firma = lineas[2].replace('Firma: ', '').strip()
+                        if firma:
+                            try:
+                                return int(monto_numeros)
+                            except ValueError:
+                                return None
+    return None

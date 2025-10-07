@@ -1,4 +1,3 @@
-Extracción
-Guaraní	100000	6
-Dólar estadounidense	10	4
-Euro	50	1
+Páguese a la orden de Global Exchange
+La suma de Guaraníes: 123f
+Firma: Yo
