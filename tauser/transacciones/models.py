@@ -141,6 +141,7 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
+    cheques = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Tauser"
@@ -582,69 +583,53 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
         return None
     
 @transaction.atomic
-def procesar_transaccion(transaccion, recibido=0):
-    
-    if transaccion.medio_pago == 'Transferencia Bancaria':
-        if recibido < transaccion.precio_final:
-            print('Notificar usuario que transferencia es incompleta')
+def procesar_transaccion(transaccion, tauser):
+    if transaccion.estado == 'Pendiente':
+        transaccion.estado = 'Confirmada'
+        transaccion.fecha_hora = timezone.now()
+        transaccion.save()
+        transaccion.cliente.consumo_diario += transaccion.precio_final
+        transaccion.cliente.consumo_mensual += transaccion.precio_final
+        transaccion.cliente.ultimo_consumo = date.today()
+        transaccion.cliente.save()
+        procesar_transaccion(transaccion, tauser)
+    elif transaccion.estado == 'Confirmada':
+        if transaccion.medio_cobro == 'Efectivo':
+            if transaccion.tipo == 'compra':
+                denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
+                cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
+                cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                extraer = billetes_necesarios(int(transaccion.monto), denominaciones, cantidades)
+                if extraer:
+                    for valor, cantidad in extraer.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=transaccion.moneda)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    transaccion.estado = 'Completa'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
+            else:
+                denominaciones = list(Denominacion.objects.filter(moneda=None).order_by('valor').values_list('valor', flat=True))
+                cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=None, tauser=tauser).order_by('denominacion__valor')
+                cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                extraer = billetes_necesarios(transaccion.precio_final, denominaciones, cantidades)
+                if extraer:
+                    for valor, cantidad in extraer.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=None)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    transaccion.estado = 'Completa'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
         else:
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
             stock = StockGuaranies.objects.first()
-            stock.cantidad += recibido
+            stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
             stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
-    elif transaccion.medio_pago in Recargos.objects.filter(medio='Billetera Electrónica'):
-        if recibido < transaccion.precio_final:
-            print('Notificar usuario que transferencia es incompleta')
-        else:
-            transaccion.estado = 'Confirmada'
+            transaccion.estado = 'Completa'
             transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            monto_recargo_pago = Decimal(recibido) * (Decimal(Recargos.objects.get(marca=transaccion.medio_pago).recargo) / Decimal(100))
-            stock.cantidad += recibido - monto_recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
             transaccion.save()
-            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
-    elif transaccion.medio_pago.startswith('Tarjeta de Crédito'):
-        if transaccion.tipo == 'compra':
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            stock.cantidad += transaccion.precio_final - transaccion.recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-        else:
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            stock.cantidad += (transaccion.monto * transaccion.moneda.tasa_base) - transaccion.recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-            if transaccion.medio_cobro != 'Efectivo':
-                stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
-                stock.save()
-                print('Notificar usuario que se realizó la transferencia en su cuenta o billetera')
-                transaccion.estado = 'Completa'
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
 
 def redondear_efectivo(monto, denominaciones):
     """
@@ -668,7 +653,7 @@ def redondear_efectivo(monto, denominaciones):
 
 def billetes_necesarios(monto, denominaciones, disponible):
     """
-    Calcula la cantidad de billetes necesarios para cubrir un monto dado.
+    Calcula la cantidad de billetes necesarios para cubrir un monto dado usando programación dinámica.
     
     Args:
         monto (int): Monto total a cubrir
@@ -676,21 +661,42 @@ def billetes_necesarios(monto, denominaciones, disponible):
         disponible (dict): Diccionario con la cantidad disponible por denominación
         
     Returns:
-        dict: Diccionario con la cantidad de billetes por denominación necesarios
+        dict: Diccionario con la cantidad de billetes por denominación necesarios, o None si no es posible
     """
-    resultado = {}
-    for valor in sorted(denominaciones, reverse=True):
-        if monto <= 0:
-            break
-        if valor in disponible and disponible[valor] > 0:
-            max_billetes = monto // valor
-            billetes_a_usar = min(max_billetes, disponible[valor])
-            if billetes_a_usar > 0:
-                resultado[valor] = billetes_a_usar
-                monto -= billetes_a_usar * valor
-    if monto > 0:
+    from collections import defaultdict
+    
+    # dp[i] = (min_billetes, configuracion) para completar monto i
+    # configuracion es un dict con {denominacion: cantidad_usada}
+    dp = defaultdict(lambda: (float('inf'), {}))
+    dp[0] = (0, {})  # Para monto 0, necesitamos 0 billetes
+    
+    # Recorrer todos los montos desde 1 hasta el monto objetivo
+    for i in range(1, monto + 1):
+        # Probar cada denominación
+        for denominacion in denominaciones:
+            if denominacion in disponible and disponible[denominacion] > 0 and i >= denominacion:
+                # Obtener la configuración anterior (para monto i - denominacion)
+                prev_billetes, prev_config = dp[i - denominacion]
+                
+                # Verificar cuántos billetes de esta denominación ya se han usado
+                billetes_usados_actual = prev_config.get(denominacion, 0)
+                
+                # Solo proceder si podemos usar otro billete de esta denominación
+                if billetes_usados_actual < disponible[denominacion]:
+                    nueva_cantidad_billetes = prev_billetes + 1
+                    
+                    # Si esta es una mejor solución (menos billetes)
+                    if nueva_cantidad_billetes < dp[i][0]:
+                        # Crear nueva configuración
+                        nueva_config = prev_config.copy()
+                        nueva_config[denominacion] = billetes_usados_actual + 1
+                        dp[i] = (nueva_cantidad_billetes, nueva_config)
+    
+    # Verificar si se encontró una solución para el monto objetivo
+    if dp[monto][0] == float('inf'):
         return None  # No se pudo cubrir el monto con los billetes disponibles
-    return resultado
+    
+    return dp[monto][1]  # Retornar la configuración óptima
 
 def leer_cheque(lineas):
     print(lineas)

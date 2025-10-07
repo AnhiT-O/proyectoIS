@@ -143,6 +143,7 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
+    cheques = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Tauser"
@@ -714,7 +715,6 @@ def procesar_transaccion(transaccion, recibido=0):
             if transaccion.medio_cobro != 'Efectivo':
                 stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
                 stock.save()
-                print('Notificar usuario que se realizó la transferencia en su cuenta o billetera')
                 transaccion.estado = 'Completa'
                 transaccion.fecha_hora = timezone.now()
                 transaccion.save()
