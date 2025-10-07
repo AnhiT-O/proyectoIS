@@ -119,6 +119,12 @@
                     {% endif %}
                     <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
+                {% if transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.pagado|intcomma }}</div>
+                </div>
+                {% endif %}
             {% else %}
                 <div class="detalle-item">
                     <div class="detalle-titulo">Monto ingresado para venta:</div>
@@ -176,6 +182,12 @@
                     {% endif %}
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
+                {% if transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.pagado|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

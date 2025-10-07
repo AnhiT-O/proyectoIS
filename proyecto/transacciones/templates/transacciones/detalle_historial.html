@@ -95,6 +95,12 @@
                     {% endif %}
                     <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
+                {% if transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.pagado|intcomma }}</div>
+                </div>
+                {% endif %}
                 {% if transaccion.estado == 'Pendiente' or transaccion.estado == 'Confirmada' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Código de la transacción:</div>
@@ -112,8 +118,8 @@
                     <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo" style="font-size:large">Monto a vender:</div>
-                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    <div class="detalle-titulo">Monto a vender:</div>
+                    <div class="detalle-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 {% endif %}
                 <div class="detalle-item">
@@ -158,6 +164,12 @@
                     {% endif %}
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.precio_final|intcomma }}</div>
                 </div>
+                {% if transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa' %}
+                <div class="detalle-item">
+                    <div class="detalle-titulo" style="font-size:large">Monto pagado:</div>
+                    <div class="detalle-valor" style="font-size:large">{{ transaccion.pagado|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                </div>
+                {% endif %}
                 {% if transaccion.estado == 'Pendiente' or transaccion.estado == 'Confirmada' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Código de la transacción:</div>

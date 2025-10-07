@@ -245,7 +245,7 @@ def ingreso_billetes(request, codigo):
                     v_denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
                     v_cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
                     v_cantidades = {b.denominacion.valor: b.cantidad for b in v_cantidades_qs}
-                    vuelto = billetes_necesarios(total - transaccion.monto, v_denominaciones, v_cantidades)
+                    vuelto = billetes_necesarios(int(total - transaccion.monto), v_denominaciones, v_cantidades)
                     if not vuelto:
                         messages.error(request, 'No hay billetes suficientes para dar el vuelto. Se devuelve lo ingresado.')
                         return redirect('ingreso_billetes', codigo=codigo)
@@ -264,7 +264,7 @@ def ingreso_billetes(request, codigo):
                     v_denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
                     v_cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
                     v_cantidades = {b.denominacion.valor: b.cantidad for b in v_cantidades_qs}
-                    vuelto = billetes_necesarios(transaccion.pagado - transaccion.monto, v_denominaciones, v_cantidades)
+                    vuelto = billetes_necesarios(int(transaccion.pagado - transaccion.monto), v_denominaciones, v_cantidades)
                     for valor, cantidad in vuelto.items():
                         denominacion = Denominacion.objects.get(valor=valor, moneda=transaccion.moneda)
                         tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)

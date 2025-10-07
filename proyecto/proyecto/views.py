@@ -27,6 +27,13 @@ def inicio(request):
         'vip': 10
     }
     
+    # Preparar lista de segmentaciones para el template
+    segmentaciones_para_template = [
+        {'id': 'minorista', 'nombre': 'Minorista', 'porcentaje_beneficio': 0},
+        {'id': 'corporativo', 'nombre': 'Corporativo', 'porcentaje_beneficio': 5},
+        {'id': 'vip', 'nombre': 'VIP', 'porcentaje_beneficio': 10}
+    ]
+    
     # Obtener el segmento seleccionado
     segmento_seleccionado = None
     porcentaje_beneficio_admin = 0
@@ -36,6 +43,7 @@ def inicio(request):
             segmento_seleccionado = segmento_id
             porcentaje_beneficio_admin = segmentaciones_lista[segmento_seleccionado]
         context['segmento_seleccionado'] = segmento_seleccionado
+        context['segmentaciones_listas'] = segmentaciones_para_template
     
     cotizaciones = []
     for moneda in monedas_activas:
@@ -44,10 +52,10 @@ def inicio(request):
             cliente = request.user.cliente_activo
             precios = moneda.get_precios_cliente(cliente)
         elif segmento_seleccionado:
-            # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+            # Administrador con segmento seleccionado - usar segmento específico
             precios = {
-                'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
-                'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+                'precio_compra': moneda.calcular_precio_compra(segmento_seleccionado),
+                'precio_venta': moneda.calcular_precio_venta(segmento_seleccionado)
             }
         else:
             # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base

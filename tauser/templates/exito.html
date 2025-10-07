@@ -23,7 +23,7 @@
             <p class="subtitulo">La compra de monedas se ha realizado exitosamente, se han extraído {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}. ¡Gracias por confiar en Global Exchange!.</p>
         {% else %}
             {% if transaccion.medio_cobro == 'Efectivo' %}
-                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, se han extraído Gs. {{ transaccion.precio_final }}. ¡Gracias por confiar en Global Exchange!.</p>
+                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, se han extraído Gs. {{ transaccion.precio_final|intcomma }}. ¡Gracias por confiar en Global Exchange!.</p>
             {% else %}
                 <p class="subtitulo">La venta de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente. ¡Gracias por confiar en Global Exchange!.</p>
             {% endif %}
