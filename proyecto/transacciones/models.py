@@ -17,6 +17,8 @@ import ast
 from datetime import date
 from decimal import Decimal
 import secrets
+import socket
+import requests
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
@@ -141,7 +143,6 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
-    activo = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Tauser"
@@ -160,6 +161,65 @@ class Tauser(models.Model):
             str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
         """
         return f"TAUser Puerto {self.puerto}"
+    
+    def esta_activo(self):
+        """
+        Verifica si hay un servidor Django corriendo en el puerto del TAUser.
+        
+        Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP
+        para confirmar que es un servidor Django.
+        
+        Returns:
+            bool: True si hay un servidor Django corriendo, False en caso contrario
+        """
+        try:
+            # Verificar si el puerto está en uso
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)  # Timeout de 1 segundo
+                result = sock.connect_ex(('localhost', self.puerto))
+                
+                if result != 0:
+                    # Puerto no está en uso
+                    return False
+            
+            # Si el puerto está en uso, verificar si es un servidor Django
+            try:
+                response = requests.get(
+                    f'http://localhost:{self.puerto}/',
+                    timeout=2,
+                    headers={'User-Agent': 'TAUser-Checker/1.0'}
+                )
+                
+                # Verificar si la respuesta contiene indicadores de Django
+                # Django típicamente incluye estos headers o contenido
+                django_indicators = [
+                    'django' in response.headers.get('server', '').lower(),
+                    'csrftoken' in response.text.lower(),
+                    'django' in response.text.lower(),
+                    response.status_code in [200, 302, 404]  # Códigos típicos de Django
+                ]
+                
+                return any(django_indicators)
+                
+            except requests.exceptions.RequestException:
+                # Si hay error en la petición HTTP pero el puerto está abierto,
+                # asumimos que podría ser Django pero no responde correctamente
+                return True
+                
+        except Exception:
+            return False
+        
+class Cheque(models.Model):
+    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
+    monto = models.BigIntegerField()
+    firma = models.CharField(max_length=100)
+    fecha_depositado = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Cheque"
+        verbose_name_plural = "Cheques"
+        db_table = "cheques"
+        default_permissions = []
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
@@ -213,12 +273,13 @@ class Transaccion(models.Model):
     redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
     redondeo_efectivo_precio_final = models.IntegerField()
     precio_final = models.IntegerField()
+    pagado = models.IntegerField(default=0)
     medio_pago = models.CharField(max_length=50) 
     medio_cobro = models.CharField(max_length=100)  
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
     razon = models.CharField(max_length=100, blank=True, null=True) 
-    token = models.CharField(max_length=255, blank=True, null=True)  
+    token = models.CharField(max_length=8, blank=True, null=True, unique=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
@@ -316,7 +377,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     else:
         # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
+            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
             monto += redondeo_efectivo_monto
         else:
             redondeo_efectivo_monto = 0
@@ -355,7 +416,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final -= monto_recargo_pago + monto_recargo_cobro
         # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
         if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -501,8 +562,28 @@ def generar_token_transaccion(transaccion):
     Se utiliza para transacciones con medios de pago que requieren verificación
     adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
     """
-    # Generar token único
-    token = secrets.token_urlsafe(32)
+    # Generar token único de 8 caracteres (números y letras mayúsculas)
+    import string
+    import random
+    caracteres = string.ascii_uppercase + string.digits
+    
+    # Verificar unicidad del token
+    token = None
+    max_intentos = 100  # Evitar bucle infinito
+    intentos = 0
+    
+    while token is None and intentos < max_intentos:
+        token_candidato = ''.join(random.choice(caracteres) for _ in range(8))
+        # Verificar si el token ya existe en la base de datos
+        if not Transaccion.objects.filter(token=token_candidato).exists():
+            token = token_candidato
+        intentos += 1
+    
+    # Si no se pudo generar un token único, usar fallback con timestamp
+    if token is None:
+        import time
+        timestamp_suffix = str(int(time.time()))[-2:]  # Últimos 2 dígitos del timestamp
+        token = ''.join(random.choice(caracteres) for _ in range(6)) + timestamp_suffix
     
     # Crear datos del token
     datos_token = {
@@ -585,6 +666,7 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
 def procesar_transaccion(transaccion, recibido=0):
     
     if transaccion.medio_pago == 'Transferencia Bancaria':
+        transaccion.pagado = recibido
         if recibido < transaccion.precio_final:
             print('Notificar usuario que transferencia es incompleta')
         else:
@@ -600,6 +682,7 @@ def procesar_transaccion(transaccion, recibido=0):
             transaccion.save()
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
     elif transaccion.medio_pago in Recargos.objects.filter(medio='Billetera Electrónica'):
+        transaccion.pagado = recibido
         if recibido < transaccion.precio_final:
             print('Notificar usuario que transferencia es incompleta')
         else:
@@ -617,6 +700,7 @@ def procesar_transaccion(transaccion, recibido=0):
             print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
     elif transaccion.medio_pago.startswith('Tarjeta de Crédito'):
         if transaccion.tipo == 'compra':
+            transaccion.pagado = transaccion.precio_final
             transaccion.estado = 'Confirmada'
             transaccion.fecha_hora = timezone.now()
             stock = StockGuaranies.objects.first()
@@ -628,6 +712,7 @@ def procesar_transaccion(transaccion, recibido=0):
             transaccion.cliente.save()
             transaccion.save()
         else:
+            transaccion.pagado = transaccion.precio_final
             transaccion.estado = 'Confirmada'
             transaccion.fecha_hora = timezone.now()
             stock = StockGuaranies.objects.first()
@@ -641,7 +726,6 @@ def procesar_transaccion(transaccion, recibido=0):
             if transaccion.medio_cobro != 'Efectivo':
                 stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
                 stock.save()
-                print('Notificar usuario que se realizó la transferencia en su cuenta o billetera')
                 transaccion.estado = 'Completa'
                 transaccion.fecha_hora = timezone.now()
                 transaccion.save()

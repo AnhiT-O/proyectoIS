@@ -86,6 +86,18 @@
                     </div>
                 {% endif %}
             </div>
+
+            <div class="form-campo">
+                <label for="{{ form.telefono.id_for_label }}">Número de teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}
+                    <div class="form-errores">
+                        {% for error in form.telefono.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
         <div class="form-fila">

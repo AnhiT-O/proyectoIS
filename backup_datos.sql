@@ -112,12 +112,12 @@ COPY public.denominaciones (valor, moneda_id) FROM stdin;
 20000	4
 \.
 
-COPY public.tausers (puerto, activo) FROM stdin;
-8001	t
-8002	t
-8003	t
-8004	t
-8005	t
+COPY public.tausers (puerto) FROM stdin;
+8001
+8002
+8003
+8004
+8005
 \.
 
 COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
@@ -174,12 +174,12 @@ COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
-pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
-pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
-pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
-pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	5167191	f	t	2025-09-20 12:56:51.22464-03	1
-pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
+COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, telefono, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
+pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	0984552373	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
+pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	0972158149	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
+pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	0986743708	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
+pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	0982977328	5167191	f	t	2025-09-20 12:56:51.22464-03	1
+pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	0981458383	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
 
 

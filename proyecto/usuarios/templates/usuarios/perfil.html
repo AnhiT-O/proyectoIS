@@ -39,6 +39,10 @@
                     <div class="info-valor">{{ user.numero_documento }}</div>
                 </div>
                 <div class="info-campo">
+                    <div class="info-titulo">Número de Teléfono</div>
+                    <div class="info-valor">{{ user.telefono }}</div>
+                </div>
+                <div class="info-campo">
                     <div class="info-titulo">Roles en el Sistema</div>
                     <div class="info-valor">
                         {% if user.groups.exists %}

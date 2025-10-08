@@ -7,31 +7,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="contenido">
-    <div class="form-cabecera">
-        <div class="logo">Tauser - Global Exchange</div>
-        <p class="subtitulo">Ingresa el token de transacción</p>
-    </div>
-    
-    <form method="post" novalidate>
+<div class="contenido extendido">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-campo">
-            {{ form.codigo }}
-            {% if form.codigo.errors %}
+            {{ form.archivo }}
+            {% if form.archivo.errors %}
                 <div class="form-errores">
-                    {% for error in form.codigo.errors %}
+                    {% for error in form.archivo.errors %}
                         <div class="mensaje-error">{{ error }}</div>
                     {% endfor %}
                 </div>
             {% endif %}
         </div>
         <div class="zona-botones">
-            <button type="submit" class="btn-enviar">
-                Enviar código
-            </button>
-            <a href="{% url 'inicio' %}" class="btn-atras">
-                Volver al Inicio
-            </a>
+            <button type="submit" class="btn-enviar">Cargar Acción</button>
+            <a href="{% url 'inicio' %}" class="btn-atras">Atras</a>
         </div>
     </form>
 </div>

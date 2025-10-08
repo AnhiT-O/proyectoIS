@@ -13,6 +13,7 @@ class RegistroUsuarioForm(UserCreationForm):
     Attributes:
         username (CharField): Campo para el nombre de usuario.
         email (EmailField): Campo para el correo electrónico.
+        telefono (CharField): Campo para el número de teléfono.
         first_name (CharField): Campo para el nombre.
         last_name (CharField): Campo para el apellido.
         numero_documento (CharField): Campo para la cédula de identidad.
@@ -36,6 +37,14 @@ class RegistroUsuarioForm(UserCreationForm):
             'unique': "Ya existe un usuario registrado con este correo electrónico."
         }
     )
+    telefono = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': "El número de teléfono es obligatorio.",
+            'unique': "Ya existe un usuario registrado con este número de teléfono.",
+            'max_length': "El número de teléfono no puede tener más de 15 caracteres."
+        }
+    )
     first_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
@@ -53,9 +62,9 @@ class RegistroUsuarioForm(UserCreationForm):
     numero_documento = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
-            'required': "La cédula de identidad es obligatoria.",
-            'max_length': "La cédula de identidad no puede tener más de 11 caracteres.",
-            'unique': "Ya existe un usuario registrado con esta cédula."
+            'required': "El número de documento es obligatorio.",
+            'max_length': "El número de documento no puede tener más de 13 caracteres.",
+            'unique': "Ya existe un usuario registrado con este número de documento."
         }
     )
 
@@ -68,7 +77,7 @@ class RegistroUsuarioForm(UserCreationForm):
             fields (tuple): Campos incluidos en el formulario.
         """
         model = Usuario
-        fields = ('username', 'first_name', 'last_name', 'email', 'numero_documento', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'telefono', 'numero_documento', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         """
@@ -94,6 +103,23 @@ class RegistroUsuarioForm(UserCreationForm):
         if len(documento) < 4:
             raise ValidationError("El número de documento debe tener al menos 4 dígitos.")
         return documento
+    
+    def clean_telefono(self):
+        """
+        Valida que el número de teléfono sea numérico y tenga entre 6 y 15 dígitos.
+
+        Raises:
+            ValidationError: Si el número de teléfono no es numérico o no tiene entre 6 y 15 dígitos.
+
+        Returns:
+            Cadena de texto: El número de teléfono validado.
+        """
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono.isdigit():
+            raise ValidationError("El número de teléfono debe ser numérico.")
+        if len(telefono) < 6 or len(telefono) > 15:
+            raise ValidationError("El número de teléfono debe tener entre 6 y 15 dígitos.")
+        return telefono
 
     def clean_password1(self):
         """

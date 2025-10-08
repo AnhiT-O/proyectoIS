@@ -1,30 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Tauser - Global Exchange</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'claro/global.css' %}" media="(prefers-color-scheme: light)">
-    <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
+{% extends 'llave_billetes.html' %}
+{% load static %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
     <link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
-</head>
-<body>
-    {% if messages %}
-    <div class="zona-alertas">
-        {% for message in messages %}
-            <div class="alerta-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    <main class="cuerpo">
-        <div class="contenido">
-            <div class="logo">Tauser - Global Exchange</div>
-            <p class="subtitulo">Realiza depósitos y retiros seguros y rápidos.</p>
-            <a href="{% url 'ingreso_token' %}" class="btn-enviar">Ingresar Token de Transacción</a>
-        </div>
-    </main>
-</body>
-</html>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="logo">Tauser - Global Exchange</div>
+    <p class="subtitulo">Realiza depósitos y retiros seguros y rápidos.</p>
+    <a href="{% url 'ingreso_token' %}" class="btn-enviar">Ingresar Token de Transacción</a>
+</div>
+{% endblock %}

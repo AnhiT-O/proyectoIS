@@ -24,22 +24,22 @@
                 <div class="logo">Transacción Iniciada</div>
                 {% if transaccion.medio_pago == 'Efectivo' or transaccion.medio_pago == 'Cheque' %}
                 <p class="subtitulo">
-                    Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
+                    Se ha generado un código para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
                 {% else %}
                 <p class="subtitulo">
-                    Se ha generado un token para la transacción. Usalo para realizar el pago de la transacción en línea.
+                    Se ha generado un código para la transacción. Usalo para realizar el pago de la transacción en línea.
                 </p>
                 {% endif %}
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.
                 </p>
-                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El token vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
+                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El código vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
                 <div class="info-campo">{{ transaccion.token }}</div>
             {% else %}
                 <div class="logo">Transacción Confirmada</div>
                 <p class="subtitulo">
-                    Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                    Se ha recibido tu pago. También se ha generado un código para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.
@@ -50,17 +50,17 @@
             {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
                 <p class="subtitulo">
-                    Se ha generado un token para la transacción. Acercate a un Tauser de Global Exchange para completar la venta.
+                    Se ha generado un código para la transacción. Acercate a un Tauser de Global Exchange para completar la venta.
                 </p>
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.
                 </p>
-                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El token vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
+                <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El código vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
                 <div class="info-campo">{{ transaccion.token }}</div>
             {% elif transaccion.estado == 'Confirmada' %}
                 <div class="logo">Transacción Confirmada</div>
                 <p class="subtitulo">
-                    Se ha recibido tu pago. También se ha generado un token para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la venta.
+                    Se ha recibido tu pago. También se ha generado un código para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la venta.
                 </p>
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.

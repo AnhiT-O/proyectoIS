@@ -7,68 +7,77 @@ from django.contrib import messages
 from .forms import LoginForm, SimuladorForm
 from monedas.models import Moneda
 from django.http import JsonResponse
-from transacciones.models import Transaccion, calcular_conversion, redondear_efectivo
+from transacciones.models import Transaccion, calcular_conversion
 
 def inicio(request):
     """
-    Vista para la página de inicio. Muestra las cotizaciones de las monedas activas.
-    -   Si el usuario es un operador con un cliente seleccionado, muestra los precios personalizados.
-    -   Si el usuario es un administrador, puede seleccionar un segmento para ver precios con beneficios específicos.
-    -   Si el usuario no está autenticado, muestra los precios base sin beneficios.
+    Vista para la página de inicio. 
+
+    - Para usuarios no autenticados muestra las cotizaciones base de las monedas activas y un simulador de conversiones.
+
+    - Para usuarios autenticados con un cliente seleccionado se le muestra además las cotizaciones personalizadas según el cliente y la opción de operar con divisas.
+
+    - Para usuarios con permiso de gestionar cotizaciones se le muestra un selector de segmentaciones para ver las cotizaciones según el segmento seleccionado 
+    (Minorista, Corporativo, VIP).
+
+    Note:
+        La barra de navegación se muestra todo el tiempo, pero con diferentes opciones según el estado de autenticación y permisos del usuario.
+
+        - Usuarios no autenticados: opciones para iniciar sesión o registrarse.
+
+        - Usuarios autenticados sin permisos especiales: opciones para ver perfil, ver clientes y cerrar sesión.
+
+        - Usuarios con permisos especiales: panel de gestiones según sus permisos.
     """
     context = {}
     # Obtener las monedas activas
     monedas_activas = Moneda.objects.filter(activa=True)
     
-    # Obtener todas las segmentaciones disponibles
-    segmentaciones_lista = {
-        'minorista': 0,
-        'corporativo': 5,
-        'vip': 10
-    }
+    # Preparar lista de segmentaciones para el template
+    segmentaciones= [
+        {'segmento': 'Minorista', 'porcentaje_beneficio': 0},
+        {'segmento': 'Corporativo', 'porcentaje_beneficio': 5},
+        {'segmento': 'VIP', 'porcentaje_beneficio': 10}
+    ]
     
     # Obtener el segmento seleccionado
     segmento_seleccionado = None
-    porcentaje_beneficio_admin = 0
     if request.user.has_perm('monedas.cotizacion'):
         segmento_id = request.GET.get('segmento')
-        if segmento_id and segmento_id in ['minorista', 'corporativo', 'vip']:
+        if segmento_id in ['minorista', 'corporativo', 'vip']:
             segmento_seleccionado = segmento_id
-            porcentaje_beneficio_admin = segmentaciones_lista[segmento_seleccionado]
         context['segmento_seleccionado'] = segmento_seleccionado
+        context['segmentaciones_listas'] = segmentaciones
     
     cotizaciones = []
     for moneda in monedas_activas:
-        if hasattr(request.user, 'cliente_activo') and request.user.cliente_activo:
+        if request.user.is_authenticated and request.user.cliente_activo:
             # Usuario u operador con cliente seleccionado
-            cliente = request.user.cliente_activo
-            precios = moneda.get_precios_cliente(cliente)
+            precios = moneda.get_precios_cliente(request.user.cliente_activo)
         elif segmento_seleccionado:
-            # Administrador con segmento seleccionado - usar porcentaje de beneficio específico
+            # Administrador con segmento seleccionado - usar segmento específico
             precios = {
-                'precio_compra': moneda.calcular_precio_compra(porcentaje_beneficio_admin),
-                'precio_venta': moneda.calcular_precio_venta(porcentaje_beneficio_admin)
+                'precio_compra': moneda.calcular_precio_compra(segmento_seleccionado),
+                'precio_venta': moneda.calcular_precio_venta(segmento_seleccionado)
             }
         else:
             # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
             precios = {
-                'precio_compra': moneda.calcular_precio_compra(0),
-                'precio_venta': moneda.calcular_precio_venta(0)
+                'precio_compra': moneda.calcular_precio_compra(),
+                'precio_venta': moneda.calcular_precio_venta()
             }
         
         cotizaciones.append({
             'moneda': moneda,
-            'simbolo': moneda.simbolo,
             'precio_compra': precios['precio_compra'],
             'precio_venta': precios['precio_venta'],
-            'fecha': moneda.fecha_cotizacion
         })
-    cotizaciones.sort(key=lambda x: x['fecha'], reverse=True)
+    cotizaciones.sort(key=lambda x: x['moneda'].fecha_cotizacion, reverse=True)
     context['cotizaciones'] = cotizaciones
     
     return render(request, 'inicio.html', context)
 
-def custom_permission_denied_view(request, exception):
+def custom_permission_denied_view(request, exception=None):
     """
     Vista personalizada para manejar errores 403 (Permission Denied). 
     Se renderiza cuando un usuario autenticado no tiene permisos para acceder a una vista
