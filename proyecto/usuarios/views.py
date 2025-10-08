@@ -63,6 +63,7 @@ def registro_usuario(request):
     Vista para registrar un nuevo usuario.
 
     -   Si el método es POST, procesa el formulario de registro y envía un email de confirmación de registro.
+    
     -   Si el método es GET, muestra el formulario de registro para completarse.
 
     Raises:
@@ -75,7 +76,7 @@ def registro_usuario(request):
                 user = form.save()
                 enviar_email_confirmacion(request, user)
                 messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
-                return redirect('login')
+                return redirect('inicio')
             except Exception as e:
                 messages.error(request, f'Error al registrar usuario: {e}')
     else:
@@ -154,8 +155,7 @@ def activar_cuenta(request, uidb64, token):
     
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
-        operador_role = Group.objects.get(name='Operador')
-        user.groups.add(operador_role)
+        user.groups.add(Group.objects.get(name='Operador'))
         user.save()
         login(request, user)
         messages.success(request, 'Cuenta activada exitosamente. ¡Bienvenido!')
@@ -167,8 +167,8 @@ def activar_cuenta(request, uidb64, token):
             if not user.is_active:
                 # Eliminar el usuario de la base de datos
                 user.delete()
-                messages.error(request, 
-                    'El enlace de activación ha expirado y tu cuenta ha sido eliminada.'
+                messages.warning(request, 
+                    'El enlace de activación ha expirado y la cuenta ha sido eliminada.'
                     'Por favor, regístrate nuevamente.')
             else:
                 # Si el usuario ya está activo, solo mostrar error de enlace inválido
@@ -176,7 +176,7 @@ def activar_cuenta(request, uidb64, token):
         else:
             messages.error(request, 'Hubo un error inesperado. Contacta a soporte.')
 
-        return redirect('usuarios:registro')
+        return redirect('inicio')
 
 @login_required
 def perfil(request):

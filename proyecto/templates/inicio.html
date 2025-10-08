@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Global Exchange - Bienvenido{% endblock %}
+{% block title %}Global Exchange - Inicio{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
@@ -19,8 +19,8 @@
                 <label for="segmento">Ver cotizaciones para segmento:</label>
                 <select class="select-filtro" name="segmento" id="segmento" onchange="this.form.submit()">
                     {% for seg in segmentaciones_listas %}
-                        <option value="{{ seg.id }}" {% if request.GET.segmento == seg.id %}selected{% endif %}>
-                            {{ seg.nombre }} ({{ seg.porcentaje_beneficio }}%)
+                        <option value="{{ seg.segmento }}" {% if request.GET.segmento == seg.segmento %}selected{% endif %}>
+                            {{ seg.segmento }} ({{ seg.porcentaje_beneficio }}%)
                         </option>
                     {% endfor %}
                 </select>
@@ -42,10 +42,10 @@
             <tbody>
                 {% for cotizacion in cotizaciones %}
                     <tr>
-                        <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.simbolo }}</span></td>
+                        <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.moneda.simbolo }}</span></td>
                         <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
                         <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
-                        <td>{{ cotizacion.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>{{ cotizacion.moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -43,6 +43,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         max_length=13,
         unique=True
     )
+    telefono = models.CharField(
+        max_length=15,
+        unique=True,
+    )
     cliente_activo = models.ForeignKey(
         'clientes.Cliente',
         on_delete=models.SET_NULL,
