@@ -143,7 +143,6 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
-    cheques = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Tauser"
@@ -209,6 +208,18 @@ class Tauser(models.Model):
                 
         except Exception:
             return False
+        
+class Cheque(models.Model):
+    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
+    monto = models.BigIntegerField()
+    firma = models.CharField(max_length=100)
+    fecha_depositado = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Cheque"
+        verbose_name_plural = "Cheques"
+        db_table = "cheques"
+        default_permissions = []
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)

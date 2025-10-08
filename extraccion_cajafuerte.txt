@@ -1,0 +1,4 @@
+Extracción
+Dólar estadounidense	100	20
+Euro	500	5
+Guaraní	100000	30

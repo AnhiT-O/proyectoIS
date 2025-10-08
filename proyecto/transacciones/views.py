@@ -1649,7 +1649,8 @@ def tauser_detalle(request, pk):
     Vista para mostrar los detalles completos de un TAUser específico.
     
     Muestra información detallada del TAUser incluyendo puerto, estado,
-    billetes asociados y sus cantidades disponibles. Incluye filtrado por moneda.
+    billetes asociados y sus cantidades disponibles, y cheques depositados.
+    Incluye filtrado por moneda para billetes.
     
     Args:
         request (HttpRequest): Petición HTTP
@@ -1664,18 +1665,32 @@ def tauser_detalle(request, pk):
     Context:
         - tauser: Instancia del TAUser
         - billetes_tauser: QuerySet de billetes asociados al TAUser
+        - cheques_tauser: QuerySet de cheques asociados al TAUser
+        - cantidad_cheques: Cantidad total de cheques
+        - total_cheques: Suma total de los montos de cheques
         - monedas_disponibles: Lista de monedas que tienen billetes en este TAUser
-        - moneda_filtro: Moneda seleccionada para filtrar (si aplica)
+        - moneda_filtro: Moneda seleccionada para filtrar (si aplica)  
         - totales_por_moneda: Diccionario con totales por moneda
     """
-    from .models import BilletesTauser
+    from .models import BilletesTauser, Cheque
     from monedas.models import Moneda
-    from django.db.models import Sum, F
+    from django.db.models import Sum, F, Count
     
     tauser = get_object_or_404(Tauser, pk=pk)
     
     # Obtener todos los billetes del TAUser (sin filtrar para obtener todas las monedas disponibles)
     todos_billetes_tauser = BilletesTauser.objects.filter(tauser=tauser)
+    
+    # Obtener todos los cheques del TAUser
+    cheques_tauser = Cheque.objects.filter(tauser=tauser).order_by('-fecha_depositado')
+    
+    # Calcular estadísticas de cheques
+    stats_cheques = cheques_tauser.aggregate(
+        cantidad=Count('id'),
+        total=Sum('monto')
+    )
+    cantidad_cheques = stats_cheques['cantidad'] or 0
+    total_cheques = stats_cheques['total'] or 0
     
     # Calcular totales por moneda
     totales_por_moneda = {}
@@ -1748,6 +1763,9 @@ def tauser_detalle(request, pk):
     context = {
         'tauser': tauser,
         'billetes_tauser': billetes_tauser,
+        'cheques_tauser': cheques_tauser,
+        'cantidad_cheques': cantidad_cheques,
+        'total_cheques': total_cheques,
         'monedas_disponibles': monedas_disponibles,
         'moneda_filtro': moneda_filtro,
         'totales_por_moneda': totales_por_moneda

@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, leer_cheque, procesar_transaccion
+from transacciones.models import Transaccion, Tauser, BilletesTauser, Cheque, billetes_necesarios, leer_cheque, procesar_transaccion
 from .forms import TokenForm, IngresoForm
 from monedas.models import Denominacion
 
@@ -71,9 +71,13 @@ def caja_fuerte(request):
                     tauser_billete.save()
                     print(f'Se han extraído {cantidades[i]} billetes de {billetes[i]} {valores[i]}')
             else:
-                print(f'Se ha extraído todos los cheques del tauser. Total: Gs. {tauser.cheques}.')
-                tauser.cheques = 0
-                tauser.save()
+                cantidad = Cheque.objects.filter(tauser=tauser).count()
+                if cantidad == 0:
+                    print('No hay cheques para extraer.')
+                    return redirect('caja_fuerte')
+                total = sum(cheque.monto for cheque in Cheque.objects.filter(tauser=tauser))
+                print(f'Se ha extraído todos los cheques ({cantidad}) del tauser. Total: Gs. {total}.')
+                Cheque.objects.filter(tauser=tauser).delete()
         else:
             print(request, 'No se reconoce la acción.')
             return redirect('caja_fuerte')
@@ -137,15 +141,18 @@ def ingreso_cheque(request, codigo):
             archivo = form.cleaned_data['archivo']
             lineas = archivo.readlines()
             lineas = [linea.decode('utf-8').strip() for linea in lineas]
-            monto = leer_cheque(lineas)
-            if monto:
-                if transaccion.precio_final == monto:
-                    transaccion.pagado = monto
+            info_cheque = leer_cheque(lineas)
+            if info_cheque:
+                if transaccion.precio_final == info_cheque['monto']:
+                    transaccion.pagado = info_cheque['monto']
                     transaccion.fecha_hora = timezone.now()
                     transaccion.save()
                     tauser = Tauser.objects.get(puerto=int(request.get_port()))
-                    tauser.cheques += monto
-                    tauser.save()
+                    Cheque.objects.create(
+                        tauser=tauser,
+                        monto=info_cheque['monto'],
+                        firma=info_cheque['firma']
+                    )
                     procesar_transaccion(transaccion, tauser)
                     return redirect('exito', codigo=codigo)
                 else:

@@ -112,12 +112,12 @@ COPY public.denominaciones (valor, moneda_id) FROM stdin;
 20000	4
 \.
 
-COPY public.tausers (puerto, cheques) FROM stdin;
-8001	0
-8002	0
-8003	0
-8004	0
-8005	0
+COPY public.tausers (puerto) FROM stdin;
+8001
+8002
+8003
+8004
+8005
 \.
 
 COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;

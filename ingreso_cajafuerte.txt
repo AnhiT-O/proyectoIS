@@ -1,0 +1,4 @@
+Ingreso
+Guaraní	100000	10
+Guaraní	50000	5
+Dólar estadounidense	100	5

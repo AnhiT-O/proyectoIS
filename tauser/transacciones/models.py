@@ -141,7 +141,6 @@ def crear_limite_global_inicial(sender, **kwargs):
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
-    cheques = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Tauser"
@@ -160,6 +159,18 @@ class Tauser(models.Model):
             str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
         """
         return f"TAUser Puerto {self.puerto}"
+    
+class Cheque(models.Model):
+    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
+    monto = models.BigIntegerField()
+    firma = models.CharField(max_length=100)
+    fecha_depositado = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Cheque"
+        verbose_name_plural = "Cheques"
+        db_table = "cheques"
+        default_permissions = []
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
@@ -699,7 +710,6 @@ def billetes_necesarios(monto, denominaciones, disponible):
     return dp[monto][1]  # Retornar la configuración óptima
 
 def leer_cheque(lineas):
-    print(lineas)
     if lineas:
         if lineas[0] == 'Páguese a la orden de Global Exchange':
             if lineas[1].startswith('La suma de Guaraníes: '):
@@ -709,7 +719,7 @@ def leer_cheque(lineas):
                         firma = lineas[2].replace('Firma: ', '').strip()
                         if firma:
                             try:
-                                return int(monto_numeros)
+                                return {'monto': int(monto_numeros), 'firma': firma}
                             except ValueError:
                                 return None
     return None
