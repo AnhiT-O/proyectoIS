@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function actualizarOpcionesMedios() {
         if (operacionSeleccionada === 'compra') {
             actualizarMedioPago([
-                { value: 'no_recargo', text: 'Efectivo/Cheque/Transferencia' },
+                { value: 'Efectivo', text: 'Efectivo' },
+                { value: 'Cheque', text: 'Cheque' },
+                { value: 'Transferencia', text: 'Transferencia' },
                 { value: '{"brand": "VISA"}', text: 'Tarjeta de Crédito Visa' },
                 { value: '{"brand": "MASTERCARD"}', text: 'Tarjeta de Crédito Mastercard' },
                 { value: 'Tigo Money', text: 'Tigo Money' },
@@ -79,23 +81,24 @@ document.addEventListener('DOMContentLoaded', function() {
             ]);
             
             actualizarMedioCobro([
-                { value: 'no_recargo', text: 'Efectivo' }
+                { value: 'Efectivo', text: 'Efectivo' }
             ]);
         } else if (operacionSeleccionada === 'venta') {
             if (monedaSelect.options[monedaSelect.selectedIndex]?.text === 'Dólar estadounidense') {
                 actualizarMedioPago([
-                    { value: 'no_recargo', text: 'Efectivo' },
+                    { value: 'Efectivo', text: 'Efectivo' },
                     { value: '{"brand": "VISA"}', text: 'Tarjeta de Crédito Visa' },
                     { value: '{"brand": "MASTERCARD"}', text: 'Tarjeta de Crédito Mastercard' },
                 ]);
             } else {
                 actualizarMedioPago([
-                    { value: 'no_recargo', text: 'Efectivo' }
+                    { value: 'Efectivo', text: 'Efectivo' }
                 ]);
             }
             
             actualizarMedioCobro([
-                { value: 'no_recargo', text: 'Efectivo/Transferencia' },
+                { value: 'Efectivo', text: 'Efectivo' },
+                { value: 'Cuenta Bancaria', text: 'Cuenta Bancaria' },
                 { value: '{"tipo_billetera": "Tigo Money"}', text: 'Tigo Money' },
                 { value: '{"tipo_billetera": "Billetera Personal"}', text: 'Billetera Personal' },
                 { value: '{"tipo_billetera": "Zimple"}', text: 'Zimple' }
@@ -153,8 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
         errores.forEach(error => {
             error.style.display = 'none';
         });
-        
-        const campos = formulario.querySelectorAll('.form-control');
     }
     
     function manejarEnvioFormulario(event) {
@@ -210,10 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
             resultadoDiv.innerHTML = 'Calculando...';
         }
     }
-    
-    function ocultarCargando() {
-        // El resultado se mostrará en mostrarResultado o mostrarErrorGeneral
-    }
 
     function formatNumber(num) {
         return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -221,11 +218,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function mostrarResultado(data) {
         if (!resultadoDiv) return;
-        
+
         let resultadoHTML = `
             <div style="text-align: left;">
-                <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
         `;
+
+        if (data.redondeo_monto) {
+            if (operacionSeleccionada === 'compra') {
+                resultadoHTML += `
+                    <small>Se redondea el monto ingresado a ${formatNumber(data.monto_final)} por medio de cobro Efectivo</small><br>
+                    <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
+                `;
+            } else {
+                resultadoHTML += `
+                    <small>Se redondea el monto ingresado a ${formatNumber(data.monto_final)} por medio de pago Efectivo</small><br>
+                    <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
+                `;
+            }
+        } else {
+            resultadoHTML += `<small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>`;
+        }
+
         
         if (data.beneficio_segmento > 0) {
             resultadoHTML += `<small>Beneficio por segmento: ${formatNumber(data.beneficio_segmento)}</small><br>`;
@@ -240,22 +253,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (operacionSeleccionada === 'compra') {
-            resultadoHTML += `
+            if (data.redondeo_precio_final) {           
+                resultadoHTML += `
                     <br>
                     <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
                         Costo: ${formatNumber(data.precio_final)} Gs.
-                    </span>
+                    </span><br>
+                    <small>Se redondea el costo por medio de pago Efectivo</small>
                 </div>
             `;
+            } else  {
+                resultadoHTML += `
+                        <br>
+                        <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
+                            Costo: ${formatNumber(data.precio_final)} Gs.
+                        </span>
+                    </div>
+                `;
+            }
         }
         else {
-            resultadoHTML += `
+            if (data.redondeo_precio_final) {
+                resultadoHTML += `
                     <br>
-                    <span style="font-size: 1.1em; font-weight: bold; color: #2c5530;">
+                    <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
                         Cobro: ${formatNumber(data.precio_final)} Gs.
-                    </span>
+                    </span><br>
+                    <small>Se redondea el cobro por medio de cobro Efectivo</small>
                 </div>
             `;
+            } else  {
+                resultadoHTML += `
+                        <br>
+                        <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
+                            Cobro: ${formatNumber(data.precio_final)} Gs.
+                        </span>
+                    </div>
+                `;
+            }
         }
         
         resultadoDiv.innerHTML = resultadoHTML;

@@ -57,8 +57,8 @@ def inicio(request):
         elif segmento_seleccionado:
             # Administrador con segmento seleccionado - usar segmento específico
             precios = {
-                'precio_compra': moneda.calcular_precio_compra(segmento_seleccionado),
-                'precio_venta': moneda.calcular_precio_venta(segmento_seleccionado)
+                'precio_compra': moneda.calcular_precio_compra(segmento_seleccionado.lower()),
+                'precio_venta': moneda.calcular_precio_venta(segmento_seleccionado.lower())
             }
         else:
             # Administrador sin segmento seleccionado o usuario sin cliente - mostrar precios base
@@ -128,16 +128,13 @@ def simular(request):
     """
     if request.method == 'GET':
         form = SimuladorForm()
-        
-        return render(request, 'simulador.html', {
-            'form': form
-        })
+        return render(request, 'simulador.html', {'form': form})
 
     elif request.method == 'POST':
         try:
             # Obtener el cliente activo si el usuario está autenticado
             cliente = None
-            if request.user.is_authenticated and hasattr(request.user, 'cliente_activo'):
+            if request.user.is_authenticated and request.user.cliente_activo:
                 cliente = request.user.cliente_activo
 
             # Crear el formulario con los datos POST
@@ -157,6 +154,9 @@ def simular(request):
                     'beneficio_segmento': float(resultado['beneficio_segmento']),
                     'monto_recargo_pago': float(resultado['monto_recargo_pago']),
                     'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),
+                    'monto_final': float(resultado['monto']),
+                    'redondeo_monto': True if resultado['redondeo_efectivo_monto'] > 0 else False,
+                    'redondeo_precio_final': True if resultado['redondeo_efectivo_precio_final'] > 0 else False,
                     'precio_final': float(resultado['precio_final'])
                 }
 
