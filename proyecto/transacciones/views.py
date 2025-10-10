@@ -136,7 +136,7 @@ def compra_medio_pago(request):
     Segundo paso del proceso de compra: selección del medio de pago.
     
     Permite al usuario seleccionar cómo va a pagar por la moneda extranjera.
-    Las opciones incluyen efectivo, cheque, billetera electrónica, transferencia
+    Las opciones incluyen efectivo, billetera electrónica, transferencia
     bancaria y tarjetas de crédito registradas en Stripe.
     
     Validaciones realizadas:
@@ -260,7 +260,6 @@ def compra_medio_pago(request):
     
     medios_pago_disponibles = [
         'Efectivo',
-        'Cheque',
         'Transferencia Bancaria'
     ]
     # Agregar billeteras electrónicas como medio de pago si hay recargos configurados
@@ -452,7 +451,7 @@ def compra_confirmacion(request):
     Cuarto paso del proceso de compra: confirmación y creación de transacción.
     
     Muestra un resumen completo de la transacción y procede a crearla en
-    la base de datos. Para medios de pago como Efectivo o Cheque,
+    la base de datos. Para medios de pago como Efectivo o Transferencia,
     genera un token de seguridad con validez de 5 minutos.
     
     Acciones realizadas:
@@ -1649,7 +1648,7 @@ def tauser_detalle(request, pk):
     Vista para mostrar los detalles completos de un TAUser específico.
     
     Muestra información detallada del TAUser incluyendo puerto, estado,
-    billetes asociados y sus cantidades disponibles, y cheques depositados.
+    billetes asociados y sus cantidades disponibles.
     Incluye filtrado por moneda para billetes.
     
     Args:
@@ -1665,14 +1664,11 @@ def tauser_detalle(request, pk):
     Context:
         - tauser: Instancia del TAUser
         - billetes_tauser: QuerySet de billetes asociados al TAUser
-        - cheques_tauser: QuerySet de cheques asociados al TAUser
-        - cantidad_cheques: Cantidad total de cheques
-        - total_cheques: Suma total de los montos de cheques
         - monedas_disponibles: Lista de monedas que tienen billetes en este TAUser
         - moneda_filtro: Moneda seleccionada para filtrar (si aplica)  
         - totales_por_moneda: Diccionario con totales por moneda
     """
-    from .models import BilletesTauser, Cheque
+    from .models import BilletesTauser
     from monedas.models import Moneda
     from django.db.models import Sum, F, Count
     
@@ -1680,17 +1676,6 @@ def tauser_detalle(request, pk):
     
     # Obtener todos los billetes del TAUser (sin filtrar para obtener todas las monedas disponibles)
     todos_billetes_tauser = BilletesTauser.objects.filter(tauser=tauser)
-    
-    # Obtener todos los cheques del TAUser
-    cheques_tauser = Cheque.objects.filter(tauser=tauser).order_by('-fecha_depositado')
-    
-    # Calcular estadísticas de cheques
-    stats_cheques = cheques_tauser.aggregate(
-        cantidad=Count('id'),
-        total=Sum('monto')
-    )
-    cantidad_cheques = stats_cheques['cantidad'] or 0
-    total_cheques = stats_cheques['total'] or 0
     
     # Calcular totales por moneda
     totales_por_moneda = {}
@@ -1763,9 +1748,6 @@ def tauser_detalle(request, pk):
     context = {
         'tauser': tauser,
         'billetes_tauser': billetes_tauser,
-        'cheques_tauser': cheques_tauser,
-        'cantidad_cheques': cantidad_cheques,
-        'total_cheques': total_cheques,
         'monedas_disponibles': monedas_disponibles,
         'moneda_filtro': moneda_filtro,
         'totales_por_moneda': totales_por_moneda

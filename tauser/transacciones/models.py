@@ -160,18 +160,6 @@ class Tauser(models.Model):
         """
         return f"TAUser Puerto {self.puerto}"
     
-class Cheque(models.Model):
-    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
-    monto = models.BigIntegerField()
-    firma = models.CharField(max_length=100)
-    fecha_depositado = models.DateField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Cheque"
-        verbose_name_plural = "Cheques"
-        db_table = "cheques"
-        default_permissions = []
-    
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
     denominacion = models.ForeignKey(Denominacion, on_delete=models.CASCADE)
@@ -309,7 +297,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
             monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
-        # Si el pago es en efectivo, cheque o transferencia, no hay recargo
+        # Si el pago es en efectivo o transferencia, no hay recargo
         else:
             monto_recargo_pago = 0
             porc_recargo_pago = 0
@@ -511,7 +499,7 @@ def generar_token_transaccion(transaccion):
     Genera un token único de seguridad para transacciones específicas.
     
     Se utiliza para transacciones con medios de pago que requieren verificación
-    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
+    adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.
     """
     # Generar token único
     token = secrets.token_urlsafe(32)
@@ -708,18 +696,3 @@ def billetes_necesarios(monto, denominaciones, disponible):
         return None  # No se pudo cubrir el monto con los billetes disponibles
     
     return dp[monto][1]  # Retornar la configuración óptima
-
-def leer_cheque(lineas):
-    if lineas:
-        if lineas[0] == 'Páguese a la orden de Global Exchange':
-            if lineas[1].startswith('La suma de Guaraníes: '):
-                monto_numeros = lineas[1].replace('La suma de Guaraníes: ', '').replace('.', '').strip()
-                if monto_numeros:
-                    if lineas[2].startswith('Firma: '):
-                        firma = lineas[2].replace('Firma: ', '').strip()
-                        if firma:
-                            try:
-                                return {'monto': int(monto_numeros), 'firma': firma}
-                            except ValueError:
-                                return None
-    return None

@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from transacciones.models import Transaccion, Tauser, BilletesTauser, Cheque, billetes_necesarios, leer_cheque, procesar_transaccion
+from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion
 from .forms import TokenForm, IngresoForm
 from monedas.models import Denominacion
 
@@ -44,7 +44,7 @@ def caja_fuerte(request):
                     tauser_billete.cantidad += cantidades[i]
                     tauser_billete.save()
                     print(f'Se han ingresado {cantidades[i]} billetes de {billetes[i]} {valores[i]}')
-            elif accion == 'Extracción':
+            else:
                 for i in range(len(billetes)):
                     try:
                         if billetes[i] == 'Guaraní':
@@ -70,14 +70,6 @@ def caja_fuerte(request):
                     tauser_billete.cantidad -= cantidades[i]
                     tauser_billete.save()
                     print(f'Se han extraído {cantidades[i]} billetes de {billetes[i]} {valores[i]}')
-            else:
-                cantidad = Cheque.objects.filter(tauser=tauser).count()
-                if cantidad == 0:
-                    print('No hay cheques para extraer.')
-                    return redirect('caja_fuerte')
-                total = sum(cheque.monto for cheque in Cheque.objects.filter(tauser=tauser))
-                print(f'Se ha extraído todos los cheques ({cantidad}) del tauser. Total: Gs. {total}.')
-                Cheque.objects.filter(tauser=tauser).delete()
         else:
             print(request, 'No se reconoce la acción.')
             return redirect('caja_fuerte')
@@ -115,9 +107,7 @@ def ingreso_token(request):
                         messages.error(request, 'El token ha expirado.')
                     return redirect('ingreso_token')
                 
-                if transaccion.medio_pago == 'Cheque':
-                    return redirect('ingreso_cheque', codigo=codigo)
-                elif transaccion.medio_pago == 'Efectivo':
+                if transaccion.medio_pago == 'Efectivo':
                     return redirect('ingreso_billetes', codigo=codigo)
                 else:
                     messages.error(request, 'El token no corresponde a una operación de Tauser.')
@@ -128,42 +118,6 @@ def ingreso_token(request):
     else:
         form = TokenForm()
     return render(request, 'ingreso_token.html', {'form': form})
-
-def ingreso_cheque(request, codigo):
-    try:
-        transaccion = Transaccion.objects.get(token=codigo)
-    except Transaccion.DoesNotExist:
-        messages.error(request, 'Transacción no encontrada.')
-        return redirect('ingreso_token')
-    if request.method == 'POST':
-        form = IngresoForm(request.POST, request.FILES)
-        if form.is_valid():
-            archivo = form.cleaned_data['archivo']
-            lineas = archivo.readlines()
-            lineas = [linea.decode('utf-8').strip() for linea in lineas]
-            info_cheque = leer_cheque(lineas)
-            if info_cheque:
-                if transaccion.precio_final == info_cheque['monto']:
-                    transaccion.pagado = info_cheque['monto']
-                    transaccion.fecha_hora = timezone.now()
-                    transaccion.save()
-                    tauser = Tauser.objects.get(puerto=int(request.get_port()))
-                    Cheque.objects.create(
-                        tauser=tauser,
-                        monto=info_cheque['monto'],
-                        firma=info_cheque['firma']
-                    )
-                    procesar_transaccion(transaccion, tauser)
-                    return redirect('exito', codigo=codigo)
-                else:
-                    messages.error(request, f'El monto del cheque (Gs. {monto:,.0f}'.replace(",", ".") + f') no coincide con el monto a pagar (Gs. {transaccion.precio_final:,.0f}'.replace(",", ".") + '). Se devuelve lo ingresado.')
-                    return redirect('ingreso_cheque', codigo=codigo)
-            else:
-                messages.error(request, 'Cheque no válido. Intente nuevamente.')
-                return redirect('ingreso_cheque', codigo=codigo)
-    else:
-        form = IngresoForm()
-    return render(request, 'ingreso_cheque.html', {'form': form, 'transaccion': transaccion})
 
 def ingreso_billetes(request, codigo):
     try:

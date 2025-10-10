@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (operacionSeleccionada === 'compra') {
             actualizarMedioPago([
                 { value: 'Efectivo', text: 'Efectivo' },
-                { value: 'Cheque', text: 'Cheque' },
                 { value: 'Transferencia', text: 'Transferencia' },
                 { value: '{"brand": "VISA"}', text: 'Tarjeta de Crédito Visa' },
                 { value: '{"brand": "MASTERCARD"}', text: 'Tarjeta de Crédito Mastercard' },

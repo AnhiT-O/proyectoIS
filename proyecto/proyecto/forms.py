@@ -80,7 +80,6 @@ class SimuladorForm(forms.Form):
     medio_pago = forms.ChoiceField(
         choices=[
                 ('Efectivo', 'Efectivo'),
-                ('Cheque', 'Cheque'),
                 ('Transferencia', 'Transferencia'),
                 ('{"brand": "VISA"}', 'Tarjeta de Crédito Visa'),
                 ('{"brand": "MASTERCARD"}', 'Tarjeta de Crédito Mastercard'),

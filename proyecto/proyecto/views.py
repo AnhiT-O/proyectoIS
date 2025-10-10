@@ -44,7 +44,7 @@ def inicio(request):
     segmento_seleccionado = None
     if request.user.has_perm('monedas.cotizacion'):
         segmento_id = request.GET.get('segmento')
-        if segmento_id in ['minorista', 'corporativo', 'vip']:
+        if segmento_id in ['Minorista', 'Corporativo', 'VIP']:
             segmento_seleccionado = segmento_id
         context['segmento_seleccionado'] = segmento_seleccionado
         context['segmentaciones_listas'] = segmentaciones
@@ -124,7 +124,8 @@ def logout_usuario(request):
 
 def simular(request):
     """
-    Vista para manejar el simulador de conversiones de moneda.
+    Vista para manejar el simulador de conversiones de moneda. 
+    Se maneja tanto la visualización del formulario como el procesamiento de las solicitudes AJAX para realizar las conversiones.
     """
     if request.method == 'GET':
         form = SimuladorForm()
