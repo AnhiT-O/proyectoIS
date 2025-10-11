@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion
+from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion, calcular_conversion, verificar_cambio_cotizacion
 from .forms import TokenForm, IngresoForm
 from monedas.models import Denominacion
 
@@ -79,42 +79,85 @@ def caja_fuerte(request):
 
 def ingreso_token(request):
     if request.method == 'POST':
-        form = TokenForm(request.POST)
-        if form.is_valid():
-            codigo = form.cleaned_data['codigo']
+        accion = request.POST.get('accion')
+        if accion == 'aceptar':
             try:
-                transaccion = Transaccion.objects.get(token=codigo)
+                transaccion = Transaccion.objects.get(id=request.session.get('transaccion'))
             except Transaccion.DoesNotExist:
                 messages.error(request, 'Transacción no encontrada.')
                 return redirect('ingreso_token')
-            
-            if transaccion.estado == 'Cancelada':
-                messages.error(request, 'Este token corresponde a una transacción ya cancelada.')
+            return redirect('ingreso_billetes', codigo=transaccion.token)
+        elif accion == 'cancelar':
+            try:
+                transaccion = Transaccion.objects.get(id=request.session.get('transaccion'))
+            except Transaccion.DoesNotExist:
+                messages.error(request, 'Transacción no encontrada.')
                 return redirect('ingreso_token')
-            
-            if transaccion.estado == 'Completa':
-                messages.error(request, 'Este token corresponde a una transacción ya completada.')
-                return redirect('ingreso_token')
-            
-            if transaccion.estado == 'Pendiente':
-                if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
-                    transaccion.estado = 'Cancelada'
-                    transaccion.razon = 'Expira el tiempo para confirmar la transacción'
-                    transaccion.save()
-                    if transaccion.pagado > 0:
-                        messages.info(request, 'El token ha expirado. Contacta a soporte para el reembolso de lo pagado.')
-                    else:
-                        messages.error(request, 'El token ha expirado.')
+            transaccion.estado = 'Cancelada'
+            transaccion.razon = 'Usuario cancela debido a cambios de cotización'
+            transaccion.save()
+            messages.info(request, 'Transacción cancelada.')
+            return redirect('inicio')
+        elif accion == 'enviar':
+            form = TokenForm(request.POST)
+            if form.is_valid():
+                codigo = form.cleaned_data['codigo']
+                try:
+                    transaccion = Transaccion.objects.get(token=codigo)
+                except Transaccion.DoesNotExist:
+                    messages.error(request, 'Transacción no encontrada.')
                     return redirect('ingreso_token')
                 
-                if transaccion.medio_pago == 'Efectivo':
-                    return redirect('ingreso_billetes', codigo=codigo)
-                else:
-                    messages.error(request, 'El token no corresponde a una operación de Tauser.')
+                if transaccion.estado == 'Cancelada':
+                    messages.error(request, 'Este token corresponde a una transacción ya cancelada.')
                     return redirect('ingreso_token')
-            else:
-                procesar_transaccion(transaccion, Tauser.objects.get(puerto=int(request.get_port())))
-                return redirect('exito', codigo=codigo)
+                
+                if transaccion.estado == 'Completa':
+                    messages.error(request, 'Este token corresponde a una transacción ya completada.')
+                    return redirect('ingreso_token')
+                
+                if transaccion.estado == 'Pendiente':
+                    if transaccion.fecha_hora < timezone.now() - timedelta(minutes=5):
+                        transaccion.estado = 'Cancelada'
+                        transaccion.razon = 'Expira el tiempo para confirmar la transacción'
+                        transaccion.save()
+                        if transaccion.pagado > 0:
+                            messages.info(request, 'El token ha expirado. Contacta a soporte para el reembolso de lo pagado.')
+                        else:
+                            messages.error(request, 'El token ha expirado.')
+                        return redirect('ingreso_token')
+                    
+                    if transaccion.medio_pago == 'Efectivo':
+                        cambios = verificar_cambio_cotizacion(transaccion)
+                        if cambios and cambios.get('hay_cambios'):
+                            datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
+                            transaccion.precio_base = datos_transaccion['precio_base']
+                            transaccion.cotizacion = datos_transaccion['cotizacion']
+                            transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
+                            transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
+                            transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
+                            transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
+                            transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
+                            transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
+                            transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
+                            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
+                            transaccion.monto_original = datos_transaccion['monto_original']
+                            transaccion.monto = datos_transaccion['monto']
+                            transaccion.precio_final = datos_transaccion['precio_final']
+                            transaccion.save()
+                            request.session['transaccion'] = transaccion.id
+                            context = {
+                                'cambios': cambios,
+                                'transaccion': transaccion
+                            }
+                            return render(request, 'ingreso_token.html', context)
+                        return redirect('ingreso_billetes', codigo=codigo)
+                    else:
+                        messages.error(request, 'El token no corresponde a una operación de Tauser.')
+                        return redirect('ingreso_token')
+                else:
+                    procesar_transaccion(transaccion, Tauser.objects.get(puerto=int(request.get_port())))
+                    return redirect('exito', codigo=codigo)
     else:
         form = TokenForm()
     return render(request, 'ingreso_token.html', {'form': form})
@@ -238,7 +281,7 @@ def ingreso_billetes(request, codigo):
                     procesar_transaccion(transaccion, tauser)
                     return redirect('exito', codigo=codigo)
         else:
-            print(request, 'Billetes no reconocidos. Se devuelve lo ingresado.')
+            messages.error(request, 'Billetes no reconocidos. Se devuelve lo ingresado.')
             return redirect('ingreso_billetes', codigo=codigo)
     else:
         form = IngresoForm()

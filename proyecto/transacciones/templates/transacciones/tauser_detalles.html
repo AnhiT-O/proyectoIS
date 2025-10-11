@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Tauser Puerto {{ tauser.puerto }} - Global Exchange{% endblock %}
+{% block title %}Tauser - Sucursal {{ tauser.sucursal }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
@@ -13,7 +13,7 @@
 <div class="contenido">
     <div class="detalle-cabecera">
         <h1 class="detalle-nombre">
-            Tauser Puerto {{ tauser.puerto }}
+            Tauser - Sucursal {{ tauser.sucursal }}
         </h1>
     </div>
 

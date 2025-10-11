@@ -140,6 +140,7 @@ def crear_limite_global_inicial(sender, **kwargs):
 
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
+    sucursal = models.CharField(max_length=100, unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
 
     class Meta:
@@ -519,7 +520,7 @@ def generar_token_transaccion(transaccion):
         'datos': datos_token
     }
 
-def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
+def verificar_cambio_cotizacion(transaccion):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
@@ -537,43 +538,33 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
             - 'moneda': instancia de la moneda
     """
     try:
-        # Obtener datos de la sesión
-        datos_key = f'{tipo_transaccion}_datos'
-        precio_compra_key = 'precio_compra_inicial'
-        precio_venta_key = 'precio_venta_inicial'
-        
-        datos_transaccion = request.session.get(datos_key)
-        precio_compra_inicial = request.session.get(precio_compra_key)
-        precio_venta_inicial = request.session.get(precio_venta_key)
-        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
-            return None
-            
-        # Obtener moneda actual
-        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
-        cliente_activo = request.user.cliente_activo
-        
         # Calcular precios actuales
-        precios_actuales = moneda.get_precios_cliente(cliente_activo)
+        precios_actuales = transaccion.moneda.get_precios_cliente(transaccion.cliente)
         precio_compra_actual = precios_actuales['precio_compra']
         precio_venta_actual = precios_actuales['precio_venta']
 
         # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != precio_compra_inicial and 
-            precio_venta_actual != precio_venta_inicial
-        )
+        hay_cambios = False
+        if transaccion.tipo == 'compra':
+            if transaccion.cotizacion != precio_venta_actual:
+                hay_cambios = True
+        else:
+            if transaccion.cotizacion != precio_compra_actual:
+                hay_cambios = True
+        
+
         if hay_cambios:
             return {
                 'hay_cambios': True,
                 'valores_anteriores': {
-                    'precio_compra': precio_compra_inicial,
-                    'precio_venta': precio_venta_inicial
+                    'precio_compra': transaccion.cotizacion,
+                    'precio_venta': transaccion.cotizacion
                 },
                 'valores_actuales': {
                     'precio_compra': precio_compra_actual,
                     'precio_venta': precio_venta_actual
                 },
-                'moneda': moneda
+                'moneda': transaccion.moneda
             }
         
         return {'hay_cambios': False}

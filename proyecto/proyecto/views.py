@@ -147,7 +147,6 @@ def simular(request):
                 operacion = form.cleaned_data['operacion']
                 medio_pago = form.cleaned_data['medio_pago']
                 medio_cobro = form.cleaned_data['medio_cobro']
-
                 resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmento if cliente is not None else 'minorista')
                 respuesta = {
                     'success': True,

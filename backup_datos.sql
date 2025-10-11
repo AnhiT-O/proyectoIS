@@ -81,7 +81,7 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
 Euro	EUR	t	8500	200	150	2	2025-10-10 10:50:00
 Real	BRL	t	1310	20	30	2	2025-10-10 10:50:00
-Peso argentino	ARP	t	5	1	0	0	2025-10-10 10:50:00
+Peso argentino	ARP	t	5	1	1	0	2025-10-10 10:50:00
 \.
 
 
@@ -112,12 +112,12 @@ COPY public.denominaciones (valor, moneda_id) FROM stdin;
 20000	4
 \.
 
-COPY public.tausers (puerto) FROM stdin;
-8001
-8002
-8003
-8004
-8005
+COPY public.tausers (puerto, sucursal) FROM stdin;
+8001	Asunción
+8002	San Lorenzo
+8003	Fernando de la Mora
+8004	Ñemby
+8005	Luque
 \.
 
 COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
