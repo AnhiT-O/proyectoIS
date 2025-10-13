@@ -6,268 +6,14 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/editar_perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/editar_perfil.css' %}" media="(prefers-color-scheme: dark)">
 <!-- Fuente de Material Icons -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<style>
-/* === CONTENEDORES DE CONTRASEÑA === */
-.password-field-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-}
-
-.password-display {
-    flex: 1;
-    letter-spacing: 2px;
-    font-family: monospace;
-}
-
-.zona-cambio-password .password-field-container {
-    gap: 0;
-}
-
-.zona-cambio-password .password-field-container .form-control {
-    padding-right: 50px;
-}
-
-/* === BOTONES === */
-.btn-cambiar-password {
-    padding: 8px 16px;
-    font-size: 12px;
-    white-space: nowrap;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-cambiar-password.btn-primario {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.btn-cambiar-password.btn-primario:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.btn-cancelar-password {
-    background: var(--color-cancelar, #6c757d);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
-}
-
-.btn-cancelar-password:hover {
-    background: var(--color-cancelar-hover, #545b62);
-}
-
-.btn-toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #5f6368;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.btn-toggle-password:hover,
-.btn-toggle-password.active {
-    color: #5f6368;
-    background: rgba(95, 99, 104, 0.08);
-}
-
-.btn-toggle-password.active:hover {
-    background: rgba(95, 99, 104, 0.12);
-}
-
-/* === ZONA DE CAMBIO DE CONTRASEÑA === */
-.zona-cambio-password {
-    background: var(--color-fondo-secundario, #f8f9fa);
-    border: 1px solid var(--color-borde, #dee2e6);
-    border-radius: 8px;
-    padding: 20px;
-    margin: 15px 0;
-    animation: slideDown 0.3s ease-out;
-}
-
-.zona-cambio-password .declaracion-titulo {
-    color: var(--color-texto-principal, #333);
-    font-weight: 600;
-    margin-bottom: 15px;
-    font-size: 16px;
-}
-
-.password-actions {
-    margin-top: 15px;
-    text-align: right;
-}
-
-/* === ICONOS === */
-.material-icons {
-    font-size: 22px;
-    user-select: none;
-}
-
-
-/* === CAMPOS DESHABILITADOS === */
-.form-control:disabled {
-    background-color: var(--color-fondo-deshabilitado, #f8f9fa);
-    color: var(--color-texto-deshabilitado, #495057);
-    border-color: var(--color-borde-deshabilitado, #dee2e6);
-    opacity: 0.85;
-    cursor: not-allowed;
-    font-weight: 500;
-}
-
-.form-control:disabled:focus {
-    box-shadow: none;
-    border-color: var(--color-borde-deshabilitado, #dee2e6);
-}
-
-/* === ANIMACIONES === */
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* === TEMA OSCURO === */
-@media (prefers-color-scheme: dark) {
-    .zona-cambio-password {
-        background: var(--color-fondo-secundario, #2d3748);
-        border-color: var(--color-borde, #4a5568);
-    }
-    
-    .zona-cambio-password .declaracion-titulo {
-        color: var(--color-texto-principal, #e2e8f0);
-    }
-    
-    .btn-toggle-password {
-        color: #a0aec0;
-    }
-    
-    .btn-toggle-password:hover,
-    .btn-toggle-password.active {
-        color: #a0aec0;
-        background: rgba(160, 174, 192, 0.15);
-    }
-    
-    .form-control:disabled {
-        background-color: var(--color-fondo-deshabilitado, #374151);
-        color: var(--color-texto-deshabilitado, #9ca3af);
-        border-color: var(--color-borde-deshabilitado, #4b5563);
-    }
-}
-    
-    .btn-toggle-password.active:hover {
-        background: rgba(160, 174, 192, 0.2);
-    }
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function togglePasswordChange() {
-    const zonaPassword = document.getElementById('zona-cambio-password');
-    const btnCambiar = document.querySelector('.btn-cambiar-password');
-    
-    if (zonaPassword.style.display === 'none') {
-        zonaPassword.style.display = 'block';
-        btnCambiar.style.display = 'none'; // Ocultar el botón cuando se despliegan los campos
-    }
-}
-
-function cancelPasswordChange() {
-    const zonaPassword = document.getElementById('zona-cambio-password');
-    const btnCambiar = document.querySelector('.btn-cambiar-password');
-    
-    zonaPassword.style.display = 'none';
-    btnCambiar.style.display = 'inline-block'; // Mostrar el botón de nuevo al cancelar
-    
-    // Limpiar campos
-    document.getElementById('{{ form.new_password1.id_for_label }}').value = '';
-    document.getElementById('{{ form.new_password2.id_for_label }}').value = '';
-    
-    // Limpiar mensajes de error
-    const errorsInPasswordSection = zonaPassword.querySelectorAll('.form-errores');
-    errorsInPasswordSection.forEach(errorDiv => {
-        errorDiv.style.display = 'none';
-    });
-    
-    // Restablecer visibilidad de contraseñas a oculta
-    const passwordFields = ['{{ form.new_password1.id_for_label }}', '{{ form.new_password2.id_for_label }}'];
-    passwordFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        const button = field.nextElementSibling;
-        if (field && field.type === 'text') {
-            field.type = 'password';
-            const icon = button.querySelector('.material-icons');
-            if (icon) {
-                icon.textContent = 'visibility';
-            }
-            button.classList.remove('active');
-        }
-    });
-}
-
-function togglePasswordVisibility(fieldId, button) {
-    const field = document.getElementById(fieldId);
-    const icon = button.querySelector('.material-icons');
-    
-    // Determinar el nuevo estado
-    const showPassword = field.type === 'password';
-    
-    // Aplicar el mismo estado a ambos campos de contraseña
-    const passwordFields = ['{{ form.new_password1.id_for_label }}', '{{ form.new_password2.id_for_label }}'];
-    
-    passwordFields.forEach(currentFieldId => {
-        const currentField = document.getElementById(currentFieldId);
-        const currentButton = currentField.nextElementSibling;
-        const currentIcon = currentButton.querySelector('.material-icons');
-        
-        if (showPassword) {
-            currentField.type = 'text';
-            currentIcon.textContent = 'visibility_off';
-            currentButton.classList.add('active');
-        } else {
-            currentField.type = 'password';
-            currentIcon.textContent = 'visibility';
-            currentButton.classList.remove('active');
-        }
-    });
-}
-
-// Si hay errores en los campos de contraseña, mostrar la sección automáticamente
-document.addEventListener('DOMContentLoaded', function() {
-    const passwordErrors = document.querySelectorAll('#zona-cambio-password .form-errores');
-    if (passwordErrors.length > 0) {
-        togglePasswordChange();
-    }
-});
-</script>
+<script src="{% static 'editar_perfil.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -364,10 +110,72 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="text" id="cliente_activo" class="form-control" value="Sí" disabled readonly>
             </div>
             <div class="form-campo">
-                <label for="roles_asignados">Roles Asignados</label>
-                <input type="text" id="roles_asignados" class="form-control" value="{% for grupo in user.groups.all %}{{ grupo.name }}{% if not forloop.last %}, {% endif %}{% empty %}Sin roles asignados{% endfor %}" disabled readonly>
+                <label>Roles Asignados</label>
+                <div class="roles-section">
+                    <button type="button" class="btn-roles" onclick="toggleRolesDropdown()">
+                        <span class="roles-info">
+                            {% if user.groups.all %}
+                                <span class="roles-text">Ver roles asignados</span>
+                                <span class="roles-count">({{ user.groups.all|length }})</span>
+                            {% else %}
+                                <span class="roles-text">Sin roles asignados</span>
+                            {% endif %}
+                        </span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="roles-dropdown" id="roles-dropdown" style="display: none;">
+                        <ul class="roles-list">
+                            {% for grupo in user.groups.all %}
+                                <li class="role-item">
+                                    <span class="role-name">{{ grupo.name }}</span>
+                                </li>
+                            {% empty %}
+                                <li class="no-roles">
+                                    No tienes roles asignados
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
+        {% else %}
+        <div class="form-fila">
+            <div class="form-campo">
+                <label>Roles Asignados</label>
+                <div class="roles-section">
+                    <button type="button" class="btn-roles" onclick="toggleRolesDropdown()">
+                        <span class="roles-info">
+                            {% if user.groups.all %}
+                                <span class="roles-text">Ver roles asignados</span>
+                                <span class="roles-count">({{ user.groups.all|length }})</span>
+                            {% else %}
+                                <span class="roles-text">Sin roles asignados</span>
+                            {% endif %}
+                        </span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                    <div class="roles-dropdown" id="roles-dropdown" style="display: none;">
+                        <ul class="roles-list">
+                            {% for grupo in user.groups.all %}
+                                <li class="role-item">
+                                    <span class="role-name">{{ grupo.name }}</span>
+                                </li>
+                            {% empty %}
+                                <li class="no-roles">
+                                    No tienes roles asignados
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="form-campo">
+                <!-- Campo vacío para mantener la estructura de la grilla -->
+            </div>
+        </div>
+        {% endif %}
+
         <div class="form-fila">
             <div class="form-campo">
                 <label for="password-display">Contraseña</label>
@@ -388,29 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Campo vacío para mantener la estructura de la grilla -->
             </div>
         </div>
-        {% else %}
-        <div class="form-fila">
-            <div class="form-campo">
-                <label for="roles_asignados">Roles Asignados</label>
-                <input type="text" id="roles_asignados" class="form-control" value="{% for grupo in user.groups.all %}{{ grupo.name }}{% if not forloop.last %}, {% endif %}{% empty %}Sin roles asignados{% endfor %}" disabled readonly>
-            </div>
-            <div class="form-campo">
-                <label for="password-display">Contraseña</label>
-                <div class="password-field-container">
-                    <input type="password" 
-                           value="••••••••••••" 
-                           readonly 
-                           class="form-control password-display"
-                           id="password-display">
-                    <button type="button" 
-                            class="btn-cambiar-password btn-primario" 
-                            onclick="togglePasswordChange()">
-                        Cambiar
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endif %}
 
         <!-- Sección de cambio de contraseña (inicialmente oculta) -->
         <div class="zona-cambio-password" id="zona-cambio-password" style="display: none;">
