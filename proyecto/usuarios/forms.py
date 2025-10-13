@@ -351,3 +351,208 @@ class AsignarClienteForm(forms.Form):
             
             # Personalizar la etiqueta de cada cliente
             self.fields['clientes'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.numero_documento})"
+
+
+class EditarPerfilForm(forms.ModelForm):
+    """
+    Formulario para editar el perfil del usuario autenticado.
+
+    Attributes:
+        username (CharField): Campo para el nombre de usuario.
+        email (EmailField): Campo para el correo electrónico.
+        telefono (CharField): Campo para el número de teléfono.
+        current_password (CharField): Campo para la contraseña actual (requerido para cambios).
+        new_password1 (CharField): Campo para la nueva contraseña (opcional).
+        new_password2 (CharField): Campo para confirmar la nueva contraseña (opcional).
+    """
+    current_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Contraseña actual',
+        help_text='Ingresa tu contraseña actual para confirmar los cambios.',
+        error_messages={
+            'required': "La contraseña actual es obligatoria para realizar cambios."
+        }
+    )
+    
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Nueva contraseña',
+        required=False,
+        help_text='Deja en blanco si no deseas cambiar tu contraseña.',
+        error_messages={
+            'invalid': "La nueva contraseña no es válida."
+        }
+    )
+    
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Confirmar nueva contraseña',
+        required=False,
+        help_text='Repite la nueva contraseña para confirmar.',
+        error_messages={
+            'invalid': "La confirmación de contraseña no es válida."
+        }
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ('username', 'email', 'telefono')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        error_messages = {
+            'username': {
+                'required': "El nombre de usuario es obligatorio.",
+                'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
+                'unique': "Ya existe un usuario registrado con este nombre de usuario."
+            },
+            'email': {
+                'invalid': "Introduce un correo electrónico válido.",
+                'required': "El correo electrónico es obligatorio.",
+                'unique': "Ya existe un usuario registrado con este correo electrónico."
+            },
+            'telefono': {
+                'required': "El número de teléfono es obligatorio.",
+                'unique': "Ya existe un usuario registrado con este número de teléfono.",
+                'max_length': "El número de teléfono no puede tener más de 15 caracteres."
+            }
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Si es una instancia existente, configurar los valores iniciales
+        if self.instance:
+            self.initial_email = self.instance.email
+            self.initial_username = self.instance.username
+
+    def clean_current_password(self):
+        """
+        Valida que la contraseña actual sea correcta.
+        """
+        current_password = self.cleaned_data.get('current_password')
+        if current_password and self.user:
+            if not self.user.check_password(current_password):
+                raise ValidationError("La contraseña actual no es correcta.")
+        return current_password
+
+    def clean_telefono(self):
+        """
+        Valida que el número de teléfono sea numérico y tenga entre 6 y 15 dígitos.
+        También verifica que no esté en uso por otro usuario.
+        """
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono.isdigit():
+            raise ValidationError("El número de teléfono debe ser numérico.")
+        if len(telefono) < 6 or len(telefono) > 15:
+            raise ValidationError("El número de teléfono debe tener entre 6 y 15 dígitos.")
+        
+        # Verificar que no esté en uso por otro usuario
+        if self.user and Usuario.objects.filter(telefono=telefono).exclude(pk=self.user.pk).exists():
+            raise ValidationError("Ya existe un usuario registrado con este número de teléfono.")
+        
+        return telefono
+
+    def clean_username(self):
+        """
+        Valida el nombre de usuario y verifica que no esté en uso por otro usuario.
+        """
+        username = self.cleaned_data.get('username')
+        
+        # Verificar que no esté en uso por otro usuario
+        if self.user and Usuario.objects.filter(username=username).exclude(pk=self.user.pk).exists():
+            raise ValidationError("Ya existe un usuario registrado con este nombre de usuario.")
+        
+        return username
+
+    def clean_email(self):
+        """
+        Valida el correo electrónico y verifica que no esté en uso por otro usuario.
+        """
+        email = self.cleaned_data.get('email')
+        
+        # Verificar que no esté en uso por otro usuario
+        if self.user and Usuario.objects.filter(email=email).exclude(pk=self.user.pk).exists():
+            raise ValidationError("Ya existe un usuario registrado con este correo electrónico.")
+        
+        return email
+
+    def clean_new_password1(self):
+        """
+        Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+        contenga al menos un caracter especial y al menos un número.
+        """
+        password1 = self.cleaned_data.get('new_password1')
+
+        if password1:  # Solo validar si se proporciona una nueva contraseña
+            if len(password1) <= 8:
+                raise ValidationError("La nueva contraseña debe tener más de 8 caracteres.")
+
+            if not re.search(r'[^A-Za-z0-9]', password1):
+                raise ValidationError("La nueva contraseña debe contener al menos un caracter especial.")
+
+            if not re.search(r'\d', password1):
+                raise ValidationError("La nueva contraseña debe contener al menos un número.")
+
+        return password1
+
+    def clean_new_password2(self):
+        """
+        Verifica que las contraseñas nuevas coincidan.
+        """
+        password1 = self.cleaned_data.get('new_password1')
+        password2 = self.cleaned_data.get('new_password2')
+        
+        if password1 or password2:  # Si se proporciona alguna contraseña nueva
+            if password1 != password2:
+                raise ValidationError("Las nuevas contraseñas no coinciden.")
+        
+        return password2
+
+    def clean(self):
+        """
+        Validación adicional para asegurar coherencia entre campos.
+        """
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get('new_password1')
+        new_password2 = cleaned_data.get('new_password2')
+        
+        # Si se proporciona una nueva contraseña, ambos campos deben estar presentes
+        if new_password1 and not new_password2:
+            raise ValidationError("Debes confirmar la nueva contraseña.")
+        if new_password2 and not new_password1:
+            raise ValidationError("Debes ingresar la nueva contraseña.")
+        
+        return cleaned_data
+
+    def save(self, commit=True):
+        """
+        Guarda el usuario con los datos del formulario y actualiza la contraseña si se proporciona.
+        """
+        user = super().save(commit=False)
+        
+        # Si se proporciona una nueva contraseña, actualizarla
+        new_password = self.cleaned_data.get('new_password1')
+        if new_password:
+            user.set_password(new_password)
+        
+        if commit:
+            user.save()
+        
+        return user
+
+    def has_email_changed(self):
+        """
+        Verifica si el email ha cambiado.
+        """
+        return hasattr(self, 'initial_email') and self.cleaned_data.get('email') != self.initial_email
+
+    def has_password_changed(self):
+        """
+        Verifica si la contraseña ha cambiado.
+        """
+        return bool(self.cleaned_data.get('new_password1'))
+            

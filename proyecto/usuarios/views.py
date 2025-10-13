@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -11,9 +11,10 @@ from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 from functools import wraps
-from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
-from .models import Usuario
+from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm, EditarPerfilForm
+from .models import Usuario, CambioEmail
 from clientes.models import Cliente
 from clientes.views import procesar_medios_acreditacion_cliente
 from clientes.exceptions import TarjetaNoPermitida, MarcaNoPermitida
@@ -814,3 +815,293 @@ def eliminar_tarjeta_cliente(request, pk, payment_method_id):
         messages.error(request, 'Error inesperado al eliminar la tarjeta.')
     
     return redirect('usuarios:detalle_cliente', cliente_id=pk)
+
+def enviar_email_validacion_cambio(request, cambio_email):
+    """
+    Envía email de validación para confirmar el cambio de correo electrónico.
+    
+    Args:
+        request: Objeto HttpRequest de Django.
+        cambio_email: Instancia de CambioEmail con los datos del cambio.
+    """
+    validation_url = request.build_absolute_uri(
+        reverse('usuarios:validar_cambio_email', kwargs={
+            'uidb64': cambio_email.uid, 
+            'token': cambio_email.token
+        })
+    )
+    
+    # Crear contenido HTML
+    html_content = render_to_string('usuarios/email_validacion_cambio.html', {
+        'user': cambio_email.usuario,
+        'email_nuevo': cambio_email.email_nuevo,
+        'validation_url': validation_url,
+    })
+    
+    # Crear versión de texto plano
+    text_content = f"""
+¡Hola {cambio_email.usuario.first_name}!
+
+Has solicitado cambiar tu correo electrónico a: {cambio_email.email_nuevo}
+
+Para confirmar este cambio, por favor visita el siguiente enlace:
+{validation_url}
+
+Si no solicitaste este cambio, puedes ignorar este correo.
+
+Saludos,
+El equipo de Global Exchange
+    """.strip()
+    
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject='Confirma el cambio de tu correo electrónico - Global Exchange',
+        body=text_content,
+        from_email=from_email,
+        to=[cambio_email.email_nuevo]
+    )
+    
+    msg.attach_alternative(html_content, "text/html")
+    
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de validación de cambio: {e}')
+
+
+def enviar_email_notificacion_cambios(user, cambios_realizados, email_cambiado=False):
+    """
+    Envía email de notificación sobre cambios realizados en la cuenta.
+    
+    Args:
+        user: Usuario que realizó los cambios.
+        cambios_realizados: Lista de cambios realizados.
+        email_cambiado: Boolean indicando si se cambió el email.
+    """
+    # Crear contenido HTML
+    html_content = render_to_string('usuarios/email_notificacion_cambios.html', {
+        'user': user,
+        'cambios_realizados': cambios_realizados,
+        'email_cambiado': email_cambiado,
+        'fecha_cambio': timezone.now(),
+    })
+    
+    # Crear versión de texto plano
+    cambios_texto = ', '.join(cambios_realizados)
+    text_content = f"""
+¡Hola {user.first_name}!
+
+Te informamos que se han realizado cambios en tu cuenta de Global Exchange.
+
+Cambios realizados: {cambios_texto}
+
+Fecha y hora: {timezone.now().strftime('%d/%m/%Y %H:%M')}
+
+Si no realizaste estos cambios, por favor contacta con soporte inmediatamente.
+
+Saludos,
+El equipo de Global Exchange
+    """.strip()
+    
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject='Cambios realizados en tu cuenta - Global Exchange',
+        body=text_content,
+        from_email=from_email,
+        to=[user.email]
+    )
+    
+    msg.attach_alternative(html_content, "text/html")
+    
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de notificación de cambios: {e}')
+
+
+def enviar_email_desvinculacion(email_anterior, username, email_nuevo):
+    """
+    Envía email de notificación de desvinculación al correo anterior.
+    
+    Args:
+        email_anterior: Correo electrónico anterior del usuario.
+        username: Nombre de usuario.
+        email_nuevo: Nuevo correo electrónico.
+    """
+    # Crear contenido HTML
+    html_content = render_to_string('usuarios/email_desvinculacion.html', {
+        'username': username,
+        'email_anterior': email_anterior,
+        'email_nuevo': email_nuevo,
+        'fecha_cambio': timezone.now(),
+    })
+    
+    # Crear versión de texto plano
+    text_content = f"""
+Estimado usuario,
+
+Te informamos que este correo electrónico ({email_anterior}) ha sido desvinculado de la cuenta de usuario "{username}" en Global Exchange.
+
+El nuevo correo electrónico asociado a esta cuenta es: {email_nuevo}
+
+Fecha y hora del cambio: {timezone.now().strftime('%d/%m/%Y %H:%M')}
+
+Si este cambio no fue autorizado por ti, por favor contacta con soporte inmediatamente.
+
+Saludos,
+El equipo de Global Exchange
+    """.strip()
+    
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject='Desvinculación de correo electrónico - Global Exchange',
+        body=text_content,
+        from_email=from_email,
+        to=[email_anterior]
+    )
+    
+    msg.attach_alternative(html_content, "text/html")
+    
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de desvinculación: {e}')
+
+
+@login_required
+def editar_perfil(request):
+    """
+    Vista para que un usuario edite su perfil personal.
+    """
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            # Obtener los datos antes del cambio
+            email_anterior = request.user.email
+            username_anterior = request.user.username
+            telefono_anterior = request.user.telefono
+            
+            # Verificar qué cambios se van a realizar
+            cambios_realizados = []
+            email_cambiado = form.has_email_changed()
+            password_cambiado = form.has_password_changed()
+            
+            # Preparar lista de cambios
+            if form.cleaned_data['username'] != username_anterior:
+                cambios_realizados.append('nombre de usuario')
+            if form.cleaned_data['telefono'] != telefono_anterior:
+                cambios_realizados.append('número de teléfono')
+            if password_cambiado:
+                cambios_realizados.append('contraseña')
+            
+            if email_cambiado:
+                # Crear registro de cambio de email pendiente
+                cambio_email = CambioEmail.objects.create(
+                    usuario=request.user,
+                    email_anterior=email_anterior,
+                    email_nuevo=form.cleaned_data['email']
+                )
+                
+                # Enviar email de validación al nuevo correo
+                enviar_email_validacion_cambio(request, cambio_email)
+                
+                # No cambiar el email todavía, solo crear el registro pendiente
+                form.instance.email = email_anterior  # Mantener el email anterior
+                cambios_realizados.append('solicitud de cambio de correo electrónico (pendiente de validación)')
+            
+            # Guardar los cambios
+            user = form.save()
+            
+            # Enviar notificación de cambios si hay alguno
+            if cambios_realizados:
+                enviar_email_notificacion_cambios(user, cambios_realizados, email_cambiado)
+            
+            if email_cambiado:
+                messages.success(
+                    request, 
+                    'Perfil actualizado exitosamente. Se ha enviado un correo de validación '
+                    f'a {form.cleaned_data["email"]} para confirmar el cambio de correo electrónico.'
+                )
+            else:
+                messages.success(request, 'Perfil actualizado exitosamente.')
+            
+            return redirect('usuarios:perfil')
+    else:
+        form = EditarPerfilForm(instance=request.user, user=request.user)
+    
+    context = {
+        'form': form,
+        'usuario': request.user,
+    }
+    return render(request, 'usuarios/editar_perfil.html', context)
+
+
+@login_required
+def validar_cambio_email(request, uidb64, token):
+    """
+    Vista para validar el cambio de correo electrónico.
+    
+    Args:
+        uidb64: UID del usuario codificado en base64.
+        token: Token de validación.
+    """
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        user = None
+    
+    if user is not None:
+        # Buscar el cambio de email pendiente
+        try:
+            cambio_email = CambioEmail.objects.get(
+                usuario=user,
+                uid=uidb64,
+                token=token,
+                validado=False
+            )
+            
+            # Verificar que el token sea válido
+            if default_token_generator.check_token(user, token):
+                # Guardar el email anterior para la notificación
+                email_anterior = user.email
+                
+                # Actualizar el email del usuario
+                user.email = cambio_email.email_nuevo
+                user.save()
+                
+                # Marcar el cambio como validado
+                cambio_email.marcar_como_validado()
+                
+                # Enviar notificación de desvinculación al correo anterior
+                enviar_email_desvinculacion(
+                    email_anterior, 
+                    user.username, 
+                    cambio_email.email_nuevo
+                )
+                
+                # Enviar notificación de cambio exitoso al nuevo correo
+                enviar_email_notificacion_cambios(
+                    user, 
+                    ['cambio de correo electrónico confirmado'], 
+                    email_cambiado=True
+                )
+                
+                messages.success(
+                    request, 
+                    'Correo electrónico actualizado exitosamente. Se ha enviado una '
+                    'notificación a tu correo anterior informando sobre el cambio.'
+                )
+                return redirect('usuarios:perfil')
+            else:
+                messages.error(request, 'El enlace de validación ha expirado o es inválido.')
+                
+        except CambioEmail.DoesNotExist:
+            messages.error(request, 'La solicitud de cambio de correo no existe o ya fue procesada.')
+    else:
+        messages.error(request, 'Usuario no encontrado.')
+    
+    return redirect('usuarios:perfil')

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desvinculación de correo electrónico</title>
+    <style>
+        /* Estilos inline para mejor compatibilidad con clientes de correo */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #dc3545;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #dc3545;
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .warning-box {
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
+        }
+        .email-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .email-old {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .email-new {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .date-time {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #495057;
+            text-align: center;
+        }
+        .contact-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Desvinculación de correo</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Estimado usuario,</h2>
+            
+            <div class="warning-box">
+                <strong>🚨 Notificación importante:</strong><br>
+                Este correo electrónico ha sido desvinculado de una cuenta de usuario en Global Exchange.
+            </div>
+            
+            <p>Te informamos los detalles del cambio:</p>
+            
+            <div class="email-info">
+                <strong>👤 Usuario:</strong> {{ username }}<br>
+                <strong>📧 Correo anterior:</strong> <span class="email-old">{{ email_anterior }}</span><br>
+                <strong>📧 Nuevo correo:</strong> <span class="email-new">{{ email_nuevo }}</span>
+            </div>
+            
+            <div class="date-time">
+                <strong>Fecha y hora del cambio:</strong> {{ fecha_cambio|date:"d/m/Y H:i" }}
+            </div>
+            
+            <p><strong>¿Qué significa esto?</strong></p>
+            <ul>
+                <li>Este correo electrónico ({{ email_anterior }}) ya no está asociado con la cuenta "{{ username }}".</li>
+                <li>Todas las notificaciones futuras se enviarán al nuevo correo electrónico.</li>
+                <li>Ya no podrás usar este correo para recuperar la contraseña de esa cuenta.</li>
+            </ul>
+            
+            <div class="contact-box">
+                <strong>⚠️ Si este cambio no fue autorizado por ti:</strong><br>
+                Por favor contacta con nuestro equipo de soporte inmediatamente. Es posible que tu cuenta haya sido comprometida y necesitemos tomar medidas de seguridad.
+            </div>
+            
+            <p>Si este cambio fue realizado por ti, puedes ignorar esta notificación de forma segura.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Saludos cordiales,<br>
+            <strong>El equipo de Global Exchange</strong></p>
+            
+            <hr style="border: none; border-top: 1px solid #e9ecef; margin: 20px 0;">
+            
+            <p style="font-size: 12px; color: #6c757d;">
+                Este es un correo automático, por favor no respondas a este mensaje.<br>
+                Para soporte técnico, contacta con nuestro equipo de atención al cliente.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

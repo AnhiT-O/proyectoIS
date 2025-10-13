@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserM
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     """
@@ -109,3 +112,58 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
             ("asignacion_clientes", "Puede asignar clientes a usuarios"),
             ("asignacion_roles", "Puede asignar roles a usuarios")
         ]
+
+
+class CambioEmail(models.Model):
+    """
+    Modelo para gestionar cambios de email pendientes de validación.
+    
+    Attributes:
+        usuario (ForeignKey): Usuario que solicita el cambio de email.
+        email_anterior (EmailField): Email anterior del usuario.
+        email_nuevo (EmailField): Nuevo email solicitado.
+        token (CharField): Token de validación generado.
+        fecha_solicitud (DateTimeField): Fecha y hora de la solicitud.
+        validado (BooleanField): Indica si el cambio ha sido validado.
+        fecha_validacion (DateTimeField): Fecha y hora de validación.
+    """
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='cambios_email'
+    )
+    email_anterior = models.EmailField()
+    email_nuevo = models.EmailField()
+    token = models.CharField(max_length=255)
+    uid = models.CharField(max_length=255)
+    fecha_solicitud = models.DateTimeField(default=timezone.now)
+    validado = models.BooleanField(default=False)
+    fecha_validacion = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Genera automáticamente el token y uid al guardar.
+        """
+        if not self.token:
+            self.token = default_token_generator.make_token(self.usuario)
+        if not self.uid:
+            self.uid = urlsafe_base64_encode(force_bytes(self.usuario.pk))
+        super().save(*args, **kwargs)
+
+    def marcar_como_validado(self):
+        """
+        Marca el cambio de email como validado y actualiza las fechas.
+        """
+        self.validado = True
+        self.fecha_validacion = timezone.now()
+        self.save()
+
+    def __str__(self):
+        estado = "Validado" if self.validado else "Pendiente"
+        return f"Cambio email {self.usuario.username}: {self.email_anterior} → {self.email_nuevo} ({estado})"
+
+    class Meta:
+        db_table = 'cambios_email'
+        verbose_name = 'Cambio de Email'
+        verbose_name_plural = 'Cambios de Email'
+        ordering = ['-fecha_solicitud']
