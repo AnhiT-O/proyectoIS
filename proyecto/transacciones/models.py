@@ -142,6 +142,7 @@ def crear_limite_global_inicial(sender, **kwargs):
 
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
+    sucursal = models.CharField(max_length=100, unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
 
     class Meta:
@@ -208,18 +209,6 @@ class Tauser(models.Model):
                 
         except Exception:
             return False
-        
-class Cheque(models.Model):
-    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
-    monto = models.BigIntegerField()
-    firma = models.CharField(max_length=100)
-    fecha_depositado = models.DateField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Cheque"
-        verbose_name_plural = "Cheques"
-        db_table = "cheques"
-        default_permissions = []
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
@@ -352,13 +341,13 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         # Calculo de recargos por medio de pago
         # Si el pago es con tarjeta de crédito
         if isinstance(dict_pago, dict) and 'brand' in dict_pago:
-            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            monto_recargo_pago =  Decimal(precio_final * Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100-Recargos.objects.get(marca=dict_pago['brand']).recargo)
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
         # Si el pago es con billetera electrónica
         elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
-            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
+            monto_recargo_pago =  Decimal(precio_final * Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100-Recargos.objects.get(marca=dict_pago).recargo)
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
-        # Si el pago es en efectivo, cheque o transferencia, no hay recargo
+        # Si el pago es en efectivo o transferencia, no hay recargo
         else:
             monto_recargo_pago = 0
             porc_recargo_pago = 0
@@ -399,7 +388,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         # Calculo de recargos por medio de pago y cobro
         # Si el pago es con tarjeta de crédito
         if isinstance(dict_pago, dict) and 'brand' in dict_pago:
-            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            monto_recargo_pago =  Decimal(monto * moneda.tasa_base) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
         else:
             monto_recargo_pago = 0
@@ -560,7 +549,7 @@ def generar_token_transaccion(transaccion):
     Genera un token único de seguridad para transacciones específicas.
     
     Se utiliza para transacciones con medios de pago que requieren verificación
-    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
+    adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.
     """
     # Generar token único de 8 caracteres (números y letras mayúsculas)
     import string

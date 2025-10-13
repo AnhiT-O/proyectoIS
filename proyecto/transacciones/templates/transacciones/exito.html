@@ -22,7 +22,7 @@
         {% if transaccion.tipo == 'compra' %}
             {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
-                {% if transaccion.medio_pago == 'Efectivo' or transaccion.medio_pago == 'Cheque' %}
+                {% if transaccion.medio_pago == 'Efectivo' %}
                 <p class="subtitulo">
                     Se ha generado un código para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
@@ -69,7 +69,7 @@
             {% elif transaccion.estado == 'Completa' %}
                 <div class="logo">¡Transacción Completa!</div>
                 <p class="subtitulo">
-                    La compra de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente. ¡Gracias por confiar en Global Exchange!.
+                    La compra de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente.<br>¡Gracias por confiar en Global Exchange!.
                 </p>
                 <p class="subtitulo">
                     Puedes consultar el historial del cliente para ver los detalles de la transacción.

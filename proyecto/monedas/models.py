@@ -21,7 +21,7 @@ class Moneda(models.Model):
     tasa_base = models.IntegerField(default=0)
     comision_compra = models.IntegerField(default=0)
     comision_venta = models.IntegerField(default=0)
-    decimales = models.SmallIntegerField(default=3)
+    decimales = models.SmallIntegerField(default=2)
     fecha_cotizacion = models.DateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
@@ -110,15 +110,15 @@ def crear_moneda_usd(sender, **kwargs):
     if kwargs['app_config'].name == 'monedas':
         # Verificar si ya existe la moneda USD
         if not Moneda.objects.filter(simbolo='USD').exists():
-            Moneda.objects.create(
+            usd = Moneda.objects.create(
                 nombre='Dólar estadounidense',
                 simbolo='USD',
-                activa=True,
-                tasa_base=7400,
-                comision_compra=200,
-                comision_venta=250,
-                decimales=2
+                tasa_base=7000,
+                comision_compra=40,
+                comision_venta=70,
             )
+            usd.fecha_cotizacion = timezone.make_aware(timezone.datetime(2025, 10, 10, 10, 50, 0))
+            usd.save()
             print("✓ Moneda USD creada automáticamente")
 
 class StockGuaranies(models.Model):

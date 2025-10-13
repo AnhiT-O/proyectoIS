@@ -90,6 +90,9 @@ def enviar_email_confirmacion(request, user):
     y un identificador único para el usuario, y construye un enlace de activación que
     se incluye en el email.
 
+    Args:
+        user (Usuario): El usuario que se está registrando.
+
     Raises:
         Exception: Si ocurre un error al enviar el email.
     """

@@ -31,7 +31,7 @@ Encargado de clientes
 --
 
 COPY public.auth_group_permissions (group_id, permission_id) FROM stdin;
-2	24
+2	25
 2	23
 5	18
 5	20
@@ -79,9 +79,9 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 --
 
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
-Euro	EUR	t	8600	200	250	3	2025-09-20 12:19:13.542976-03
-Real	BRL	t	1340	25	20	3	2025-09-20 12:21:35.90483-03
-Peso argentino	ARP	t	5	1	0	0	2025-09-20 12:22:28.974217-03
+Euro	EUR	t	8500	200	150	2	2025-10-10 10:50:00
+Real	BRL	t	1310	20	30	2	2025-10-10 10:50:00
+Peso argentino	ARP	t	5	1	1	0	2025-10-10 10:50:00
 \.
 
 
@@ -112,12 +112,12 @@ COPY public.denominaciones (valor, moneda_id) FROM stdin;
 20000	4
 \.
 
-COPY public.tausers (puerto) FROM stdin;
-8001
-8002
-8003
-8004
-8005
+COPY public.tausers (puerto, sucursal) FROM stdin;
+8001	Asunción
+8002	San Lorenzo
+8003	Fernando de la Mora
+8004	Ñemby
+8005	Luque
 \.
 
 COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
@@ -175,11 +175,11 @@ COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 --
 
 COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, telefono, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
-pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	iris@example.com	0984552373	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
-pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	anahi@example.com	0972158149	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
-pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen@example.com	0986743708	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
-pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	josias@example.com	0982977328	5167191	f	t	2025-09-20 12:56:51.22464-03	1
-pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	admin@example.com	0981458383	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
+pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	irismendoza012@fpuna.edu.py	0984552373	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
+pbkdf2_sha256$1000000$nDM0sJaQBiMzsduSi21c8E$v7g5eQiQWgQigZTXYsrOtJPCkbqc6k6fuz/7I1SZHcQ=	\N	f	anahi	Claudia Anahi	Talavera Ovelar	clautalavera12@fpuna.edu.py	0972158149	5461535	f	t	2025-09-20 12:56:06.05157-03	\N
+pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ezfv69nsEM=	\N	f	aylen	Aylén María	Wyder Aquino	aylen14wyder@fpuna.edu.py	0986743708	5130314	f	t	2025-09-20 12:49:11.68885-03	\N
+pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	totiespinola@fpuna.edu.py	0982977328	5167191	f	t	2025-09-20 12:56:51.22464-03	1
+pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	losrivarola612@fpuna.edu.py	0981458383	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
 
 

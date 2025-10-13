@@ -140,6 +140,7 @@ def crear_limite_global_inicial(sender, **kwargs):
 
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
+    sucursal = models.CharField(max_length=100, unique=True)
     billetes = models.ManyToManyField(Denominacion, through='BilletesTauser', blank=True)
 
     class Meta:
@@ -159,18 +160,6 @@ class Tauser(models.Model):
             str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
         """
         return f"TAUser Puerto {self.puerto}"
-    
-class Cheque(models.Model):
-    tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
-    monto = models.BigIntegerField()
-    firma = models.CharField(max_length=100)
-    fecha_depositado = models.DateField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Cheque"
-        verbose_name_plural = "Cheques"
-        db_table = "cheques"
-        default_permissions = []
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
@@ -309,7 +298,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
             monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
-        # Si el pago es en efectivo, cheque o transferencia, no hay recargo
+        # Si el pago es en efectivo o transferencia, no hay recargo
         else:
             monto_recargo_pago = 0
             porc_recargo_pago = 0
@@ -511,7 +500,7 @@ def generar_token_transaccion(transaccion):
     Genera un token único de seguridad para transacciones específicas.
     
     Se utiliza para transacciones con medios de pago que requieren verificación
-    adicional como Efectivo o Cheque. El token tiene una validez de 5 minutos.
+    adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.
     """
     # Generar token único
     token = secrets.token_urlsafe(32)
@@ -531,7 +520,7 @@ def generar_token_transaccion(transaccion):
         'datos': datos_token
     }
 
-def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
+def verificar_cambio_cotizacion(transaccion):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
@@ -549,43 +538,33 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
             - 'moneda': instancia de la moneda
     """
     try:
-        # Obtener datos de la sesión
-        datos_key = f'{tipo_transaccion}_datos'
-        precio_compra_key = 'precio_compra_inicial'
-        precio_venta_key = 'precio_venta_inicial'
-        
-        datos_transaccion = request.session.get(datos_key)
-        precio_compra_inicial = request.session.get(precio_compra_key)
-        precio_venta_inicial = request.session.get(precio_venta_key)
-        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
-            return None
-            
-        # Obtener moneda actual
-        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
-        cliente_activo = request.user.cliente_activo
-        
         # Calcular precios actuales
-        precios_actuales = moneda.get_precios_cliente(cliente_activo)
+        precios_actuales = transaccion.moneda.get_precios_cliente(transaccion.cliente)
         precio_compra_actual = precios_actuales['precio_compra']
         precio_venta_actual = precios_actuales['precio_venta']
 
         # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != precio_compra_inicial and 
-            precio_venta_actual != precio_venta_inicial
-        )
+        hay_cambios = False
+        if transaccion.tipo == 'compra':
+            if transaccion.cotizacion != precio_venta_actual:
+                hay_cambios = True
+        else:
+            if transaccion.cotizacion != precio_compra_actual:
+                hay_cambios = True
+        
+
         if hay_cambios:
             return {
                 'hay_cambios': True,
                 'valores_anteriores': {
-                    'precio_compra': precio_compra_inicial,
-                    'precio_venta': precio_venta_inicial
+                    'precio_compra': transaccion.cotizacion,
+                    'precio_venta': transaccion.cotizacion
                 },
                 'valores_actuales': {
                     'precio_compra': precio_compra_actual,
                     'precio_venta': precio_venta_actual
                 },
-                'moneda': moneda
+                'moneda': transaccion.moneda
             }
         
         return {'hay_cambios': False}
@@ -708,18 +687,3 @@ def billetes_necesarios(monto, denominaciones, disponible):
         return None  # No se pudo cubrir el monto con los billetes disponibles
     
     return dp[monto][1]  # Retornar la configuración óptima
-
-def leer_cheque(lineas):
-    if lineas:
-        if lineas[0] == 'Páguese a la orden de Global Exchange':
-            if lineas[1].startswith('La suma de Guaraníes: '):
-                monto_numeros = lineas[1].replace('La suma de Guaraníes: ', '').replace('.', '').strip()
-                if monto_numeros:
-                    if lineas[2].startswith('Firma: '):
-                        firma = lineas[2].replace('Firma: ', '').strip()
-                        if firma:
-                            try:
-                                return {'monto': int(monto_numeros), 'firma': firma}
-                            except ValueError:
-                                return None
-    return None

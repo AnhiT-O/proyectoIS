@@ -136,8 +136,8 @@
                     <div class="detalle-valor">Gs. {{ transaccion.redondeo_efectivo_monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 <div class="detalle-item">
-                    <div class="detalle-titulo" style="font-size:large">Monto a vender:</div>
-                    <div class="detalle-valor" style="font-size:large">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                    <div class="detalle-titulo">Monto a vender:</div>
+                    <div class="detalle-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 </div>
                 {% endif %}
                 <div class="detalle-item">

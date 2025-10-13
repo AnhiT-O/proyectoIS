@@ -45,7 +45,8 @@ class SimuladorForm(forms.Form):
         moneda (ModelChoiceField): Campo para seleccionar la moneda.
         monto (DecimalField): Campo para ingresar el monto a convertir.
         operacion (ChoiceField): Campo para seleccionar el tipo de operación (compra o venta).
-        recargo (ChoiceField): Campo para seleccionar el método de pago.
+        medio_pago (ChoiceField): Campo para seleccionar el medio de pago.
+        medio_cobro (ChoiceField): Campo para seleccionar el medio de cobro.
     """
     
     moneda = forms.ModelChoiceField(
@@ -78,7 +79,8 @@ class SimuladorForm(forms.Form):
     )
     medio_pago = forms.ChoiceField(
         choices=[
-                ('no_recargo', 'Efectivo/Cheque/Transferencia'),
+                ('Efectivo', 'Efectivo'),
+                ('Transferencia', 'Transferencia'),
                 ('{"brand": "VISA"}', 'Tarjeta de Crédito Visa'),
                 ('{"brand": "MASTERCARD"}', 'Tarjeta de Crédito Mastercard'),
                 ('Tigo Money', 'Tigo Money'),
@@ -91,7 +93,8 @@ class SimuladorForm(forms.Form):
         }))
     medio_cobro = forms.ChoiceField(
         choices=[
-                ('no_recargo', 'Efectivo/Transferencia'),
+                ('Efectivo', 'Efectivo'),
+                ('Cuenta Bancaria', 'Cuenta Bancaria'),
                 ('{"tipo_billetera": "Tigo Money"}', 'Tigo Money'),
                 ('{"tipo_billetera": "Billetera Personal"}', 'Billetera Personal'),
                 ('{"tipo_billetera": "Zimple"}', 'Zimple')
@@ -104,11 +107,14 @@ class SimuladorForm(forms.Form):
     def clean_monto(self):
         """
         Valida el campo monto según las reglas específicas de la operación y moneda seleccionada.
+        
         -   Si el monto es menor o igual a 0, lanza un error.
         -   Valida que el monto mínimo sea acorde a los decimales de la moneda seleccionada.
         """
         monto = self.cleaned_data.get('monto')
         moneda = self.data.get('moneda')
+        medio_pago = self.cleaned_data.get('medio_pago')
+        medio_cobro = self.cleaned_data.get('medio_cobro')
             
         if monto <= 0:
             raise forms.ValidationError('El monto debe ser mayor a 0.')
