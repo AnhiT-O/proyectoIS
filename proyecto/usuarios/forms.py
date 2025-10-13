@@ -358,6 +358,8 @@ class EditarPerfilForm(forms.ModelForm):
     Formulario para editar el perfil del usuario autenticado.
 
     Attributes:
+        first_name (CharField): Campo para el nombre.
+        last_name (CharField): Campo para el apellido.
         username (CharField): Campo para el nombre de usuario.
         email (EmailField): Campo para el correo electrónico.
         telefono (CharField): Campo para el número de teléfono.
@@ -396,13 +398,23 @@ class EditarPerfilForm(forms.ModelForm):
 
     class Meta:
         model = Usuario
-        fields = ('username', 'email', 'telefono')
+        fields = ('first_name', 'last_name', 'username', 'email', 'telefono')
         widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
         }
         error_messages = {
+            'first_name': {
+                'required': "El nombre es obligatorio.",
+                'max_length': "El nombre no puede tener más de 30 caracteres."
+            },
+            'last_name': {
+                'required': "El apellido es obligatorio.",
+                'max_length': "El apellido no puede tener más de 30 caracteres."
+            },
             'username': {
                 'required': "El nombre de usuario es obligatorio.",
                 'max_length': "El nombre de usuario no puede tener más de 30 caracteres.",
@@ -436,7 +448,7 @@ class EditarPerfilForm(forms.ModelForm):
         current_password = self.cleaned_data.get('current_password')
         if current_password and self.user:
             if not self.user.check_password(current_password):
-                raise ValidationError("La contraseña actual no es correcta.")
+                raise ValidationError("Contraseña incorrecta.")
         return current_password
 
     def clean_telefono(self):
@@ -482,14 +494,14 @@ class EditarPerfilForm(forms.ModelForm):
 
     def clean_new_password1(self):
         """
-        Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+        Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga al menos 8 caracteres,
         contenga al menos un caracter especial y al menos un número.
         """
         password1 = self.cleaned_data.get('new_password1')
 
         if password1:  # Solo validar si se proporciona una nueva contraseña
-            if len(password1) <= 8:
-                raise ValidationError("La nueva contraseña debe tener más de 8 caracteres.")
+            if len(password1) < 8:
+                raise ValidationError("La nueva contraseña debe tener al menos 8 caracteres.")
 
             if not re.search(r'[^A-Za-z0-9]', password1):
                 raise ValidationError("La nueva contraseña debe contener al menos un caracter especial.")
@@ -501,14 +513,17 @@ class EditarPerfilForm(forms.ModelForm):
 
     def clean_new_password2(self):
         """
-        Verifica que las contraseñas nuevas coincidan.
+        Verifica que las contraseñas nuevas coincidan, pero solo si ambos campos están llenos
+        y no hay errores de formato en el primer campo.
         """
         password1 = self.cleaned_data.get('new_password1')
         password2 = self.cleaned_data.get('new_password2')
         
-        if password1 or password2:  # Si se proporciona alguna contraseña nueva
+        # Solo validar coincidencia si ambos campos están llenos
+        # y no hay errores previos en new_password1
+        if password1 and password2 and 'new_password1' not in self.errors:
             if password1 != password2:
-                raise ValidationError("Las nuevas contraseñas no coinciden.")
+                self.add_error('new_password2', "Las nuevas contraseñas no coinciden.")
         
         return password2
 
@@ -520,11 +535,13 @@ class EditarPerfilForm(forms.ModelForm):
         new_password1 = cleaned_data.get('new_password1')
         new_password2 = cleaned_data.get('new_password2')
         
-        # Si se proporciona una nueva contraseña, ambos campos deben estar presentes
-        if new_password1 and not new_password2:
-            raise ValidationError("Debes confirmar la nueva contraseña.")
-        if new_password2 and not new_password1:
-            raise ValidationError("Debes ingresar la nueva contraseña.")
+        # Solo validar campos faltantes si no hay errores previos en los campos de contraseña
+        if 'new_password1' not in self.errors and 'new_password2' not in self.errors:
+            # Si se proporciona una nueva contraseña, ambos campos deben estar presentes
+            if new_password1 and not new_password2:
+                raise ValidationError("Debes confirmar la nueva contraseña.")
+            if new_password2 and not new_password1:
+                raise ValidationError("Debes ingresar la nueva contraseña.")
         
         return cleaned_data
 
