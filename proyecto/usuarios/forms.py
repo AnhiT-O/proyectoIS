@@ -435,11 +435,6 @@ class EditarPerfilForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
-        # Si es una instancia existente, configurar los valores iniciales
-        if self.instance:
-            self.initial_email = self.instance.email
-            self.initial_username = self.instance.username
 
     def clean_current_password(self):
         """
@@ -561,15 +556,12 @@ class EditarPerfilForm(forms.ModelForm):
         
         return user
 
-    def has_email_changed(self):
-        """
-        Verifica si el email ha cambiado.
-        """
-        return hasattr(self, 'initial_email') and self.cleaned_data.get('email') != self.initial_email
-
     def has_password_changed(self):
         """
         Verifica si la contraseña ha cambiado.
+        
+        Returns:
+            bool: True si se proporcionó una nueva contraseña, False en caso contrario.
         """
         return bool(self.cleaned_data.get('new_password1'))
             

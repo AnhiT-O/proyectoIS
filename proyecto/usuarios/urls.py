@@ -5,10 +5,8 @@ app_name = 'usuarios'
 
 urlpatterns = [
     path('registro/', views.registro_usuario, name='registro'),
-    path('activar/<str:uidb64>/<str:token>/', views.activar_cuenta, name='activar_cuenta'),
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
-    path('validar-cambio-email/<str:uidb64>/<str:token>/', views.validar_cambio_email, name='validar_cambio_email'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
     path('reset-password/<str:uidb64>/<str:token>/', views.reset_password_confirm, name='reset_password_confirm'),
     # Rutas para administración de usuarios
