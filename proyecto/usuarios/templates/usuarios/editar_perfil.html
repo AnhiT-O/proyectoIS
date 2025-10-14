@@ -22,7 +22,7 @@
     <div class="form-cabecera">
         <h2>Editar Perfil</h2>
         <p class="subtitulo">
-            Actualiza tu información personal y configuración de cuenta
+            Actualiza tu información personal
         </p>
     </div>
 
@@ -46,9 +46,9 @@
             <div class="form-campo">
                 <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
                 {{ form.email }}
-                <div class="campo-ayuda">
+                {% comment %} <div class="campo-ayuda">
                     Puedes cambiar tu correo electrónico libremente
-                </div>
+                </div> {% endcomment %}
                 {% if form.email.errors %}
                     <div class="form-errores">
                         {% for error in form.email.errors %}
@@ -85,10 +85,10 @@
         </div>
 
         <div class="form-fila">
-            <div class="form-campo">
+            {% comment %} <div class="form-campo">
                 <label for="numero_documento">Número de documento</label>
                 <input type="text" id="numero_documento" class="form-control" value="{{ user.numero_documento }}" disabled readonly>
-            </div>
+            </div> {% endcomment %}
             <div class="form-campo">
                 <label for="{{ form.telefono.id_for_label }}">Número de teléfono</label>
                 {{ form.telefono }}
@@ -100,10 +100,28 @@
                     </div>
                 {% endif %}
             </div>
+            <div class="form-campo">
+                <label for="password-display">Contraseña</label>
+                <div class="password-field-container">
+                    <input type="password" 
+                           value="••••••••••" 
+                           readonly 
+                           class="form-control password-display"
+                           id="password-display">
+                    <button type="button" 
+                            class="btn-cambiar-password btn-primario" 
+                            onclick="togglePasswordChange()">
+                        Cambiar
+                    </button>
+                </div>
+            </div>
+            {% comment %} <div class="form-campo">
+                <!-- Campo vacío para mantener la estructura de la grilla -->
+            </div> {% endcomment %}
         </div>
 
         <!-- Campos adicionales no editables -->
-        {% if user.cliente_activo %}
+        {% comment %} {% if user.cliente_activo %}
         <div class="form-fila">
             <div class="form-campo">
                 <label for="cliente_activo">Cliente Activo</label>
@@ -174,28 +192,7 @@
                 <!-- Campo vacío para mantener la estructura de la grilla -->
             </div>
         </div>
-        {% endif %}
-
-        <div class="form-fila">
-            <div class="form-campo">
-                <label for="password-display">Contraseña</label>
-                <div class="password-field-container">
-                    <input type="password" 
-                           value="••••••••••" 
-                           readonly 
-                           class="form-control password-display"
-                           id="password-display">
-                    <button type="button" 
-                            class="btn-cambiar-password btn-primario" 
-                            onclick="togglePasswordChange()">
-                        Cambiar
-                    </button>
-                </div>
-            </div>
-            <div class="form-campo">
-                <!-- Campo vacío para mantener la estructura de la grilla -->
-            </div>
-        </div>
+        {% endif %} {% endcomment %}
 
         <!-- Sección de cambio de contraseña (inicialmente oculta) -->
         <div class="zona-cambio-password" id="zona-cambio-password" style="display: none;">
@@ -258,7 +255,7 @@
                 <div class="form-campo">
                     <label for="{{ form.current_password.id_for_label }}">Contraseña Actual <span style="color: red;">*</span></label>
                     {{ form.current_password }}
-                    <div class="campo-ayuda">Requerida para confirmar cualquier cambio</div>
+                    <div class="campo-ayuda">La contraseña es requerida para confirmar cualquier cambio.</div>
                     {% if form.current_password.errors %}
                         <div class="form-errores">
                             {% for error in form.current_password.errors %}
