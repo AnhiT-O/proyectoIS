@@ -63,24 +63,20 @@ def registro_usuario(request):
     """
     Vista para registrar un nuevo usuario.
 
-    -   Si el método es POST, procesa el formulario de registro y activa la cuenta inmediatamente.
+    -   Si el método es POST, procesa el formulario de registro y envía un email de confirmación de registro.
     
     -   Si el método es GET, muestra el formulario de registro para completarse.
 
     Raises:
-        Exception: Si ocurre un error al guardar el usuario.
+        Exception: Si ocurre un error al guardar el usuario o enviar el email.
     """
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
             try:
                 user = form.save()
-                # Activar cuenta inmediatamente
-                user.is_active = True
-                user.groups.add(Group.objects.get(name='Operador'))
-                user.save()
-                login(request, user)
-                messages.success(request, '¡Registro exitoso! Tu cuenta ha sido activada.')
+                enviar_email_confirmacion(request, user)
+                messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
                 return redirect('inicio')
             except Exception as e:
                 messages.error(request, f'Error al registrar usuario: {e}')
@@ -94,9 +90,6 @@ def enviar_email_confirmacion(request, user):
     Envía email de confirmación de registro con enlace de activación. Genera un token seguro
     y un identificador único para el usuario, y construye un enlace de activación que
     se incluye en el email.
-
-    Args:
-        user (Usuario): El usuario que se está registrando.
 
     Raises:
         Exception: Si ocurre un error al enviar el email.
@@ -191,11 +184,7 @@ def perfil(request):
     """
     Vista para mostrar el perfil del usuario.
     """
-    context = {
-        'usuario': request.user,
-    }
-    
-    return render(request, 'usuarios/perfil.html', context)
+    return render(request, 'usuarios/perfil.html')
 
 
 def recuperar_password(request):

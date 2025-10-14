@@ -29,29 +29,29 @@
             <div class="info-campos">
                 <div class="info-campo">
                     <div class="info-titulo">Nombre Completo</div>
-                    <div class="info-valor">{{ usuario.first_name }} {{ usuario.last_name }}</div>
+                    <div class="info-valor">{{ user.first_name }} {{ user.last_name }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Nombre de Usuario</div>
-                    <div class="info-valor">{{ usuario.username }}</div>
+                    <div class="info-valor">{{ user.username }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Correo Electrónico</div>
-                    <div class="info-valor">{{ usuario.email }}</div>
+                    <div class="info-valor">{{ user.email }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Número de Documento</div>
-                    <div class="info-valor">{{ usuario.numero_documento }}</div>
+                    <div class="info-valor">{{ user.numero_documento }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Número de Teléfono</div>
-                    <div class="info-valor">{{ usuario.telefono }}</div>
+                    <div class="info-valor">{{ user.telefono }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Roles en el Sistema</div>
                     <div class="info-valor">
-                        {% if usuario.groups.exists %}
-                            {% for group in usuario.groups.all %}
+                        {% if user.groups.exists %}
+                            {% for group in user.groups.all %}
                                 {% if group.name == 'Administrador' %}
                                     <span class="rol-admin">Administrador</span>
                                 {% elif group.name == 'Analista cambiario' %}
