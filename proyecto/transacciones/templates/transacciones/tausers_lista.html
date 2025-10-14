@@ -51,7 +51,6 @@
     <div class="zona-conteo">
         <div class="conteo-info">
             <span>Total: <span class="conteo">{{ total_tausers_sistema }}</span></span>
-            <span style="margin-left: 1rem;">Mostrando: <span class="conteo">{{ tausers|length }}</span></span>
             <span style="margin-left: 1rem;">Activos: <span class="conteo" style="background: #28a745;">{{ tausers_activos }}</span></span>
             <span style="margin-left: 0.5rem;">Inactivos: <span class="conteo" style="background: #dc3545;">{{ tausers_inactivos }}</span></span>
         </div>
@@ -69,15 +68,15 @@
             <table class="gestion-tabla">
                 <thead>
                     <tr>
-                        <th style="width: 25%;">Puerto</th>
-                        <th style="width: 25%;">Estado</th>
+                        <th style="width: 30%;">Sucursal</th>
+                        <th style="width: 20%;">Estado</th>
                         <th style="width: 25%;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>
-                            <span style="font-size:1rem; font-weight:700;">{{ tauser.puerto }}</span>
+                            <span style="font-size:1rem; font-weight:700;">{{ tauser.sucursal }}</span>
                         </td>
                         <td>
                             <span class="{% if tauser.activo %}etiqueta-activo{% else %}etiqueta-bloqueado{% endif %}">

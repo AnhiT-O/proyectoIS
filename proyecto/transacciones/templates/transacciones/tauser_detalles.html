@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Tauser Puerto {{ tauser.puerto }} - Global Exchange{% endblock %}
+{% block title %}Tauser - Sucursal {{ tauser.sucursal }} - Global Exchange{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
@@ -13,7 +13,7 @@
 <div class="contenido">
     <div class="detalle-cabecera">
         <h1 class="detalle-nombre">
-            Tauser Puerto {{ tauser.puerto }}
+            Tauser - Sucursal {{ tauser.sucursal }}
         </h1>
     </div>
 
@@ -38,65 +38,6 @@
                             </div>
                             {% endfor %}
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sección de Cheques -->
-        <div class="seccion-info">
-            <div class="info-columna" style="grid-column: 1 / -1;">
-                <div class="info-celda">
-                    <div class="info-icono">🏦</div>
-                    <div class="info-contenido">
-                        <div class="info-titulo">Cheques Depositados</div>
-                        <div class="seccion-info" style="grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); justify-content: start; margin-bottom: 1rem;">
-                            <div class="info-columna" style="padding: 1rem; min-width: fit-content; width: auto; border-color: #0066cc;">
-                                <div class="info-celda">
-                                    <div class="info-contenido">
-                                        <div class="info-titulo">Cantidad de Cheques</div>
-                                        <div class="info-valor">{{ cantidad_cheques }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="info-columna" style="padding: 1rem; min-width: fit-content; width: auto; border-color: #0066cc;">
-                                <div class="info-celda">
-                                    <div class="info-contenido">
-                                        <div class="info-titulo">Total en Cheques</div>
-                                        <div class="info-valor">Gs. {{ total_cheques|intcomma }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {% if cheques_tauser %}
-                        <div class="info-valor">
-                            <div class="billetes-tabla">
-                                <table class="tabla-billetes">
-                                    <thead>
-                                        <tr>
-                                            <th>Monto</th>
-                                            <th>Firma</th>
-                                            <th>Fecha Depositado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for cheque in cheques_tauser %}
-                                        <tr>
-                                            <td>Gs. {{ cheque.monto|intcomma }}</td>
-                                            <td>{{ cheque.firma }}</td>
-                                            <td>{{ cheque.fecha_depositado|date:"d/m/Y" }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="info-valor">
-                            <span class="texto-vacio">No hay cheques depositados en este Tauser</span>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

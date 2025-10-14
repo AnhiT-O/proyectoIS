@@ -89,7 +89,102 @@ def registro_usuario(request):
     
     return render(request, 'usuarios/registro.html', {'form': form})
 
+def enviar_email_confirmacion(request, user):
+    """
+    Envía email de confirmación de registro con enlace de activación. Genera un token seguro
+    y un identificador único para el usuario, y construye un enlace de activación que
+    se incluye en el email.
 
+    Args:
+        user (Usuario): El usuario que se está registrando.
+
+    Raises:
+        Exception: Si ocurre un error al enviar el email.
+    """
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    activacion_url = request.build_absolute_uri(
+        reverse('usuarios:activar_cuenta', kwargs={'uidb64': uid, 'token': token})
+    )
+    
+    # transforma el HTML en formato de correo
+    html_content = render_to_string('usuarios/email_confirmacion.html', {
+        'user': user,
+        'activacion_url': activacion_url,
+    })
+    
+    # Crear versión de texto plano (fallback)
+    text_content = f"""
+¡Hola {user.first_name}!
+
+Gracias por registrarte en nuestro sistema.
+
+Para activar tu cuenta, por favor visita el siguiente enlace:
+{activacion_url}
+
+Si no solicitaste esta cuenta, puedes ignorar este correo.
+
+Saludos,
+El equipo de desarrollo
+    """.strip()
+
+    from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@localhost')
+    
+    msg = EmailMultiAlternatives(
+        subject='Confirma tu cuenta',
+        body=text_content,  
+        from_email=from_email,
+        to=[user.email]
+    )
+    
+
+    msg.attach_alternative(html_content, "text/html")
+
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de confirmación: {e}')
+
+def activar_cuenta(request, uidb64, token):
+    """
+    Vista para activar la cuenta de un usuario a través del enlace enviado por email. Verifica
+    el token y activa la cuenta si es válido. Si el token ha expirado y el usuario no ha activado su cuenta,
+    elimina el usuario de la base de datos.
+
+    Args:
+        uidb64 (str): Identificador único del usuario codificado en base64.
+        token (str): Token de activación.
+    """
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.groups.add(Group.objects.get(name='Operador'))
+        user.save()
+        login(request, user)
+        messages.success(request, 'Cuenta activada exitosamente. ¡Bienvenido!')
+        return redirect('inicio')
+    else:
+        # Si el usuario existe pero el token es inválido o expiró
+        if user is not None:
+            # Verificar si el usuario no está activo (nunca activó su cuenta)
+            if not user.is_active:
+                # Eliminar el usuario de la base de datos
+                user.delete()
+                messages.warning(request, 
+                    'El enlace de activación ha expirado y la cuenta ha sido eliminada.'
+                    'Por favor, regístrate nuevamente.')
+            else:
+                # Si el usuario ya está activo, solo mostrar error de enlace inválido
+                messages.error(request, 'El enlace de activación ya se usó.')
+        else:
+            messages.error(request, 'Hubo un error inesperado. Contacta a soporte.')
+
+        return redirect('inicio')
 
 @login_required
 def perfil(request):

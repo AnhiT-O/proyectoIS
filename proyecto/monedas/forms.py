@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Moneda, Denominacion
+from transacciones.models import BilletesTauser
 
 class NoBracketsArrayWidget(forms.TextInput):
     """
@@ -179,11 +180,18 @@ class MonedaForm(forms.ModelForm):
             # Remover duplicados y ordenar
             denominaciones_list = sorted(list(set(denominaciones_list)))
             
+            # Validar restricciones de eliminación solo si estamos editando una moneda existente
+            if self.instance and self.instance.pk:
+                denominaciones_existentes = Denominacion.objects.filter(moneda=self.instance)
+                for denominacion_obj in denominaciones_existentes.exclude(valor__in=denominaciones_list):
+                    if BilletesTauser.objects.filter(denominacion=denominacion_obj).exists():
+                        raise ValidationError(f'No se puede eliminar la denominación {denominacion_obj.valor} porque está en uso en un Tauser.')
+            
             return denominaciones_list
             
         except ValueError:
             raise ValidationError('Las denominaciones deben ser números enteros separados por comas.')
-
+        
     def save(self, commit=True):
         """
         Guarda el formulario y maneja las denominaciones como objetos relacionados.
@@ -194,12 +202,14 @@ class MonedaForm(forms.ModelForm):
             # Obtener las denominaciones del campo limpio
             denominaciones_list = self.cleaned_data.get('denominaciones', [])
             
-            # Eliminar denominaciones existentes para esta moneda
-            Denominacion.objects.filter(moneda=moneda).delete()
-            
-            # Crear nuevas denominaciones
-            for valor in denominaciones_list:
-                Denominacion.objects.create(moneda=moneda, valor=valor)
+            # Crear/actualizar denominaciones
+            if denominaciones_list:
+                for denominacion in denominaciones_list:
+                    Denominacion.objects.get_or_create(moneda=moneda, valor=denominacion)
+                
+                # Eliminar denominaciones que ya no están en la lista
+                # (La validación de restricciones ya se hizo en clean_denominaciones)
+                Denominacion.objects.filter(moneda=moneda).exclude(valor__in=denominaciones_list).delete()
         
         return moneda
 

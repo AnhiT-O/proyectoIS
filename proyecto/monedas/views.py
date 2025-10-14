@@ -156,8 +156,6 @@ def moneda_editar(request, pk):
             form.save()
             messages.success(request, f'Moneda \"{moneda.nombre}\" editada exitosamente.')
             return redirect('monedas:lista_monedas')
-        else:
-            messages.error(request, 'Error al actualizar la moneda.')
     return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})
 
 @login_required
