@@ -178,17 +178,44 @@
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" id="confirmacionForm">
     {% csrf_token %}
         <div class="zona-botones">
-            {% if transaccion.tipo == 'venta' %}
-                <button type="submit" name="accion" value="confirmar" class="btn-enviar">
-                    Confirmar Venta
-                </button>
+            {% if enable_2fa %}
+                {% if has_email %}
+                    {% if transaccion.tipo == 'venta' %}
+                        <button type="button" id="confirmarBtn" class="btn-enviar">
+                            Confirmar Venta
+                        </button>
+                    {% else %}
+                        <button type="button" id="confirmarBtn" class="btn-enviar">
+                            Confirmar Compra
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <div class="mensaje-advertencia" style="margin-bottom: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;">
+                        <strong>⚠️ Email requerido:</strong> Necesitas tener un email registrado en tu cuenta para utilizar la verificación de seguridad. Contacta al administrador para actualizar tu perfil.
+                    </div>
+                    {% if transaccion.tipo == 'venta' %}
+                        <button type="submit" name="accion" value="confirmar" class="btn-enviar" disabled>
+                            Confirmar Venta (Email requerido)
+                        </button>
+                    {% else %}
+                        <button type="submit" name="accion" value="confirmar" class="btn-enviar" disabled>
+                            Confirmar Compra (Email requerido)
+                        </button>
+                    {% endif %}
+                {% endif %}
             {% else %}
-                <button type="submit" name="accion" value="confirmar" class="btn-enviar">
-                    Confirmar Compra
-                </button>
+                {% if transaccion.tipo == 'venta' %}
+                    <button type="submit" name="accion" value="confirmar" class="btn-enviar">
+                        Confirmar Venta
+                    </button>
+                {% else %}
+                    <button type="submit" name="accion" value="confirmar" class="btn-enviar">
+                        Confirmar Compra
+                    </button>
+                {% endif %}
             {% endif %}
             <button type="submit" name="accion" value="cancelar" class="btn-atras">
                 Cancelar {% if transaccion.tipo == 'venta' %}Venta{% else %}Compra{% endif %}
@@ -222,5 +249,357 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Modal 2FA -->
+    {% if enable_2fa and has_email %}
+    <div id="modal2FA" class="popup-overlay" style="display: none;">
+        <div class="popup-contenido" style="max-width: 500px;">
+            <div class="popup-cabecera">
+                <h3>🔐 Verificación de Seguridad</h3>
+            </div>
+            <div class="popup-cuerpo">
+                <div id="step-sending" class="verification-step">
+                    <div class="loading-container">
+                        <div class="spinner"></div>
+                        <p>Enviando código de verificación a <strong>{{ user_email }}</strong>...</p>
+                    </div>
+                </div>
+                
+                <div id="step-verify" class="verification-step" style="display: none;">
+                    <p>Se ha enviado un código de verificación de 6 dígitos a tu email <strong>{{ user_email }}</strong></p>
+                    <div class="input-group">
+                        <label for="tokenInput">Código de verificación:</label>
+                        <input type="text" id="tokenInput" maxlength="6" placeholder="123456" 
+                               class="form-control" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                        <small class="form-text text-muted">El código expira en <span id="timerDisplay">1:00</span></small>
+                    </div>
+                    <div id="tokenError" class="mensaje-error" style="display: none;"></div>
+                    
+                    <div class="zona-botones">
+                        <button type="button" id="verificarBtn" class="btn-enviar">
+                            Verificar Código
+                        </button>
+                        <button type="button" id="reenviarBtn" class="btn-secundario">
+                            Reenviar Código
+                        </button>
+                        <button type="button" id="cancelar2FABtn" class="btn-atras">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="step-error" class="verification-step" style="display: none;">
+                    <div class="mensaje-error">
+                        <p id="errorMessage">Error al enviar código de verificación</p>
+                        <div class="zona-botones">
+                            <button type="button" id="reintentar2FABtn" class="btn-enviar">
+                                Reintentar
+                            </button>
+                            <button type="button" id="cancelarError2FABtn" class="btn-atras">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if enable_2fa and has_email %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal2FA = document.getElementById('modal2FA');
+    const confirmarBtn = document.getElementById('confirmarBtn');
+    const tokenInput = document.getElementById('tokenInput');
+    const verificarBtn = document.getElementById('verificarBtn');
+    const reenviarBtn = document.getElementById('reenviarBtn');
+    const cancelar2FABtn = document.getElementById('cancelar2FABtn');
+    const reintentar2FABtn = document.getElementById('reintentar2FABtn');
+    const cancelarError2FABtn = document.getElementById('cancelarError2FABtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const tokenError = document.getElementById('tokenError');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    let countdownTimer = null;
+    let timeRemaining = 60; // 1 minuto
+    
+    // Función para mostrar pasos del modal
+    function showStep(stepId) {
+        document.querySelectorAll('.verification-step').forEach(step => {
+            step.style.display = 'none';
+        });
+        document.getElementById(stepId).style.display = 'block';
+    }
+    
+    // Función para iniciar countdown
+    function startCountdown() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        timeRemaining = 60;
+        
+        countdownTimer = setInterval(() => {
+            timeRemaining--;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining <= 0) {
+                clearInterval(countdownTimer);
+                timerDisplay.textContent = 'Expirado';
+                showError('El código ha expirado. Solicita uno nuevo.');
+            }
+        }, 1000);
+    }
+    
+    // Función para mostrar errores
+    function showError(message) {
+        tokenError.textContent = message;
+        tokenError.style.display = 'block';
+    }
+    
+    // Función para limpiar errores
+    function clearError() {
+        tokenError.style.display = 'none';
+    }
+    
+    // Evento click en confirmar transacción
+    confirmarBtn.addEventListener('click', function() {
+        modal2FA.style.display = 'flex';
+        showStep('step-sending');
+        sendToken();
+    });
+    
+    // Enviar token
+    function sendToken() {
+        clearError();
+        
+        fetch('{% url "transacciones:send_2fa_token" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showStep('step-verify');
+                startCountdown();
+                tokenInput.focus();
+            } else {
+                showStep('step-error');
+                errorMessage.textContent = data.message || 'Error al enviar código de verificación';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showStep('step-error');
+            errorMessage.textContent = 'Error de conexión. Intenta nuevamente.';
+        });
+    }
+    
+    // Verificar token
+    function verifyToken() {
+        const token = tokenInput.value.trim();
+        
+        if (!token) {
+            showError('Ingresa el código de verificación');
+            return;
+        }
+        
+        if (token.length !== 6 || !/^\d{6}$/.test(token)) {
+            showError('El código debe contener exactamente 6 dígitos');
+            return;
+        }
+        
+        clearError();
+        verificarBtn.disabled = true;
+        verificarBtn.textContent = 'Verificando...';
+        
+        fetch('{% url "transacciones:verify_2fa_token" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ token: token })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (countdownTimer) clearInterval(countdownTimer);
+                modal2FA.style.display = 'none';
+                
+                // Redirigir o mostrar mensaje de éxito
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Fallback: enviar formulario tradicional
+                    const form = document.getElementById('confirmacionForm');
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'accion';
+                    hiddenInput.value = 'confirmar';
+                    form.appendChild(hiddenInput);
+                    form.submit();
+                }
+            } else {
+                showError(data.message || 'Código incorrecto');
+                verificarBtn.disabled = false;
+                verificarBtn.textContent = 'Verificar Código';
+                tokenInput.select();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Error de conexión. Intenta nuevamente.');
+            verificarBtn.disabled = false;
+            verificarBtn.textContent = 'Verificar Código';
+        });
+    }
+    
+    // Event listeners
+    verificarBtn.addEventListener('click', verifyToken);
+    
+    // Permitir verificar con Enter
+    tokenInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            verifyToken();
+        }
+    });
+    
+    // Solo permitir números en el input
+    tokenInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/\D/g, '');
+        clearError();
+    });
+    
+    // Reenviar código
+    reenviarBtn.addEventListener('click', function() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        showStep('step-sending');
+        sendToken();
+    });
+    
+    // Cancelar desde modal de verificación
+    cancelar2FABtn.addEventListener('click', function() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        modal2FA.style.display = 'none';
+    });
+    
+    // Reintentar desde error
+    reintentar2FABtn.addEventListener('click', function() {
+        showStep('step-sending');
+        sendToken();
+    });
+    
+    // Cancelar desde error
+    cancelarError2FABtn.addEventListener('click', function() {
+        modal2FA.style.display = 'none';
+    });
+    
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal2FA.style.display === 'flex') {
+            if (countdownTimer) clearInterval(countdownTimer);
+            modal2FA.style.display = 'none';
+        }
+    });
+});
+</script>
+
+<style>
+.loading-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.input-group {
+    margin: 1.5rem 0;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-family: monospace;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.mensaje-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 5px;
+    border: 1px solid #f5c6cb;
+    margin: 1rem 0;
+}
+
+.btn-secundario {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.btn-secundario:hover {
+    background-color: #5a6268;
+}
+
+.btn-secundario:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.mensaje-advertencia {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    color: #856404;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endif %}
 {% endblock %}

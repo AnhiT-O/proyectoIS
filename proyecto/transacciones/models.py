@@ -26,6 +26,8 @@ from django.utils import timezone
 import stripe
 from monedas.models import Moneda, StockGuaranies, Denominacion
 from django.db import transaction
+import random
+import string
 
 class Recargos(models.Model):
     """
@@ -139,6 +141,69 @@ def crear_limite_global_inicial(sender, **kwargs):
         if not LimiteGlobal.objects.exists():
             LimiteGlobal.objects.create()
             print("Límite global inicial creado automáticamente")
+
+class TransactionToken(models.Model):
+    """
+    Modelo para almacenar tokens temporales de autenticación de dos factores
+    para transacciones que requieren verificación adicional.
+    """
+    usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
+    token = models.CharField(max_length=6)  # Token de 6 dígitos
+    transaccion_data = models.JSONField()  # Datos de la transacción pendiente
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name = "Token de Transacción"
+        verbose_name_plural = "Tokens de Transacción"
+        db_table = "transaction_tokens"
+        default_permissions = []
+        
+    def __str__(self):
+        return f"Token {self.token} - Usuario: {self.usuario.username}"
+    
+    def is_valid(self):
+        """
+        Verifica si el token es válido (no usado y no expirado)
+        """
+        return not self.used and timezone.now() <= self.expires_at
+    
+    def mark_as_used(self):
+        """
+        Marca el token como usado
+        """
+        self.used = True
+        self.save()
+    
+    @classmethod
+    def generate_token(cls, usuario, transaccion_data):
+        """
+        Genera un nuevo token para un usuario y datos de transacción específicos.
+        Elimina tokens previos no usados del mismo usuario.
+        """
+        from django.conf import settings
+        
+        # Eliminar tokens previos no usados del usuario
+        cls.objects.filter(usuario=usuario, used=False).delete()
+        
+        # Generar token de 6 dígitos
+        token = ''.join(random.choices(string.digits, k=settings.TWO_FACTOR_AUTH['TOKEN_LENGTH']))
+        
+        # Calcular tiempo de expiración
+        expires_at = timezone.now() + timezone.timedelta(
+            minutes=settings.TWO_FACTOR_AUTH['TOKEN_EXPIRY_MINUTES']
+        )
+        
+        # Crear y guardar el token
+        token_obj = cls.objects.create(
+            usuario=usuario,
+            token=token,
+            transaccion_data=transaccion_data,
+            expires_at=expires_at
+        )
+        
+        return token_obj
 
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
