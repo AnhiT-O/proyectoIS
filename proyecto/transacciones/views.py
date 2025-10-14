@@ -111,12 +111,14 @@ def compra_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+        
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
         form = SeleccionMonedaMontoForm()
     
     context = {
@@ -704,12 +706,14 @@ def venta_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+        
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
         form = SeleccionMonedaMontoForm()
     
     context = {
