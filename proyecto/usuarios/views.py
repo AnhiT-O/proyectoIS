@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -11,8 +11,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 from functools import wraps
-from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
+from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm, EditarPerfilForm
 from .models import Usuario
 from clientes.models import Cliente
 from clientes.views import procesar_medios_acreditacion_cliente
@@ -89,9 +90,6 @@ def enviar_email_confirmacion(request, user):
     Envía email de confirmación de registro con enlace de activación. Genera un token seguro
     y un identificador único para el usuario, y construye un enlace de activación que
     se incluye en el email.
-
-    Args:
-        user (Usuario): El usuario que se está registrando.
 
     Raises:
         Exception: Si ocurre un error al enviar el email.
@@ -817,3 +815,34 @@ def eliminar_tarjeta_cliente(request, pk, payment_method_id):
         messages.error(request, 'Error inesperado al eliminar la tarjeta.')
     
     return redirect('usuarios:detalle_cliente', cliente_id=pk)
+
+
+
+
+@login_required
+def editar_perfil(request):
+    """
+    Vista para editar el perfil del usuario. Todos los campos se actualizan inmediatamente.
+    """
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            user = form.save()
+            
+            # Forzar recarga del usuario en la sesión si cambió contraseña
+            if form.has_password_changed():
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
+            
+            messages.success(request, 'Perfil actualizado exitosamente.')
+            return redirect('usuarios:perfil')
+    else:
+        form = EditarPerfilForm(instance=request.user, user=request.user)
+    
+    context = {
+        'form': form,
+        'usuario': request.user,
+    }
+    return render(request, 'usuarios/editar_perfil.html', context)
+
+
