@@ -5,7 +5,9 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Moneda, Denominacion
+from django.utils import timezone
+from datetime import datetime, timedelta
+from .models import Moneda, Denominacion, HistorialCotizacion
 from .forms import MonedaForm
 
 
@@ -214,3 +216,140 @@ def verificar_cambios_precios(request, moneda_id):
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+
+@login_required
+def evolucion_cotizacion(request, pk):
+    """
+    Vista para mostrar la evolución de las cotizaciones de una moneda específica
+    """
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Obtener datos históricos de los últimos 12 meses
+    fecha_limite = timezone.now().date() - timedelta(days=365)
+    historial = HistorialCotizacion.objects.filter(
+        moneda=moneda,
+        fecha__gte=fecha_limite
+    ).order_by('fecha')
+    
+    # Si no hay historial, crear algunos datos de ejemplo para demostración
+    if not historial.exists():
+        # Generar algunos datos de ejemplo para los últimos 30 días
+        datos_ejemplo = []
+        for i in range(30, 0, -1):
+            fecha = timezone.now().date() - timedelta(days=i)
+            # Variación pequeña en las tasas para simular evolución
+            variacion = (i % 5) * 10  # Pequeña variación
+            tasa_base = moneda.tasa_base + variacion
+            
+            datos_ejemplo.append({
+                'fecha': fecha,
+                'tasa_base': tasa_base,
+                'comision_compra': moneda.comision_compra,
+                'comision_venta': moneda.comision_venta,
+                'precio_compra': tasa_base - moneda.comision_compra,
+                'precio_venta': tasa_base + moneda.comision_venta
+            })
+        
+        # Agregar datos actuales
+        datos_ejemplo.append({
+            'fecha': timezone.now().date(),
+            'tasa_base': moneda.tasa_base,
+            'comision_compra': moneda.comision_compra,
+            'comision_venta': moneda.comision_venta,
+            'precio_compra': moneda.tasa_base - moneda.comision_compra,
+            'precio_venta': moneda.tasa_base + moneda.comision_venta
+        })
+        
+        context = {
+            'moneda': moneda,
+            'historial': datos_ejemplo,
+            'datos_json': datos_ejemplo  # Para JavaScript
+        }
+    else:
+        # Convertir QuerySet a lista de diccionarios para JSON
+        datos_json = []
+        for registro in historial:
+            datos_json.append({
+                'fecha': registro.fecha.strftime('%Y-%m-%d'),
+                'precio_compra': registro.precio_compra,
+                'precio_venta': registro.precio_venta
+            })
+        
+        context = {
+            'moneda': moneda,
+            'historial': historial,
+            'datos_json': datos_json
+        }
+    
+    return render(request, 'monedas/evolucion_cotizacion.html', context)
+
+@login_required
+def api_evolucion_cotizacion(request, pk):
+    """
+    API para obtener datos de evolución en formato JSON para gráficos
+    """
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Obtener parámetro de rango temporal
+    rango = request.GET.get('rango', 'mes')
+    
+    # Calcular fecha límite según el rango
+    if rango == 'semana':
+        fecha_limite = timezone.now().date() - timedelta(days=7)
+    elif rango == 'mes':
+        fecha_limite = timezone.now().date() - timedelta(days=30)
+    elif rango == '6meses':
+        fecha_limite = timezone.now().date() - timedelta(days=180)
+    elif rango == 'año':
+        fecha_limite = timezone.now().date() - timedelta(days=365)
+    else:
+        fecha_limite = timezone.now().date() - timedelta(days=30)
+    
+    # Obtener historial filtrado
+    historial = HistorialCotizacion.objects.filter(
+        moneda=moneda,
+        fecha__gte=fecha_limite
+    ).order_by('fecha')
+    
+    # Si no hay historial, generar datos de ejemplo
+    if not historial.exists():
+        datos = []
+        dias = 7 if rango == 'semana' else (30 if rango == 'mes' else (180 if rango == '6meses' else 365))
+        
+        for i in range(dias, 0, -1):
+            fecha = timezone.now().date() - timedelta(days=i)
+            variacion = (i % 5) * 10
+            tasa_base = moneda.tasa_base + variacion
+            
+            datos.append({
+                'fecha': fecha.strftime('%d/%m/%Y'),
+                'fecha_iso': fecha.strftime('%Y-%m-%d'),
+                'precio_compra': tasa_base - moneda.comision_compra,
+                'precio_venta': tasa_base + moneda.comision_venta
+            })
+        
+        # Agregar dato actual
+        datos.append({
+            'fecha': timezone.now().date().strftime('%d/%m/%Y'),
+            'fecha_iso': timezone.now().date().strftime('%Y-%m-%d'),
+            'precio_compra': moneda.tasa_base - moneda.comision_compra,
+            'precio_venta': moneda.tasa_base + moneda.comision_venta
+        })
+    else:
+        datos = []
+        for registro in historial:
+            datos.append({
+                'fecha': registro.fecha.strftime('%d/%m/%Y'),
+                'fecha_iso': registro.fecha.strftime('%Y-%m-%d'),
+                'precio_compra': registro.precio_compra,
+                'precio_venta': registro.precio_venta
+            })
+    
+    return JsonResponse({
+        'moneda': {
+            'nombre': moneda.nombre,
+            'simbolo': moneda.simbolo
+        },
+        'datos': datos,
+        'rango': rango
+    })

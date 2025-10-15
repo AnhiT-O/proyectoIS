@@ -205,7 +205,9 @@ class MonedaForm(forms.ModelForm):
             # Crear/actualizar denominaciones
             if denominaciones_list:
                 for denominacion in denominaciones_list:
-                    Denominacion.objects.get_or_create(moneda=moneda, valor=denominacion)
+                    # Verificar si ya existe antes de crear
+                    if not Denominacion.objects.filter(moneda=moneda, valor=denominacion).exists():
+                        Denominacion.objects.create(moneda=moneda, valor=denominacion)
                 
                 # Eliminar denominaciones que ya no están en la lista
                 # (La validación de restricciones ya se hizo en clean_denominaciones)

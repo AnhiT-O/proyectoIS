@@ -180,3 +180,59 @@ def crear_denominaciones_iniciales(sender, **kwargs):
         for valor in [2000, 5000, 10000, 20000, 50000, 100000]:
             Denominacion.objects.create(valor=valor)
         print("Denominaciones iniciales para Stock de Guaraníes creadas automáticamente")
+
+class HistorialCotizacion(models.Model):
+    """
+    Modelo para almacenar el historial de cotizaciones de las monedas
+    """
+    moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, related_name='historial_cotizaciones')
+    nombre_moneda = models.CharField(max_length=100, default='')  # Nombre de la moneda para facilitar consultas
+    fecha = models.DateField()
+    tasa_base = models.IntegerField()
+    comision_compra = models.IntegerField()
+    comision_venta = models.IntegerField()
+    precio_compra = models.IntegerField()  # tasa_base - comision_compra
+    precio_venta = models.IntegerField()   # tasa_base + comision_venta
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Historial de Cotización'
+        verbose_name_plural = 'Historial de Cotizaciones'
+        db_table = 'historial_cotizaciones'
+        default_permissions = []
+        # Removemos unique_together para permitir múltiples ediciones por día
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.moneda.nombre} - {self.fecha}"
+
+    def save(self, *args, **kwargs):
+        # Guardar automáticamente el nombre de la moneda
+        if self.moneda:
+            self.nombre_moneda = self.moneda.nombre
+        
+        # Calcular precios automáticamente
+        self.precio_compra = self.tasa_base - self.comision_compra
+        self.precio_venta = self.tasa_base + self.comision_venta
+        super().save(*args, **kwargs)
+
+# Signal para crear registro en historial cuando se actualiza una moneda
+from django.db.models.signals import post_save
+
+@receiver(post_save, sender=Moneda)
+def crear_historial_cotizacion(sender, instance, created, **kwargs):
+    """
+    Crea un registro en el historial cuando se actualiza una cotización
+    """
+    if not created:  # Solo cuando se actualiza, no cuando se crea
+        fecha_hoy = timezone.now().date()
+        
+        # Guardar TODAS las ediciones (eliminar la verificación de duplicados para el mismo día)
+        HistorialCotizacion.objects.create(
+            moneda=instance,
+            nombre_moneda=instance.nombre,
+            fecha=fecha_hoy,
+            tasa_base=instance.tasa_base,
+            comision_compra=instance.comision_compra,
+            comision_venta=instance.comision_venta
+        )
