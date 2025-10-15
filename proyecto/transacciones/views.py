@@ -23,11 +23,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm, VariablesForm
 from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
 from decimal import Decimal
 from clientes.models import Cliente
+from django.contrib.auth.models import User
 import ast
 import stripe
 import logging
@@ -35,6 +37,17 @@ from datetime import date, timedelta
 from django.utils import timezone
 from django.db import models
 import stripe
+
+# Importaciones para exportación de archivos (se importan en las funciones para manejo de errores)
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.pagesizes import letter, A4
+# from reportlab.lib.styles import getSampleStyleSheet
+# from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+# from reportlab.lib import colors
+# from reportlab.lib.units import inch
+# import openpyxl
+# from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+# from io import BytesIO
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1669,4 +1682,308 @@ def verificar_estado_tauser(request, tauser_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+# ============================================================================
+# VISTAS PARA DESCARGA DE HISTORIAL DE TRANSACCIONES
+# ============================================================================
+
+@login_required
+def descargar_historial_pdf(request):
+    """
+    Vista para descargar el historial de transacciones en formato PDF.
+    
+    Genera un archivo PDF con las transacciones filtradas según los parámetros
+    recibidos en la petición GET. Mantiene la coherencia con los filtros
+    aplicados en la vista de historial.
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro
+        
+    Returns:
+        HttpResponse: Archivo PDF para descarga
+    """
+    from django.http import HttpResponse
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from io import BytesIO
+    
+    # Obtener parámetros de filtro
+    cliente_id = request.GET.get('cliente')
+    busqueda = request.GET.get('busqueda', '')
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
+    
+    # Obtener transacciones con los mismos filtros que la vista principal
+    try:
+        if cliente_id:
+            cliente = Cliente.objects.get(id=cliente_id)
+            transacciones = Transaccion.objects.filter(cliente=cliente).order_by('-fecha_hora')
+            
+            # Verificar permisos del usuario
+            if not request.user.clientes_operados.filter(id=cliente.id).exists():
+                messages.error(request, "No tienes permiso para descargar el historial de este cliente.")
+                return redirect('inicio')
+        else:
+            return HttpResponse("Cliente no especificado", status=400)
+    except Cliente.DoesNotExist:
+        return HttpResponse("Cliente no encontrado", status=404)
+    
+    # Aplicar los mismos filtros que en la vista de historial
+    if busqueda:
+        transacciones = transacciones.filter(
+            models.Q(cliente__nombre__icontains=busqueda) | 
+            models.Q(cliente__numero_documento__icontains=busqueda) |
+            models.Q(cliente__usuarios__username__icontains=busqueda)
+        )
+    
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
+    
+    # Crear el PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
+    
+    # Título del documento
+    title = f"Historial de Transacciones - {cliente.nombre}"
+    story.append(Paragraph(title, styles['Title']))
+    story.append(Spacer(1, 12))
+    
+    # Información de filtros aplicados
+    if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
+        filtros_texto = "Filtros aplicados: "
+        if busqueda:
+            filtros_texto += f"Búsqueda: '{busqueda}' "
+        if tipo_operacion:
+            filtros_texto += f"Tipo: {tipo_operacion.title()} "
+        if estado_filtro:
+            filtros_texto += f"Estado: {estado_filtro.title()} "
+        if usuario_filtro:
+            try:
+                from usuarios.models import Usuario
+                usuario = Usuario.objects.get(id=usuario_filtro)
+                filtros_texto += f"Usuario: {usuario.nombre_completo() or usuario.username} "
+            except:
+                pass
+        
+        story.append(Paragraph(filtros_texto, styles['Normal']))
+        story.append(Spacer(1, 12))
+    
+    # Crear tabla de transacciones
+    data = [['Fecha/Hora', 'Usuario', 'Operación', 'Moneda', 'Estado']]
+    
+    for transaccion in transacciones:
+        fecha_str = transaccion.fecha_hora.strftime("%d/%m/%Y %H:%M:%S")
+        usuario_str = transaccion.usuario.nombre_completo() or transaccion.usuario.username
+        operacion_str = transaccion.tipo.title()
+        moneda_str = f"{transaccion.monto} {transaccion.moneda.simbolo}"
+        estado_str = transaccion.estado
+        
+        data.append([fecha_str, usuario_str, operacion_str, moneda_str, estado_str])
+    
+    # Crear y estilizar la tabla
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(table)
+    
+    # Construir el PDF
+    doc.build(story)
+    
+    # Preparar la respuesta
+    buffer.seek(0)
+    response = HttpResponse(buffer.read(), content_type='application/pdf')
+    filename = f"historial_transacciones_{cliente.nombre.replace(' ', '_')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required  
+def descargar_historial_excel(request):
+    """
+    Vista para descargar el historial de transacciones en formato Excel.
+    
+    Genera un archivo Excel con las transacciones filtradas según los parámetros
+    recibidos en la petición GET. Incluye formateo profesional y múltiples hojas
+    si es necesario.
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro
+        
+    Returns:
+        HttpResponse: Archivo Excel para descarga
+    """
+    from django.http import HttpResponse
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from io import BytesIO
+    
+    # Obtener parámetros de filtro
+    cliente_id = request.GET.get('cliente')
+    busqueda = request.GET.get('busqueda', '')
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
+    
+    # Obtener transacciones con los mismos filtros que la vista principal
+    try:
+        if cliente_id:
+            cliente = Cliente.objects.get(id=cliente_id)
+            transacciones = Transaccion.objects.filter(cliente=cliente).order_by('-fecha_hora')
+            
+            # Verificar permisos del usuario
+            if not request.user.clientes_operados.filter(id=cliente.id).exists():
+                messages.error(request, "No tienes permiso para descargar el historial de este cliente.")
+                return redirect('inicio')
+        else:
+            return HttpResponse("Cliente no especificado", status=400)
+    except Cliente.DoesNotExist:
+        return HttpResponse("Cliente no encontrado", status=404)
+    
+    # Aplicar los mismos filtros que en la vista de historial
+    if busqueda:
+        transacciones = transacciones.filter(
+            models.Q(cliente__nombre__icontains=busqueda) | 
+            models.Q(cliente__numero_documento__icontains=busqueda) |
+            models.Q(cliente__usuarios__username__icontains=busqueda)
+        )
+    
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
+    
+    # Crear el libro de Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Historial de Transacciones"
+    
+    # Estilos
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'), 
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Título del documento
+    ws.merge_cells('A1:F1')
+    ws['A1'] = f"Historial de Transacciones - {cliente.nombre}"
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal="center")
+    
+    # Información de filtros (si aplica)
+    row_start = 3
+    if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
+        ws.merge_cells(f'A2:F2')
+        filtros_texto = "Filtros aplicados: "
+        if busqueda:
+            filtros_texto += f"Búsqueda: '{busqueda}' "
+        if tipo_operacion:
+            filtros_texto += f"Tipo: {tipo_operacion.title()} "
+        if estado_filtro:
+            filtros_texto += f"Estado: {estado_filtro.title()} "
+        if usuario_filtro:
+            try:
+                from usuarios.models import Usuario
+                usuario = Usuario.objects.get(id=usuario_filtro)
+                filtros_texto += f"Usuario: {usuario.nombre_completo() or usuario.username} "
+            except:
+                pass
+        
+        ws['A2'] = filtros_texto
+        ws['A2'].font = Font(italic=True)
+        row_start = 4
+    
+    # Encabezados de la tabla
+    headers = ['Fecha', 'Hora', 'Usuario', 'Operación', 'Moneda', 'Monto', 'Estado']
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=row_start, column=col_num)
+        cell.value = header
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = border
+    
+    # Datos de las transacciones
+    for row_num, transaccion in enumerate(transacciones, row_start + 1):
+        data_row = [
+            transaccion.fecha_hora.strftime("%d/%m/%Y"),
+            transaccion.fecha_hora.strftime("%H:%M:%S"),
+            transaccion.usuario.nombre_completo() or transaccion.usuario.username,
+            transaccion.tipo.title(),
+            transaccion.moneda.nombre,
+            float(transaccion.monto),
+            transaccion.estado
+        ]
+        
+        for col_num, value in enumerate(data_row, 1):
+            cell = ws.cell(row=row_num, column=col_num)
+            cell.value = value
+            cell.border = border
+            if col_num == 6:  # Columna de monto
+                cell.number_format = '#,##0.00'
+                cell.alignment = Alignment(horizontal="right")
+            else:
+                cell.alignment = Alignment(horizontal="center")
+    
+    # Ajustar ancho de columnas
+    column_widths = [12, 10, 20, 12, 15, 15, 12]
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+    
+    # Guardar en buffer
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    # Preparar la respuesta
+    response = HttpResponse(
+        buffer.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"historial_transacciones_{cliente.nombre.replace(' ', '_')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
     
