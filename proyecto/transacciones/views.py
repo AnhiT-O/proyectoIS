@@ -2019,7 +2019,7 @@ def descargar_historial_excel(request):
     # Estilos
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-    header_alignment = Alignment(horizontal="center", vertical="center")
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     border = Border(
         left=Side(style='thin'),
         right=Side(style='thin'), 
@@ -2031,7 +2031,7 @@ def descargar_historial_excel(request):
     ws.merge_cells('A1:G1')
     ws['A1'] = f"Historial de Transacciones - {cliente.nombre}"
     ws['A1'].font = Font(bold=True, size=14)
-    ws['A1'].alignment = Alignment(horizontal="center")
+    ws['A1'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     
     # Información de filtros (si aplica)
     row_start = 3
@@ -2042,6 +2042,7 @@ def descargar_historial_excel(request):
         ws.merge_cells(f'A{current_row}:G{current_row}')
         ws[f'A{current_row}'] = "Filtros aplicados:"
         ws[f'A{current_row}'].font = Font(bold=True, italic=True)
+        ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
         current_row += 1
         
         # Filtros individuales por fila
@@ -2049,16 +2050,19 @@ def descargar_historial_excel(request):
             ws.merge_cells(f'A{current_row}:G{current_row}')
             ws[f'A{current_row}'] = f"• Búsqueda: '{busqueda}'"
             ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
             current_row += 1
         if tipo_operacion:
             ws.merge_cells(f'A{current_row}:G{current_row}')
             ws[f'A{current_row}'] = f"• Tipo de operación: {tipo_operacion.title()}"
             ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
             current_row += 1
         if estado_filtro:
             ws.merge_cells(f'A{current_row}:G{current_row}')
             ws[f'A{current_row}'] = f"• Estado: {estado_filtro.title()}"
             ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
             current_row += 1
         if usuario_filtro:
             try:
@@ -2067,6 +2071,7 @@ def descargar_historial_excel(request):
                 ws.merge_cells(f'A{current_row}:G{current_row}')
                 ws[f'A{current_row}'] = f"• Usuario: {usuario.nombre_completo() or usuario.username}"
                 ws[f'A{current_row}'].font = Font(italic=True)
+                ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
                 current_row += 1
             except:
                 pass
@@ -2099,13 +2104,13 @@ def descargar_historial_excel(request):
             transaccion.estado
         ]
         
-        # Aplicar estilo a la fila principal
+        # Aplicar estilo mejorado a la fila principal
         for col_num, value in enumerate(data_row, 1):
             cell = ws.cell(row=current_row, column=col_num)
             cell.value = value
             cell.border = border
             cell.fill = PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid")
-            cell.font = Font(bold=True)
+            cell.font = Font(bold=True, size=11)
             
             if col_num == 6:  # Columna de monto
                 decimales = transaccion.moneda.decimales
@@ -2121,9 +2126,9 @@ def descargar_historial_excel(request):
                     cell.number_format = '#,##0.0000'
                 else:
                     cell.number_format = f'#,##0.{"0" * decimales}'
-                cell.alignment = Alignment(horizontal="right")
+                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
             else:
-                cell.alignment = Alignment(horizontal="center")
+                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
         current_row += 1
         
@@ -2132,15 +2137,33 @@ def descargar_historial_excel(request):
         detail_font = Font(italic=True, size=9)
         
         def add_detail_row(label, value):
-            """Helper para agregar filas de detalle"""
-            ws.cell(row=current_row, column=1).value = label
-            ws.cell(row=current_row, column=1).font = detail_font
-            ws.cell(row=current_row, column=1).fill = detail_fill
-            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            """Helper para agregar filas de detalle con formato mejorado"""
+            # Celda de etiqueta
+            label_cell = ws.cell(row=current_row, column=1)
+            label_cell.value = label
+            label_cell.font = Font(bold=True, size=10)
+            label_cell.fill = detail_fill
+            label_cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+            label_cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
             
-            ws.cell(row=current_row, column=2).value = value
-            ws.cell(row=current_row, column=2).font = detail_font
-            ws.cell(row=current_row, column=2).fill = detail_fill
+            # Celda de valor
+            value_cell = ws.cell(row=current_row, column=2)
+            value_cell.value = value
+            value_cell.font = detail_font
+            value_cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+            value_cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            value_cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
             return current_row + 1
         
         # Información básica
@@ -2217,10 +2240,14 @@ def descargar_historial_excel(request):
         # Fila de separación entre transacciones
         current_row += 1
     
-    # Ajustar ancho de columnas
-    column_widths = [12, 10, 20, 12, 15, 15, 12]
+    # Ajustar ancho de columnas para acomodar todos los detalles
+    column_widths = [25, 30, 25, 18, 20, 18, 15]  # Aumentado para los detalles extensos
     for i, width in enumerate(column_widths, 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+    
+    # Ajustar altura de filas para mejor legibilidad
+    for row in ws.iter_rows():
+        ws.row_dimensions[row[0].row].height = 20
     
     # Guardar en buffer
     buffer = BytesIO()
