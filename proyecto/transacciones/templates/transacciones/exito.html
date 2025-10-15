@@ -16,6 +16,10 @@
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
+{% block extra_js %}
+    <script src="{% static 'pasarela_pago.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="contenido extendido">
     <div class="form-cabecera">
@@ -26,6 +30,38 @@
                 <p class="subtitulo">
                     Se ha generado un código para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
+                {% elif transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    Swal.fire({
+                        title: 'Redirigiendo a plataforma de pago',
+                        text: 'Serás redirigido automáticamente a la plataforma de pago en línea para completar la transacción.',
+                        icon: 'info',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+
+                    const datosTransaccion = {
+                        monto: '{{ transaccion.monto }}',
+                        moneda: '{{ transaccion.moneda.simbolo }}',
+                        tipo_operacion: '{{ transaccion.tipo }}',
+                        cliente_id: '{{ transaccion.cliente.id }}',
+                        token: '{{ transaccion.token }}',
+                        medio_pago: '{{ transaccion.medio_pago }}',
+                        monto_minimo: '{{ transaccion.precio_final }}'
+                    };
+
+                    // Ejecutar redirección cuando se cargue la página
+                    document.addEventListener('DOMContentLoaded', function() {
+                        console.log('Iniciando redirección a pasarela...', datosTransaccion);
+                        sessionStorage.setItem('returnUrl', window.location.href);
+                        sessionStorage.setItem('datosTransaccion', JSON.stringify(datosTransaccion));
+                        
+                        // Llamar directamente a procesarPago
+                        procesarPago(datosTransaccion);
+                    });
+                </script>
                 {% else %}
                 <p class="subtitulo">
                     Se ha generado un código para la transacción. Usalo para realizar el pago de la transacción en línea.

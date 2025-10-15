@@ -18,12 +18,10 @@
 {% endblock %}
 
 {% block extra_js %}
+    <!-- SweetAlert2 para mensajes de error -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'pasarela_pago.js' %}"></script>
-    <!-- Primero definimos las URLs que Django conoce -->
-    <script>
-        const URL_TRANSFERENCIA = "http://localhost:5500/pagos/transferencia/";
-        const URL_BILLETERA = "http://localhost:5500/pagos/billetera/";
-    </script>
+    <!-- Las URLs se movieron a pasarela_pago.js -->
 
 {% endblock %}
 
@@ -192,23 +190,17 @@
     {% csrf_token %}
         <div class="zona-botones">
             {% if transaccion.tipo == 'venta' %}
-                <button type="{% if transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}button{% else %}submit{% endif %}" 
+                <button type="submit" 
                     name="accion" 
                     value="confirmar" 
-                    class="btn-enviar"
-                    {% if transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}
-                        onclick="procesarPago('{{ transaccion.medio_pago }}', '{{ transaccion.monto }}', '{{ transaccion.moneda.simbolo }}', '{{ transaccion.tipo }}')"
-                    {% endif %}>
+                    class="btn-enviar">
                     Confirmar Venta
                 </button>
             {% else %}
-                <button type="{% if transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}button{% else %}submit{% endif %}"
+                <button type="submit"
                     name="accion" 
                     value="confirmar" 
-                    class="btn-enviar"
-                    {% if transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}
-                        onclick="procesarPago('{{ transaccion.medio_pago }}', '{{ transaccion.monto }}', '{{ transaccion.moneda.simbolo }}', '{{ transaccion.tipo }}')"
-                    {% endif %}>
+                    class="btn-enviar">
                     Confirmar Compra
                 </button>
             {% endif %}
@@ -218,36 +210,7 @@
         </div>
     </form>
     
-    <script>
-    function procesarPago(medioPago, monto, moneda, tipoOperacion) {
-        const datosTransaccion = {
-            monto: monto,
-            moneda: moneda,
-            tipo_operacion: tipoOperacion,
-            cliente_id: '{{ transaccion.cliente.id }}',
-            billetera: medioPago.toLowerCase().includes('tigo') ? 'tigo' : 
-                      medioPago.toLowerCase().includes('personal') ? 'personal' :
-                      medioPago.toLowerCase().includes('zimple') ? 'zimple' : ''
-        };
-
-        // Almacenar URL actual para regresar después del pago
-        sessionStorage.setItem('returnUrl', window.location.href);
-        
-        redirigirAPasarela(
-            medioPago.includes('Billetera') ? 'Billetera Electrónica' : 'Transferencia Bancaria',
-            datosTransaccion
-        );
-    }
-
-    // Verificar si regresamos de la pasarela
-    document.addEventListener('DOMContentLoaded', function() {
-        const estadoPago = sessionStorage.getItem('estadoPago');
-        if (estadoPago === 'completado') {
-            sessionStorage.removeItem('estadoPago');
-            document.getElementById('form-confirmacion').submit();
-        }
-    });
-    </script>
+    <!-- El script se movió a exito.html -->
     {% if cambios %}
     <div class="popup-overlay" style="display: flex">
         <div class="popup-contenido" style="max-width: 700px;">

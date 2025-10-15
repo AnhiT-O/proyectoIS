@@ -571,7 +571,7 @@ def compra_confirmacion(request):
         return render(request, 'transacciones/confirmacion.html', context)
 
 @login_required
-def compra_exito(request):
+def compra_exito(request, token=None):
     """
     Página final del proceso de compra: mensaje de éxito.
     
@@ -581,6 +581,7 @@ def compra_exito(request):
     
     Args:
         request (HttpRequest): Petición HTTP
+        token (str, optional): Token de la transacción para retorno de la pasarela
         
     Returns:
         HttpResponse: Página de éxito o modal de cambio de cotización
