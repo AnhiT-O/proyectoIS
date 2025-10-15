@@ -150,28 +150,30 @@ def verify_2fa_token(request):
         result = validate_2fa_token(request.user, token_input)
         
         if result['success']:
-            # Token válido - ahora procesar la transacción
+            # Token válido - continuar con el flujo normal de la transacción
             transaccion_data = result['transaccion_data']
             
             try:
                 # Obtener la transacción
                 transaccion = Transaccion.objects.get(id=transaccion_data['transaccion_id'])
                 
-                # Cambiar estado de la transacción a confirmada
-                transaccion.estado = 'Confirmada'
-                transaccion.save()
+                # No cambiar el estado aquí, dejar que el flujo normal lo maneje
+                # Restaurar la transacción_id en la sesión para el flujo normal
+                request.session['transaccion_id'] = transaccion.id
                 
-                # Limpiar sesión
-                if 'transaccion_id' in request.session:
-                    del request.session['transaccion_id']
+                logger.info(f"Token 2FA validado exitosamente para transacción {transaccion.id} por usuario {request.user.username}")
                 
-                logger.info(f"Transacción {transaccion.id} confirmada via 2FA por usuario {request.user.username}")
+                # Redirigir al flujo normal de éxito según el tipo de transacción
+                if transaccion.tipo == 'compra':
+                    redirect_url = '/operaciones/comprar/exito/'
+                else:  # venta
+                    redirect_url = '/operaciones/vender/exito/'
                 
                 return JsonResponse({
                     'success': True,
-                    'message': 'Transacción confirmada exitosamente',
+                    'message': 'Token verificado correctamente. Continuando con la transacción...',
                     'transaccion_id': transaccion.id,
-                    'redirect_url': f'/operaciones/detalle/{transaccion.id}/'
+                    'redirect_url': redirect_url
                 })
                 
             except Transaccion.DoesNotExist:
