@@ -28,6 +28,13 @@ urlpatterns = [
     path('comprar/medio-cobro/', views.compra_medio_cobro, name='compra_medio_cobro'),
     path('comprar/confirmacion/', views.compra_confirmacion, name='compra_confirmacion'),
     path('comprar/exito/', views.compra_exito, name='compra_exito'),
+    # =========================================================
+    # 📌 ENDPOINT DE RECEPCIÓN DE PAGO DE LA PASARELA
+    # =========================================================
+    # La pasarela enviará la notificación POST a este endpoint.
+    path('recibir_pago/', views.recibir_pago, name='recibir_pago'),
+    path('api/pago/', views.recibir_pago, name='recibir_pago'),
+
     
     # URLs para proceso de venta
     path('vender/', views.venta_monto_moneda, name='venta_monto_moneda'),

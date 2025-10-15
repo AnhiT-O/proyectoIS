@@ -185,14 +185,16 @@ class ClienteForm(forms.ModelForm):
     def clean_tipo_documento(self):
         """
         Valida que el tipo de documento sea consistente con el tipo de cliente.
-        Realiza validación personalizada para asegurar que las personas jurídicas
-        tengan RUC como tipo de documento.
         """
-
+        # IMPORTANTE: Obtener 'tipo' del cleaned_data, que ya ha sido limpiado por su propio clean_field
         tipo_documento = self.cleaned_data.get('tipo_documento')
-        tipo = self.cleaned_data.get('tipo')
+        tipo = self.cleaned_data.get('tipo') # Asume que 'tipo' ya ha sido limpiado
+
         if tipo == 'J' and tipo_documento != 'RUC':
             raise ValidationError('Las personas jurídicas deben tener RUC.')
+        
+        # --- SOLUCIÓN: DEBES RETORNAR EL VALOR LIMPIADO ---
+        return tipo_documento
         
     
     def clean_id_stripe(self):
@@ -227,6 +229,13 @@ class ClienteForm(forms.ModelForm):
             except Exception as e:
                 raise ValidationError(f'Error al validar el ID de Stripe: {str(e)}')
         return id_stripe
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.tipo_documento = self.cleaned_data.get('tipo_documento')
+        if commit:
+            instance.save()
+        return instance
 
 
 class AgregarTarjetaForm(forms.Form):

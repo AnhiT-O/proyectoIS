@@ -111,12 +111,16 @@ def compra_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
+
+        # Si cliente_activo.ultimo_consumo es None, no hacemos nada y los consumos
+        # se mantienen en 0 (que es el valor inicial/correcto para un nuevo día/mes).
         form = SeleccionMonedaMontoForm()
     
     context = {
@@ -704,12 +708,17 @@ def venta_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+         
+        # 1. Verificar si el cliente tiene un último consumo registrado
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
+        # Si cliente_activo.ultimo_consumo es None, no hacemos nada y los consumos
+        # se mantienen en 0 (que es el valor inicial/correcto para un nuevo día/mes).
         form = SeleccionMonedaMontoForm()
     
     context = {
@@ -1018,7 +1027,7 @@ def venta_confirmacion(request):
     if not venta_datos or venta_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:venta_medio_cobro')
-    
+
     if request.method == 'POST':
         accion = request.POST.get('accion')
         action = request.POST.get('action')
@@ -1666,3 +1675,56 @@ def verificar_estado_tauser(request, tauser_id):
             'error': str(e)
         }, status=500)
     
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def recibir_pago(request):
+    """Vista para recibir y verificar notificaciones de la pasarela"""
+    logger.info("Recibiendo notificación de pago")
+    
+    if request.method == 'POST':
+        try:
+            # Log de headers para debug
+            logger.info(f"Headers recibidos: {dict(request.headers)}")
+            
+
+            data = json.loads(request.body)
+            logger.info(f"Datos recibidos: {data}")
+            
+            estado = data.get('estado')
+            monto = data.get('monto')
+            tipo_pago = data.get('tipo_pago')
+            
+            # Validar datos
+            if estado not in ['exito', 'error', 'cancelado']:
+                logger.error(f"Estado inválido recibido: {estado}")
+                return JsonResponse({'status': 'error', 'mensaje': 'Estado inválido'})
+            
+            if estado != 'cancelado' and not monto:
+                logger.error("Monto requerido no recibido")
+                return JsonResponse({'status': 'error', 'mensaje': 'Monto requerido'})
+
+            # Procesar según estado
+            if estado == 'exito':
+                logger.info(f"Pago exitoso procesado: {data}")
+                return JsonResponse({'status': 'ok', 'mensaje': 'Pago procesado correctamente'})
+            elif estado == 'error':
+                logger.warning(f"Error en pago: {data}")
+                return JsonResponse({'status': 'error', 'mensaje': 'Error procesando pago'})
+            else:
+                logger.info(f"Pago cancelado: {data}")
+                return JsonResponse({'status': 'ok', 'mensaje': 'Pago cancelado'})
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decodificando JSON: {str(e)}")
+            return JsonResponse({'status': 'error', 'mensaje': 'JSON inválido'}, status=400)
+        except Exception as e:
+            logger.error(f"Error inesperado: {str(e)}")
+            return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
+    
+    logger.warning("Método no permitido")
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'}, status=405)
