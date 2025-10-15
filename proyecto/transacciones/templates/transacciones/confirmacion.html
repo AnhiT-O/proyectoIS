@@ -276,12 +276,16 @@
                     <div id="tokenError" class="mensaje-error" style="display: none;"></div>
                     
                     <div class="zona-botones">
-                        <button type="button" id="verificarBtn" class="btn-enviar">
+                        <button type="button" id="verificarBtn" class="btn-primario">
                             Verificar Código
                         </button>
-                        <button type="button" id="reenviarBtn" class="btn-secundario">
+                        <button type="button" id="reenviarBtn" class="btn-primario">
                             Reenviar Código
                         </button>
+                    </div>
+                    
+                    <!-- Botón cancelar en sección separada -->
+                    <div class="zona-botones" style="margin-top: 1rem;">
                         <button type="button" id="cancelar2FABtn" class="btn-atras">
                             Cancelar
                         </button>
@@ -310,6 +314,30 @@
 
 {% block extra_js %}
 {% if enable_2fa and has_email %}
+<style>
+/* Estilos específicos para modal 2FA */
+/* Botones deshabilitados en modal */
+#modal2FA .btn-primario:disabled, 
+#modal2FA .btn-enviar:disabled, 
+#modal2FA .btn-atras:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: #d6d6d6 !important;
+    color: #888888 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#modal2FA .btn-primario:disabled:hover, 
+#modal2FA .btn-enviar:disabled:hover, 
+#modal2FA .btn-atras:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: #d6d6d6 !important;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modal2FA = document.getElementById('modal2FA');
@@ -327,6 +355,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let countdownTimer = null;
     let timeRemaining = 60; // 1 minuto
     
+    // Función helper para manejar estados de botones
+    function setButtonStates(reenviarEnabled, verificarEnabled) {
+        reenviarBtn.disabled = !reenviarEnabled;
+        verificarBtn.disabled = !verificarEnabled;
+        console.log('Estados actualizados - Reenviar:', reenviarEnabled ? 'HABILITADO' : 'DESHABILITADO', 
+                   'Verificar:', verificarEnabled ? 'HABILITADO' : 'DESHABILITADO');
+    }
+    
     // Función para mostrar pasos del modal
     function showStep(stepId) {
         document.querySelectorAll('.verification-step').forEach(step => {
@@ -340,16 +376,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (countdownTimer) clearInterval(countdownTimer);
         timeRemaining = 60;
         
+        // Mantener texto fijo en el botón sin contador
+        reenviarBtn.textContent = 'Reenviar Código';
+        
         countdownTimer = setInterval(() => {
             timeRemaining--;
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
             timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // No actualizar el texto del botón con el contador
             
             if (timeRemaining <= 0) {
                 clearInterval(countdownTimer);
                 timerDisplay.textContent = 'Expirado';
                 showError('El código ha expirado. Solicita uno nuevo.');
+                
+                // Estado: Token expirado - Reenviar habilitado, Verificar deshabilitado
+                setButtonStates(true, false);
+                reenviarBtn.textContent = 'Reenviar Código';
+                verificarBtn.textContent = 'Código Expirado';
             }
         }, 1000);
     }
@@ -369,6 +414,8 @@ document.addEventListener('DOMContentLoaded', function() {
     confirmarBtn.addEventListener('click', function() {
         modal2FA.style.display = 'flex';
         showStep('step-sending');
+        // Estado inicial: ambos botones deshabilitados mientras se envía el token
+        setButtonStates(false, false);
         sendToken();
     });
     
@@ -387,6 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 showStep('step-verify');
+                // Estado: Token enviado - Verificar habilitado, Reenviar deshabilitado
+                setButtonStates(false, true);
+                reenviarBtn.textContent = 'Reenviar Código';
+                verificarBtn.textContent = 'Verificar Código';
                 startCountdown();
                 tokenInput.focus();
             } else {
@@ -448,6 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 showError(data.message || 'Código incorrecto');
+                // Estado: Error en verificación - mantener verificar habilitado, reenviar según tiempo restante
                 verificarBtn.disabled = false;
                 verificarBtn.textContent = 'Verificar Código';
                 tokenInput.select();
@@ -456,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showError('Error de conexión. Intenta nuevamente.');
+            // Estado: Error de conexión - mantener verificar habilitado
             verificarBtn.disabled = false;
             verificarBtn.textContent = 'Verificar Código';
         });
@@ -542,27 +595,22 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: bold;
 }
 
-.form-control {
+/* Estilos específicos del formulario del modal */
+#modal2FA .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+#modal2FA .form-group input {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #ddd;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    font-family: monospace;
+    font-size: 1rem;
 }
 
-.form-control:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-.form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-    display: block;
-}
-
+/* Estilos específicos del modal 2FA - no están en archivos globales */
 .mensaje-error {
     background-color: #f8d7da;
     color: #721c24;
@@ -570,26 +618,6 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 5px;
     border: 1px solid #f5c6cb;
     margin: 1rem 0;
-}
-
-.btn-secundario {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 0.25rem;
-    transition: background-color 0.2s;
-}
-
-.btn-secundario:hover {
-    background-color: #5a6268;
-}
-
-.btn-secundario:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
 }
 
 .mensaje-advertencia {

@@ -77,11 +77,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🏦 Global Exchange</div>
+            <div class="logo">💰 Global Exchange</div>
             <h2>Código de Verificación para Transacción</h2>
         </div>
 
-        <p>Estimado/a <strong>{{ usuario.get_full_name|default:usuario.username }}</strong>,</p>
+        <p>Estimado/a <strong>{% if usuario.first_name %}{{ usuario.first_name }}{% else %}{{ usuario.username }}{% endif %}</strong>,</p>
 
         <p>Has solicitado realizar una transacción que requiere verificación adicional por seguridad. 
         Utiliza el siguiente código de verificación para confirmar tu operación:</p>
@@ -110,7 +110,7 @@
 
         <div class="footer">
             <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-            <p>Global Exchange - Sistema de Casa de Cambio</p>
+            <p>Global Exchange - Casa de Cambio de Divisas</p>
             <p>© {{ "now"|date:"Y" }} Global Exchange. Todos los derechos reservados.</p>
         </div>
     </div>
