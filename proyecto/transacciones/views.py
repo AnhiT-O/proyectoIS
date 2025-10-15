@@ -1834,30 +1834,86 @@ def descargar_historial_pdf(request):
         
         story.append(main_table)
         
-        # Tabla de detalles de la transacción
-        precio_final_formateado = f"Gs. {transaccion.precio_final:,.0f}"
-        cotizacion_formateada = f"{transaccion.cotizacion:.{transaccion.moneda.decimales}f}"
-        
+        # Tabla de detalles completos de la transacción
         details_data = [
-            ['Detalles de la Transacción'],
-            ['Precio Final', precio_final_formateado],
-            ['Cotización', f"{cotizacion_formateada} Gs./{transaccion.moneda.simbolo}"],
+            ['Detalles Completos de la Transacción'],
+            ['Cliente', transaccion.cliente.nombre],
+            ['Segmento Cliente', transaccion.cliente.get_segmento_display()],
+            ['Tipo de Transacción', f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}"],
+            ['Estado', transaccion.estado],
             ['Medio de Pago', transaccion.medio_pago],
             ['Medio de Cobro', transaccion.medio_cobro]
         ]
         
-        # Agregar detalles adicionales si existen
+        # Detalles específicos por tipo de transacción
+        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
+        
+        if transaccion.tipo == 'compra':
+            details_data.extend([
+                ['Monto ingresado para compra', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
+                ['Redondeo por medio cobro Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Monto a comprar', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Cotización para compra', f"Gs. {transaccion.cotizacion:,.0f}"],
+                ['Precio base para compra', f"Gs. {transaccion.precio_base:,.0f}"]
+            ])
+        else:
+            details_data.extend([
+                ['Monto ingresado para venta', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
+                ['Monto a vender', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Cotización para venta', f"Gs. {transaccion.cotizacion:,.0f}"],
+                ['Precio base para venta', f"Gs. {transaccion.precio_base:,.0f}"]
+            ])
+            
+            if transaccion.medio_pago == 'Efectivo':
+                details_data.append(['Redondeo por medio pago Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"])
+        
+        # Beneficios y recargos
         if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
-            details_data.append(['Beneficio Segmento', f"Gs. {transaccion.beneficio_segmento:,.0f} ({transaccion.porc_beneficio_segmento}%)"])
+            details_data.append(['Beneficio por segmento', f"Gs. {transaccion.beneficio_segmento:,.0f}"])
         
-        if transaccion.recargo_pago and transaccion.recargo_pago > 0:
-            details_data.append(['Recargo Pago', f"Gs. {transaccion.recargo_pago:,.0f} ({transaccion.porc_recargo_pago}%)"])
         
-        if transaccion.recargo_cobro and transaccion.recargo_cobro > 0:
-            details_data.append(['Recargo Cobro', f"Gs. {transaccion.recargo_cobro:,.0f} ({transaccion.porc_recargo_cobro}%)"])
+        details_data.append([f'Recargo por medio de pago ({transaccion.porc_recargo_pago}%)', f"Gs. {transaccion.recargo_pago:,.0f}"])
         
-        if transaccion.token:
-            details_data.append(['Token', transaccion.token])
+        
+        if transaccion.tipo == 'venta':
+            details_data.append([f'Recargo por medio de cobro ({transaccion.porc_recargo_cobro}%)', f"Gs. {transaccion.recargo_cobro:,.0f}"])
+        
+        # Redondeo efectivo para precio final si aplica
+        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
+            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
+            details_data.append(['Redondeo efectivo precio final', f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}"])
+        
+        # Montos finales
+        if transaccion.tipo == 'compra':
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            details_data.extend([
+                [f'Monto {estado_texto}', f"Gs. {transaccion.precio_final:,.0f}"],
+                [f'Monto {recibido_texto}', f"{monto_formateado} {transaccion.moneda.simbolo}"]
+            ])
+        else:
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            details_data.extend([
+                [f'Monto {estado_texto}', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                [f'Monto {recibido_texto}', f"Gs. {transaccion.precio_final:,.0f}"]
+            ])
+        
+        # Mostrar monto pagado si es parcial
+        if ((transaccion.tipo == 'compra' and transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa') or
+            (transaccion.tipo == 'venta' and transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa')):
+            if transaccion.tipo == 'compra':
+                details_data.append(['Monto pagado', f"Gs. {transaccion.pagado:,.0f}"])
+            else:
+                details_data.append(['Monto pagado', f"{transaccion.pagado:.{transaccion.moneda.decimales}f} {transaccion.moneda.simbolo}"])
+        
+        # Token si existe y está pendiente/confirmada
+        if transaccion.token and transaccion.estado in ['Pendiente', 'Confirmada']:
+            details_data.append(['Código de transacción', transaccion.token])
         
         details_table = Table(details_data, colWidths=[2*inch, 3*inch])
         details_table.setStyle(TableStyle([
@@ -2071,99 +2127,92 @@ def descargar_historial_excel(request):
         
         current_row += 1
         
-        # Filas de detalles de la transacción
+        # Filas de detalles completos de la transacción
         detail_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
         detail_font = Font(italic=True, size=9)
         
-        # Precio final
-        ws.cell(row=current_row, column=1).value = "Precio Final:"
-        ws.cell(row=current_row, column=1).font = detail_font
-        ws.cell(row=current_row, column=1).fill = detail_fill
-        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        def add_detail_row(label, value):
+            """Helper para agregar filas de detalle"""
+            ws.cell(row=current_row, column=1).value = label
+            ws.cell(row=current_row, column=1).font = detail_font
+            ws.cell(row=current_row, column=1).fill = detail_fill
+            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            
+            ws.cell(row=current_row, column=2).value = value
+            ws.cell(row=current_row, column=2).font = detail_font
+            ws.cell(row=current_row, column=2).fill = detail_fill
+            return current_row + 1
         
-        ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.precio_final:,.0f}"
-        ws.cell(row=current_row, column=2).font = detail_font
-        ws.cell(row=current_row, column=2).fill = detail_fill
-        ws.cell(row=current_row, column=2).number_format = '#,##0'
-        current_row += 1
+        # Información básica
+        current_row = add_detail_row("Cliente:", transaccion.cliente.nombre)
+        current_row = add_detail_row("Segmento Cliente:", transaccion.cliente.get_segmento_display())
+        current_row = add_detail_row("Tipo de Transacción:", f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}")
+        current_row = add_detail_row("Estado:", transaccion.estado)
+        current_row = add_detail_row("Medio de Pago:", transaccion.medio_pago)
+        current_row = add_detail_row("Medio de Cobro:", transaccion.medio_cobro)
         
-        # Cotización
-        ws.cell(row=current_row, column=1).value = "Cotización:"
-        ws.cell(row=current_row, column=1).font = detail_font
-        ws.cell(row=current_row, column=1).fill = detail_fill
-        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        # Detalles específicos por tipo de transacción
+        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
         
-        cotizacion_formateada = f"{transaccion.cotizacion:.{transaccion.moneda.decimales}f} Gs./{transaccion.moneda.simbolo}"
-        ws.cell(row=current_row, column=2).value = cotizacion_formateada
-        ws.cell(row=current_row, column=2).font = detail_font
-        ws.cell(row=current_row, column=2).fill = detail_fill
-        current_row += 1
+        if transaccion.tipo == 'compra':
+            current_row = add_detail_row("Monto ingresado para compra:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Redondeo por medio cobro Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Monto a comprar:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Cotización para compra:", f"Gs. {transaccion.cotizacion:,.0f}")
+            current_row = add_detail_row("Precio base para compra:", f"Gs. {transaccion.precio_base:,.0f}")
+        else:
+            current_row = add_detail_row("Monto ingresado para venta:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Monto a vender:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Cotización para venta:", f"Gs. {transaccion.cotizacion:,.0f}")
+            current_row = add_detail_row("Precio base para venta:", f"Gs. {transaccion.precio_base:,.0f}")
+            
+            if transaccion.medio_pago == 'Efectivo':
+                current_row = add_detail_row("Redondeo por medio pago Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
         
-        # Medios de pago y cobro
-        ws.cell(row=current_row, column=1).value = "Medio Pago:"
-        ws.cell(row=current_row, column=1).font = detail_font
-        ws.cell(row=current_row, column=1).fill = detail_fill
-        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
-        
-        ws.cell(row=current_row, column=2).value = transaccion.medio_pago
-        ws.cell(row=current_row, column=2).font = detail_font
-        ws.cell(row=current_row, column=2).fill = detail_fill
-        current_row += 1
-        
-        ws.cell(row=current_row, column=1).value = "Medio Cobro:"
-        ws.cell(row=current_row, column=1).font = detail_font
-        ws.cell(row=current_row, column=1).fill = detail_fill
-        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
-        
-        ws.cell(row=current_row, column=2).value = transaccion.medio_cobro
-        ws.cell(row=current_row, column=2).font = detail_font
-        ws.cell(row=current_row, column=2).fill = detail_fill
-        current_row += 1
-        
-        # Detalles adicionales si existen
+        # Beneficios y recargos
         if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
-            ws.cell(row=current_row, column=1).value = "Beneficio Segmento:"
-            ws.cell(row=current_row, column=1).font = detail_font
-            ws.cell(row=current_row, column=1).fill = detail_fill
-            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
-            
-            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.beneficio_segmento:,.0f} ({transaccion.porc_beneficio_segmento}%)"
-            ws.cell(row=current_row, column=2).font = detail_font
-            ws.cell(row=current_row, column=2).fill = detail_fill
-            current_row += 1
+            current_row = add_detail_row("Beneficio por segmento:", f"Gs. {transaccion.beneficio_segmento:,.0f}")
         
-        if transaccion.recargo_pago and transaccion.recargo_pago > 0:
-            ws.cell(row=current_row, column=1).value = "Recargo Pago:"
-            ws.cell(row=current_row, column=1).font = detail_font
-            ws.cell(row=current_row, column=1).fill = detail_fill
-            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
-            
-            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.recargo_pago:,.0f} ({transaccion.porc_recargo_pago}%)"
-            ws.cell(row=current_row, column=2).font = detail_font
-            ws.cell(row=current_row, column=2).fill = detail_fill
-            current_row += 1
         
-        if transaccion.recargo_cobro and transaccion.recargo_cobro > 0:
-            ws.cell(row=current_row, column=1).value = "Recargo Cobro:"
-            ws.cell(row=current_row, column=1).font = detail_font
-            ws.cell(row=current_row, column=1).fill = detail_fill
-            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
-            
-            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.recargo_cobro:,.0f} ({transaccion.porc_recargo_cobro}%)"
-            ws.cell(row=current_row, column=2).font = detail_font
-            ws.cell(row=current_row, column=2).fill = detail_fill
-            current_row += 1
+        current_row = add_detail_row(f"Recargo por medio de pago ({transaccion.porc_recargo_pago}%):", f"Gs. {transaccion.recargo_pago:,.0f}")
         
-        if transaccion.token:
-            ws.cell(row=current_row, column=1).value = "Token:"
-            ws.cell(row=current_row, column=1).font = detail_font
-            ws.cell(row=current_row, column=1).fill = detail_fill
-            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        
+        if transaccion.tipo == 'venta':
+            current_row = add_detail_row(f"Recargo por medio de cobro ({transaccion.porc_recargo_cobro}%):", f"Gs. {transaccion.recargo_cobro:,.0f}")
+        
+        # Redondeo efectivo para precio final si aplica
+        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
+            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
+            current_row = add_detail_row("Redondeo efectivo precio final:", f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}")
+        
+        # Montos finales
+        if transaccion.tipo == 'compra':
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
             
-            ws.cell(row=current_row, column=2).value = transaccion.token
-            ws.cell(row=current_row, column=2).font = detail_font
-            ws.cell(row=current_row, column=2).fill = detail_fill
-            current_row += 1
+            current_row = add_detail_row(f"Monto {estado_texto}:", f"Gs. {transaccion.precio_final:,.0f}")
+            current_row = add_detail_row(f"Monto {recibido_texto}:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+        else:
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            current_row = add_detail_row(f"Monto {estado_texto}:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row(f"Monto {recibido_texto}:", f"Gs. {transaccion.precio_final:,.0f}")
+        
+        # Mostrar monto pagado si es parcial
+        if ((transaccion.tipo == 'compra' and transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa') or
+            (transaccion.tipo == 'venta' and transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa')):
+            if transaccion.tipo == 'compra':
+                current_row = add_detail_row("Monto pagado:", f"Gs. {transaccion.pagado:,.0f}")
+            else:
+                current_row = add_detail_row("Monto pagado:", f"{transaccion.pagado:.{transaccion.moneda.decimales}f} {transaccion.moneda.simbolo}")
+        
+        # Token si existe y está pendiente/confirmada
+        if transaccion.token and transaccion.estado in ['Pendiente', 'Confirmada']:
+            current_row = add_detail_row("Código de transacción:", transaccion.token)
+
         
         # Fila de separación entre transacciones
         current_row += 1
