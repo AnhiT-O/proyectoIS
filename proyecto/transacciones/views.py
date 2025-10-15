@@ -1790,7 +1790,9 @@ def descargar_historial_pdf(request):
     # Crear sección de transacciones con detalles
     for i, transaccion in enumerate(transacciones):
         # Crear tabla principal para cada transacción
-        fecha_str = transaccion.fecha_hora.strftime("%d/%m/%Y %H:%M:%S")
+        # Usar timezone local como en el template HTML
+        fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
+        fecha_str = fecha_hora_local.strftime("%d/%m/%Y %H:%M:%S")
         usuario_str = transaccion.usuario.nombre_completo() or transaccion.usuario.username
         operacion_str = transaccion.tipo.title()
         # Formatear el monto con los decimales correspondientes a la moneda
@@ -2094,9 +2096,11 @@ def descargar_historial_excel(request):
     for transaccion in transacciones:
         # Fila principal de la transacción
         monto_formateado = round(float(transaccion.monto), transaccion.moneda.decimales)
+        # Usar timezone local como en el template HTML
+        fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
         data_row = [
-            transaccion.fecha_hora.strftime("%d/%m/%Y"),
-            transaccion.fecha_hora.strftime("%H:%M:%S"),
+            fecha_hora_local.strftime("%d/%m/%Y"),
+            fecha_hora_local.strftime("%H:%M:%S"),
             transaccion.usuario.nombre_completo() or transaccion.usuario.username,
             transaccion.tipo.title(),
             transaccion.moneda.nombre,
