@@ -72,9 +72,8 @@ function redirigirAPasarela(metodoPago, datosTransaccion) {
         moneda: datosTransaccion.moneda,
         tipo_operacion: datosTransaccion.tipo_operacion,
         cliente_id: datosTransaccion.cliente_id,
-        token: datosTransaccion.token,  // Agregamos el token
-        return_url: window.location.origin + '/operaciones/comprar/exito/' + datosTransaccion.token + '/'
-    
+        token: datosTransaccion.token,
+        return_url: `${window.location.origin}/operaciones/comprar/exito/${datosTransaccion.token}/`
     });
     
     // Redireccionar
@@ -135,7 +134,7 @@ function procesarRespuestaPago(respuesta) {
             .then(data => {
                 if (data.success) {
                     // Redirigir a la página de éxito con estado confirmado
-                    window.location.href = `/transacciones/exito/${datosTransaccion.token}/`;
+                    window.location.href = `/operaciones/${datosTransaccion.tipo_operacion}/exito/${datosTransaccion.token}/`;
                 } else {
                     mostrarError('Error al confirmar el pago: ' + data.mensaje);
                 }

@@ -54,12 +54,18 @@
 
                     // Ejecutar redirección cuando se cargue la página
                     document.addEventListener('DOMContentLoaded', function() {
-                        console.log('Iniciando redirección a pasarela...', datosTransaccion);
-                        sessionStorage.setItem('returnUrl', window.location.href);
-                        sessionStorage.setItem('datosTransaccion', JSON.stringify(datosTransaccion));
-                        
-                        // Llamar directamente a procesarPago
-                        procesarPago(datosTransaccion);
+                        // Verificar si ya viene de la pasarela
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (!urlParams.has('estado')) {
+                            console.log('Iniciando redirección a pasarela...', datosTransaccion);
+                            sessionStorage.setItem('returnUrl', window.location.href);
+                            sessionStorage.setItem('datosTransaccion', JSON.stringify(datosTransaccion));
+                            
+                            // Llamar directamente a procesarPago
+                            procesarPago(datosTransaccion);
+                        } else {
+                            console.log('Retorno de pasarela detectado:', Object.fromEntries(urlParams));
+                        }
                     });
                 </script>
                 {% else %}
@@ -73,14 +79,17 @@
                 <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El código vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
                 <div class="info-campo">{{ transaccion.token }}</div>
             {% else %}
-                <div class="logo">Transacción Confirmada</div>
+                <div class="logo">¡Pago Exitoso!</div>
                 <p class="subtitulo">
-                    Se ha recibido tu pago. También se ha generado un código para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                    Tu pago ha sido confirmado exitosamente. Se ha generado un código de retiro para completar la transacción.
                 </p>
                 <p class="subtitulo">
-                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                    Acércate a un Tauser de Global Exchange para retirar tu dinero presentando el siguiente código:
                 </p>
-                <div class="info-campo" style="margin-top: 2rem;">{{ transaccion.token }}</div>
+                <div class="info-campo" style="margin-top: 2rem; font-size: 1.2em;">{{ transaccion.token }}</div>
+                <p class="subtitulo" style="margin-top: 1rem;">
+                    Para mayor seguridad, mantén este código en privado y no lo compartas con nadie.
+                </p>
             {% endif %}
         {% else %}
             {% if transaccion.estado == 'Pendiente' %}

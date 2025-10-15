@@ -571,6 +571,7 @@ def compra_confirmacion(request):
         return render(request, 'transacciones/confirmacion.html', context)
 
 @login_required
+@login_required
 def compra_exito(request, token=None):
     """
     Página final del proceso de compra: mensaje de éxito.
@@ -593,12 +594,36 @@ def compra_exito(request, token=None):
     if not request.user.cliente_activo:
         messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
         return redirect('inicio')
-    try:
-        idt = request.session.get('transaccion_id')
-        transaccion = Transaccion.objects.get(id=idt)
-    except:
-        return redirect('inicio')
-    
+
+    transaccion = None
+    # Si viene token desde la pasarela, buscar la transacción por token
+    if token:
+        try:
+            transaccion = Transaccion.objects.get(token=token)
+            
+            # Si viene desde la pasarela, actualizar estado si aún está pendiente
+            if transaccion.estado in ['Pendiente', 'Iniciada'] and request.GET.get('estado') == 'exito':
+                transaccion.estado = 'Confirmada'
+                transaccion.fecha_hora = timezone.now()
+                transaccion.save()
+                messages.success(request, 'Pago confirmado exitosamente')
+            elif request.GET.get('estado') == 'error':
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error en el pago'
+                transaccion.save()
+                messages.error(request, 'Error al procesar el pago')
+                
+        except Transaccion.DoesNotExist:
+            messages.error(request, 'Token de transacción inválido.')
+            return redirect('inicio')
+    else:
+        # Flujo normal: buscar por sesión
+        try:
+            idt = request.session.get('transaccion_id')
+            transaccion = Transaccion.objects.get(id=idt)
+        except:
+            return redirect('inicio')
+
     compra_datos = request.session.get('compra_datos')
     if not compra_datos:
         messages.error(request, 'Debe completar el cuarto paso antes de continuar.')
@@ -608,7 +633,7 @@ def compra_exito(request, token=None):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-    
+
     if transaccion.token is None:
         if medio_pago.startswith('{'):
             medio_pago_dict = ast.literal_eval(medio_pago)
@@ -631,13 +656,16 @@ def compra_exito(request, token=None):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
-    
-    del request.session['transaccion_id']
+
+    # Limpiar sesión
+    request.session.pop('transaccion_id', None)
+
     context = {
         'transaccion': transaccion
     }
-    
+
     return render(request, 'transacciones/exito.html', context)
+
 
 # ============================================================================
 # PROCESO DE VENTA DE MONEDAS
