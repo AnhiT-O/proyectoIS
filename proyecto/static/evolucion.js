@@ -225,14 +225,6 @@ function actualizarEstadisticas(datos) {
     // Precios actuales
     document.getElementById('precio-actual-compra').textContent = formatearPrecio(ultimo.precio_compra);
     document.getElementById('precio-actual-venta').textContent = formatearPrecio(ultimo.precio_venta);
-    
-    // Variación del período
-    const variacionCompra = ultimo.precio_compra - primero.precio_compra;
-    const porcentajeVariacion = ((variacionCompra / primero.precio_compra) * 100).toFixed(2);
-    
-    const elementoVariacion = document.getElementById('variacion-periodo');
-    elementoVariacion.textContent = `${porcentajeVariacion > 0 ? '+' : ''}${porcentajeVariacion}%`;
-    elementoVariacion.className = `stat-valor ${porcentajeVariacion >= 0 ? 'positivo' : 'negativo'}`;
 }
 
 // Formatear precio

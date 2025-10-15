@@ -186,6 +186,7 @@ class HistorialCotizacion(models.Model):
     Modelo para almacenar el historial de cotizaciones de las monedas
     """
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, related_name='historial_cotizaciones')
+    nombre_moneda = models.CharField(max_length=100, default='')  # Nombre de la moneda para facilitar consultas
     fecha = models.DateField()
     tasa_base = models.IntegerField()
     comision_compra = models.IntegerField()
@@ -199,13 +200,17 @@ class HistorialCotizacion(models.Model):
         verbose_name_plural = 'Historial de Cotizaciones'
         db_table = 'historial_cotizaciones'
         default_permissions = []
-        unique_together = ('moneda', 'fecha')
+        # Removemos unique_together para permitir múltiples ediciones por día
         ordering = ['-fecha']
 
     def __str__(self):
         return f"{self.moneda.nombre} - {self.fecha}"
 
     def save(self, *args, **kwargs):
+        # Guardar automáticamente el nombre de la moneda
+        if self.moneda:
+            self.nombre_moneda = self.moneda.nombre
+        
         # Calcular precios automáticamente
         self.precio_compra = self.tasa_base - self.comision_compra
         self.precio_venta = self.tasa_base + self.comision_venta
@@ -222,15 +227,12 @@ def crear_historial_cotizacion(sender, instance, created, **kwargs):
     if not created:  # Solo cuando se actualiza, no cuando se crea
         fecha_hoy = timezone.now().date()
         
-        # Verificar si ya existe un registro para hoy
-        if not HistorialCotizacion.objects.filter(
-            moneda=instance, 
-            fecha=fecha_hoy
-        ).exists():
-            HistorialCotizacion.objects.create(
-                moneda=instance,
-                fecha=fecha_hoy,
-                tasa_base=instance.tasa_base,
-                comision_compra=instance.comision_compra,
-                comision_venta=instance.comision_venta
-            )
+        # Guardar TODAS las ediciones (eliminar la verificación de duplicados para el mismo día)
+        HistorialCotizacion.objects.create(
+            moneda=instance,
+            nombre_moneda=instance.nombre,
+            fecha=fecha_hoy,
+            tasa_base=instance.tasa_base,
+            comision_compra=instance.comision_compra,
+            comision_venta=instance.comision_venta
+        )

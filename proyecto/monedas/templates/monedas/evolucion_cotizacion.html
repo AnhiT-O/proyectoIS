@@ -19,8 +19,8 @@
                 Evolución del {{ moneda.nombre }} ({{ moneda.simbolo }})
             </h1>
             <div class="botones-accion">
-                <a href="{% url 'monedas:moneda_detalle' moneda.pk %}" class="btn-regresar">
-                    ← Volver a Detalles
+                <a href="{% url 'inicio' %}" class="btn-regresar">
+                    Volver al Inicio
                 </a>
             </div>
         </div>
@@ -46,7 +46,7 @@
         <!-- Tabla de datos -->
         <div class="seccion-tabla">
             <div class="contenedor-tabla">
-                <h3 class="titulo-tabla">Datos Históricos</h3>
+                <h3 class="titulo-tabla">Datos Históricos <!-- DEBUG: 15-Oct-2025 13:40 --></h3>
                 <div class="tabla-wrapper">
                     <table class="tabla-evolucion">
                         <thead>
@@ -75,10 +75,6 @@
             <div class="stat-item">
                 <div class="stat-valor" id="precio-actual-venta">-</div>
                 <div class="stat-label">Precio Actual Venta</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-valor" id="variacion-periodo">-</div>
-                <div class="stat-label">Variación del Período</div>
             </div>
         </div>
     </div>

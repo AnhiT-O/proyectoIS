@@ -33,11 +33,10 @@
         <table class="tabla-cotizaciones">
             <thead>
                 <tr>
-                    <th width="10%">Moneda</th>
-                    <th width="20%">Compra</th>
-                    <th width="20%">Venta</th>
-                    <th width="30%">Última actualización</th>
-                    <th width="20%">Ver Evolución</th>
+                    <th width="15%">Moneda</th>
+                    <th width="25%">Compra</th>
+                    <th width="25%">Venta</th>
+                    <th width="35%">Última actualización</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,7 +46,6 @@
                         <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
                         <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
                         <td>{{ cotizacion.moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
-                        <td><span class="ver-evolucion">📈 Ver gráfico</span></td>
                     </tr>
                 {% endfor %}
             </tbody>
