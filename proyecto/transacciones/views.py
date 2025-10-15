@@ -1768,52 +1768,117 @@ def descargar_historial_pdf(request):
     
     # Información de filtros aplicados
     if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
-        filtros_texto = "Filtros aplicados: "
+        story.append(Paragraph("Filtros aplicados:", styles['Normal']))
+        story.append(Spacer(1, 6))
+        
         if busqueda:
-            filtros_texto += f"Búsqueda: '{busqueda}' "
+            story.append(Paragraph(f"• Búsqueda: '{busqueda}'", styles['Normal']))
         if tipo_operacion:
-            filtros_texto += f"Tipo: {tipo_operacion.title()} "
+            story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", styles['Normal']))
         if estado_filtro:
-            filtros_texto += f"Estado: {estado_filtro.title()} "
+            story.append(Paragraph(f"• Estado: {estado_filtro.title()}", styles['Normal']))
         if usuario_filtro:
             try:
                 from usuarios.models import Usuario
                 usuario = Usuario.objects.get(id=usuario_filtro)
-                filtros_texto += f"Usuario: {usuario.nombre_completo() or usuario.username} "
+                story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", styles['Normal']))
             except:
                 pass
         
-        story.append(Paragraph(filtros_texto, styles['Normal']))
         story.append(Spacer(1, 12))
     
-    # Crear tabla de transacciones
-    data = [['Fecha/Hora', 'Usuario', 'Operación', 'Moneda', 'Estado']]
-    
-    for transaccion in transacciones:
+    # Crear sección de transacciones con detalles
+    for i, transaccion in enumerate(transacciones):
+        # Crear tabla principal para cada transacción
         fecha_str = transaccion.fecha_hora.strftime("%d/%m/%Y %H:%M:%S")
         usuario_str = transaccion.usuario.nombre_completo() or transaccion.usuario.username
         operacion_str = transaccion.tipo.title()
-        moneda_str = f"{transaccion.monto} {transaccion.moneda.simbolo}"
+        # Formatear el monto con los decimales correspondientes a la moneda
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        moneda_str = f"{monto_formateado} {transaccion.moneda.simbolo}"
         estado_str = transaccion.estado
         
-        data.append([fecha_str, usuario_str, operacion_str, moneda_str, estado_str])
-    
-    # Crear y estilizar la tabla
-    table = Table(data)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    
-    story.append(table)
+        # Tabla principal de la transacción
+        if i == 0:  # Solo agregar encabezados en la primera transacción
+            main_data = [
+                ['Fecha/Hora', 'Usuario', 'Operación', 'Moneda', 'Estado'],
+                [fecha_str, usuario_str, operacion_str, moneda_str, estado_str]
+            ]
+        else:
+            main_data = [
+                [fecha_str, usuario_str, operacion_str, moneda_str, estado_str]
+            ]
+        
+        main_table = Table(main_data)
+        if i == 0:
+            main_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+        else:
+            main_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.lightblue),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+        
+        story.append(main_table)
+        
+        # Tabla de detalles de la transacción
+        precio_final_formateado = f"Gs. {transaccion.precio_final:,.0f}"
+        cotizacion_formateada = f"{transaccion.cotizacion:.{transaccion.moneda.decimales}f}"
+        
+        details_data = [
+            ['Detalles de la Transacción'],
+            ['Precio Final', precio_final_formateado],
+            ['Cotización', f"{cotizacion_formateada} Gs./{transaccion.moneda.simbolo}"],
+            ['Medio de Pago', transaccion.medio_pago],
+            ['Medio de Cobro', transaccion.medio_cobro]
+        ]
+        
+        # Agregar detalles adicionales si existen
+        if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
+            details_data.append(['Beneficio Segmento', f"Gs. {transaccion.beneficio_segmento:,.0f} ({transaccion.porc_beneficio_segmento}%)"])
+        
+        if transaccion.recargo_pago and transaccion.recargo_pago > 0:
+            details_data.append(['Recargo Pago', f"Gs. {transaccion.recargo_pago:,.0f} ({transaccion.porc_recargo_pago}%)"])
+        
+        if transaccion.recargo_cobro and transaccion.recargo_cobro > 0:
+            details_data.append(['Recargo Cobro', f"Gs. {transaccion.recargo_cobro:,.0f} ({transaccion.porc_recargo_cobro}%)"])
+        
+        if transaccion.token:
+            details_data.append(['Token', transaccion.token])
+        
+        details_table = Table(details_data, colWidths=[2*inch, 3*inch])
+        details_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkgrey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('SPAN', (0, 0), (-1, 0)),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('LEFTPADDING', (0, 1), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 1), (-1, -1), 6)
+        ]))
+        
+        story.append(details_table)
+        story.append(Spacer(1, 12))  # Espacio entre transacciones
     
     # Construir el PDF
     doc.build(story)
@@ -1907,7 +1972,7 @@ def descargar_historial_excel(request):
     )
     
     # Título del documento
-    ws.merge_cells('A1:F1')
+    ws.merge_cells('A1:G1')
     ws['A1'] = f"Historial de Transacciones - {cliente.nombre}"
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal="center")
@@ -1915,25 +1980,42 @@ def descargar_historial_excel(request):
     # Información de filtros (si aplica)
     row_start = 3
     if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
-        ws.merge_cells(f'A2:F2')
-        filtros_texto = "Filtros aplicados: "
+        current_row = 2
+        
+        # Título de filtros
+        ws.merge_cells(f'A{current_row}:G{current_row}')
+        ws[f'A{current_row}'] = "Filtros aplicados:"
+        ws[f'A{current_row}'].font = Font(bold=True, italic=True)
+        current_row += 1
+        
+        # Filtros individuales por fila
         if busqueda:
-            filtros_texto += f"Búsqueda: '{busqueda}' "
+            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws[f'A{current_row}'] = f"• Búsqueda: '{busqueda}'"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            current_row += 1
         if tipo_operacion:
-            filtros_texto += f"Tipo: {tipo_operacion.title()} "
+            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws[f'A{current_row}'] = f"• Tipo de operación: {tipo_operacion.title()}"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            current_row += 1
         if estado_filtro:
-            filtros_texto += f"Estado: {estado_filtro.title()} "
+            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws[f'A{current_row}'] = f"• Estado: {estado_filtro.title()}"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            current_row += 1
         if usuario_filtro:
             try:
                 from usuarios.models import Usuario
                 usuario = Usuario.objects.get(id=usuario_filtro)
-                filtros_texto += f"Usuario: {usuario.nombre_completo() or usuario.username} "
+                ws.merge_cells(f'A{current_row}:G{current_row}')
+                ws[f'A{current_row}'] = f"• Usuario: {usuario.nombre_completo() or usuario.username}"
+                ws[f'A{current_row}'].font = Font(italic=True)
+                current_row += 1
             except:
                 pass
         
-        ws['A2'] = filtros_texto
-        ws['A2'].font = Font(italic=True)
-        row_start = 4
+        row_start = current_row + 1
     
     # Encabezados de la tabla
     headers = ['Fecha', 'Hora', 'Usuario', 'Operación', 'Moneda', 'Monto', 'Estado']
@@ -1945,27 +2027,146 @@ def descargar_historial_excel(request):
         cell.alignment = header_alignment
         cell.border = border
     
-    # Datos de las transacciones
-    for row_num, transaccion in enumerate(transacciones, row_start + 1):
+    current_row = row_start + 1
+    
+    # Datos de las transacciones con detalles
+    for transaccion in transacciones:
+        # Fila principal de la transacción
+        monto_formateado = round(float(transaccion.monto), transaccion.moneda.decimales)
         data_row = [
             transaccion.fecha_hora.strftime("%d/%m/%Y"),
             transaccion.fecha_hora.strftime("%H:%M:%S"),
             transaccion.usuario.nombre_completo() or transaccion.usuario.username,
             transaccion.tipo.title(),
             transaccion.moneda.nombre,
-            float(transaccion.monto),
+            monto_formateado,
             transaccion.estado
         ]
         
+        # Aplicar estilo a la fila principal
         for col_num, value in enumerate(data_row, 1):
-            cell = ws.cell(row=row_num, column=col_num)
+            cell = ws.cell(row=current_row, column=col_num)
             cell.value = value
             cell.border = border
+            cell.fill = PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid")
+            cell.font = Font(bold=True)
+            
             if col_num == 6:  # Columna de monto
-                cell.number_format = '#,##0.00'
+                decimales = transaccion.moneda.decimales
+                if decimales == 0:
+                    cell.number_format = '#,##0'
+                elif decimales == 1:
+                    cell.number_format = '#,##0.0'
+                elif decimales == 2:
+                    cell.number_format = '#,##0.00'
+                elif decimales == 3:
+                    cell.number_format = '#,##0.000'
+                elif decimales == 4:
+                    cell.number_format = '#,##0.0000'
+                else:
+                    cell.number_format = f'#,##0.{"0" * decimales}'
                 cell.alignment = Alignment(horizontal="right")
             else:
                 cell.alignment = Alignment(horizontal="center")
+        
+        current_row += 1
+        
+        # Filas de detalles de la transacción
+        detail_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+        detail_font = Font(italic=True, size=9)
+        
+        # Precio final
+        ws.cell(row=current_row, column=1).value = "Precio Final:"
+        ws.cell(row=current_row, column=1).font = detail_font
+        ws.cell(row=current_row, column=1).fill = detail_fill
+        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        
+        ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.precio_final:,.0f}"
+        ws.cell(row=current_row, column=2).font = detail_font
+        ws.cell(row=current_row, column=2).fill = detail_fill
+        ws.cell(row=current_row, column=2).number_format = '#,##0'
+        current_row += 1
+        
+        # Cotización
+        ws.cell(row=current_row, column=1).value = "Cotización:"
+        ws.cell(row=current_row, column=1).font = detail_font
+        ws.cell(row=current_row, column=1).fill = detail_fill
+        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        
+        cotizacion_formateada = f"{transaccion.cotizacion:.{transaccion.moneda.decimales}f} Gs./{transaccion.moneda.simbolo}"
+        ws.cell(row=current_row, column=2).value = cotizacion_formateada
+        ws.cell(row=current_row, column=2).font = detail_font
+        ws.cell(row=current_row, column=2).fill = detail_fill
+        current_row += 1
+        
+        # Medios de pago y cobro
+        ws.cell(row=current_row, column=1).value = "Medio Pago:"
+        ws.cell(row=current_row, column=1).font = detail_font
+        ws.cell(row=current_row, column=1).fill = detail_fill
+        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        
+        ws.cell(row=current_row, column=2).value = transaccion.medio_pago
+        ws.cell(row=current_row, column=2).font = detail_font
+        ws.cell(row=current_row, column=2).fill = detail_fill
+        current_row += 1
+        
+        ws.cell(row=current_row, column=1).value = "Medio Cobro:"
+        ws.cell(row=current_row, column=1).font = detail_font
+        ws.cell(row=current_row, column=1).fill = detail_fill
+        ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+        
+        ws.cell(row=current_row, column=2).value = transaccion.medio_cobro
+        ws.cell(row=current_row, column=2).font = detail_font
+        ws.cell(row=current_row, column=2).fill = detail_fill
+        current_row += 1
+        
+        # Detalles adicionales si existen
+        if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
+            ws.cell(row=current_row, column=1).value = "Beneficio Segmento:"
+            ws.cell(row=current_row, column=1).font = detail_font
+            ws.cell(row=current_row, column=1).fill = detail_fill
+            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            
+            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.beneficio_segmento:,.0f} ({transaccion.porc_beneficio_segmento}%)"
+            ws.cell(row=current_row, column=2).font = detail_font
+            ws.cell(row=current_row, column=2).fill = detail_fill
+            current_row += 1
+        
+        if transaccion.recargo_pago and transaccion.recargo_pago > 0:
+            ws.cell(row=current_row, column=1).value = "Recargo Pago:"
+            ws.cell(row=current_row, column=1).font = detail_font
+            ws.cell(row=current_row, column=1).fill = detail_fill
+            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            
+            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.recargo_pago:,.0f} ({transaccion.porc_recargo_pago}%)"
+            ws.cell(row=current_row, column=2).font = detail_font
+            ws.cell(row=current_row, column=2).fill = detail_fill
+            current_row += 1
+        
+        if transaccion.recargo_cobro and transaccion.recargo_cobro > 0:
+            ws.cell(row=current_row, column=1).value = "Recargo Cobro:"
+            ws.cell(row=current_row, column=1).font = detail_font
+            ws.cell(row=current_row, column=1).fill = detail_fill
+            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            
+            ws.cell(row=current_row, column=2).value = f"Gs. {transaccion.recargo_cobro:,.0f} ({transaccion.porc_recargo_cobro}%)"
+            ws.cell(row=current_row, column=2).font = detail_font
+            ws.cell(row=current_row, column=2).fill = detail_fill
+            current_row += 1
+        
+        if transaccion.token:
+            ws.cell(row=current_row, column=1).value = "Token:"
+            ws.cell(row=current_row, column=1).font = detail_font
+            ws.cell(row=current_row, column=1).fill = detail_fill
+            ws.cell(row=current_row, column=1).alignment = Alignment(horizontal="right")
+            
+            ws.cell(row=current_row, column=2).value = transaccion.token
+            ws.cell(row=current_row, column=2).font = detail_font
+            ws.cell(row=current_row, column=2).fill = detail_fill
+            current_row += 1
+        
+        # Fila de separación entre transacciones
+        current_row += 1
     
     # Ajustar ancho de columnas
     column_widths = [12, 10, 20, 12, 15, 15, 12]
