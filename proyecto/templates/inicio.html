@@ -37,15 +37,17 @@
                     <th width="20%">Compra</th>
                     <th width="20%">Venta</th>
                     <th width="30%">Última actualización</th>
+                    <th width="20%">Ver Evolución</th>
                 </tr>
             </thead>
             <tbody>
                 {% for cotizacion in cotizaciones %}
-                    <tr>
+                    <tr class="fila-clickeable" data-url="{% url 'monedas:evolucion_cotizacion' cotizacion.moneda.pk %}" style="cursor: pointer;" title="Click para ver la evolución de {{ cotizacion.moneda.nombre }}">
                         <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.moneda.simbolo }}</span></td>
                         <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
                         <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
                         <td>{{ cotizacion.moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
+                        <td><span class="ver-evolucion">📈 Ver gráfico</span></td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -89,4 +91,30 @@
         </div>
     </div>
 </div>
+
+<script>
+// Hacer las filas de cotizaciones clickeables
+document.addEventListener('DOMContentLoaded', function() {
+    const filasClickeables = document.querySelectorAll('.fila-clickeable');
+    
+    filasClickeables.forEach(function(fila) {
+        fila.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        });
+        
+        // Agregar efecto hover
+        fila.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'var(--color-hover, #f8f9fa)';
+        });
+        
+        fila.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+});
+</script>
+
 {% endblock %}

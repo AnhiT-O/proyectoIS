@@ -118,6 +118,9 @@
                     Editar Moneda
                 </a>
             {% endif %}
+            <a href="{% url 'monedas:evolucion_cotizacion' moneda.pk %}" class="btn-primario">
+                Ver Evolución
+            </a>
             <a href="{% url 'monedas:lista_monedas' %}" class="btn-secundario">
                 Volver a la Lista
             </a>

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Evolución de {{ moneda.nombre }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/evolucion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/evolucion.css' %}" media="(prefers-color-scheme: dark)">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <!-- Cabecera -->
+    <div class="evolucion-cabecera">
+        <div class="cabecera-principal">
+            <h1 class="titulo-evolucion">
+                Evolución del {{ moneda.nombre }} ({{ moneda.simbolo }})
+            </h1>
+            <div class="botones-accion">
+                <a href="{% url 'monedas:moneda_detalle' moneda.pk %}" class="btn-regresar">
+                    ← Volver a Detalles
+                </a>
+            </div>
+        </div>
+        
+        <!-- Botones de filtro temporal -->
+        <div class="filtros-temporales">
+            <button class="btn-filtro" data-rango="semana">Semana</button>
+            <button class="btn-filtro active" data-rango="mes">Mes</button>
+            <button class="btn-filtro" data-rango="6meses">6 Meses</button>
+            <button class="btn-filtro" data-rango="año">Año</button>
+        </div>
+    </div>
+
+    <!-- Dashboard con gráfico y tabla -->
+    <div class="dashboard-evolucion">
+        <!-- Gráfico -->
+        <div class="seccion-grafico">
+            <div class="contenedor-grafico">
+                <canvas id="graficoEvolucion"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabla de datos -->
+        <div class="seccion-tabla">
+            <div class="contenedor-tabla">
+                <h3 class="titulo-tabla">Datos Históricos</h3>
+                <div class="tabla-wrapper">
+                    <table class="tabla-evolucion">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Compra</th>
+                                <th>Venta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-datos">
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="info-adicional">
+        <div class="estadisticas">
+            <div class="stat-item">
+                <div class="stat-valor" id="precio-actual-compra">-</div>
+                <div class="stat-label">Precio Actual Compra</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-valor" id="precio-actual-venta">-</div>
+                <div class="stat-label">Precio Actual Venta</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-valor" id="variacion-periodo">-</div>
+                <div class="stat-label">Variación del Período</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando datos...</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'evolucion.js' %}"></script>
+<script>
+// Inicialización cuando se carga el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarEvolucion({{ moneda.pk }}, '{{ moneda.nombre }}', '{{ moneda.simbolo }}');
+});
+</script>
+{% endblock %}
