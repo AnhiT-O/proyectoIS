@@ -24,22 +24,20 @@
     <!-- Formulario de búsqueda -->
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
-            {% if perms.transacciones.visualizacion %}
-                {% if usuario_filtro %}
-                    <input type="hidden" name="usuario" value="{{ usuario_filtro }}">
-                {% endif %}
-                {% if cliente_filtrado and usuarios_cliente %}
-                <div class="campo-filtro">
-                    <select name="usuario" class="select-filtro">
-                        <option value="">Todos los usuarios del cliente</option>
-                        {% for usuario in usuarios_cliente %}
-                        <option value="{{ usuario.id }}" {% if usuario_filtro == usuario.id|stringformat:"s" %}selected{% endif %}>
-                            {{ usuario.nombre_completo|default:usuario.username }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% endif %}
+            {% if usuario_filtro %}
+                <input type="hidden" name="usuario" value="{{ usuario_filtro }}">
+            {% endif %}
+            {% if cliente_filtrado and usuarios_cliente %}
+            <div class="campo-filtro">
+                <select name="usuario" class="select-filtro">
+                    <option value="">Todos los usuarios del cliente</option>
+                    {% for usuario in usuarios_cliente %}
+                    <option value="{{ usuario.id }}" {% if usuario_filtro == usuario.id|stringformat:"s" %}selected{% endif %}>
+                        {{ usuario.nombre_completo|default:usuario.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
             {% endif %}
             <div class="campo-filtro">
                 <select name="tipo_operacion" class="select-filtro">
@@ -113,9 +111,7 @@
         <thead>
             <tr>
                 <th>Fecha/Hora</th>
-                {% if perms.transacciones.visualizacion %}
                 <th>Usuario</th>
-                {% endif %}
                 <th>Operación</th>
                 <th>Moneda</th>
                 <th>Estado</th>
@@ -131,13 +127,11 @@
                         <small>{{ transaccion.fecha_hora|time:"H:i:s" }}</small>
                     </div>
                 </td>
-                {% if perms.transacciones.visualizacion %}
                 <td>
                     <div>
-                        {{ transaccion.usuario.nombre_completo }}
+                        {{ transaccion.usuario.nombre_completo|default:transaccion.usuario.username }}
                     </div>
                 </td>
-                {% endif %}
                 <td>
                     <div class="tipo-operacion {% if transaccion.tipo == 'compra' %}compra{% else %}venta{% endif %}">
                         {{ transaccion.tipo|title }}
@@ -162,7 +156,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">
+                <td colspan="6">
                     {% if busqueda or tipo_operacion or estado_filtro or usuario_filtro or cliente_filtrado %}
                         No se encontraron transacciones que coincidan con los filtros aplicados.
                     {% else %}
