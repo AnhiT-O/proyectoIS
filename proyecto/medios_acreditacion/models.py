@@ -187,7 +187,7 @@ class TarjetaLocal(MedioAcreditacion):
         ('CABAL', 'Cabal'),
     ]
     
-    tipo_tarjeta = models.CharField(
+    brand = models.CharField(
         max_length=10,
         choices=TIPO_TARJETA_CHOICES,
         help_text="Tipo de tarjeta local"
@@ -196,6 +196,10 @@ class TarjetaLocal(MedioAcreditacion):
     numero_tarjeta = models.CharField(
         max_length=19,  # Formato: XXXX XXXX XXXX XXXX
         help_text="Número completo de la tarjeta"
+    )
+
+    last4 = models.CharField(
+        max_length=4
     )
     
     mes_expiracion = models.IntegerField(
@@ -237,9 +241,10 @@ class TarjetaLocal(MedioAcreditacion):
         """Retorna el número de tarjeta enmascarado."""
         return f"**** **** **** {self.get_last4()}"
     
-    def __str__(self):
-        """Representación en cadena de la tarjeta local."""
-        return f"{self.get_tipo_tarjeta_display()} - {self.get_numero_enmascarado()} ({self.nombre_titular})"
+    def save(self, *args, **kwargs):
+        """Sobrescribe el método save para actualizar last4 automáticamente."""
+        self.last4 = self.get_last4()
+        super().save(*args, **kwargs)
     
     class Meta:
         """Metadatos del modelo TarjetaLocal."""

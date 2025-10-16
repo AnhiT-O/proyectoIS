@@ -114,12 +114,12 @@
                 {% csrf_token %}
                 
                 <div class="form-campo">
-                    <label for="{{ form.tipo_tarjeta.id_for_label }}">Tipo de Tarjeta *</label>
-                    {{ form.tipo_tarjeta }}
-                    {% if form.tipo_tarjeta.errors %}
-                        <div class="form-errores">{{ form.tipo_tarjeta.errors }}</div>
+                    <label for="{{ form.brand.id_for_label }}">Tipo de Tarjeta *</label>
+                    {{ form.brand }}
+                    {% if form.brand.errors %}
+                        <div class="form-errores">{{ form.brand.errors }}</div>
                     {% endif %}
-                    <small style="color: #6c757d;">{{ form.tipo_tarjeta.help_text }}</small>
+                    <small style="color: #6c757d;">{{ form.brand.help_text }}</small>
                 </div>
 
                 <div class="form-campo">

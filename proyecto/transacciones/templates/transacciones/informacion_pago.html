@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
     Información de Pago
@@ -32,24 +33,38 @@
         <p class="subtitulo">
             Usa la información de pago a continuación para confirmar tu transacción.
         </p>
+        <div style="margin-top: 2rem;"></div>
         {% if transaccion.medio_pago == 'Transferencia Bancaria' %}
-        <div style="text-align:left">
-            <h3>Datos de la cuenta para transferencia:</h3>
-            <p><strong>Banco:</strong> Sudameris</p>
-            <p><strong>Tipo de cuenta:</strong> Cuenta Corriente</p>
-            <p><strong>Número de cuenta:</strong> 123456</p>
-            <p><strong>Titular:</strong> Global Exchange</p>
-            <p><strong>RUC:</strong> 1234567</p>
-        </div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Banco:</div>
+            <div class="info-valor">Sudameris Bank</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número de Cuenta:</div>
+            <div class="info-valor">123456</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Titular:</div>
+            <div class="info-valor">Global Exchange</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Registro Único de Contribuyente:</div>
+            <div class="info-valor">1234567</div>
         {% else %}
-        <div style="text-align:left">
-            <h3>Datos de la billetera:</h3>
-            <p><strong>Tipo:</strong> {{ transaccion.medio_pago }}</p>
-            <p><strong>Número:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</p>
-            <p><strong>Titular:</strong> Global Exchange</p>
-            <p><strong>Numero de Documento:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}1010101{% elif transaccion.medio_pago == 'Billetera Personal' %}2020202{% elif transaccion.medio_pago == 'Zimple' %}3030303{% else %}N/D{% endif %}</p>
-        </div>
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Marca de Billetera:</div>
+            <div class="info-valor">{{ transaccion.medio_pago }}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número:</div>
+            <div class="info-valor">{% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Titular:</div>
+            <div class="info-valor">Global Exchange</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número de Documento:</div>
+            <div class="info-valor">{% if transaccion.medio_pago == 'Tigo Money' %}1010101{% elif transaccion.medio_pago == 'Billetera Personal' %}2020202{% elif transaccion.medio_pago == 'Zimple' %}3030303{% else %}N/D{% endif %}</div>
         {% endif %}
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Monto a Pagar:</div>
+            <div class="info-valor"> <strong>Gs. {{ transaccion.precio_final|intcomma }}</strong></div>
+        </div>
     </div>
     <div class="zona-botones">
         <a href="#" class="btn-enviar" onclick="procesarPago(datosTransaccion)">Continuar con el Pago</a>

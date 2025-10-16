@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
+from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
 from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
 from .utils_2fa import is_2fa_enabled
@@ -237,6 +238,14 @@ def compra_medio_pago(request):
     if request.user.cliente_activo.tiene_tarjetas_activas():
         for tarjeta in request.user.cliente_activo.obtener_tarjetas_stripe():
             medios_pago_disponibles.append(tarjeta)
+    if TarjetaLocal.objects.filter(cliente=request.user.cliente_activo, activo=True).exists():
+        for tarjeta in TarjetaLocal.objects.filter(cliente=request.user.cliente_activo, activo=True):
+            dict_tarjeta = {
+                "id": tarjeta.id,
+                "brand": tarjeta.brand,
+                "last4": tarjeta.last4
+            }
+            medios_pago_disponibles.append(dict_tarjeta)
     # Obtener el medio de pago seleccionado actualmente (si hay uno)
     medio_pago_seleccionado = None
     if compra_datos.get('medio_pago'):
@@ -612,7 +621,7 @@ def compra_exito(request, token=None):
             transaccion = Transaccion.objects.get(token=token)
             
             # Si viene desde la pasarela, validar los datos del pago
-            if transaccion.estado in ['Pendiente', 'Iniciada'] and request.GET.get('estado') == 'exito':
+            if transaccion.estado == 'Pendiente' and request.GET.get('estado') == 'exito':
                 # Datos enviados por la pasarela
                 try:
                     monto_pago = float(request.GET.get('monto', 0))
@@ -640,6 +649,7 @@ def compra_exito(request, token=None):
                     if monto_valido and cuenta_valida:
                         transaccion.estado = 'Confirmada'
                         transaccion.fecha_hora = timezone.now()
+                        transaccion.pagado = transaccion.precio_final
                         transaccion.save()
                         transaccion.cliente.consumo_diario += transaccion.precio_final
                         transaccion.cliente.consumo_mensual += transaccion.precio_final
@@ -649,6 +659,10 @@ def compra_exito(request, token=None):
                         guaranies.cantidad += transaccion.precio_final - transaccion.recargo_pago
                         guaranies.save()
                         messages.success(request, 'Pago confirmado exitosamente')
+                        context = {
+                            'transaccion': transaccion
+                        }
+                        return render(request, 'transacciones/exito.html', context)
                     else:
                         messages.error(request, 'Error en la validación del pago. Por favor, verifique los datos e intente nuevamente.')
                         context = {
@@ -693,17 +707,22 @@ def compra_exito(request, token=None):
     if transaccion.token is None:
         if medio_pago.startswith('{'):
             medio_pago_dict = ast.literal_eval(medio_pago)
-            pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
-            if pago['success']:
+            if medio_pago_dict['brand'] in ['VISA','MASTERCARD']:
+                pago = procesar_pago_stripe(transaccion, medio_pago_dict["id"])
+                if pago['success']:
+                    messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
+                    procesar_transaccion(transaccion)
+                    generar_token_transaccion(transaccion)
+                else:
+                    transaccion.estado = 'Cancelada'
+                    transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
+                    transaccion.save()
+                    messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
+                    return redirect('transacciones:compra_monto_moneda')
+            else:
                 messages.success(request, 'Pago con tarjeta de crédito procesado exitosamente.')
                 procesar_transaccion(transaccion)
                 generar_token_transaccion(transaccion)
-            else:
-                transaccion.estado = 'Cancelada'
-                transaccion.razon = 'Error en el procesamiento del pago con tarjeta de crédito'
-                transaccion.save()
-                messages.error(request, 'Error al procesar el pago con tarjeta de crédito. Intente nuevamente.')
-                return redirect('transacciones:compra_monto_moneda')
         else:
             try:
                 generar_token_transaccion(transaccion)
@@ -711,10 +730,14 @@ def compra_exito(request, token=None):
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
             transaccion.save()
-            context = {
-                'transaccion': transaccion
-            }
-            return render(request, 'transacciones/informacion_pago.html', context)
+            if transaccion.medio_pago != 'Efectivo':
+                context = {
+                    'transaccion': transaccion
+                }
+                return render(request, 'transacciones/informacion_pago.html', context)
+
+    else:
+        return redirect('inicio')
 
     # Limpiar sesión
     request.session.pop('transaccion_id', None)

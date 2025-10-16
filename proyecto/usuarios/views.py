@@ -750,7 +750,7 @@ def agregar_tarjeta_cliente(request, pk):
     context = {
         'cliente': cliente,
     }
-    return render(request, 'usuarios/seleccionar_tipo_tarjeta.html', context)
+    return render(request, 'usuarios/seleccionar_brand.html', context)
 
 
 @login_required
@@ -819,7 +819,7 @@ def agregar_tarjeta_local_cliente(request, pk):
         if form.is_valid():
             try:
                 tarjeta = form.save()
-                messages.success(request, f'Tarjeta {tarjeta.get_tipo_tarjeta_display()} agregada exitosamente.')
+                messages.success(request, f'Tarjeta {tarjeta.get_brand_display()} agregada exitosamente.')
                 return redirect('usuarios:detalle_cliente', cliente_id=pk)
             except Exception as e:
                 messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
@@ -904,9 +904,9 @@ def eliminar_tarjeta_local_cliente(request, pk, tarjeta_id):
     try:
         # Buscar y eliminar la tarjeta local
         tarjeta = TarjetaLocal.objects.get(id=tarjeta_id, cliente=cliente)
-        tipo_tarjeta = tarjeta.get_tipo_tarjeta_display()
+        brand = tarjeta.get_brand_display()
         tarjeta.delete()
-        messages.success(request, f'Tarjeta {tipo_tarjeta} eliminada exitosamente.')
+        messages.success(request, f'Tarjeta {brand} eliminada exitosamente.')
         
     except TarjetaLocal.DoesNotExist:
         messages.error(request, 'La tarjeta no existe o no pertenece al cliente.')

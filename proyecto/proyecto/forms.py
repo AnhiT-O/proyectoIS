@@ -83,6 +83,8 @@ class SimuladorForm(forms.Form):
                 ('Transferencia', 'Transferencia'),
                 ('{"brand": "VISA"}', 'Tarjeta de Crédito Visa'),
                 ('{"brand": "MASTERCARD"}', 'Tarjeta de Crédito Mastercard'),
+                ('{"brand": "PANAL"}', 'Tarjeta de Crédito Panal'),
+                ('{"brand": "CABAL"}', 'Tarjeta de Crédito Cabal'),
                 ('Tigo Money', 'Tigo Money'),
                 ('Billetera Personal', 'Billetera Personal'),
                 ('Zimple', 'Zimple')

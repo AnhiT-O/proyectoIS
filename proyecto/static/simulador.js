@@ -74,6 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { value: 'Transferencia', text: 'Transferencia' },
                 { value: '{"brand": "VISA"}', text: 'Tarjeta de Crédito Visa' },
                 { value: '{"brand": "MASTERCARD"}', text: 'Tarjeta de Crédito Mastercard' },
+                { value: '{"brand": "PANAL"}', text: 'Tarjeta de Crédito Panal' },
+                { value: '{"brand": "CABAL"}', text: 'Tarjeta de Crédito Cabal' },
                 { value: 'Tigo Money', text: 'Tigo Money' },
                 { value: 'Billetera Personal', text: 'Billetera Personal' },
                 { value: 'Zimple', text: 'Zimple' }

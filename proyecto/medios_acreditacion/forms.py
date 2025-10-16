@@ -214,7 +214,7 @@ class TarjetaLocalForm(forms.Form):
     incluyendo validaciones de número de tarjeta, fecha de expiración y CVV.
     
     Attributes:
-        tipo_tarjeta: Campo de selección para el tipo de tarjeta.
+        brand: Campo de selección para el tipo de tarjeta.
         numero_tarjeta: Campo de texto para el número de tarjeta.
         nombre_titular: Campo de texto para el nombre del titular.
         nro_documento: Campo de texto para el número de documento.
@@ -223,7 +223,7 @@ class TarjetaLocalForm(forms.Form):
         cvv: Campo de texto para el código de seguridad.
     """
     
-    tipo_tarjeta = forms.ChoiceField(
+    brand = forms.ChoiceField(
         choices=TarjetaLocal.TIPO_TARJETA_CHOICES,
         widget=forms.Select(attrs={
             'class': 'form-control',
@@ -394,7 +394,7 @@ class TarjetaLocalForm(forms.Form):
         
         tarjeta = TarjetaLocal.objects.create(
             cliente=self.cliente,
-            tipo_tarjeta=self.cleaned_data['tipo_tarjeta'],
+            brand=self.cleaned_data['brand'],
             numero_tarjeta=self.cleaned_data['numero_tarjeta'],
             nombre_titular=self.cleaned_data['nombre_titular'],
             nro_documento=self.cleaned_data['nro_documento'],
