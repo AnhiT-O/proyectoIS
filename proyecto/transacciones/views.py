@@ -1761,9 +1761,18 @@ def descargar_historial_pdf(request):
     styles = getSampleStyleSheet()
     story = []
     
-    # Título del documento con nombre de la empresa
-    title = f"Global Exchange - Historial de Transacciones - {cliente.nombre}"
-    story.append(Paragraph(title, styles['Title']))
+    
+    # Título de la empresa
+    company_title = "Global Exchange"
+    story.append(Paragraph(company_title, styles['Title']))
+    story.append(Spacer(1, 6))
+    
+    # Título del historial centrado
+    historial_title = f"Historial de Transacciones - {cliente.nombre}"
+    # Crear estilo centrado para el título
+    centered_style = styles['Heading1'].clone('CenteredHeading1')
+    centered_style.alignment = 1  # 1 = CENTER
+    story.append(Paragraph(historial_title, centered_style))
     story.append(Spacer(1, 12))
     
     # Información de filtros aplicados
@@ -1807,7 +1816,10 @@ def descargar_historial_pdf(request):
             [fecha_str, operacion_str, moneda_simbolo, estado_str]
         ]
         
-        main_table = Table(main_data)
+        
+        # Distribuir proporcionalmente: Fecha/Hora más ancha, otras iguales
+        main_colWidths = [2.0*inch, 1.0*inch, 1.0*inch, 1.0*inch]  # Total: 5 inches
+        main_table = Table(main_data, colWidths=main_colWidths)
         main_table.setStyle(TableStyle([
             # Estilo del encabezado
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -1865,11 +1877,11 @@ def descargar_historial_pdf(request):
             details_data.append(['Beneficio por segmento', f"Gs. {transaccion.beneficio_segmento:,.0f}"])
         
         
-        details_data.append([f'Recargo por medio de pago ({transaccion.porc_recargo_pago}%)', f"Gs. {transaccion.recargo_pago:,.0f}"])
+        details_data.append([f'Recargo por medio de pago ({transaccion.porc_recargo_pago})', f"Gs. {transaccion.recargo_pago:,.0f}"])
         
         
         if transaccion.tipo == 'venta':
-            details_data.append([f'Recargo por medio de cobro ({transaccion.porc_recargo_cobro}%)', f"Gs. {transaccion.recargo_cobro:,.0f}"])
+            details_data.append([f'Recargo por medio de cobro ({transaccion.porc_recargo_cobro})', f"Gs. {transaccion.recargo_cobro:,.0f}"])
         
         # Redondeo efectivo para precio final si aplica
         if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
@@ -2018,16 +2030,23 @@ def descargar_historial_excel(request):
         bottom=Side(style='thin')
     )
     
-    # Título del documento con nombre de la empresa
+    
+    # Título de la empresa (fila 1)
     ws.merge_cells('A1:E1') 
-    ws['A1'] = f"Global Exchange - Historial de Transacciones - {cliente.nombre}"
-    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'] = "Global Exchange"
+    ws['A1'].font = Font(bold=True, size=16)
     ws['A1'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     
+    # Título del historial (fila 2)
+    ws.merge_cells('A2:E2')
+    ws['A2'] = f"Historial de Transacciones - {cliente.nombre}"
+    ws['A2'].font = Font(bold=True, size=14)
+    ws['A2'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
     # Información de filtros (si aplica)
-    row_start = 3
+    row_start = 4  
     if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
-        current_row = 2
+        current_row = 3  # Comenzar en la fila 3 después de los títulos
         
         # Título de filtros
         ws.merge_cells(f'A{current_row}:E{current_row}')  # Ahora son 5 columnas
@@ -2172,11 +2191,11 @@ def descargar_historial_excel(request):
             current_row = add_detail_row("Beneficio por segmento:", f"Gs. {transaccion.beneficio_segmento:,.0f}")
         
         
-        current_row = add_detail_row(f"Recargo por medio de pago ({transaccion.porc_recargo_pago}%):", f"Gs. {transaccion.recargo_pago:,.0f}")
+        current_row = add_detail_row(f"Recargo por medio de pago ({transaccion.porc_recargo_pago}):", f"Gs. {transaccion.recargo_pago:,.0f}")
         
         
         if transaccion.tipo == 'venta':
-            current_row = add_detail_row(f"Recargo por medio de cobro ({transaccion.porc_recargo_cobro}%):", f"Gs. {transaccion.recargo_cobro:,.0f}")
+            current_row = add_detail_row(f"Recargo por medio de cobro ({transaccion.porc_recargo_cobro}):", f"Gs. {transaccion.recargo_cobro:,.0f}")
         
         # Redondeo efectivo para precio final si aplica
         if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
@@ -2213,8 +2232,9 @@ def descargar_historial_excel(request):
         # Fila de separación entre transacciones
         current_row += 1
     
-    # Ajustar ancho de columnas para acomodar todos los detalles (5 columnas ahora)
-    column_widths = [20, 15, 18, 15, 15]  # Fecha, Hora, Operación, Moneda, Estado
+    # Ajustar ancho de columnas para que coincidan proporcionalmente con detalles
+    # Proporcionalmente similar a PDF: más ancho para fecha, iguales para el resto
+    column_widths = [25, 18, 20, 15, 15]  # Fecha, Hora, Operación, Moneda, Estado
     for i, width in enumerate(column_widths, 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
     
