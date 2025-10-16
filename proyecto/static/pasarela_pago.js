@@ -116,6 +116,7 @@ function procesarRespuestaPago(respuesta) {
     if (respuesta.estado === 'exito') {
         const verificacion = verificarPago(respuesta.datosPago, datosTransaccion);
         
+        console.log('Verificación de pago:', verificacion, 'Datos de la transacción:', datosTransaccion, 'Respuesta de pago:', respuesta.datosPago);
         if (verificacion.valido) {
             // Actualizar estado de la transacción
             fetch('/api/transacciones/confirmar/', {
@@ -153,9 +154,17 @@ function mostrarError(mensaje) {
         title: 'Error en el pago',
         text: mensaje,
         icon: 'error',
-        confirmButtonText: 'Intentar nuevamente'
-    }).then(() => {
-        window.location.href = sessionStorage.getItem('returnUrl');
+        showCancelButton: true,
+        confirmButtonText: 'Reintentar pago',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Reintentar: volver a la página de inicio del flujo de pago
+            window.location.href = sessionStorage.getItem('returnUrl');
+        } else {
+            // Cancelar: volver al inicio
+            window.location.href = '/inicio/'; 
+        }
     });
 }
 

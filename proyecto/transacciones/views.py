@@ -570,7 +570,7 @@ def compra_confirmacion(request):
         
         return render(request, 'transacciones/confirmacion.html', context)
 
-@login_required
+
 @login_required
 def compra_exito(request, token=None):
     """
@@ -601,15 +601,67 @@ def compra_exito(request, token=None):
         try:
             transaccion = Transaccion.objects.get(token=token)
             
-            # Si viene desde la pasarela, actualizar estado si aún está pendiente
+            # Si viene desde la pasarela, validar los datos del pago
             if transaccion.estado in ['Pendiente', 'Iniciada'] and request.GET.get('estado') == 'exito':
-                transaccion.estado = 'Confirmada'
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
-                messages.success(request, 'Pago confirmado exitosamente')
+                # Datos enviados por la pasarela
+                try:
+                    monto_pago = float(request.GET.get('monto', 0))
+                    cuenta_pago = request.GET.get('nro_cuenta')
+                    banco_pago = request.GET.get('banco')
+                    
+                    # Verificación de cuenta/billetera
+                    CUENTAS_GLOBAL_EXCHANGE = {
+                        'Transferencia Bancaria': 'SUDAMERIS-123456',
+                        'Tigo Money': 'TIGO-0981000001-1010101',
+                        'Billetera Personal': 'PERSONAL-0982000002-2020202',
+                        'Zimple': 'ZIMPLE-0983000003-3030303'
+                    }
+                    # Mensajes de debug para ver los valores reales
+                    # Mensajes de debug para ver los valores reales
+                    messages.info(request, f"Pago recibido: monto_pago={monto_pago}, cuenta_pago={cuenta_pago}, banco_pago={banco_pago}")
+                    messages.info(request, f"Esperado: precio_final={transaccion.precio_final}, cuenta_esperada={CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago, '')}")
+
+
+                    # Verificación del monto
+                    monto_valido = monto_pago >= float(transaccion.precio_final)
+                    
+                    
+                    
+                    # Verificación de cuenta + banco
+                    cuenta_valida = f"{banco_pago}-{cuenta_pago}" == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago, '')
+                    
+                
+                    if monto_valido and cuenta_valida:
+                        transaccion.estado = 'Confirmada'
+                        transaccion.fecha_hora = timezone.now()
+                        transaccion.save()
+                        messages.success(request, 'Pago confirmado exitosamente')
+                    else:
+                        transaccion.estado = 'Pendiente'
+                        transaccion.razon = f'Error en validación: monto={monto_valido}, cuenta={cuenta_valida}'
+                        transaccion.save()
+                        # Restaurar datos en sesión para volver a confirmación
+                        request.session['compra_datos'] = {
+                            'moneda': transaccion.moneda.id,
+                            'monto': str(transaccion.monto),
+                            'medio_pago': transaccion.medio_pago,
+                            'medio_cobro': transaccion.medio_cobro,
+                            'paso_actual': 4
+                        }
+                        request.session['transaccion_id'] = transaccion.id
+                        messages.error(request, 'Error en la validación del pago. Por favor, verifique los datos e intente nuevamente.')
+                        return redirect('transacciones:compra_confirmacion')
+                        
+                except (ValueError, TypeError, AttributeError) as e:
+                    transaccion.estado = 'Cancelada'
+                    transaccion.razon = f'Error procesando datos del pago: {str(e)}'
+                    transaccion.save()
+                    messages.error(request, 'Error al procesar los datos del pago')
+                    return redirect('inicio')
+                    
             elif request.GET.get('estado') == 'error':
                 transaccion.estado = 'Cancelada'
-                transaccion.razon = 'Error en el pago'
+                transaccion.razon = 'Error reportado por la pasarela de pago'
                 transaccion.save()
                 messages.error(request, 'Error al procesar el pago')
                 
