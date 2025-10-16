@@ -61,8 +61,8 @@
                                     <h3>Datos de la billetera:</h3>
                                     <p><strong>Tipo:</strong> {{ transaccion.medio_pago }}</p>
                                     <p><strong>Número:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</p>
-                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE S.A.</p>
-                                    <p><strong>RUC:</strong> 80012345-6</p>
+                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE</p>
+                                    <p><strong>Numero de Documento:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}1010101{% elif transaccion.medio_pago == 'Billetera Personal' %}2020202{% elif transaccion.medio_pago == 'Zimple' %}3030303{% else %}N/D{% endif %}</p>
                                 </div>`;
                         {% endif %}
 
