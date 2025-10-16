@@ -112,12 +112,16 @@ def compra_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
+
+        # Si cliente_activo.ultimo_consumo es None, no hacemos nada y los consumos
+        # se mantienen en 0 (que es el valor inicial/correcto para un nuevo día/mes).
         form = SeleccionMonedaMontoForm()
     
     context = {
@@ -576,8 +580,9 @@ def compra_confirmacion(request):
         
         return render(request, 'transacciones/confirmacion.html', context)
 
+
 @login_required
-def compra_exito(request):
+def compra_exito(request, token=None):
     """
     Página final del proceso de compra: mensaje de éxito.
     
@@ -587,6 +592,7 @@ def compra_exito(request):
     
     Args:
         request (HttpRequest): Petición HTTP
+        token (str, optional): Token de la transacción para retorno de la pasarela
         
     Returns:
         HttpResponse: Página de éxito o modal de cambio de cotización
@@ -598,12 +604,90 @@ def compra_exito(request):
     if not request.user.cliente_activo:
         messages.error(request, 'Debe tener un cliente activo seleccionado para continuar.')
         return redirect('inicio')
-    try:
-        idt = request.session.get('transaccion_id')
-        transaccion = Transaccion.objects.get(id=idt)
-    except:
-        return redirect('inicio')
-    
+
+    transaccion = None
+    # Si viene token desde la pasarela, buscar la transacción por token
+    if token:
+        try:
+            transaccion = Transaccion.objects.get(token=token)
+            
+            # Si viene desde la pasarela, validar los datos del pago
+            if transaccion.estado in ['Pendiente', 'Iniciada'] and request.GET.get('estado') == 'exito':
+                # Datos enviados por la pasarela
+                try:
+                    monto_pago = float(request.GET.get('monto', 0))
+                    cuenta_pago = request.GET.get('nro_cuenta')
+                    banco_pago = request.GET.get('banco')
+                    
+                    # Verificación de cuenta/billetera
+                    CUENTAS_GLOBAL_EXCHANGE = {
+                        'Transferencia Bancaria': 'SUDAMERIS-123456',
+                        'Tigo Money': 'TIGO-0981000001-1010101',
+                        'Billetera Personal': 'PERSONAL-0982000002-2020202',
+                        'Zimple': 'ZIMPLE-0983000003-3030303'
+                    }
+                    # Mensajes de debug para ver los valores reales
+                    # Mensajes de debug para ver los valores reales
+                    messages.info(request, f"Pago recibido: monto_pago={monto_pago}, cuenta_pago={cuenta_pago}, banco_pago={banco_pago}")
+                    messages.info(request, f"Esperado: precio_final={transaccion.precio_final}, cuenta_esperada={CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago, '')}")
+
+
+                    # Verificación del monto
+                    monto_valido = monto_pago >= float(transaccion.precio_final)
+                    
+                    if transaccion.medio_pago == "Transferencia Bancaria":
+                        # Para transferencias, el CUENTAS_GLOBAL_EXCHANGE ya tiene banco+cuenta
+                        cuenta_valida = f"{banco_pago}-{cuenta_pago}" == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago)
+                    else:
+                        # Para billeteras, la cuenta completa ya incluye el prefijo del banco
+                        cuenta_valida = cuenta_pago == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago)
+
+                
+                    if monto_valido and cuenta_valida:
+                        transaccion.estado = 'Confirmada'
+                        transaccion.fecha_hora = timezone.now()
+                        transaccion.save()
+                        messages.success(request, 'Pago confirmado exitosamente')
+                    else:
+                        transaccion.estado = 'Pendiente'
+                        transaccion.razon = f'Error en validación: monto={monto_valido}, cuenta={cuenta_valida}'
+                        transaccion.save()
+                        # Restaurar datos en sesión para volver a confirmación
+                        request.session['compra_datos'] = {
+                            'moneda': transaccion.moneda.id,
+                            'monto': str(transaccion.monto),
+                            'medio_pago': transaccion.medio_pago,
+                            'medio_cobro': transaccion.medio_cobro,
+                            'paso_actual': 4
+                        }
+                        request.session['transaccion_id'] = transaccion.id
+                        messages.error(request, 'Error en la validación del pago. Por favor, verifique los datos e intente nuevamente.')
+                        return redirect('transacciones:compra_confirmacion')
+                        
+                except (ValueError, TypeError, AttributeError) as e:
+                    transaccion.estado = 'Cancelada'
+                    transaccion.razon = f'Error procesando datos del pago: {str(e)}'
+                    transaccion.save()
+                    messages.error(request, 'Error al procesar los datos del pago')
+                    return redirect('inicio')
+                    
+            elif request.GET.get('estado') == 'error':
+                transaccion.estado = 'Cancelada'
+                transaccion.razon = 'Error reportado por la pasarela de pago'
+                transaccion.save()
+                messages.error(request, 'Error al procesar el pago')
+                
+        except Transaccion.DoesNotExist:
+            messages.error(request, 'Token de transacción inválido.')
+            return redirect('inicio')
+    else:
+        # Flujo normal: buscar por sesión
+        try:
+            idt = request.session.get('transaccion_id')
+            transaccion = Transaccion.objects.get(id=idt)
+        except:
+            return redirect('inicio')
+
     compra_datos = request.session.get('compra_datos')
     if not compra_datos:
         messages.error(request, 'Debe completar el cuarto paso antes de continuar.')
@@ -613,7 +697,7 @@ def compra_exito(request):
     except (Moneda.DoesNotExist, ValueError, KeyError):
         messages.error(request, 'Error al recuperar los datos. Reinicie el proceso.')
         return redirect('transacciones:compra_monto_moneda')
-    
+
     if transaccion.token is None:
         if medio_pago.startswith('{'):
             medio_pago_dict = ast.literal_eval(medio_pago)
@@ -636,13 +720,16 @@ def compra_exito(request):
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
-    
-    del request.session['transaccion_id']
+
+    # Limpiar sesión
+    request.session.pop('transaccion_id', None)
+
     context = {
         'transaccion': transaccion
     }
-    
+
     return render(request, 'transacciones/exito.html', context)
+
 
 # ============================================================================
 # PROCESO DE VENTA DE MONEDAS
@@ -714,12 +801,17 @@ def venta_monto_moneda(request):
         if not request.user.cliente_activo:
             messages.error(request, 'Debes tener un cliente activo para realizar compras.')
             return redirect('inicio')
-        if request.user.cliente_activo.ultimo_consumo != date.today():
-            request.user.cliente_activo.consumo_diario = 0
-            request.user.cliente_activo.save()
-        if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
-            request.user.cliente_activo.consumo_mensual = 0
-            request.user.cliente_activo.save()
+         
+        # 1. Verificar si el cliente tiene un último consumo registrado
+        if request.user.cliente_activo.ultimo_consumo:
+            if request.user.cliente_activo.ultimo_consumo != date.today():
+                request.user.cliente_activo.consumo_diario = 0
+                request.user.cliente_activo.save()
+            if request.user.cliente_activo.ultimo_consumo.month != date.today().month:
+                request.user.cliente_activo.consumo_mensual = 0
+                request.user.cliente_activo.save()
+        # Si cliente_activo.ultimo_consumo es None, no hacemos nada y los consumos
+        # se mantienen en 0 (que es el valor inicial/correcto para un nuevo día/mes).
         form = SeleccionMonedaMontoForm()
     
     context = {
@@ -1028,7 +1120,7 @@ def venta_confirmacion(request):
     if not venta_datos or venta_datos.get('paso_actual') != 4:
         messages.error(request, 'Debe completar el tercer paso antes de continuar.')
         return redirect('transacciones:venta_medio_cobro')
-    
+
     if request.method == 'POST':
         accion = request.POST.get('accion')
         action = request.POST.get('action')
@@ -1691,3 +1783,56 @@ def verificar_estado_tauser(request, tauser_id):
             'error': str(e)
         }, status=500)
     
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def recibir_pago(request):
+    """Vista para recibir y verificar notificaciones de la pasarela"""
+    logger.info("Recibiendo notificación de pago")
+    
+    if request.method == 'POST':
+        try:
+            # Log de headers para debug
+            logger.info(f"Headers recibidos: {dict(request.headers)}")
+            
+
+            data = json.loads(request.body)
+            logger.info(f"Datos recibidos: {data}")
+            
+            estado = data.get('estado')
+            monto = data.get('monto')
+            tipo_pago = data.get('tipo_pago')
+            
+            # Validar datos
+            if estado not in ['exito', 'error', 'cancelado']:
+                logger.error(f"Estado inválido recibido: {estado}")
+                return JsonResponse({'status': 'error', 'mensaje': 'Estado inválido'})
+            
+            if estado != 'cancelado' and not monto:
+                logger.error("Monto requerido no recibido")
+                return JsonResponse({'status': 'error', 'mensaje': 'Monto requerido'})
+
+            # Procesar según estado
+            if estado == 'exito':
+                logger.info(f"Pago exitoso procesado: {data}")
+                return JsonResponse({'status': 'ok', 'mensaje': 'Pago procesado correctamente'})
+            elif estado == 'error':
+                logger.warning(f"Error en pago: {data}")
+                return JsonResponse({'status': 'error', 'mensaje': 'Error procesando pago'})
+            else:
+                logger.info(f"Pago cancelado: {data}")
+                return JsonResponse({'status': 'ok', 'mensaje': 'Pago cancelado'})
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decodificando JSON: {str(e)}")
+            return JsonResponse({'status': 'error', 'mensaje': 'JSON inválido'}, status=400)
+        except Exception as e:
+            logger.error(f"Error inesperado: {str(e)}")
+            return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
+    
+    logger.warning("Método no permitido")
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'}, status=405)

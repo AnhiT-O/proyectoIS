@@ -29,6 +29,13 @@ urlpatterns = [
     path('comprar/medio-cobro/', views.compra_medio_cobro, name='compra_medio_cobro'),
     path('comprar/confirmacion/', views.compra_confirmacion, name='compra_confirmacion'),
     path('comprar/exito/', views.compra_exito, name='compra_exito'),
+    path('comprar/exito/<str:token>/', views.compra_exito, name='compra_exito_token'),
+    # =========================================================
+    # 📌 ENDPOINTS DE RECEPCIÓN DE PAGO DE LA PASARELA
+    # =========================================================
+    # Endpoint para notificaciones POST de la pasarela
+    path('recibir_pago/', views.recibir_pago, name='recibir_pago'),
+    path('api/pago/', views.recibir_pago, name='recibir_pago'),
     
     # URLs para proceso de venta
     path('vender/', views.venta_monto_moneda, name='venta_monto_moneda'),
@@ -36,6 +43,7 @@ urlpatterns = [
     path('vender/medio-cobro/', views.venta_medio_cobro, name='venta_medio_cobro'),
     path('vender/confirmacion/', views.venta_confirmacion, name='venta_confirmacion'),
     path('vender/exito/', views.venta_exito, name='venta_exito'),
+    path('vender/exito/<str:token>/', views.venta_exito, name='venta_exito_token'),
     
     # URLs para historial de transacciones
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),

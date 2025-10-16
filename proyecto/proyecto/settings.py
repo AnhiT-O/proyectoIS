@@ -165,7 +165,25 @@ STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2G
 STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5500",  # URL donde se sirve tu HTML de pasarela
+    "http://localhost:5500",  # URL donde se sirve la pasarela
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 # Configuración de monedas del sistema

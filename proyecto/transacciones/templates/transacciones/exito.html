@@ -16,6 +16,10 @@
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
+{% block extra_js %}
+    <script src="{% static 'pasarela_pago.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="contenido extendido">
     <div class="form-cabecera">
@@ -26,6 +30,78 @@
                 <p class="subtitulo">
                     Se ha generado un código para la transacción. Acercate a un Tauser de Global Exchange para completar la compra.
                 </p>
+                {% elif transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    const datosTransaccion = {
+                        monto: '{{ transaccion.monto }}',
+                        moneda: '{{ transaccion.moneda.simbolo }}',
+                        tipo_operacion: '{{ transaccion.tipo }}',
+                        cliente_id: '{{ transaccion.cliente.id }}',
+                        token: '{{ transaccion.token }}',
+                        medio_pago: '{{ transaccion.medio_pago }}',
+                        monto_minimo: '{{ transaccion.precio_final }}'
+                    };
+
+                    const mostrarDatosPago = async () => {
+                        let contenidoHTML = '';
+                        {% if transaccion.medio_pago == 'Transferencia Bancaria' %}
+                            contenidoHTML = `
+                                <div style="text-align:left">
+                                    <h3>Datos de la cuenta para transferencia:</h3>
+                                    <p><strong>Banco:</strong> SUDAMERIS</p>
+                                    <p><strong>Tipo de cuenta:</strong> Cuenta Corriente</p>
+                                    <p><strong>Número de cuenta:</strong> 123456</p>
+                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE</p>
+                                    <p><strong>RUC:</strong> 1234567</p>
+                                </div>`;
+                        {% else %}
+                            contenidoHTML = `
+                                <div style="text-align:left">
+                                    <h3>Datos de la billetera:</h3>
+                                    <p><strong>Tipo:</strong> {{ transaccion.medio_pago }}</p>
+                                    <p><strong>Número:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</p>
+                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE</p>
+                                    <p><strong>Numero de Documento:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}1010101{% elif transaccion.medio_pago == 'Billetera Personal' %}2020202{% elif transaccion.medio_pago == 'Zimple' %}3030303{% else %}N/D{% endif %}</p>
+                                </div>`;
+                        {% endif %}
+
+                        const result = await Swal.fire({
+                            title: 'Información de Pago',
+                            html: contenidoHTML,
+                            icon: 'info',
+                            confirmButtonText: 'Continuar con el pago'
+                        });
+
+                        if (result.isConfirmed) {
+                            await Swal.fire({
+                                title: 'Redirigiendo a plataforma de pago',
+                                text: 'Serás redirigido automáticamente a la plataforma de pago en línea para completar la transacción.',
+                                icon: 'info',
+                                timer: 3000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                            
+                            setTimeout(() => {
+                                procesarPago(datosTransaccion);
+                            }, 1000);
+                        }
+                    };
+
+                    // Ejecutar cuando se cargue la página
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        if (!urlParams.has('estado')) {
+                            console.log('Iniciando proceso de pago...', datosTransaccion);
+                            sessionStorage.setItem('returnUrl', window.location.href);
+                            sessionStorage.setItem('datosTransaccion', JSON.stringify(datosTransaccion));
+                            mostrarDatosPago();
+                        } else {
+                            console.log('Retorno de pasarela detectado:', Object.fromEntries(urlParams));
+                        }
+                    });
+                </script>
                 {% else %}
                 <p class="subtitulo">
                     Se ha generado un código para la transacción. Usalo para realizar el pago de la transacción en línea.
@@ -37,14 +113,17 @@
                 <div style="margin-top: 2rem; font-weight: bold; margin-bottom: 1rem;">El código vence en 5 minutos. Si expira deberás reiniciar el proceso de compra.</div>
                 <div class="info-campo">{{ transaccion.token }}</div>
             {% else %}
-                <div class="logo">Transacción Confirmada</div>
+                <div class="logo">¡Pago Exitoso!</div>
                 <p class="subtitulo">
-                    Se ha recibido tu pago. También se ha generado un código para retirar el dinero. Acercate a un Tauser de Global Exchange para completar la compra.
+                    Tu pago ha sido confirmado exitosamente. Se ha generado un código de retiro para completar la transacción.
                 </p>
                 <p class="subtitulo">
-                    Puedes consultar el historial del cliente para ver los detalles de la transacción.
+                    Acércate a un Tauser de Global Exchange para retirar tu dinero presentando el siguiente código:
                 </p>
-                <div class="info-campo" style="margin-top: 2rem;">{{ transaccion.token }}</div>
+                <div class="info-campo" style="margin-top: 2rem; font-size: 1.2em;">{{ transaccion.token }}</div>
+                <p class="subtitulo" style="margin-top: 1rem;">
+                    Para mayor seguridad, mantén este código en privado y no lo compartas con nadie.
+                </p>
             {% endif %}
         {% else %}
             {% if transaccion.estado == 'Pendiente' %}

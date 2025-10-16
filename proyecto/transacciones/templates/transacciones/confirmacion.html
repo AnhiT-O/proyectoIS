@@ -17,6 +17,14 @@
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
+{% block extra_js %}
+    <!-- SweetAlert2 para mensajes de error -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'pasarela_pago.js' %}"></script>
+    <!-- Las URLs se movieron a pasarela_pago.js -->
+
+{% endblock %}
+
 {% block content %}
 <div class="contenido extendido">
     <!-- Barra de progreso -->
@@ -222,6 +230,8 @@
             </button>
         </div>
     </form>
+    
+    <!-- El script se movió a exito.html -->
     {% if cambios %}
     <div class="popup-overlay" style="display: flex">
         <div class="popup-contenido" style="max-width: 700px;">
