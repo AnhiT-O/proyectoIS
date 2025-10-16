@@ -18,7 +18,8 @@ Documentación de Global Exchange
    transacciones
    medios_acreditacion
    proyecto
-   
+   transacciones
+   medios_acreditacion
 
 
 
