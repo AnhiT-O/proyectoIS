@@ -104,7 +104,7 @@ def editar_rol(request, pk):
                 messages.success(request, 'Rol editado exitosamente.')
             except Exception as e:
                 messages.error(request, f'Error al editar rol: {e}')
-            return redirect('roles:listar_roles')
+            return redirect('roles:detalle_rol', pk=rol.pk)
     else:
         form = RolForm(instance=rol)
 

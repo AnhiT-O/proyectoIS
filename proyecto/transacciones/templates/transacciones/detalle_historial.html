@@ -101,11 +101,16 @@
                     <div class="detalle-valor" style="font-size:large">Gs. {{ transaccion.pagado|intcomma }}</div>
                 </div>
                 {% endif %}
-                {% if transaccion.estado == 'Pendiente' or transaccion.estado == 'Confirmada' %}
+                {% if transaccion.estado == 'Pendiente' and transaccion.medio_pago == 'Efectivo' %}
                 <div class="detalle-item">
                     <div class="detalle-titulo" style="font-size:large">Código de la transacción:</div>
                     <div class="detalle-valor" style="font-size:large">{{ transaccion.token }}</div>
                 </div>
+                {% elif transaccion.estado == 'Confirmada' %}
+                    <div class="detalle-item">
+                        <div class="detalle-titulo" style="font-size:large">Código de la transacción:</div>
+                        <div class="detalle-valor" style="font-size:large">{{ transaccion.token }}</div>
+                    </div>
                 {% endif %}
             {% else %}
                 <div class="detalle-item">

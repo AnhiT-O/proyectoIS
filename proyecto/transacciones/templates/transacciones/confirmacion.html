@@ -17,14 +17,6 @@
 <link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
-{% block extra_js %}
-    <!-- SweetAlert2 para mensajes de error -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{% static 'pasarela_pago.js' %}"></script>
-    <!-- Las URLs se movieron a pasarela_pago.js -->
-
-{% endblock %}
-
 {% block content %}
 <div class="contenido extendido">
     <!-- Barra de progreso -->
@@ -323,6 +315,9 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'pasarela_pago.js' %}"></script>
+
 {% if enable_2fa and has_email %}
 <style>
 /* Estilos específicos para modal 2FA */

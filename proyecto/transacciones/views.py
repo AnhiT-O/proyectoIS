@@ -626,12 +626,6 @@ def compra_exito(request, token=None):
                         'Billetera Personal': 'PERSONAL-0982000002-2020202',
                         'Zimple': 'ZIMPLE-0983000003-3030303'
                     }
-                    # Mensajes de debug para ver los valores reales
-                    # Mensajes de debug para ver los valores reales
-                    messages.info(request, f"Pago recibido: monto_pago={monto_pago}, cuenta_pago={cuenta_pago}, banco_pago={banco_pago}")
-                    messages.info(request, f"Esperado: precio_final={transaccion.precio_final}, cuenta_esperada={CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago, '')}")
-
-
                     # Verificación del monto
                     monto_valido = monto_pago >= float(transaccion.precio_final)
                     
@@ -647,22 +641,20 @@ def compra_exito(request, token=None):
                         transaccion.estado = 'Confirmada'
                         transaccion.fecha_hora = timezone.now()
                         transaccion.save()
+                        transaccion.cliente.consumo_diario += transaccion.precio_final
+                        transaccion.cliente.consumo_mensual += transaccion.precio_final
+                        transaccion.cliente.ultimo_consumo = date.today()
+                        transaccion.cliente.save()
+                        guaranies = StockGuaranies.objects.first()
+                        guaranies.cantidad += transaccion.precio_final - transaccion.recargo_pago
+                        guaranies.save()
                         messages.success(request, 'Pago confirmado exitosamente')
                     else:
-                        transaccion.estado = 'Pendiente'
-                        transaccion.razon = f'Error en validación: monto={monto_valido}, cuenta={cuenta_valida}'
-                        transaccion.save()
-                        # Restaurar datos en sesión para volver a confirmación
-                        request.session['compra_datos'] = {
-                            'moneda': transaccion.moneda.id,
-                            'monto': str(transaccion.monto),
-                            'medio_pago': transaccion.medio_pago,
-                            'medio_cobro': transaccion.medio_cobro,
-                            'paso_actual': 4
-                        }
-                        request.session['transaccion_id'] = transaccion.id
                         messages.error(request, 'Error en la validación del pago. Por favor, verifique los datos e intente nuevamente.')
-                        return redirect('transacciones:compra_confirmacion')
+                        context = {
+                            'transaccion': transaccion
+                        }
+                        return render(request, 'transacciones/informacion_pago.html', context)
                         
                 except (ValueError, TypeError, AttributeError) as e:
                     transaccion.estado = 'Cancelada'
@@ -715,11 +707,14 @@ def compra_exito(request, token=None):
         else:
             try:
                 generar_token_transaccion(transaccion)
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:compra_medio_cobro')
+            transaccion.save()
+            context = {
+                'transaccion': transaccion
+            }
+            return render(request, 'transacciones/informacion_pago.html', context)
 
     # Limpiar sesión
     request.session.pop('transaccion_id', None)
@@ -1501,7 +1496,7 @@ def detalle_historial(request, transaccion_id):
                 t.estado = 'Cancelada'
                 t.razon = 'Expira el tiempo para confirmar la transacción'
                 t.save()
-    if transaccion.cliente not in request.user.clientes_operados.all() and not request.user.has_perm('transacciones.visualizacion'):
+    if transaccion.cliente not in request.user.clientes_operados.all():
         messages.error(request, "No tienes permiso para ver el historial de este cliente.")
         return redirect('inicio')
     
@@ -1580,13 +1575,13 @@ def revisar_tausers(request):
     todos_los_tausers = Tauser.objects.all()
     tausers_query = todos_los_tausers
     
-    # Manejar búsqueda por puerto
+    # Manejar búsqueda por sucursal
     busqueda = request.GET.get('busqueda', '').strip()
     if busqueda:
-        tausers_query = tausers_query.filter(puerto__icontains=busqueda)
+        tausers_query = tausers_query.filter(sucursal__icontains=busqueda)
     
-    # Ordenar por puerto
-    tausers_query = tausers_query.order_by('puerto')
+    # Ordenar por número de Tauser
+    tausers_query = tausers_query.order_by('id')
     
     # Obtener filtro de estado
     filtro_estado = request.GET.get('estado', '')

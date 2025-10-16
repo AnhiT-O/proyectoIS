@@ -84,6 +84,11 @@ Real	BRL	t	1310	20	30	2	2025-10-10 10:50:00
 Peso argentino	ARP	t	5	1	1	0	2025-10-10 10:50:00
 \.
 
+COPY public.historial_cotizaciones (nombre_moneda, fecha, tasa_base, comision_compra, comision_venta, precio_compra, precio_venta, fecha_registro, moneda_id) FROM stdin;
+Euro	2025-10-10	8500	200	150	8300	8650	2025-10-10 10:50:00	2
+Real	2025-10-10	1310	20	30	1290	1340	2025-10-10 10:50:00	3
+Peso argentino	2025-10-10	5	1	1	4	6	2025-10-10 10:50:00	4
+\.
 
 COPY public.denominaciones (valor, moneda_id) FROM stdin;
 5	2

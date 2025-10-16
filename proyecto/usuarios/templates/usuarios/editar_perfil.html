@@ -115,84 +115,7 @@
                     </button>
                 </div>
             </div>
-            {% comment %} <div class="form-campo">
-                <!-- Campo vacío para mantener la estructura de la grilla -->
-            </div> {% endcomment %}
         </div>
-
-        <!-- Campos adicionales no editables -->
-        {% comment %} {% if user.cliente_activo %}
-        <div class="form-fila">
-            <div class="form-campo">
-                <label for="cliente_activo">Cliente Activo</label>
-                <input type="text" id="cliente_activo" class="form-control" value="Sí" disabled readonly>
-            </div>
-            <div class="form-campo">
-                <label>Roles Asignados</label>
-                <div class="roles-section">
-                    <button type="button" class="btn-roles" onclick="toggleRolesDropdown()">
-                        <span class="roles-info">
-                            {% if user.groups.all %}
-                                <span class="roles-text">Ver roles asignados</span>
-                                <span class="roles-count">({{ user.groups.all|length }})</span>
-                            {% else %}
-                                <span class="roles-text">Sin roles asignados</span>
-                            {% endif %}
-                        </span>
-                        <span class="material-icons">expand_more</span>
-                    </button>
-                    <div class="roles-dropdown" id="roles-dropdown" style="display: none;">
-                        <ul class="roles-list">
-                            {% for grupo in user.groups.all %}
-                                <li class="role-item">
-                                    <span class="role-name">{{ grupo.name }}</span>
-                                </li>
-                            {% empty %}
-                                <li class="no-roles">
-                                    No tienes roles asignados
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <div class="form-fila">
-            <div class="form-campo">
-                <label>Roles Asignados</label>
-                <div class="roles-section">
-                    <button type="button" class="btn-roles" onclick="toggleRolesDropdown()">
-                        <span class="roles-info">
-                            {% if user.groups.all %}
-                                <span class="roles-text">Ver roles asignados</span>
-                                <span class="roles-count">({{ user.groups.all|length }})</span>
-                            {% else %}
-                                <span class="roles-text">Sin roles asignados</span>
-                            {% endif %}
-                        </span>
-                        <span class="material-icons">expand_more</span>
-                    </button>
-                    <div class="roles-dropdown" id="roles-dropdown" style="display: none;">
-                        <ul class="roles-list">
-                            {% for grupo in user.groups.all %}
-                                <li class="role-item">
-                                    <span class="role-name">{{ grupo.name }}</span>
-                                </li>
-                            {% empty %}
-                                <li class="no-roles">
-                                    No tienes roles asignados
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="form-campo">
-                <!-- Campo vacío para mantener la estructura de la grilla -->
-            </div>
-        </div>
-        {% endif %} {% endcomment %}
 
         <!-- Sección de cambio de contraseña (inicialmente oculta) -->
         <div class="zona-cambio-password" id="zona-cambio-password" style="display: none;">
@@ -251,7 +174,7 @@
             <div class="declaracion-titulo">
                 Confirmación de Seguridad
             </div>
-            <div class="form-fila">
+            <div class="form-fila" style="margin-bottom: 0.5rem;">
                 <div class="form-campo">
                     <label for="{{ form.current_password.id_for_label }}">Contraseña Actual <span style="color: red;">*</span></label>
                     {{ form.current_password }}

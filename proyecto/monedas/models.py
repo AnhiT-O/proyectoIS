@@ -22,7 +22,7 @@ class Moneda(models.Model):
     comision_compra = models.IntegerField(default=0)
     comision_venta = models.IntegerField(default=0)
     decimales = models.SmallIntegerField(default=2)
-    fecha_cotizacion = models.DateTimeField(auto_now=True)
+    fecha_cotizacion = models.DateTimeField(default=timezone.now)
     
     def save(self, *args, **kwargs):
         if self.pk:
@@ -110,15 +110,14 @@ def crear_moneda_usd(sender, **kwargs):
     if kwargs['app_config'].name == 'monedas':
         # Verificar si ya existe la moneda USD
         if not Moneda.objects.filter(simbolo='USD').exists():
-            usd = Moneda.objects.create(
+            Moneda.objects.create(
                 nombre='Dólar estadounidense',
                 simbolo='USD',
                 tasa_base=7000,
                 comision_compra=40,
                 comision_venta=70,
+                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 10, 10, 10, 50, 0))
             )
-            usd.fecha_cotizacion = timezone.make_aware(timezone.datetime(2025, 10, 10, 10, 50, 0))
-            usd.save()
             print("✓ Moneda USD creada automáticamente")
 
 class StockGuaranies(models.Model):
@@ -224,15 +223,17 @@ def crear_historial_cotizacion(sender, instance, created, **kwargs):
     """
     Crea un registro en el historial cuando se actualiza una cotización
     """
-    if not created:  # Solo cuando se actualiza, no cuando se crea
+    if created:
+        fecha_hoy = instance.fecha_cotizacion.date()
+    else:
         fecha_hoy = timezone.now().date()
-        
-        # Guardar TODAS las ediciones (eliminar la verificación de duplicados para el mismo día)
-        HistorialCotizacion.objects.create(
-            moneda=instance,
-            nombre_moneda=instance.nombre,
-            fecha=fecha_hoy,
-            tasa_base=instance.tasa_base,
-            comision_compra=instance.comision_compra,
-            comision_venta=instance.comision_venta
-        )
+    
+    # Guardar TODAS las ediciones (eliminar la verificación de duplicados para el mismo día)
+    HistorialCotizacion.objects.create(
+        moneda=instance,
+        nombre_moneda=instance.nombre,
+        fecha=fecha_hoy,
+        tasa_base=instance.tasa_base,
+        comision_compra=instance.comision_compra,
+        comision_venta=instance.comision_venta
+    )

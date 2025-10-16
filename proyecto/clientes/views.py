@@ -645,7 +645,7 @@ def cliente_agregar_billetera(request, pk):
     return render(request, 'clientes/agregar_billetera.html', context)
 
 @login_required
-@permission_required('transacciones.visualizacion', raise_exception=True)
+@permission_required('clientes.gestion', raise_exception=True)
 def historial_transacciones(request, cliente_id):
     """
     Vista para el historial de transacciones de un cliente específico.
@@ -734,6 +734,7 @@ def historial_transacciones(request, cliente_id):
     return render(request, 'clientes/cliente_historial_transacciones.html', context)
 
 @login_required
+@permission_required('clientes.gestion', raise_exception=True)
 def cliente_detalle_transaccion(request, cliente_id, transaccion_id):
     """
     Vista de detalle para una transacción específica desde el contexto de cliente.

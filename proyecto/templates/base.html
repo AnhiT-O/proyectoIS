@@ -33,7 +33,7 @@
                             </div>
                         {% endif %}
                         <!-- Panel de Administración basado en permisos -->
-                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas %}
+                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas or perms.transacciones %}
                             <div class="panel-gestiones">
                                 <a href="#" class="btn-panel" onclick="toggleAdminMenu(event)">
                                     ⚙️ Panel de Gestiones

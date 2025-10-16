@@ -76,8 +76,8 @@ function redirigirAPasarela(metodoPago, datosTransaccion) {
         return_url: `${window.location.origin}/operaciones/comprar/exito/${datosTransaccion.token}/`
     });
     
-    // Redireccionar
-    window.location.href = `${url}?${params.toString()}`;
+    // Abrir pasarela en nueva pestaña
+    window.open(`${url}?${params.toString()}`, '_blank');
 }
 
 // Función para verificar el pago
@@ -177,51 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
         procesarRespuestaPago(respuesta);
     }
 });
-
-// Función para probar la conexión con la pasarela
-function probarConexionPasarela() {
-    console.log('Probando conexión con la pasarela...');
-    
-    // Datos de prueba
-    const datosPrueba = {
-        estado: 'exito',
-        monto: 1000,
-        tipo_pago: 'TIGO',
-        usuario: '1234567'
-    };
-
-    fetch(PASARELA_CONFIG.API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify(datosPrueba)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Respuesta recibida:', data);
-        alert('Conexión exitosa con la pasarela. Ver consola para detalles.');
-    })
-    .catch(error => {
-        console.error('Error de conexión:', error);
-        alert('Error al conectar con la pasarela. Ver consola para detalles.');
-    });
-}
-
-// Agregar botón de prueba si estamos en modo desarrollo
-if (window.location.hostname === 'localhost') {
-    document.addEventListener('DOMContentLoaded', function() {
-        const botonPrueba = document.createElement('button');
-        botonPrueba.textContent = 'Probar Conexión Pasarela';
-        botonPrueba.onclick = probarConexionPasarela;
-        botonPrueba.style.position = 'fixed';
-        botonPrueba.style.bottom = '20px';
-        botonPrueba.style.right = '20px';
-        botonPrueba.style.zIndex = '1000';
-        document.body.appendChild(botonPrueba);
-    });
-}
 
 // --- Escuchar retorno desde la pasarela ---
 window.addEventListener('message', function(event) {

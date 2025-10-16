@@ -205,7 +205,7 @@ def recuperar_password(request):
             enviar_email_recuperacion(request, user)
 
             messages.success(request, 'Se ha enviado un enlace de recuperación a tu correo electrónico. Revisa tu bandeja de entrada y sigue las instrucciones.')
-            return redirect('login')
+            return redirect('inicio')
     else:
         form = RecuperarPasswordForm()
     
@@ -536,6 +536,9 @@ def remover_rol(request, pk, rol_id):
     # Si el rol a remover es 'Operador', desasociar todos los clientes del usuario
     if rol.name == 'Operador':
         clientes_asociados = usuario.clientes_operados.all()
+        if usuario.cliente_activo:
+            usuario.cliente_activo = None
+            usuario.save()
         for cliente in clientes_asociados:
             try:
                 cliente.usuarios.remove(usuario)

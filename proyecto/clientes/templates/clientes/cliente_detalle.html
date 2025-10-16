@@ -21,14 +21,12 @@
                 {{ cliente.get_tipo_display }}
             </div>
         </div>
-        {% if perms.transacciones.visualizacion %}
         <div style="display: flex; gap: 0.5rem;">
             <!-- Botón para ver historial de transacciones -->
             <a href="{% url 'clientes:cliente_historial' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem; z-index: 1;">
                 Historial de Transacciones
             </a>
         </div>
-        {% endif %}
     </div>
 
     <div class="zona-detalle">
@@ -61,8 +59,10 @@
                     <div class="info-contenido">
                         <div class="info-titulo">Beneficio aplicado</div>
                         <div class="info-valor">
-                            {% if cliente.beneficio_segmento > 0 %}
-                                {{ cliente.beneficio_segmento }}%
+                            {% if cliente.segmento == 'corporativo' %}
+                                5% sobre comisión
+                            {% elif cliente.segmento == 'vip' %}
+                                10% sobre comisión
                             {% else %}
                                 Ninguno
                             {% endif %}
