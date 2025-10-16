@@ -20,55 +20,58 @@
         {% endif %}
     </div>
 
-    <div class="zona-monedas">
-        <div class="tarjeta-moneda">
-            <div class="tarjeta-cabecera">
-                <h3>Límites de Transacciones</h3>
-            </div>
-            <table class="gestion-tabla">
-                <thead>
-                    <tr>
-                        <th style="width: 50%;">Límite de transacciones diarias</th>
-                        <th style="width: 50%;">Límite de transacciones mensuales</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_diario|intcomma }}</span>
-                        </td>
-                        <td>
-                            <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_mensual|intcomma }}</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Límites de Transacciones -->
+    <div class="tarjeta-moneda" style="margin-bottom: 2rem;">
+        <div class="tarjeta-cabecera">
+            <h3>Límites de Transacciones</h3>
         </div>
-        <div class="tarjeta-moneda">
-            <div class="tarjeta-cabecera">
-                <h3>Porcentajes de Recargo</h3>
-            </div>
-            <table class="gestion-tabla">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Tarjetas VISA</th>
-                        <th style="width: 25%;">Tarjetas MASTERCARD</th>
-                        <th style="width: 20%;">Tigo Money</th>
-                        <th style="width: 20%;">Billetera Personal</th>
-                        <th style="width: 20%;">Zimple</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        {% for r in recargos %}
-                        <td>
-                            <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
-                        </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
+        <table class="gestion-tabla">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Límite de transacciones diarias</th>
+                    <th style="width: 50%;">Límite de transacciones mensuales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_diario|intcomma }}</span>
+                    </td>
+                    <td>
+                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_mensual|intcomma }}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Porcentajes de Recargo -->
+    <div class="tarjeta-moneda" style="max-width: 100%;">
+        <div class="tarjeta-cabecera">
+            <h3>Porcentajes de Recargo</h3>
         </div>
+        <table class="gestion-tabla" style="width: 100%; table-layout: auto; font-size: 0.95rem;">
+            <thead>
+                <tr>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">Tarjetas VISA</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">Tarjetas MASTERCARD</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">Tigo Money</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">Billetera Personal</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">Zimple</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">PANAL</th>
+                    <th style="padding: 15px 12px; white-space: nowrap; text-align: center;">CABAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for r in recargos %}
+                    <td style="text-align: center; padding: 15px 12px;">
+                        <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

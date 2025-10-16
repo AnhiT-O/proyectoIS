@@ -109,6 +109,20 @@ def crear_recargos(sender, **kwargs):
                 recargo='3'
             )
 
+        if not Recargos.objects.filter(marca='PANAL').exists():
+            Recargos.objects.create(
+                marca='PANAL',
+                medio='Tarjeta de Crédito',
+                recargo='2'
+            )
+
+        if not Recargos.objects.filter(marca='CABAL').exists():
+            Recargos.objects.create(
+                marca='CABAL',
+                medio='Tarjeta de Crédito',
+                recargo='1'
+            )
+
 class LimiteGlobal(models.Model):
     """
     Modelo para almacenar los límites globales de transacciones

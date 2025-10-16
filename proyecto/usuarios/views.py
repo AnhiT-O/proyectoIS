@@ -706,14 +706,21 @@ def detalle_cliente(request, cliente_id):
         
         # Obtener las tarjetas de Stripe del cliente
         tarjetas_stripe = cliente.obtener_tarjetas_stripe()
+        
+        # Obtener las tarjetas locales del cliente
+        from medios_acreditacion.models import TarjetaLocal
+        tarjetas_locales = TarjetaLocal.objects.filter(cliente=cliente, activo=True)
 
         # Usar función auxiliar para procesar medios de acreditación
         medios_data = procesar_medios_acreditacion_cliente(cliente, request.user)
         
+        total_tarjetas = len(tarjetas_stripe) + tarjetas_locales.count()
+        
         context = {
             'cliente': cliente,
             'tarjetas_stripe': tarjetas_stripe,
-            'total_tarjetas': len(tarjetas_stripe),
+            'tarjetas_locales': tarjetas_locales,
+            'total_tarjetas': total_tarjetas,
             **medios_data
         }
         
@@ -727,17 +734,32 @@ def detalle_cliente(request, cliente_id):
 @login_required
 def agregar_tarjeta_cliente(request, pk):
     """
-    Vista para que un operador agregue tarjeta de crédito a su cliente asignado.
+    Vista para mostrar opciones de tipos de tarjetas disponibles.
+    Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Stripe).
 
     Args:
         pk (int): ID del cliente al que se le agregará la tarjeta.
+    """
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    context = {
+        'cliente': cliente,
+    }
+    return render(request, 'usuarios/seleccionar_tipo_tarjeta.html', context)
 
-    Raises:
-        Cliente.DoesNotExist: Si el cliente con el ID proporcionado no existe o no está asociado al usuario.
-        Exception: Si ocurre un error al agregar la tarjeta.
 
-    Note:
-        -   Se utiliza el formulario AgregarTarjetaForm del módulo clientes.forms.
+@login_required
+def agregar_tarjeta_stripe_cliente(request, pk):
+    """
+    Vista para agregar tarjeta de crédito internacional (Stripe) a un cliente.
+
+    Args:
+        pk (int): ID del cliente al que se le agregará la tarjeta.
     """
     try:
         # Verificar que el cliente existe y está asociado al usuario
@@ -772,6 +794,43 @@ def agregar_tarjeta_cliente(request, pk):
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
     }
     return render(request, 'clientes/agregar_tarjeta.html', context)
+
+
+@login_required
+def agregar_tarjeta_local_cliente(request, pk):
+    """
+    Vista para agregar tarjeta de crédito local (Panal o Cabal) a un cliente.
+
+    Args:
+        pk (int): ID del cliente al que se le agregará la tarjeta.
+    """
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    # Importar el formulario aquí para evitar dependencia circular
+    from medios_acreditacion.forms import TarjetaLocalForm
+    
+    if request.method == 'POST':
+        form = TarjetaLocalForm(request.POST, cliente=cliente)
+        if form.is_valid():
+            try:
+                tarjeta = form.save()
+                messages.success(request, f'Tarjeta {tarjeta.get_tipo_tarjeta_display()} agregada exitosamente.')
+                return redirect('usuarios:detalle_cliente', cliente_id=pk)
+            except Exception as e:
+                messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
+    else:
+        form = TarjetaLocalForm(cliente=cliente)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+    }
+    return render(request, 'usuarios/agregar_tarjeta_local.html', context)
 
 
 @login_required
@@ -820,6 +879,41 @@ def eliminar_tarjeta_cliente(request, pk, payment_method_id):
     return redirect('usuarios:detalle_cliente', cliente_id=pk)
 
 
+@login_required
+def eliminar_tarjeta_local_cliente(request, pk, tarjeta_id):
+    """
+    Vista para que un operador elimine una tarjeta local de su cliente asignado.
+
+    Args:
+        pk (int): ID del cliente al que se le eliminará la tarjeta.
+        tarjeta_id (int): ID de la tarjeta local a eliminar.
+    """
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:mis_clientes')
+    
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    from medios_acreditacion.models import TarjetaLocal
+    
+    try:
+        # Buscar y eliminar la tarjeta local
+        tarjeta = TarjetaLocal.objects.get(id=tarjeta_id, cliente=cliente)
+        tipo_tarjeta = tarjeta.get_tipo_tarjeta_display()
+        tarjeta.delete()
+        messages.success(request, f'Tarjeta {tipo_tarjeta} eliminada exitosamente.')
+        
+    except TarjetaLocal.DoesNotExist:
+        messages.error(request, 'La tarjeta no existe o no pertenece al cliente.')
+    except Exception as e:
+        messages.error(request, f'Error al eliminar la tarjeta: {str(e)}')
+    
+    return redirect('usuarios:detalle_cliente', cliente_id=pk)
 
 
 @login_required

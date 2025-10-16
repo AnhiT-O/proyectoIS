@@ -11,10 +11,12 @@ personalizados y configuración de widgets para mejorar la experiencia del usuar
 Clases:
     CuentaBancariaForm: Formulario para crear y editar cuentas bancarias.
     BilleteraForm: Formulario para crear y editar billeteras electrónicas.
+    TarjetaLocalForm: Formulario para agregar tarjetas locales (Panal y Cabal).
 """
 
 from django import forms
-from .models import CuentaBancaria, Billetera
+from datetime import datetime
+from .models import CuentaBancaria, Billetera, TarjetaLocal
 
 
 class CuentaBancariaForm(forms.ModelForm):
@@ -203,3 +205,203 @@ class BilleteraForm(forms.ModelForm):
         if tipo_billetera == '-------':
             raise forms.ValidationError('Debes seleccionar un tipo de billetera válido.')
         return tipo_billetera
+
+class TarjetaLocalForm(forms.Form):
+    """
+    Formulario para agregar tarjetas de crédito locales (Panal y Cabal).
+    
+    Este formulario maneja la captura y validación de datos de tarjetas locales,
+    incluyendo validaciones de número de tarjeta, fecha de expiración y CVV.
+    
+    Attributes:
+        tipo_tarjeta: Campo de selección para el tipo de tarjeta.
+        numero_tarjeta: Campo de texto para el número de tarjeta.
+        nombre_titular: Campo de texto para el nombre del titular.
+        nro_documento: Campo de texto para el número de documento.
+        mes_expiracion: Campo de selección para el mes de expiración.
+        anio_expiracion: Campo de selección para el año de expiración.
+        cvv: Campo de texto para el código de seguridad.
+    """
+    
+    tipo_tarjeta = forms.ChoiceField(
+        choices=TarjetaLocal.TIPO_TARJETA_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'title': 'Seleccione el tipo de tarjeta'
+        }),
+        error_messages={
+            'required': 'Debes seleccionar un tipo de tarjeta.',
+        },
+        help_text="Seleccione Panal o Cabal"
+    )
+    
+    numero_tarjeta = forms.CharField(
+        max_length=19,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '1234 5678 9012 3456',
+            'title': 'Número de tarjeta (16 dígitos)',
+            'maxlength': '19'
+        }),
+        error_messages={
+            'required': 'Debes ingresar el número de tarjeta.',
+            'max_length': 'El número de tarjeta no puede exceder los 19 caracteres.'
+        },
+        help_text="Ingrese el número completo de la tarjeta"
+    )
+    
+    nombre_titular = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre completo del titular',
+            'title': 'Nombre tal como aparece en la tarjeta'
+        }),
+        error_messages={
+            'required': 'Debes ingresar el nombre del titular.',
+            'max_length': 'El nombre del titular no puede exceder los 100 caracteres.'
+        },
+        help_text="Nombre completo tal como aparece en la tarjeta"
+    )
+    
+    nro_documento = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Número de documento',
+            'title': 'Cédula de identidad del titular'
+        }),
+        error_messages={
+            'required': 'Debes ingresar el número de documento del titular.',
+            'max_length': 'El número de documento no puede exceder los 20 caracteres.'
+        },
+        help_text="Número de cédula del titular de la tarjeta"
+    )
+    
+    mes_expiracion = forms.ChoiceField(
+        choices=[(i, f'{i:02d}') for i in range(1, 13)],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'title': 'Mes de expiración'
+        }),
+        error_messages={
+            'required': 'Debes seleccionar el mes de expiración.',
+        },
+        help_text="Mes de expiración (MM)"
+    )
+    
+    anio_expiracion = forms.ChoiceField(
+        choices=[(i, str(i)) for i in range(datetime.now().year, datetime.now().year + 11)],
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'title': 'Año de expiración'
+        }),
+        error_messages={
+            'required': 'Debes seleccionar el año de expiración.',
+        },
+        help_text="Año de expiración (AAAA)"
+    )
+    
+    cvv = forms.CharField(
+        max_length=4,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'CVV',
+            'title': 'Código de seguridad (3 o 4 dígitos)',
+            'maxlength': '4'
+        }),
+        error_messages={
+            'required': 'Debes ingresar el código CVV.',
+            'max_length': 'El CVV no puede exceder los 4 dígitos.'
+        },
+        help_text="Código de seguridad de 3 o 4 dígitos"
+    )
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario con el cliente asociado.
+        
+        Args:
+            cliente: Instancia del cliente al que se agregará la tarjeta.
+        """
+        self.cliente = kwargs.pop('cliente', None)
+        super().__init__(*args, **kwargs)
+    
+    def clean_numero_tarjeta(self):
+        """
+        Validación del número de tarjeta.
+        Limpia espacios y verifica que contenga solo dígitos.
+        """
+        numero = self.cleaned_data.get('numero_tarjeta', '').replace(' ', '')
+        
+        if not numero.isdigit():
+            raise forms.ValidationError('El número de tarjeta debe contener solo dígitos.')
+        
+        if len(numero) != 16:
+            raise forms.ValidationError('El número de tarjeta debe tener 16 dígitos.')
+        
+        # Formatear con espacios para visualización
+        numero_formateado = ' '.join([numero[i:i+4] for i in range(0, len(numero), 4)])
+        return numero_formateado
+    
+    def clean_cvv(self):
+        """
+        Validación del CVV.
+        Verifica que contenga solo dígitos y tenga 3 o 4 caracteres.
+        """
+        cvv = self.cleaned_data.get('cvv', '')
+        
+        if not cvv.isdigit():
+            raise forms.ValidationError('El CVV debe contener solo dígitos.')
+        
+        if len(cvv) < 3 or len(cvv) > 4:
+            raise forms.ValidationError('El CVV debe tener 3 o 4 dígitos.')
+        
+        return cvv
+    
+    def clean(self):
+        """
+        Validación general del formulario.
+        Verifica que la fecha de expiración sea válida.
+        """
+        cleaned_data = super().clean()
+        mes = cleaned_data.get('mes_expiracion')
+        anio = cleaned_data.get('anio_expiracion')
+        
+        if mes and anio:
+            mes_int = int(mes)
+            anio_int = int(anio)
+            fecha_actual = datetime.now()
+            
+            # Verificar que la tarjeta no esté expirada
+            if anio_int < fecha_actual.year or (anio_int == fecha_actual.year and mes_int < fecha_actual.month):
+                raise forms.ValidationError('La tarjeta está expirada.')
+        
+        return cleaned_data
+    
+    def save(self):
+        """
+        Crea y guarda la tarjeta local en la base de datos.
+        
+        Returns:
+            TarjetaLocal: La instancia de la tarjeta creada.
+        
+        Raises:
+            ValidationError: Si no se especifica cliente o si ocurre algún error.
+        """
+        if not self.cliente:
+            raise forms.ValidationError('Cliente no especificado.')
+        
+        tarjeta = TarjetaLocal.objects.create(
+            cliente=self.cliente,
+            tipo_tarjeta=self.cleaned_data['tipo_tarjeta'],
+            numero_tarjeta=self.cleaned_data['numero_tarjeta'],
+            nombre_titular=self.cleaned_data['nombre_titular'],
+            nro_documento=self.cleaned_data['nro_documento'],
+            mes_expiracion=int(self.cleaned_data['mes_expiracion']),
+            anio_expiracion=int(self.cleaned_data['anio_expiracion']),
+            cvv=self.cleaned_data['cvv'],
+            activo=True
+        )
+        
+        return tarjeta
