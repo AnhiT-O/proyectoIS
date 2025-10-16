@@ -5,8 +5,24 @@ Este módulo contiene todas las funciones necesarias para implementar
 el sistema de autenticación de dos factores para transacciones,
 incluyendo generación de tokens, envío de emails y validaciones.
 
+Funcionalidades principales:
+    - Verificación de estado de 2FA en el sistema
+    - Generación de tokens aleatorios de 6 dígitos
+    - Envío de tokens por email
+    - Validación de tokens ingresados por usuarios
+    - Gestión del ciclo de vida de tokens (creación, validación, expiración)
+    - Limpieza de tokens expirados
+
+Configuración requerida en settings.py:
+    ENABLE_2FA_TRANSACTIONS: bool - Habilita/deshabilita el sistema 2FA
+    TWO_FACTOR_AUTH: dict - Configuración de parámetros del sistema 2FA
+        - TOKEN_LENGTH: int - Longitud del token (default: 6)
+        - TOKEN_EXPIRY_MINUTES: int - Minutos de validez del token (default: 1)
+        - EMAIL_SUBJECT: str - Asunto del email
+        - EMAIL_FROM: str - Email remitente
+
 Author: Sistema de Desarrollo Global Exchange
-Date: 2024
+Date: 2025
 """
 
 import random
@@ -25,17 +41,40 @@ def is_2fa_enabled():
     """
     Verifica si el 2FA está habilitado globalmente en el sistema.
     
+    Esta función consulta la configuración del sistema para determinar
+    si la autenticación de dos factores está activa para las transacciones.
+    
     Returns:
         bool: True si el 2FA está habilitado, False en caso contrario
+        
+    Example:
+        >>> if is_2fa_enabled():
+        ...     send_2fa_token(user)
+        ... else:
+        ...     process_transaction_directly()
     """
     return getattr(settings, 'ENABLE_2FA_TRANSACTIONS', False)
 
 def generate_2fa_token():
     """
-    Genera un token aleatorio de 6 dígitos.
+    Genera un token aleatorio de dígitos numéricos.
+    
+    Utiliza la configuración TOKEN_LENGTH del sistema para determinar
+    la longitud del token. Por defecto genera 6 dígitos.
     
     Returns:
-        str: Token de 6 dígitos
+        str: Token numérico aleatorio
+        
+    Example:
+        >>> token = generate_2fa_token()
+        >>> len(token)
+        6
+        >>> token.isdigit()
+        True
+        
+    Note:
+        El token generado es aleatorio y no se garantiza que sea único
+        sin validación adicional contra la base de datos.
     """
     token_length = settings.TWO_FACTOR_AUTH.get('TOKEN_LENGTH', 6)
     return ''.join(random.choices(string.digits, k=token_length))
@@ -44,12 +83,30 @@ def send_2fa_email(usuario, token):
     """
     Envía un email con el token 2FA al usuario.
     
+    Renderiza un template HTML con el token y lo envía al email del usuario.
+    También genera una versión de texto plano como fallback.
+    
     Args:
-        usuario (Usuario): Usuario al que enviar el token
-        token (str): Token de 6 dígitos a enviar
+        usuario (Usuario): Usuario al que enviar el token. Debe tener un email válido.
+        token (str): Token numérico a enviar al usuario
         
     Returns:
         bool: True si el email se envió correctamente, False en caso contrario
+        
+    Raises:
+        No lanza excepciones, las captura y registra en el log.
+        
+    Example:
+        >>> user = User.objects.get(username='test_user')
+        >>> token = '123456'
+        >>> success = send_2fa_email(user, token)
+        >>> if success:
+        ...     print("Email enviado correctamente")
+        
+    Note:
+        - Requiere configuración SMTP válida en settings.py
+        - Utiliza el template 'transacciones/emails/2fa_token.html'
+        - Registra el resultado en el logger del módulo
     """
     try:
         # Configuración del email
@@ -89,12 +146,46 @@ def create_transaction_token(usuario, transaccion_data):
     """
     Crea un token de transacción y envía el email de verificación.
     
+    Esta es la función principal para iniciar el flujo 2FA. Genera un token,
+    lo almacena en la base de datos asociado a los datos de la transacción,
+    y envía el token al usuario por email.
+    
     Args:
         usuario (Usuario): Usuario para el que crear el token
-        transaccion_data (dict): Datos de la transacción a almacenar
+        transaccion_data (dict): Datos de la transacción a almacenar. Debe contener:
+            - transaccion_id: int - ID de la transacción
+            - cliente_id: int - ID del cliente
+            - tipo: str - Tipo de transacción ('compra' o 'venta')
+            - monto: str - Monto de la transacción
+            - moneda_id: int - ID de la moneda
+            - precio_final: Decimal - Precio final calculado
+            - medio_pago: str - Medio de pago seleccionado (opcional)
+            - medio_cobro: str - Medio de cobro seleccionado (opcional)
         
     Returns:
-        dict: Resultado de la operación con éxito/error y detalles
+        dict: Diccionario con el resultado de la operación:
+            - success (bool): True si se creó y envió correctamente
+            - message (str): Mensaje descriptivo del resultado
+            - token_id (int): ID del token creado (solo si success=True)
+            - expires_at (datetime): Fecha de expiración (solo si success=True)
+            - error (str): Código de error (solo si success=False)
+            
+    Example:
+        >>> transaccion_data = {
+        ...     'transaccion_id': 123,
+        ...     'cliente_id': 45,
+        ...     'tipo': 'compra',
+        ...     'monto': '100.00',
+        ...     'moneda_id': 1,
+        ...     'precio_final': 700000
+        ... }
+        >>> result = create_transaction_token(user, transaccion_data)
+        >>> if result['success']:
+        ...     print(f"Token enviado, expira: {result['expires_at']}")
+        
+    Note:
+        - Si el envío del email falla, el token se elimina automáticamente
+        - El token tiene una duración limitada según TOKEN_EXPIRY_MINUTES
     """
     try:
         # Generar el token usando el modelo
@@ -131,12 +222,38 @@ def validate_2fa_token(usuario, token_input):
     """
     Valida un token 2FA ingresado por el usuario.
     
+    Busca el token más reciente no usado del usuario, verifica que no haya
+    expirado y que coincida con el token ingresado. Si es válido, marca el
+    token como usado y devuelve los datos de la transacción asociada.
+    
     Args:
         usuario (Usuario): Usuario que intenta validar el token
-        token_input (str): Token ingresado por el usuario
+        token_input (str): Token numérico ingresado por el usuario
         
     Returns:
-        dict: Resultado de la validación con éxito/error y datos de transacción
+        dict: Diccionario con el resultado de la validación:
+            - success (bool): True si el token es válido
+            - message (str): Mensaje descriptivo del resultado
+            - transaccion_data (dict): Datos de la transacción (solo si success=True)
+            - error (str): Código de error (solo si success=False)
+            
+    Posibles errores:
+        - NO_TOKEN_FOUND: No hay token pendiente para el usuario
+        - TOKEN_EXPIRED: El token ha expirado
+        - INVALID_TOKEN: El token ingresado no coincide
+        
+    Example:
+        >>> result = validate_2fa_token(user, '123456')
+        >>> if result['success']:
+        ...     transaccion_data = result['transaccion_data']
+        ...     process_transaction(transaccion_data)
+        ... else:
+        ...     print(f"Error: {result['message']}")
+        
+    Note:
+        - Los tokens expirados se eliminan automáticamente al ser detectados
+        - Un token solo puede usarse una vez
+        - Busca solo entre tokens no usados del usuario
     """
     try:
         # Buscar el token más reciente no usado del usuario
@@ -192,7 +309,31 @@ def validate_2fa_token(usuario, token_input):
 def cleanup_expired_tokens():
     """
     Limpia tokens expirados de la base de datos.
-    Esta función debería ejecutarse periódicamente (por ejemplo, con un cron job).
+    
+    Elimina todos los tokens cuya fecha de expiración sea anterior al momento
+    actual. Esta función es útil para mantener la base de datos limpia y
+    mejorar el rendimiento.
+    
+    Returns:
+        int: Número de tokens eliminados
+        
+    Example:
+        >>> deleted_count = cleanup_expired_tokens()
+        >>> print(f"Se eliminaron {deleted_count} tokens expirados")
+        
+    Note:
+        - Esta función debería ejecutarse periódicamente (cron job, celery task, etc.)
+        - No afecta a tokens válidos aún no expirados
+        - Registra el resultado en el logger del módulo
+        - Es seguro ejecutarla múltiples veces
+        
+    Suggested Usage:
+        Configurar como tarea periódica en celery:
+        
+        @periodic_task(run_every=timedelta(hours=1))
+        def cleanup_tokens():
+            from transacciones.utils_2fa import cleanup_expired_tokens
+            cleanup_expired_tokens()
     """
     try:
         expired_count = TransactionToken.objects.filter(
@@ -212,11 +353,33 @@ def get_token_status(usuario):
     """
     Obtiene el estado del token actual del usuario.
     
+    Consulta el token más reciente no usado del usuario y devuelve información
+    detallada sobre su estado (si existe, si es válido, tiempo restante, etc.).
+    
     Args:
         usuario (Usuario): Usuario para verificar el estado del token
         
     Returns:
-        dict: Estado del token (exists, valid, expires_at, etc.)
+        dict: Diccionario con información del estado del token:
+            - exists (bool): True si existe un token pendiente
+            - valid (bool): True si el token es válido (no expirado)
+            - expires_at (datetime): Fecha de expiración (solo si exists=True)
+            - created_at (datetime): Fecha de creación (solo si exists=True)
+            - time_remaining (float): Segundos restantes hasta expiración (solo si valid=True)
+            - message (str): Mensaje descriptivo del estado
+            
+    Example:
+        >>> status = get_token_status(user)
+        >>> if status['valid']:
+        ...     remaining = status['time_remaining']
+        ...     print(f"Token válido por {remaining} segundos más")
+        ... else:
+        ...     print(status['message'])
+        
+    Note:
+        - Útil para mostrar información en el frontend (temporizador, etc.)
+        - No modifica el estado del token
+        - Siempre busca el token más reciente no usado
     """
     try:
         token_obj = TransactionToken.objects.filter(

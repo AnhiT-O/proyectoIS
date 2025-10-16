@@ -4,8 +4,23 @@ Vistas específicas para autenticación de dos factores (2FA) en transacciones.
 Este módulo contiene las vistas AJAX y de procesamiento específicas
 para manejar el flujo de 2FA en transacciones.
 
+Funcionalidades:
+    - Envío de tokens 2FA por email
+    - Verificación de tokens ingresados por el usuario
+    - Consulta de estado de tokens
+    - Reenvío de tokens expirados o perdidos
+
+Endpoints:
+    POST /transacciones/2fa/send/ - Enviar token 2FA
+    POST /transacciones/2fa/verify/ - Verificar token ingresado
+    GET  /transacciones/2fa/status/ - Consultar estado del token
+    POST /transacciones/2fa/resend/ - Reenviar token
+
+Todas las vistas requieren autenticación de usuario y devuelven
+respuestas JSON para ser consumidas por JavaScript en el frontend.
+
 Author: Sistema de Desarrollo Global Exchange  
-Date: 2024
+Date: 2025
 """
 
 import json
@@ -32,10 +47,60 @@ logger = logging.getLogger(__name__)
 def send_2fa_token(request):
     """
     Vista AJAX para enviar token 2FA al email del usuario.
+    
     Se llama cuando el usuario hace clic en "Confirmar transacción".
+    Obtiene los datos de la transacción de la sesión, genera un token
+    y lo envía por email.
+    
+    Decoradores:
+        @login_required: Requiere usuario autenticado
+        @require_http_methods(["POST"]): Solo acepta método POST
+    
+    Args:
+        request (HttpRequest): Objeto request de Django con:
+            - user: Usuario autenticado
+            - session['transaccion_id']: ID de la transacción pendiente
     
     Returns:
-        JsonResponse: Resultado del envío del token
+        JsonResponse: Respuesta JSON con estructura:
+            En caso de éxito:
+                {
+                    'success': True,
+                    'message': str - Mensaje de confirmación,
+                    'expires_at': str - Fecha de expiración ISO format,
+                    'expiry_minutes': int - Minutos de validez del token
+                }
+            En caso de error:
+                {
+                    'success': False,
+                    'message': str - Descripción del error,
+                    'error': str - Código de error
+                }
+    
+    Códigos de error:
+        - 2FA_DISABLED: El sistema 2FA no está habilitado
+        - NO_EMAIL: El usuario no tiene email registrado
+        - NO_TRANSACTION_DATA: No se encontró transacción en la sesión
+        - TRANSACTION_NOT_FOUND: La transacción no existe en la BD
+        - EMAIL_SEND_FAILED: Error al enviar el email
+        - SERVER_ERROR: Error interno del servidor
+        
+    Example (JavaScript):
+        fetch('/transacciones/2fa/send/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Token enviado, expira en:', data.expiry_minutes);
+            }
+        });
+    
+    Note:
+        - Requiere que exista transaccion_id en la sesión
+        - El token se envía al email del usuario autenticado
+        - El token expira según la configuración TOKEN_EXPIRY_MINUTES
     """
     try:
         # Verificar si 2FA está habilitado
@@ -115,8 +180,65 @@ def verify_2fa_token(request):
     """
     Vista AJAX para verificar el token 2FA ingresado por el usuario.
     
+    Valida el token ingresado contra el token almacenado en la base de datos.
+    Si es válido, prepara la transacción para continuar con el flujo normal.
+    
+    Decoradores:
+        @login_required: Requiere usuario autenticado
+        @require_http_methods(["POST"]): Solo acepta método POST
+    
+    Args:
+        request (HttpRequest): Objeto request de Django con:
+            - user: Usuario autenticado
+            - body: JSON con {'token': str} - Token de 6 dígitos ingresado
+    
     Returns:
-        JsonResponse: Resultado de la verificación del token
+        JsonResponse: Respuesta JSON con estructura:
+            En caso de éxito:
+                {
+                    'success': True,
+                    'message': str - Mensaje de confirmación,
+                    'transaccion_id': int - ID de la transacción verificada,
+                    'redirect_url': str - URL para redirección
+                }
+            En caso de error:
+                {
+                    'success': False,
+                    'message': str - Descripción del error,
+                    'error': str - Código de error
+                }
+    
+    Códigos de error:
+        - 2FA_DISABLED: El sistema 2FA no está habilitado
+        - EMPTY_TOKEN: No se ingresó ningún token
+        - INVALID_FORMAT: El token no tiene el formato correcto (6 dígitos)
+        - NO_TOKEN_FOUND: No hay token pendiente para el usuario
+        - TOKEN_EXPIRED: El token ha expirado
+        - INVALID_TOKEN: El token ingresado es incorrecto
+        - TRANSACTION_NOT_FOUND: La transacción no existe
+        - INVALID_JSON: Los datos enviados no son JSON válido
+        - SERVER_ERROR: Error interno del servidor
+        
+    Example (JavaScript):
+        fetch('/transacciones/2fa/verify/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({token: '123456'})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            }
+        });
+    
+    Note:
+        - El token debe ser exactamente 6 dígitos numéricos
+        - El token se marca como usado después de una verificación exitosa
+        - La URL de redirección depende del tipo de transacción (compra/venta)
     """
     try:
         # Verificar si 2FA está habilitado
@@ -210,8 +332,57 @@ def get_token_status_view(request):
     """
     Vista AJAX para obtener el estado actual del token del usuario.
     
+    Consulta y devuelve información sobre el token más reciente del usuario,
+    incluyendo si existe, si es válido, y tiempo restante hasta expiración.
+    Útil para actualizar la UI del frontend (temporizadores, etc.).
+    
+    Decoradores:
+        @login_required: Requiere usuario autenticado
+        @require_http_methods(["GET"]): Solo acepta método GET
+    
+    Args:
+        request (HttpRequest): Objeto request de Django con:
+            - user: Usuario autenticado
+    
     Returns:
-        JsonResponse: Estado del token (válido, expirado, etc.)
+        JsonResponse: Respuesta JSON con estructura:
+            En caso de éxito:
+                {
+                    'success': True,
+                    'token_status': {
+                        'exists': bool - Si existe un token,
+                        'valid': bool - Si el token es válido,
+                        'expires_at': datetime - Fecha de expiración,
+                        'created_at': datetime - Fecha de creación,
+                        'time_remaining': float - Segundos restantes,
+                        'message': str - Descripción del estado
+                    }
+                }
+            En caso de error:
+                {
+                    'success': False,
+                    'message': str - Descripción del error,
+                    'error': str - Código de error
+                }
+    
+    Códigos de error:
+        - 2FA_DISABLED: El sistema 2FA no está habilitado
+        - SERVER_ERROR: Error interno del servidor
+        
+    Example (JavaScript):
+        fetch('/transacciones/2fa/status/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.token_status.valid) {
+                const seconds = data.token_status.time_remaining;
+                updateCountdown(seconds);
+            }
+        });
+    
+    Note:
+        - No modifica el estado del token
+        - Puede llamarse repetidamente para actualizar el estado
+        - Útil para implementar temporizadores en el frontend
     """
     try:
         if not is_2fa_enabled():
@@ -242,8 +413,61 @@ def resend_2fa_token(request):
     """
     Vista AJAX para reenviar el token 2FA.
     
+    Genera un nuevo token y lo envía por email. Útil cuando el token anterior
+    ha expirado o el usuario no recibió el email. Invalida el token anterior
+    al crear uno nuevo.
+    
+    Decoradores:
+        @login_required: Requiere usuario autenticado
+        @require_http_methods(["POST"]): Solo acepta método POST
+    
+    Args:
+        request (HttpRequest): Objeto request de Django con:
+            - user: Usuario autenticado
+            - session['transaccion_id']: ID de la transacción pendiente
+    
     Returns:
-        JsonResponse: Resultado del reenvío del token
+        JsonResponse: Respuesta JSON con estructura:
+            En caso de éxito:
+                {
+                    'success': True,
+                    'message': str - Mensaje de confirmación,
+                    'expires_at': str - Fecha de expiración ISO format,
+                    'expiry_minutes': int - Minutos de validez del nuevo token
+                }
+            En caso de error:
+                {
+                    'success': False,
+                    'message': str - Descripción del error,
+                    'error': str - Código de error
+                }
+    
+    Códigos de error:
+        - 2FA_DISABLED: El sistema 2FA no está habilitado
+        - NO_EMAIL: El usuario no tiene email registrado
+        - NO_TRANSACTION_DATA: No se encontró transacción en la sesión
+        - TRANSACTION_NOT_FOUND: La transacción no existe en la BD
+        - EMAIL_SEND_FAILED: Error al enviar el email
+        - SERVER_ERROR: Error interno del servidor
+        
+    Example (JavaScript):
+        fetch('/transacciones/2fa/resend/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Nuevo código enviado a tu email');
+                resetCountdown(data.expiry_minutes * 60);
+            }
+        });
+    
+    Note:
+        - Invalida automáticamente el token anterior
+        - El nuevo token tiene la misma duración que el anterior
+        - Requiere que exista transaccion_id en la sesión
+        - Útil para implementar botón "Reenviar código"
     """
     try:
         if not is_2fa_enabled():
