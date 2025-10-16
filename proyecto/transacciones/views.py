@@ -14,7 +14,7 @@ Funcionalidades principales:
     - Generación y gestión de tokens de seguridad
 
 Author: Equipo de desarrollo Global Exchange
-Date: 2024
+Date: 2025
 """
 
 import logging
@@ -26,6 +26,7 @@ from django.conf import settings
 from monedas.models import Moneda, StockGuaranies
 from .forms import SeleccionMonedaMontoForm, VariablesForm
 from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
+from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
 import ast
@@ -470,7 +471,10 @@ def compra_confirmacion(request):
             context = {
                 'transaccion': transaccion,
                 'paso_actual': 4,
-                'titulo_paso': 'Confirmación de Compra'
+                'titulo_paso': 'Confirmación de Compra',
+                'enable_2fa': is_2fa_enabled(),
+                'user_email': request.user.email,
+                'has_email': bool(request.user.email)
             }
             
             return render(request, 'transacciones/confirmacion.html', context)
@@ -553,7 +557,10 @@ def compra_confirmacion(request):
                 'cambios': cambios,
                 'transaccion': transaccion,
                 'paso_actual': 4,
-                'titulo_paso': 'Confirmación de Compra'
+                'titulo_paso': 'Confirmación de Compra',
+                'enable_2fa': is_2fa_enabled(),
+                'user_email': request.user.email,
+                'has_email': bool(request.user.email)
             }
             
             return render(request, 'transacciones/confirmacion.html', context)
@@ -561,7 +568,10 @@ def compra_confirmacion(request):
         context = {
             'transaccion': transaccion,
             'paso_actual': 4,
-            'titulo_paso': 'Confirmación de Compra'
+            'titulo_paso': 'Confirmación de Compra',
+            'enable_2fa': is_2fa_enabled(),
+            'user_email': request.user.email,
+            'has_email': bool(request.user.email)
         }
         
         return render(request, 'transacciones/confirmacion.html', context)
@@ -1045,7 +1055,10 @@ def venta_confirmacion(request):
                     'cambios': cambios,
                     'transaccion': Transaccion.objects.get(id=request.session.get('transaccion_id')),
                     'paso_actual': 4,
-                    'titulo_paso': 'Confirmación de Venta'
+                    'titulo_paso': 'Confirmación de Venta',
+                    'enable_2fa': is_2fa_enabled(),
+                    'user_email': request.user.email,
+                    'has_email': bool(request.user.email)
                 }
                 
                 return render(request, 'transacciones/confirmacion.html', context)
@@ -1073,7 +1086,10 @@ def venta_confirmacion(request):
             context = {
                 'transaccion': transaccion,
                 'paso_actual': 4,
-                'titulo_paso': 'Confirmación de Venta'
+                'titulo_paso': 'Confirmación de Venta',
+                'enable_2fa': is_2fa_enabled(),
+                'user_email': request.user.email,
+                'has_email': bool(request.user.email)
             }
             
             return render(request, 'transacciones/confirmacion.html', context)
@@ -1107,7 +1123,10 @@ def venta_confirmacion(request):
             context = {
             'transaccion': transaccion,
             'paso_actual': 4,
-            'titulo_paso': 'Confirmación de Venta'
+            'titulo_paso': 'Confirmación de Venta',
+            'enable_2fa': is_2fa_enabled(),
+            'user_email': request.user.email,
+            'has_email': bool(request.user.email)
             }
             return render(request, 'transacciones/confirmacion.html', context)
     
@@ -1166,7 +1185,10 @@ def venta_confirmacion(request):
                 'cambios': cambios,
                 'transaccion': transaccion,
                 'paso_actual': 4,
-                'titulo_paso': 'Confirmación de Venta'
+                'titulo_paso': 'Confirmación de Venta',
+                'enable_2fa': is_2fa_enabled(),
+                'user_email': request.user.email,
+                'has_email': bool(request.user.email)
             }
             
             return render(request, 'transacciones/confirmacion.html', context)
@@ -1174,7 +1196,10 @@ def venta_confirmacion(request):
         context = {
             'transaccion': transaccion,
             'paso_actual': 4,
-            'titulo_paso': 'Confirmación de Venta'
+            'titulo_paso': 'Confirmación de Venta',
+            'enable_2fa': is_2fa_enabled(),
+            'user_email': request.user.email,
+            'has_email': bool(request.user.email)
         }
         
         return render(request, 'transacciones/confirmacion.html', context)

@@ -18,6 +18,7 @@ Date: 2024
 
 from django.urls import path
 from . import views
+from . import views_2fa
 
 app_name = 'transacciones'
 
@@ -47,4 +48,10 @@ urlpatterns = [
     path('tausers/', views.revisar_tausers, name='revisar_tausers'),
     path('tausers/<int:pk>/', views.tauser_detalle, name='tauser_detalle'),
     path('tausers/<int:tauser_id>/verificar-estado/', views.verificar_estado_tauser, name='verificar_estado_tauser'),
+    
+    # URLs para autenticación de dos factores (2FA)
+    path('2fa/send-token/', views_2fa.send_2fa_token, name='send_2fa_token'),
+    path('2fa/verify-token/', views_2fa.verify_2fa_token, name='verify_2fa_token'),
+    path('2fa/token-status/', views_2fa.get_token_status_view, name='token_status'),
+    path('2fa/resend-token/', views_2fa.resend_2fa_token, name='resend_2fa_token'),
 ]

@@ -177,3 +177,14 @@ MONEDA_BASE_GUARANIES = {
     'decimales': 0,  # El guaraní no utiliza decimales
     'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
 }
+
+# Configuración de 2FA para transacciones
+ENABLE_2FA_TRANSACTIONS = True # Cambiar a False para deshabilitar completamente el 2FA
+
+# Configuración específica del 2FA
+TWO_FACTOR_AUTH = {
+    'TOKEN_LENGTH': 6,  # Longitud del token
+    'TOKEN_EXPIRY_MINUTES': 1,  # Tiempo de expiración en minutos
+    'EMAIL_SUBJECT': 'Código de verificación - Global Exchange',
+    'EMAIL_FROM': os.environ.get('EMAIL_HOST_USER'),
+}
