@@ -659,12 +659,13 @@ def compra_exito(request, token=None):
                         guaranies.cantidad += transaccion.precio_final - transaccion.recargo_pago
                         guaranies.save()
                         messages.success(request, 'Pago confirmado exitosamente')
+                        request.session.pop('transaccion_id', None)
                         context = {
                             'transaccion': transaccion
                         }
                         return render(request, 'transacciones/exito.html', context)
                     else:
-                        messages.error(request, 'Error en la validación del pago. Por favor, verifique los datos e intente nuevamente.')
+                        messages.error(request, 'Error en la validación del pago, se revierte el pago. Por favor, verifique los datos y el monto, e intente nuevamente.')
                         context = {
                             'transaccion': transaccion
                         }

@@ -221,19 +221,34 @@ from django.db.models.signals import post_save
 @receiver(post_save, sender=Moneda)
 def crear_historial_cotizacion(sender, instance, created, **kwargs):
     """
-    Crea un registro en el historial cuando se actualiza una cotización
+    Crea un registro en el historial cuando se crea una moneda o se actualizan
+    sus campos de cotización (tasa_base, comision_compra, comision_venta)
     """
+    # Si es una moneda nueva, crear historial
     if created:
         fecha_hoy = instance.fecha_cotizacion.date()
+        HistorialCotizacion.objects.create(
+            moneda=instance,
+            nombre_moneda=instance.nombre,
+            fecha=fecha_hoy,
+            tasa_base=instance.tasa_base,
+            comision_compra=instance.comision_compra,
+            comision_venta=instance.comision_venta
+        )
     else:
-        fecha_hoy = timezone.now().date()
-    
-    # Guardar TODAS las ediciones (eliminar la verificación de duplicados para el mismo día)
-    HistorialCotizacion.objects.create(
-        moneda=instance,
-        nombre_moneda=instance.nombre,
-        fecha=fecha_hoy,
-        tasa_base=instance.tasa_base,
-        comision_compra=instance.comision_compra,
-        comision_venta=instance.comision_venta
-    )
+        # Si es una edición, verificar si cambió algún campo de cotización
+        old_instance = Moneda.objects.get(pk=instance.pk)
+        if (
+            instance.tasa_base != old_instance.tasa_base or
+            instance.comision_compra != old_instance.comision_compra or
+            instance.comision_venta != old_instance.comision_venta
+        ):
+            fecha_hoy = timezone.now().date()
+            HistorialCotizacion.objects.create(
+                moneda=instance,
+                nombre_moneda=instance.nombre,
+                fecha=fecha_hoy,
+                tasa_base=instance.tasa_base,
+                comision_compra=instance.comision_compra,
+                comision_venta=instance.comision_venta
+            )

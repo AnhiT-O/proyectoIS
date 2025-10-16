@@ -4,200 +4,112 @@
 {% block title %}Agregar Tarjeta Local - Global Exchange{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
-<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
-<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
-<style>
-    .form-campo {
-        margin-bottom: 20px;
-    }
-    
-    .form-campo label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: var(--texto-principal, #333);
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 1rem;
-        background: var(--fondo-input, #fff);
-        color: var(--texto-input, #000);
-    }
-    
-    .form-control:focus {
-        outline: none;
-        border-color: #FFC600;
-        box-shadow: 0 0 0 3px rgba(255, 198, 0, 0.1);
-    }
-    
-    .form-errores {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 5px;
-    }
-    
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-    
-    .info-usuario {
-        background: var(--fondo-info, #f8f9fa);
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-    }
-    
-    .info-titulo {
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: var(--texto-principal, #333);
-    }
-    
-    .info-valor {
-        color: var(--texto-secundario, #666);
-    }
-    
-    @media (prefers-color-scheme: dark) {
-        .form-control {
-            --fondo-input: #2d2d2d;
-            --texto-input: #f3f4f6;
-            border-color: #444;
-        }
-        
-        .info-usuario {
-            --fondo-info: #2d2d2d;
-            --texto-principal: #f3f4f6;
-            --texto-secundario: #adb5bd;
-        }
-        
-        .form-campo label {
-            --texto-principal: #f3f4f6;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
-<div class="contenido">
-    <div class="cabecera-perfil">
-        <div class="logo">💳</div>
-        <h1 class="titulo">Agregar Tarjeta Local</h1>
-        <p class="subtitulo">Ingrese los datos de la tarjeta para {{ cliente.nombre }}</p>
-    </div>
-
-    <div class="zona-perfil">
-        <div class="perfil-info">
-            <div class="info-usuario">
-                <div class="info-titulo">Información de seguridad:</div>
-                <div class="info-valor">
-                    Los datos de su tarjeta son almacenados de forma segura y encriptada.
-                    Utilizamos los más altos estándares de seguridad para proteger su información.
-                </div>
-            </div>
-
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="form-campo">
-                    <label for="{{ form.brand.id_for_label }}">Tipo de Tarjeta *</label>
-                    {{ form.brand }}
-                    {% if form.brand.errors %}
-                        <div class="form-errores">{{ form.brand.errors }}</div>
-                    {% endif %}
-                    <small style="color: #6c757d;">{{ form.brand.help_text }}</small>
-                </div>
-
-                <div class="form-campo">
-                    <label for="{{ form.numero_tarjeta.id_for_label }}">Número de Tarjeta *</label>
-                    {{ form.numero_tarjeta }}
-                    {% if form.numero_tarjeta.errors %}
-                        <div class="form-errores">{{ form.numero_tarjeta.errors }}</div>
-                    {% endif %}
-                    <small style="color: #6c757d;">{{ form.numero_tarjeta.help_text }}</small>
-                </div>
-
-                <div class="form-campo">
-                    <label for="{{ form.nombre_titular.id_for_label }}">Nombre del Titular *</label>
-                    {{ form.nombre_titular }}
-                    {% if form.nombre_titular.errors %}
-                        <div class="form-errores">{{ form.nombre_titular.errors }}</div>
-                    {% endif %}
-                    <small style="color: #6c757d;">{{ form.nombre_titular.help_text }}</small>
-                </div>
-
-                <div class="form-campo">
-                    <label for="{{ form.nro_documento.id_for_label }}">Número de Documento *</label>
-                    {{ form.nro_documento }}
-                    {% if form.nro_documento.errors %}
-                        <div class="form-errores">{{ form.nro_documento.errors }}</div>
-                    {% endif %}
-                    <small style="color: #6c757d;">{{ form.nro_documento.help_text }}</small>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-campo">
-                        <label for="{{ form.mes_expiracion.id_for_label }}">Mes de Expiración *</label>
-                        {{ form.mes_expiracion }}
-                        {% if form.mes_expiracion.errors %}
-                            <div class="form-errores">{{ form.mes_expiracion.errors }}</div>
-                        {% endif %}
-                        <small style="color: #6c757d;">{{ form.mes_expiracion.help_text }}</small>
-                    </div>
-
-                    <div class="form-campo">
-                        <label for="{{ form.anio_expiracion.id_for_label }}">Año de Expiración *</label>
-                        {{ form.anio_expiracion }}
-                        {% if form.anio_expiracion.errors %}
-                            <div class="form-errores">{{ form.anio_expiracion.errors }}</div>
-                        {% endif %}
-                        <small style="color: #6c757d;">{{ form.anio_expiracion.help_text }}</small>
-                    </div>
-                </div>
-
-                <div class="form-campo">
-                    <label for="{{ form.cvv.id_for_label }}">CVV *</label>
-                    {{ form.cvv }}
-                    {% if form.cvv.errors %}
-                        <div class="form-errores">{{ form.cvv.errors }}</div>
-                    {% endif %}
-                    <small style="color: #6c757d;">{{ form.cvv.help_text }}</small>
-                </div>
-
-                <!-- Mostrar errores generales del formulario -->
-                {% if form.non_field_errors %}
-                    <div class="form-errores" style="margin-bottom: 20px;">
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %}
-
-                <div class="zona-acciones">
-                    <div class="acciones-contenido">
-                        <button type="submit" class="btn-primario">
-                            Agregar Tarjeta
-                        </button>
-                        <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-secundario">
-                            Cancelar
-                        </a>
-                    </div>
-                </div>
-            </form>
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <h2>Agregar Tarjeta de Crédito</h2>
+        <p class="subtitulo">
+            Ingrese los datos de la tarjeta para {{ cliente.nombre }}
+        </p>
+        <div style="margin-top: 2rem;"></div>
+        <div class="info-usuario" style="width: auto; text-align: left;">
+            <div class="info-titulo">Información de seguridad:</div>
+            <div class="info-valor">Los datos de su tarjeta son almacenados de forma segura y encriptada.
+                    Utilizamos los más altos estándares de seguridad para proteger su información.</div>
         </div>
     </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.brand.id_for_label }}">Tipo de Tarjeta *</label>
+                {{ form.brand }}
+                {% if form.brand.errors %}
+                    <div class="form-errores">{{ form.brand.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.brand.help_text }}</small>
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.numero_tarjeta.id_for_label }}">Número de Tarjeta *</label>
+                {{ form.numero_tarjeta }}
+                {% if form.numero_tarjeta.errors %}
+                    <div class="form-errores">{{ form.numero_tarjeta.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.numero_tarjeta.help_text }}</small>
+            </div>
+        </div>
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.nombre_titular.id_for_label }}">Nombre del Titular *</label>
+                {{ form.nombre_titular }}
+                {% if form.nombre_titular.errors %}
+                    <div class="form-errores">{{ form.nombre_titular.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.nombre_titular.help_text }}</small>
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.nro_documento.id_for_label }}">Número de Documento *</label>
+                {{ form.nro_documento }}
+                {% if form.nro_documento.errors %}
+                    <div class="form-errores">{{ form.nro_documento.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.nro_documento.help_text }}</small>
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.mes_expiracion.id_for_label }}">Mes de Expiración *</label>
+                {{ form.mes_expiracion }}
+                {% if form.mes_expiracion.errors %}
+                    <div class="form-errores">{{ form.mes_expiracion.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.mes_expiracion.help_text }}</small>
+            </div>
+
+            <div class="form-campo">
+                <label for="{{ form.anio_expiracion.id_for_label }}">Año de Expiración *</label>
+                {{ form.anio_expiracion }}
+                {% if form.anio_expiracion.errors %}
+                    <div class="form-errores">{{ form.anio_expiracion.errors }}</div>
+                {% endif %}
+                <small style="color: #6c757d;">{{ form.anio_expiracion.help_text }}</small>
+            </div>
+        </div>
+
+        <div class="form-campo">
+            <label for="{{ form.cvv.id_for_label }}">CVV *</label>
+            {{ form.cvv }}
+            {% if form.cvv.errors %}
+                <div class="form-errores">{{ form.cvv.errors }}</div>
+            {% endif %}
+            <small style="color: #6c757d;">{{ form.cvv.help_text }}</small>
+        </div>
+
+        <!-- Mostrar errores generales del formulario -->
+        {% if form.non_field_errors %}
+            <div class="form-errores" style="margin-bottom: 20px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Agregar Tarjeta
+            </button>
+            <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-atras">
+                Cancelar
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 

@@ -177,19 +177,11 @@
         <div class="modal-body">
             <p class="modal-subtitle">Seleccione el tipo de tarjeta para {{ cliente.nombre }}:</p>
             
-            <!-- Tarjeta Panal -->
-            <a href="{% url 'usuarios:agregar_tarjeta_local_cliente' cliente.pk %}?tipo=PANAL" class="tarjeta-opcion">
+            <!-- Tarjeta Nacional -->
+            <a href="{% url 'usuarios:agregar_tarjeta_local_cliente' cliente.pk %}" class="tarjeta-opcion">
                 <div class="tarjeta-info">
-                    <div class="tarjeta-titulo">Panal</div>
-                    <div class="tarjeta-descripcion">Tarjeta de crédito local</div>
-                </div>
-            </a>
-
-            <!-- Tarjeta Cabal -->
-            <a href="{% url 'usuarios:agregar_tarjeta_local_cliente' cliente.pk %}?tipo=CABAL" class="tarjeta-opcion">
-                <div class="tarjeta-info">
-                    <div class="tarjeta-titulo">Cabal</div>
-                    <div class="tarjeta-descripcion">Tarjeta de crédito local</div>
+                    <div class="tarjeta-titulo">Tarjeta Local</div>
+                    <div class="tarjeta-descripcion">Panal - Cabal</div>
                 </div>
             </a>
 
@@ -197,7 +189,7 @@
             <a href="{% url 'usuarios:agregar_tarjeta_stripe_cliente' cliente.pk %}" class="tarjeta-opcion">
                 <div class="tarjeta-info">
                     <div class="tarjeta-titulo">Tarjeta Internacional</div>
-                    <div class="tarjeta-descripcion">Visa, Mastercard y otras tarjetas</div>
+                    <div class="tarjeta-descripcion">Visa - Mastercard</div>
                 </div>
             </a>
         </div>
