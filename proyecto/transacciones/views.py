@@ -1770,37 +1770,45 @@ def descargar_historial_pdf(request):
         # Agregar títulos y filtros en cada página
         # Título de la empresa
         company_title = "Global Exchange"
-        story.append(Paragraph(company_title, styles['Title']))
-        story.append(Spacer(1, 6))
+        title_style = styles['Title'].clone('CompactTitle')
+        title_style.fontSize = 20  # Ligeramente aumentado
+        title_style.leading = 24
+        story.append(Paragraph(company_title, title_style))
+        story.append(Spacer(1, 8))  # Ligeramente aumentado
         
         # Título del historial centrado
         historial_title = f"Historial de Transacciones - {cliente.nombre}"
         # Crear estilo centrado para el título
         centered_style = styles['Heading1'].clone('CenteredHeading1')
+        centered_style.fontSize = 15  # Ligeramente aumentado
+        centered_style.leading = 18
         centered_style.alignment = 1  # 1 = CENTER
         story.append(Paragraph(historial_title, centered_style))
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 12))  # Ligeramente aumentado
         
         # Información de filtros aplicados
         if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
-            story.append(Paragraph("Filtros aplicados:", styles['Normal']))
-            story.append(Spacer(1, 6))
+            filtro_style = styles['Normal'].clone('CompactNormal')
+            filtro_style.fontSize = 11  # Ligeramente aumentado
+            filtro_style.leading = 13
+            story.append(Paragraph("Filtros aplicados:", filtro_style))
+            story.append(Spacer(1, 5))  # Ligeramente aumentado
             
             if busqueda:
-                story.append(Paragraph(f"• Búsqueda: '{busqueda}'", styles['Normal']))
+                story.append(Paragraph(f"• Búsqueda: '{busqueda}'", filtro_style))
             if tipo_operacion:
-                story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", styles['Normal']))
+                story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", filtro_style))
             if estado_filtro:
-                story.append(Paragraph(f"• Estado: {estado_filtro.title()}", styles['Normal']))
+                story.append(Paragraph(f"• Estado: {estado_filtro.title()}", filtro_style))
             if usuario_filtro:
                 try:
                     from usuarios.models import Usuario
                     usuario = Usuario.objects.get(id=usuario_filtro)
-                    story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", styles['Normal']))
+                    story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", filtro_style))
                 except:
                     pass
             
-            story.append(Spacer(1, 12))
+            story.append(Spacer(1, 10))  # Ligeramente aumentado
         
         # Crear tabla principal para cada transacción
         # Usar timezone local como en el template HTML
@@ -1822,19 +1830,22 @@ def descargar_historial_pdf(request):
         
         
         # Distribuir proporcionalmente: Fecha/Hora más ancha, otras iguales
-        main_colWidths = [2.0*inch, 1.0*inch, 1.0*inch, 1.0*inch]  # Total: 5 inches
+        main_colWidths = [2.4*inch, 1.15*inch, 1.15*inch, 1.15*inch]  # Total: 5.85 inches (ligeramente aumentado)
         main_table = Table(main_data, colWidths=main_colWidths)
         main_table.setStyle(TableStyle([
             # Estilo del encabezado
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
             # Estilo de la fila de datos
             ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 11),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 10),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 1), (-1, -1), 7),
             # Alineación y bordes
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 1, colors.black)
@@ -1922,26 +1933,30 @@ def descargar_historial_pdf(request):
         if transaccion.token and transaccion.estado in ['Pendiente', 'Confirmada']:
             details_data.append(['Código de transacción', transaccion.token])
         
-        details_table = Table(details_data, colWidths=[2*inch, 3*inch])
+        details_table = Table(details_data, colWidths=[2.4*inch, 3.45*inch])  # Ligeramente aumentado
         details_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.darkgrey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 0), (-1, 0), 7),
             ('SPAN', (0, 0), (-1, 0)),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
             ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 7),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
             ('ALIGN', (0, 1), (0, -1), 'LEFT'),
             ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('LEFTPADDING', (0, 1), (-1, -1), 6),
-            ('RIGHTPADDING', (0, 1), (-1, -1), 6)
+            ('LEFTPADDING', (0, 1), (-1, -1), 7),  # Ligeramente aumentado
+            ('RIGHTPADDING', (0, 1), (-1, -1), 7)  # Ligeramente aumentado
         ]))
         
         story.append(details_table)
-        story.append(Spacer(1, 12))  # Espacio entre transacciones
+        story.append(Spacer(1, 15))  # Espacio ligeramente mayor al final
     
     # Construir el PDF
     doc.build(story)
