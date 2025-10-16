@@ -33,15 +33,6 @@
                 {% elif transaccion.medio_pago in 'Tigo Money,Billetera Personal,Zimple,Transferencia Bancaria' %}
                 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                 <script>
-                    Swal.fire({
-                        title: 'Redirigiendo a plataforma de pago',
-                        text: 'Serás redirigido automáticamente a la plataforma de pago en línea para completar la transacción.',
-                        icon: 'info',
-                        timer: 3000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                    });
-
                     const datosTransaccion = {
                         monto: '{{ transaccion.monto }}',
                         moneda: '{{ transaccion.moneda.simbolo }}',
@@ -52,17 +43,60 @@
                         monto_minimo: '{{ transaccion.precio_final }}'
                     };
 
-                    // Ejecutar redirección cuando se cargue la página
+                    const mostrarDatosPago = async () => {
+                        let contenidoHTML = '';
+                        {% if transaccion.medio_pago == 'Transferencia Bancaria' %}
+                            contenidoHTML = `
+                                <div style="text-align:left">
+                                    <h3>Datos de la cuenta para transferencia:</h3>
+                                    <p><strong>Banco:</strong> SUDAMERIS</p>
+                                    <p><strong>Tipo de cuenta:</strong> Cuenta Corriente</p>
+                                    <p><strong>Número de cuenta:</strong> 123456</p>
+                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE</p>
+                                    <p><strong>RUC:</strong> 1234567</p>
+                                </div>`;
+                        {% else %}
+                            contenidoHTML = `
+                                <div style="text-align:left">
+                                    <h3>Datos de la billetera:</h3>
+                                    <p><strong>Tipo:</strong> {{ transaccion.medio_pago }}</p>
+                                    <p><strong>Número:</strong> {% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</p>
+                                    <p><strong>Titular:</strong> GLOBAL EXCHANGE S.A.</p>
+                                    <p><strong>RUC:</strong> 80012345-6</p>
+                                </div>`;
+                        {% endif %}
+
+                        const result = await Swal.fire({
+                            title: 'Información de Pago',
+                            html: contenidoHTML,
+                            icon: 'info',
+                            confirmButtonText: 'Continuar con el pago'
+                        });
+
+                        if (result.isConfirmed) {
+                            await Swal.fire({
+                                title: 'Redirigiendo a plataforma de pago',
+                                text: 'Serás redirigido automáticamente a la plataforma de pago en línea para completar la transacción.',
+                                icon: 'info',
+                                timer: 3000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                            
+                            setTimeout(() => {
+                                procesarPago(datosTransaccion);
+                            }, 1000);
+                        }
+                    };
+
+                    // Ejecutar cuando se cargue la página
                     document.addEventListener('DOMContentLoaded', function() {
-                        // Verificar si ya viene de la pasarela
                         const urlParams = new URLSearchParams(window.location.search);
                         if (!urlParams.has('estado')) {
-                            console.log('Iniciando redirección a pasarela...', datosTransaccion);
+                            console.log('Iniciando proceso de pago...', datosTransaccion);
                             sessionStorage.setItem('returnUrl', window.location.href);
                             sessionStorage.setItem('datosTransaccion', JSON.stringify(datosTransaccion));
-                            
-                            // Llamar directamente a procesarPago
-                            procesarPago(datosTransaccion);
+                            mostrarDatosPago();
                         } else {
                             console.log('Retorno de pasarela detectado:', Object.fromEntries(urlParams));
                         }
