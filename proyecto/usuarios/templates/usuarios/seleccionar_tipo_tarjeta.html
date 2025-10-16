@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Seleccionar Tipo de Tarjeta - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/perfil.css' %}" media="(prefers-color-scheme: dark)">
+<style>
+    .tarjeta-opcion {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 20px 0;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: var(--fondo-tarjeta, #fff);
+    }
+    
+    .tarjeta-opcion:hover {
+        border-color: #FFC600;
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .tarjeta-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+    
+    .tarjeta-titulo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--texto-principal, #000);
+    }
+    
+    .tarjeta-descripcion {
+        color: var(--texto-secundario, #666);
+        margin-bottom: 20px;
+    }
+    
+    .tarjeta-recargo {
+        font-size: 0.9rem;
+        color: var(--texto-terciario, #999);
+        margin-top: 10px;
+    }
+    
+    .tarjetas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        .tarjeta-opcion {
+            --fondo-tarjeta: #2d2d2d;
+            --texto-principal: #f3f4f6;
+            --texto-secundario: #adb5bd;
+            --texto-terciario: #6c757d;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="cabecera-perfil">
+        <div class="logo">💳</div>
+        <h1 class="titulo">Agregar Tarjeta de Crédito</h1>
+        <p class="subtitulo">Seleccione el tipo de tarjeta que desea agregar para {{ cliente.nombre }}</p>
+    </div>
+
+    <div class="zona-perfil">
+        <div class="tarjetas-grid">
+            <!-- Tarjeta Panal -->
+            <a href="{% url 'usuarios:agregar_tarjeta_local_cliente' cliente.pk %}?tipo=PANAL" style="text-decoration: none;">
+                <div class="tarjeta-opcion">
+                    <div class="tarjeta-icon">🏦</div>
+                    <div class="tarjeta-titulo">Panal</div>
+                    <div class="tarjeta-descripcion">
+                        Tarjeta de crédito local Panal
+                    </div>
+                    <div class="tarjeta-recargo">
+                        Recargo: 2%
+                    </div>
+                </div>
+            </a>
+
+            <!-- Tarjeta Cabal -->
+            <a href="{% url 'usuarios:agregar_tarjeta_local_cliente' cliente.pk %}?tipo=CABAL" style="text-decoration: none;">
+                <div class="tarjeta-opcion">
+                    <div class="tarjeta-icon">💳</div>
+                    <div class="tarjeta-titulo">Cabal</div>
+                    <div class="tarjeta-descripcion">
+                        Tarjeta de crédito local Cabal
+                    </div>
+                    <div class="tarjeta-recargo">
+                        Recargo: 1%
+                    </div>
+                </div>
+            </a>
+
+            <!-- Tarjeta Internacional (Stripe) -->
+            <a href="{% url 'usuarios:agregar_tarjeta_stripe_cliente' cliente.pk %}" style="text-decoration: none;">
+                <div class="tarjeta-opcion">
+                    <div class="tarjeta-icon">🌍</div>
+                    <div class="tarjeta-titulo">Tarjeta Internacional</div>
+                    <div class="tarjeta-descripcion">
+                        Visa, Mastercard y otras tarjetas internacionales
+                    </div>
+                    <div class="tarjeta-recargo">
+                        Recargo variable según la marca
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            <a href="{% url 'usuarios:detalle_cliente' cliente.pk %}" class="btn-secundario">
+                Cancelar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

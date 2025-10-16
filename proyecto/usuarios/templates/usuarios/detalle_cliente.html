@@ -71,17 +71,52 @@
         </div>
         <div class="perfil-info">
             <div class="info-cabecera">
-                <h2 class="perfil-titulo">Tarjetas de Crédito</h2>
+                <h2 class="perfil-titulo">Tarjetas de Crédito ({{ total_tarjetas }})</h2>
                 <a href="{% url 'usuarios:agregar_tarjeta_cliente' cliente.pk %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                     Agregar Tarjeta
                 </a>
             </div>
-            {% if tarjetas_stripe %}
+            
+            {% if tarjetas_stripe or tarjetas_locales %}
             <div class="lista-clientes">
-                {% for tarjeta in tarjetas_stripe %}
-                    <div class="cliente">
+                <!-- Tarjetas Locales (Panal y Cabal) -->
+                {% for tarjeta in tarjetas_locales %}
+                    <div class="cliente" style="border-left: 4px solid #28a745;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div style="flex: 1;">
+                                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; margin-right: 8px;">
+                                    LOCAL
+                                </span>
+                                <strong>{{ tarjeta.get_numero_enmascarado }}</strong>
+                                <br>
+                                <small style="color: #6c757d;">
+                                    Marca: {{ tarjeta.get_tipo_tarjeta_display }} 
+                                    | Expira: {{ tarjeta.mes_expiracion }}/{{ tarjeta.anio_expiracion }}
+                                    | Titular: {{ tarjeta.nombre_titular }}
+                                </small>
+                            </div>
+                            <div class="acciones-tarjeta" style="margin-left: 10px;">
+                                <form method="post" action="{% url 'usuarios:eliminar_tarjeta_local_cliente' cliente.pk tarjeta.id %}" 
+                                      style="display: inline;" 
+                                      onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta tarjeta?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-desactivar" title="Eliminar tarjeta">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- Tarjetas Internacionales (Stripe) -->
+                {% for tarjeta in tarjetas_stripe %}
+                    <div class="cliente" style="border-left: 4px solid #007bff;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; margin-right: 8px;">
+                                    INTERNACIONAL
+                                </span>
                                 <strong>**** **** **** {{ tarjeta.last4 }}</strong>
                                 <br>
                                 <small style="color: #6c757d;">

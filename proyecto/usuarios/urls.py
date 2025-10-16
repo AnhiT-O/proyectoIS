@@ -24,5 +24,8 @@ urlpatterns = [
     path('cliente/<int:cliente_id>/', views.detalle_cliente, name='detalle_cliente'),
     # Rutas para gestión de tarjetas por operadores
     path('cliente/<int:pk>/agregar-tarjeta/', views.agregar_tarjeta_cliente, name='agregar_tarjeta_cliente'),
+    path('cliente/<int:pk>/agregar-tarjeta-stripe/', views.agregar_tarjeta_stripe_cliente, name='agregar_tarjeta_stripe_cliente'),
+    path('cliente/<int:pk>/agregar-tarjeta-local/', views.agregar_tarjeta_local_cliente, name='agregar_tarjeta_local_cliente'),
     path('cliente/<int:pk>/eliminar-tarjeta/<str:payment_method_id>/', views.eliminar_tarjeta_cliente, name='eliminar_tarjeta_cliente'),
+    path('cliente/<int:pk>/eliminar-tarjeta-local/<int:tarjeta_id>/', views.eliminar_tarjeta_local_cliente, name='eliminar_tarjeta_local_cliente'),
 ]

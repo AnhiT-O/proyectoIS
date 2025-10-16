@@ -172,3 +172,78 @@ class Billetera(MedioAcreditacion):
         verbose_name = 'Billetera'
         verbose_name_plural = 'Billeteras'
         default_permissions = []  # Deshabilitar permisos por defecto
+
+
+class TarjetaLocal(MedioAcreditacion):
+    """
+    Modelo que representa una tarjeta de crédito local (Panal o Cabal) asociada a un cliente.
+    
+    Hereda de MedioAcreditacion los campos comunes: nombre_titular, 
+    nro_documento, cliente.
+    """
+    
+    TIPO_TARJETA_CHOICES = [
+        ('PANAL', 'Panal'),
+        ('CABAL', 'Cabal'),
+    ]
+    
+    tipo_tarjeta = models.CharField(
+        max_length=10,
+        choices=TIPO_TARJETA_CHOICES,
+        help_text="Tipo de tarjeta local"
+    )
+    
+    numero_tarjeta = models.CharField(
+        max_length=19,  # Formato: XXXX XXXX XXXX XXXX
+        help_text="Número completo de la tarjeta"
+    )
+    
+    mes_expiracion = models.IntegerField(
+        help_text="Mes de expiración (1-12)"
+    )
+    
+    anio_expiracion = models.IntegerField(
+        help_text="Año de expiración (YYYY)"
+    )
+    
+    cvv = models.CharField(
+        max_length=4,
+        help_text="Código de seguridad CVV"
+    )
+    
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Fecha de creación del registro"
+    )
+    
+    activo = models.BooleanField(
+        default=True,
+        help_text="Indica si la tarjeta está activa"
+    )
+    
+    # Sobreescribimos la relación para tener related_name específico
+    cliente = models.ForeignKey(
+        'clientes.Cliente',
+        on_delete=models.CASCADE,
+        related_name='tarjetas_locales',
+        help_text="Cliente propietario de la tarjeta"
+    )
+    
+    def get_last4(self):
+        """Obtiene los últimos 4 dígitos de la tarjeta."""
+        return self.numero_tarjeta.replace(' ', '')[-4:]
+    
+    def get_numero_enmascarado(self):
+        """Retorna el número de tarjeta enmascarado."""
+        return f"**** **** **** {self.get_last4()}"
+    
+    def __str__(self):
+        """Representación en cadena de la tarjeta local."""
+        return f"{self.get_tipo_tarjeta_display()} - {self.get_numero_enmascarado()} ({self.nombre_titular})"
+    
+    class Meta:
+        """Metadatos del modelo TarjetaLocal."""
+        db_table = 'tarjeta_local'
+        verbose_name = 'Tarjeta Local'
+        verbose_name_plural = 'Tarjetas Locales'
+        default_permissions = []  # Deshabilitar permisos por defecto
