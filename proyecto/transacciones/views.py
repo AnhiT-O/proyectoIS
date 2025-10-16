@@ -1693,15 +1693,57 @@ def descargar_historial_pdf(request):
     """
     Vista para descargar el historial de transacciones en formato PDF.
     
-    Genera un archivo PDF con las transacciones filtradas según los parámetros
-    recibidos en la petición GET. Mantiene la coherencia con los filtros
-    aplicados en la vista de historial.
+    Genera un archivo PDF profesional con las transacciones filtradas, donde cada 
+    transacción se presenta en su propia página individual con títulos, filtros 
+    aplicados y detalles completos de la operación.
+    
+    Características del PDF generado:
+        - Formato A4 con márgenes de 2cm en todos los bordes
+        - Cada página contiene: títulos corporativos, filtros aplicados y una transacción
+        - Tablas optimizadas con fuentes legibles y espaciado profesional
+        - Información completa de cada transacción incluyendo cálculos y estados
+        - Formato de fecha/hora sincronizado con la zona horaria local
+    
+    Filtros soportados:
+        - cliente: ID del cliente específico (requerido)
+        - busqueda: Búsqueda por nombre/documento de cliente o username de usuario
+        - tipo_operacion: Filtro por tipo ('compra' o 'venta')
+        - estado: Filtro por estado de transacción
+        - usuario: ID del usuario que procesó la transacción
+    
+    Seguridad:
+        - Verifica permisos del usuario para acceder al cliente solicitado
+        - Valida existencia del cliente antes de procesar
+        - Aplica los mismos filtros de seguridad que la vista de historial
+    
+    Estructura del PDF:
+        - Página 1: Títulos + Filtros + Primera transacción
+        - Páginas N: Títulos + Filtros + Transacción N
+        - Cada transacción incluye: tabla principal y tabla de detalles expandida
     
     Args:
-        request (HttpRequest): Petición HTTP con parámetros de filtro
+        request (HttpRequest): Petición HTTP con parámetros de filtro en GET
+            - cliente (str): ID del cliente (requerido)
+            - busqueda (str, opcional): Término de búsqueda
+            - tipo_operacion (str, opcional): 'compra' o 'venta'
+            - estado (str, opcional): Estado de la transacción
+            - usuario (str, opcional): ID del usuario
         
     Returns:
-        HttpResponse: Archivo PDF para descarga
+        HttpResponse: Archivo PDF para descarga con content-type 'application/pdf'
+            - Nombre del archivo: 'historial_transacciones_{cliente_nombre}.pdf'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(400): Si no se proporciona ID de cliente
+        HttpResponse(404): Si el cliente no existe
+        redirect('inicio'): Si el usuario no tiene permisos para el cliente
+    
+    Dependencias:
+        - ReportLab: Para generación de PDF (SimpleDocTemplate, Table, etc.)
+        - Django timezone: Para formateo de fechas consistente
+        - Modelos: Cliente, Transaccion, Usuario
+    
     """
     from django.http import HttpResponse
     from reportlab.pdfgen import canvas
@@ -1975,15 +2017,70 @@ def descargar_historial_excel(request):
     """
     Vista para descargar el historial de transacciones en formato Excel.
     
-    Genera un archivo Excel con las transacciones filtradas según los parámetros
-    recibidos en la petición GET. Incluye formateo profesional y múltiples hojas
-    si es necesario.
+    Genera un archivo Excel (.xlsx) con formato profesional que incluye títulos 
+    corporativos, filtros aplicados y detalles expandidos de cada transacción 
+    con encabezados individuales para mejor organización.
+    
+    Características del Excel generado:
+        - Hoja única con todas las transacciones organizadas secuencialmente
+        - Títulos corporativos y filtros aplicados al inicio
+        - Cada transacción tiene su propio encabezado con información principal
+        - Detalles expandidos con todos los cálculos y montos de cada operación
+        - Formato profesional con colores, fuentes en negrita y alineación
+        - Anchos de columna optimizados para legibilidad
+        - Bordes y estilos aplicados consistentemente
+    
+    Filtros soportados:
+        - cliente: ID del cliente específico (requerido)
+        - busqueda: Búsqueda por nombre/documento de cliente o username de usuario
+        - tipo_operacion: Filtro por tipo ('compra' o 'venta')
+        - estado: Filtro por estado de transacción
+        - usuario: ID del usuario que procesó la transacción
+    
+    Seguridad:
+        - Verifica permisos del usuario para acceder al cliente solicitado
+        - Valida existencia del cliente antes de procesar
+        - Aplica los mismos filtros de seguridad que la vista de historial
+    
+    Estructura del Excel:
+        - Fila 1-3: Título "Global Exchange" y "Historial de Transacciones"
+        - Fila 4+: Filtros aplicados (si existen)
+        - Por cada transacción:
+            * Encabezado con datos principales (fecha, operación, moneda, estado)
+            * Detalle expandido con todos los cálculos, medios de pago/cobro
+            * Montos finales y información de pagos parciales
+            * Código de transacción si aplica
+    
+    Formato y Estilos:
+        - Encabezados en negrita con fondo gris
+        - Datos alineados apropiadamente (centro, izquierda, derecha)
+        - Bordes en todas las celdas para mejor visualización
+        - Anchos de columna: [25, 18, 20, 15, 15] para óptima legibilidad
+        - Formato de números con separadores de miles
     
     Args:
-        request (HttpRequest): Petición HTTP con parámetros de filtro
+        request (HttpRequest): Petición HTTP con parámetros de filtro en GET
+            - cliente (str): ID del cliente (requerido)
+            - busqueda (str, opcional): Término de búsqueda
+            - tipo_operacion (str, opcional): 'compra' o 'venta'
+            - estado (str, opcional): Estado de la transacción
+            - usuario (str, opcional): ID del usuario
         
     Returns:
-        HttpResponse: Archivo Excel para descarga
+        HttpResponse: Archivo Excel para descarga con content-type 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            - Nombre del archivo: 'historial_transacciones_{cliente_nombre}.xlsx'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(400): Si no se proporciona ID de cliente
+        HttpResponse(404): Si el cliente no existe
+        redirect('inicio'): Si el usuario no tiene permisos para el cliente
+    
+    Dependencias:
+        - OpenPyXL: Para generación de archivos Excel (Workbook, estilos, etc.)
+        - Django timezone: Para formateo de fechas consistente
+        - Modelos: Cliente, Transaccion, Usuario
+    
     """
     from django.http import HttpResponse
     import openpyxl
