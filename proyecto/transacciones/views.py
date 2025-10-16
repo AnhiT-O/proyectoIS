@@ -625,11 +625,13 @@ def compra_exito(request, token=None):
                     # Verificación del monto
                     monto_valido = monto_pago >= float(transaccion.precio_final)
                     
-                    
-                    
-                    # Verificación de cuenta + banco
-                    cuenta_valida = f"{banco_pago}-{cuenta_pago}" == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago, '')
-                    
+                    if transaccion.medio_pago == "Transferencia Bancaria":
+                        # Para transferencias, el CUENTAS_GLOBAL_EXCHANGE ya tiene banco+cuenta
+                        cuenta_valida = f"{banco_pago}-{cuenta_pago}" == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago)
+                    else:
+                        # Para billeteras, la cuenta completa ya incluye el prefijo del banco
+                        cuenta_valida = cuenta_pago == CUENTAS_GLOBAL_EXCHANGE.get(transaccion.medio_pago)
+
                 
                     if monto_valido and cuenta_valida:
                         transaccion.estado = 'Confirmada'

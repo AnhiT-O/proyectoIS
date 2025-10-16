@@ -239,3 +239,4 @@ window.addEventListener('message', function(event) {
         mostrarError('El pago no fue completado o fue cancelado');
     }
 });
+
