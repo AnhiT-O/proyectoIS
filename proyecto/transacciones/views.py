@@ -1707,7 +1707,7 @@ def descargar_historial_pdf(request):
     from reportlab.pdfgen import canvas
     from reportlab.lib.pagesizes import letter, A4
     from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
     from reportlab.lib import colors
     from reportlab.lib.units import inch
     from io import BytesIO
@@ -1757,47 +1757,51 @@ def descargar_historial_pdf(request):
     
     # Crear el PDF
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
     story = []
     
-    
-    # Título de la empresa
-    company_title = "Global Exchange"
-    story.append(Paragraph(company_title, styles['Title']))
-    story.append(Spacer(1, 6))
-    
-    # Título del historial centrado
-    historial_title = f"Historial de Transacciones - {cliente.nombre}"
-    # Crear estilo centrado para el título
-    centered_style = styles['Heading1'].clone('CenteredHeading1')
-    centered_style.alignment = 1  # 1 = CENTER
-    story.append(Paragraph(historial_title, centered_style))
-    story.append(Spacer(1, 12))
-    
-    # Información de filtros aplicados
-    if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
-        story.append(Paragraph("Filtros aplicados:", styles['Normal']))
-        story.append(Spacer(1, 6))
-        
-        if busqueda:
-            story.append(Paragraph(f"• Búsqueda: '{busqueda}'", styles['Normal']))
-        if tipo_operacion:
-            story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", styles['Normal']))
-        if estado_filtro:
-            story.append(Paragraph(f"• Estado: {estado_filtro.title()}", styles['Normal']))
-        if usuario_filtro:
-            try:
-                from usuarios.models import Usuario
-                usuario = Usuario.objects.get(id=usuario_filtro)
-                story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", styles['Normal']))
-            except:
-                pass
-        
-        story.append(Spacer(1, 12))
-    
     # Crear sección de transacciones con detalles
     for i, transaccion in enumerate(transacciones):
+        # Si no es la primera transacción, agregar salto de página
+        if i > 0:
+            story.append(PageBreak())
+        
+        # Agregar títulos y filtros en cada página
+        # Título de la empresa
+        company_title = "Global Exchange"
+        story.append(Paragraph(company_title, styles['Title']))
+        story.append(Spacer(1, 6))
+        
+        # Título del historial centrado
+        historial_title = f"Historial de Transacciones - {cliente.nombre}"
+        # Crear estilo centrado para el título
+        centered_style = styles['Heading1'].clone('CenteredHeading1')
+        centered_style.alignment = 1  # 1 = CENTER
+        story.append(Paragraph(historial_title, centered_style))
+        story.append(Spacer(1, 12))
+        
+        # Información de filtros aplicados
+        if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
+            story.append(Paragraph("Filtros aplicados:", styles['Normal']))
+            story.append(Spacer(1, 6))
+            
+            if busqueda:
+                story.append(Paragraph(f"• Búsqueda: '{busqueda}'", styles['Normal']))
+            if tipo_operacion:
+                story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", styles['Normal']))
+            if estado_filtro:
+                story.append(Paragraph(f"• Estado: {estado_filtro.title()}", styles['Normal']))
+            if usuario_filtro:
+                try:
+                    from usuarios.models import Usuario
+                    usuario = Usuario.objects.get(id=usuario_filtro)
+                    story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", styles['Normal']))
+                except:
+                    pass
+            
+            story.append(Spacer(1, 12))
+        
         # Crear tabla principal para cada transacción
         # Usar timezone local como en el template HTML
         fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
@@ -2159,7 +2163,7 @@ def descargar_historial_excel(request):
             
             return current_row + 1
         
-        # Información básica - sin Cliente
+        # Información básica
         current_row = add_detail_row("Usuario:", transaccion.usuario.nombre_completo() or transaccion.usuario.username)
         current_row = add_detail_row("Segmento Cliente:", transaccion.cliente.get_segmento_display())
         current_row = add_detail_row("Tipo de Transacción:", f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}")
