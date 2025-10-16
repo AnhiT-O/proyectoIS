@@ -24,9 +24,7 @@
 <div class="contenido extendido">
     <div class="form-cabecera">
         {% if transaccion.tipo == 'compra' %}
-            {% if transaccion.estado == 'Confirmada' %}
-                <div class="logo">¡Pago Exitoso!</div>
-            {% elif transaccion.estado == 'Pendiente' %}
+            {% if transaccion.estado == 'Pendiente' %}
                 <div class="logo">Transacción Iniciada</div>
                 {% if transaccion.medio_pago == 'Efectivo' %}
                 <p class="subtitulo">
@@ -39,7 +37,7 @@
                         title: 'Redirigiendo a plataforma de pago',
                         text: 'Serás redirigido automáticamente a la plataforma de pago en línea para completar la transacción.',
                         icon: 'info',
-                        timer: 7000,
+                        timer: 3000,
                         timerProgressBar: true,
                         showConfirmButton: false
                     });
