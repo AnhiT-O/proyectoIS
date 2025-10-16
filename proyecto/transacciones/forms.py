@@ -102,7 +102,7 @@ class VariablesForm(forms.Form):
     Formulario para editar los recargos por medio de pago y los límites globales de transacciones.
     
     Este formulario permite a los administradores modificar:
-    - Los porcentajes de recargo para cada medio de pago (VISA, MASTERCARD, billeteras electrónicas)
+    - Los porcentajes de recargo para cada medio de pago (VISA, MASTERCARD, PANAL, CABAL, billeteras electrónicas)
     - Los límites diarios y mensuales globales según la ley de casas de cambio
     
     Fields:
@@ -111,6 +111,8 @@ class VariablesForm(forms.Form):
         recargo_tigo_money (DecimalField): Porcentaje de recargo para Tigo Money
         recargo_billetera_personal (DecimalField): Porcentaje de recargo para Billetera Personal
         recargo_zimple (DecimalField): Porcentaje de recargo para Zimple
+        recargo_panal (DecimalField): Porcentaje de recargo para tarjetas PANAL
+        recargo_cabal (DecimalField): Porcentaje de recargo para tarjetas CABAL
         limite_diario (IntegerField): Límite diario global en guaraníes
         limite_mensual (IntegerField): Límite mensual global en guaraníes
     """
@@ -196,6 +198,38 @@ class VariablesForm(forms.Form):
         }
     )
     
+    recargo_panal = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_cabal = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
     # Campos para límites globales
     limite_diario = forms.IntegerField(
         min_value=1,
@@ -258,6 +292,18 @@ class VariablesForm(forms.Form):
             self.fields['recargo_zimple'].initial = zimple_recargo.recargo
         except Recargos.DoesNotExist:
             self.fields['recargo_zimple'].initial = 3.0
+            
+        try:
+            panal_recargo = Recargos.objects.get(marca='PANAL')
+            self.fields['recargo_panal'].initial = panal_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_panal'].initial = 2.0
+            
+        try:
+            cabal_recargo = Recargos.objects.get(marca='CABAL')
+            self.fields['recargo_cabal'].initial = cabal_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_cabal'].initial = 1.0
         
         # Cargar valores actuales de límites globales
         try:
@@ -293,6 +339,8 @@ class VariablesForm(forms.Form):
             ('Tigo Money', self.cleaned_data['recargo_tigo_money']),
             ('Billetera Personal', self.cleaned_data['recargo_billetera_personal']),
             ('Zimple', self.cleaned_data['recargo_zimple']),
+            ('PANAL', self.cleaned_data['recargo_panal']),
+            ('CABAL', self.cleaned_data['recargo_cabal']),
         ]
         
         for marca, nuevo_recargo in recargos_data:
@@ -303,7 +351,7 @@ class VariablesForm(forms.Form):
                 recargo_obj.save()
             except Recargos.DoesNotExist:
                 # Si no existe, crear el recargo
-                medio = 'Tarjeta de Crédito' if marca in ['VISA', 'MASTERCARD'] else 'Billetera Electrónica'
+                medio = 'Tarjeta de Crédito' if marca in ['VISA', 'MASTERCARD', 'PANAL', 'CABAL'] else 'Billetera Electrónica'
                 Recargos.objects.create(
                     marca=marca,
                     medio=medio,
