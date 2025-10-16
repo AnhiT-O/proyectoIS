@@ -1761,8 +1761,8 @@ def descargar_historial_pdf(request):
     styles = getSampleStyleSheet()
     story = []
     
-    # Título del documento
-    title = f"Historial de Transacciones - {cliente.nombre}"
+    # Título del documento con nombre de la empresa
+    title = f"Global Exchange - Historial de Transacciones - {cliente.nombre}"
     story.append(Paragraph(title, styles['Title']))
     story.append(Spacer(1, 12))
     
@@ -1800,49 +1800,38 @@ def descargar_historial_pdf(request):
         moneda_str = f"{monto_formateado} {transaccion.moneda.simbolo}"
         estado_str = transaccion.estado
         
-        # Tabla principal de la transacción
-        if i == 0:  # Solo agregar encabezados en la primera transacción
-            main_data = [
-                ['Fecha/Hora', 'Usuario', 'Operación', 'Moneda', 'Estado'],
-                [fecha_str, usuario_str, operacion_str, moneda_str, estado_str]
-            ]
-        else:
-            main_data = [
-                [fecha_str, usuario_str, operacion_str, moneda_str, estado_str]
-            ]
+        # Cada transacción tiene su propio encabezado
+        moneda_simbolo = transaccion.moneda.simbolo  # Solo el símbolo sin monto
+        main_data = [
+            ['Fecha/Hora', 'Operación', 'Moneda', 'Estado'],
+            [fecha_str, operacion_str, moneda_simbolo, estado_str]
+        ]
         
         main_table = Table(main_data)
-        if i == 0:
-            main_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
-        else:
-            main_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.lightblue),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
+        main_table.setStyle(TableStyle([
+            # Estilo del encabezado
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            # Estilo de la fila de datos
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            # Alineación y bordes
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
         
         story.append(main_table)
         
         # Tabla de detalles completos de la transacción
         details_data = [
             ['Detalles Completos de la Transacción'],
-            ['Cliente', transaccion.cliente.nombre],
+            ['Usuario', usuario_str],
             ['Segmento Cliente', transaccion.cliente.get_segmento_display()],
             ['Tipo de Transacción', f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}"],
-            ['Estado', transaccion.estado],
             ['Medio de Pago', transaccion.medio_pago],
             ['Medio de Cobro', transaccion.medio_cobro]
         ]
@@ -2029,9 +2018,9 @@ def descargar_historial_excel(request):
         bottom=Side(style='thin')
     )
     
-    # Título del documento
-    ws.merge_cells('A1:G1')
-    ws['A1'] = f"Historial de Transacciones - {cliente.nombre}"
+    # Título del documento con nombre de la empresa
+    ws.merge_cells('A1:E1') 
+    ws['A1'] = f"Global Exchange - Historial de Transacciones - {cliente.nombre}"
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     
@@ -2041,7 +2030,7 @@ def descargar_historial_excel(request):
         current_row = 2
         
         # Título de filtros
-        ws.merge_cells(f'A{current_row}:G{current_row}')
+        ws.merge_cells(f'A{current_row}:E{current_row}')  # Ahora son 5 columnas
         ws[f'A{current_row}'] = "Filtros aplicados:"
         ws[f'A{current_row}'].font = Font(bold=True, italic=True)
         ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
@@ -2049,19 +2038,19 @@ def descargar_historial_excel(request):
         
         # Filtros individuales por fila
         if busqueda:
-            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
             ws[f'A{current_row}'] = f"• Búsqueda: '{busqueda}'"
             ws[f'A{current_row}'].font = Font(italic=True)
             ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
             current_row += 1
         if tipo_operacion:
-            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
             ws[f'A{current_row}'] = f"• Tipo de operación: {tipo_operacion.title()}"
             ws[f'A{current_row}'].font = Font(italic=True)
             ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
             current_row += 1
         if estado_filtro:
-            ws.merge_cells(f'A{current_row}:G{current_row}')
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
             ws[f'A{current_row}'] = f"• Estado: {estado_filtro.title()}"
             ws[f'A{current_row}'].font = Font(italic=True)
             ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
@@ -2070,7 +2059,7 @@ def descargar_historial_excel(request):
             try:
                 from usuarios.models import Usuario
                 usuario = Usuario.objects.get(id=usuario_filtro)
-                ws.merge_cells(f'A{current_row}:G{current_row}')
+                ws.merge_cells(f'A{current_row}:E{current_row}')  # Ahora son 5 columnas
                 ws[f'A{current_row}'] = f"• Usuario: {usuario.nombre_completo() or usuario.username}"
                 ws[f'A{current_row}'].font = Font(italic=True)
                 ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
@@ -2080,31 +2069,29 @@ def descargar_historial_excel(request):
         
         row_start = current_row + 1
     
-    # Encabezados de la tabla
-    headers = ['Fecha', 'Hora', 'Usuario', 'Operación', 'Moneda', 'Monto', 'Estado']
-    for col_num, header in enumerate(headers, 1):
-        cell = ws.cell(row=row_start, column=col_num)
-        cell.value = header
-        cell.font = header_font
-        cell.fill = header_fill
-        cell.alignment = header_alignment
-        cell.border = border
+    # Datos de las transacciones con detalles - cada una con su propio encabezado
+    current_row = row_start
     
-    current_row = row_start + 1
-    
-    # Datos de las transacciones con detalles
     for transaccion in transacciones:
-        # Fila principal de la transacción
-        monto_formateado = round(float(transaccion.monto), transaccion.moneda.decimales)
+        # Agregar encabezado para cada transacción
+        headers = ['Fecha', 'Hora', 'Operación', 'Moneda', 'Estado']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=current_row, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        current_row += 1
+        # Fila principal de la transacción - sin columna Usuario y Moneda solo símbolo
         # Usar timezone local como en el template HTML
         fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
         data_row = [
             fecha_hora_local.strftime("%d/%m/%Y"),
             fecha_hora_local.strftime("%H:%M:%S"),
-            transaccion.usuario.nombre_completo() or transaccion.usuario.username,
             transaccion.tipo.title(),
-            transaccion.moneda.nombre,
-            monto_formateado,
+            transaccion.moneda.simbolo,  
             transaccion.estado
         ]
         
@@ -2115,24 +2102,7 @@ def descargar_historial_excel(request):
             cell.border = border
             cell.fill = PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid")
             cell.font = Font(bold=True, size=11)
-            
-            if col_num == 6:  # Columna de monto
-                decimales = transaccion.moneda.decimales
-                if decimales == 0:
-                    cell.number_format = '#,##0'
-                elif decimales == 1:
-                    cell.number_format = '#,##0.0'
-                elif decimales == 2:
-                    cell.number_format = '#,##0.00'
-                elif decimales == 3:
-                    cell.number_format = '#,##0.000'
-                elif decimales == 4:
-                    cell.number_format = '#,##0.0000'
-                else:
-                    cell.number_format = f'#,##0.{"0" * decimales}'
-                cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
-            else:
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
         current_row += 1
         
@@ -2170,11 +2140,10 @@ def descargar_historial_excel(request):
             
             return current_row + 1
         
-        # Información básica
-        current_row = add_detail_row("Cliente:", transaccion.cliente.nombre)
+        # Información básica - sin Cliente
+        current_row = add_detail_row("Usuario:", transaccion.usuario.nombre_completo() or transaccion.usuario.username)
         current_row = add_detail_row("Segmento Cliente:", transaccion.cliente.get_segmento_display())
         current_row = add_detail_row("Tipo de Transacción:", f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}")
-        current_row = add_detail_row("Estado:", transaccion.estado)
         current_row = add_detail_row("Medio de Pago:", transaccion.medio_pago)
         current_row = add_detail_row("Medio de Cobro:", transaccion.medio_cobro)
         
@@ -2244,8 +2213,8 @@ def descargar_historial_excel(request):
         # Fila de separación entre transacciones
         current_row += 1
     
-    # Ajustar ancho de columnas para acomodar todos los detalles
-    column_widths = [25, 30, 25, 18, 20, 18, 15]  # Aumentado para los detalles extensos
+    # Ajustar ancho de columnas para acomodar todos los detalles (5 columnas ahora)
+    column_widths = [20, 15, 18, 15, 15]  # Fecha, Hora, Operación, Moneda, Estado
     for i, width in enumerate(column_widths, 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
     
