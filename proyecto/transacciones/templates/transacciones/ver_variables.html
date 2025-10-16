@@ -48,26 +48,30 @@
             <div class="tarjeta-cabecera">
                 <h3>Porcentajes de Recargo</h3>
             </div>
-            <table class="gestion-tabla">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Tarjetas VISA</th>
-                        <th style="width: 25%;">Tarjetas MASTERCARD</th>
-                        <th style="width: 20%;">Tigo Money</th>
-                        <th style="width: 20%;">Billetera Personal</th>
-                        <th style="width: 20%;">Zimple</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        {% for r in recargos %}
-                        <td>
-                            <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
-                        </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
+            <div style="overflow-x: auto;">
+                <table class="gestion-tabla" style="width: 100%; table-layout: auto;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px 15px; white-space: nowrap;">Tarjetas VISA</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">Tarjetas MASTERCARD</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">Tigo Money</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">Billetera Personal</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">Zimple</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">PANAL</th>
+                            <th style="padding: 12px 15px; white-space: nowrap;">CABAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for r in recargos %}
+                            <td style="text-align: center; padding: 12px 15px;">
+                                <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
