@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roles &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Monedas" href="monedas.html" />
+    <link rel="prev" title="Usuarios" href="usuarios.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#roles.models.Roles"><code class="docutils literal notranslate"><span class="pre">Roles</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roles.models.Roles.descripcion"><code class="docutils literal notranslate"><span class="pre">Roles.descripcion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roles.models.Roles.nombre"><code class="docutils literal notranslate"><span class="pre">Roles.nombre</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.models.crear_roles_predefinidos"><code class="docutils literal notranslate"><span class="pre">crear_roles_predefinidos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.views.crear_rol"><code class="docutils literal notranslate"><span class="pre">crear_rol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.views.detalle_rol"><code class="docutils literal notranslate"><span class="pre">detalle_rol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.views.editar_rol"><code class="docutils literal notranslate"><span class="pre">editar_rol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.views.listar_roles"><code class="docutils literal notranslate"><span class="pre">listar_roles()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.views.permiso_administrador"><code class="docutils literal notranslate"><span class="pre">permiso_administrador()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.forms.PermissionCheckboxSelectMultiple"><code class="docutils literal notranslate"><span class="pre">PermissionCheckboxSelectMultiple</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.forms.RolForm"><code class="docutils literal notranslate"><span class="pre">RolForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roles.forms.RolForm.name"><code class="docutils literal notranslate"><span class="pre">RolForm.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roles.forms.RolForm.descripcion"><code class="docutils literal notranslate"><span class="pre">RolForm.descripcion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roles.forms.RolForm.permisos"><code class="docutils literal notranslate"><span class="pre">RolForm.permisos</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roles.forms.RolForm.Meta"><code class="docutils literal notranslate"><span class="pre">RolForm.Meta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roles.forms.RolForm.Meta.model"><code class="docutils literal notranslate"><span class="pre">RolForm.Meta.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roles.forms.RolForm.Meta.fields"><code class="docutils literal notranslate"><span class="pre">RolForm.Meta.fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">RolForm.Meta.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#roles.forms.RolForm.save"><code class="docutils literal notranslate"><span class="pre">RolForm.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#roles.signals.asignar_permisos_administrador"><code class="docutils literal notranslate"><span class="pre">asignar_permisos_administrador()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Roles</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="roles">
+<h1>Roles<a class="headerlink" href="#roles" title="Link to this heading"></a></h1>
+<p>Modelo de Roles personalizado que extiende auth.Group de Django.
+Incluye la creación automática de roles predefinidos y gestión de permisos.</p>
+<p>Roles predefinidos:</p>
+<ul class="simple">
+<li><p>Operador</p></li>
+<li><p>Analista cambiario</p></li>
+<li><p>Administrador</p></li>
+</ul>
+<dl class="py class" id="module-roles.models">
+<dt class="sig sig-object py" id="roles.models.Roles">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roles.models.</span></span><span class="sig-name descname"><span class="pre">Roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/models.html#Roles"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.models.Roles" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></p>
+<p>Modelo que extiende auth.Group para agregar una descripción a cada rol.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.models.Roles.descripcion">
+<span class="sig-name descname"><span class="pre">descripcion</span></span><a class="headerlink" href="#roles.models.Roles.descripcion" title="Link to this definition"></a></dt>
+<dd><p>Descripción del rol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TextField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Se deshabilitan los permisos predeterminados de Django.</p></li>
+<li><p>Se define un permiso personalizado «gestion» para la gestión de roles.</p></li>
+</ul>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="roles.models.Roles.nombre">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nombre</span></span><a class="headerlink" href="#roles.models.Roles.nombre" title="Link to this definition"></a></dt>
+<dd><p>Alias para mantener compatibilidad con código existente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del rol.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cadena de texto</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rol</span> <span class="o">=</span> <span class="n">Roles</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Controlador&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rol</span><span class="o">.</span><span class="n">nombre</span><span class="p">)</span>  <span class="c1"># Salida: Controlador</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.models.crear_roles_predefinidos">
+<span class="sig-prename descclassname"><span class="pre">roles.models.</span></span><span class="sig-name descname"><span class="pre">crear_roles_predefinidos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/models.html#crear_roles_predefinidos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.models.crear_roles_predefinidos" title="Link to this definition"></a></dt>
+<dd><p>Crea los roles predefinidos después de ejecutar las migraciones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – El remitente de la señal (AppConfig).</p></li>
+<li><p><strong>**kwargs</strong> – Argumentos adicionales.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function" id="module-roles.views">
+<dt class="sig sig-object py" id="roles.views.crear_rol">
+<span class="sig-prename descclassname"><span class="pre">roles.views.</span></span><span class="sig-name descname"><span class="pre">crear_rol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/views.html#crear_rol"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.views.crear_rol" title="Link to this definition"></a></dt>
+<dd><p>Gestiona el formulario para crear un nuevo rol.</p>
+<ul class="simple">
+<li><p>Si el método es GET, muestra el formulario para completarlo.</p></li>
+<li><p>Si el método es POST, valida el formulario y crea el nuevo rol.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – Objeto solicitante.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – Si ocurre un error al guardar el rol.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.views.detalle_rol">
+<span class="sig-prename descclassname"><span class="pre">roles.views.</span></span><span class="sig-name descname"><span class="pre">detalle_rol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/views.html#detalle_rol"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.views.detalle_rol" title="Link to this definition"></a></dt>
+<dd><p>Muestra los detalles de un rol específico (nombre, descripción y permisos).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> – Objeto solicitante.</p></li>
+<li><p><strong>pk</strong> – Clave primaria del rol a mostrar.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Roles.DoesNotExist</strong> – Si el rol no existe.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.views.editar_rol">
+<span class="sig-prename descclassname"><span class="pre">roles.views.</span></span><span class="sig-name descname"><span class="pre">editar_rol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/views.html#editar_rol"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.views.editar_rol" title="Link to this definition"></a></dt>
+<dd><p>Gestiona el formulario para editar un rol existente.</p>
+<ul class="simple">
+<li><p>Si el método es GET, muestra el formulario con los datos actuales del rol.</p></li>
+<li><p>Si el método es POST, valida el formulario y actualiza el rol.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> – Objeto solicitante.</p></li>
+<li><p><strong>pk</strong> – Clave primaria del rol a editar.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Roles.DoesNotExist</strong> – Si el rol no existe.</p></li>
+<li><p><strong>Exception</strong> – Si ocurre un error al guardar el rol.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.views.listar_roles">
+<span class="sig-prename descclassname"><span class="pre">roles.views.</span></span><span class="sig-name descname"><span class="pre">listar_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/views.html#listar_roles"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.views.listar_roles" title="Link to this definition"></a></dt>
+<dd><p>Muestra una lista de todos los roles disponibles para asignar, excepto “Administrador”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – Objeto solicitante.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.views.permiso_administrador">
+<span class="sig-prename descclassname"><span class="pre">roles.views.</span></span><span class="sig-name descname"><span class="pre">permiso_administrador</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/views.html#permiso_administrador"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.views.permiso_administrador" title="Link to this definition"></a></dt>
+<dd><p>Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+para administrar monedas: creación, edición o activación.</p>
+</dd></dl>
+
+<dl class="py class" id="module-roles.forms">
+<dt class="sig sig-object py" id="roles.forms.PermissionCheckboxSelectMultiple">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roles.forms.</span></span><span class="sig-name descname"><span class="pre">PermissionCheckboxSelectMultiple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/forms.html#PermissionCheckboxSelectMultiple"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.forms.PermissionCheckboxSelectMultiple" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CheckboxSelectMultiple</span></code></p>
+<p>Widget personalizado para mostrar solo la descripción de los permisos.
+Extiende CheckboxSelectMultiple para personalizar la representación de las opciones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>forms</strong> (<em>CheckboxSelectMultiple</em>) – Widget base de Django para selección múltiple con checkboxes.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diccionario que representa una opción en el widget, con la etiqueta personalizada.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>diccionario</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roles.forms.RolForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roles.forms.</span></span><span class="sig-name descname"><span class="pre">RolForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/forms.html#RolForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.forms.RolForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<p>Formulario para crear y editar roles, incluyendo la asignación de permisos personalizados.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.forms.RolForm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roles.forms.RolForm.name" title="Link to this definition"></a></dt>
+<dd><p>Campo para el nombre del rol. Máximo 100 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.forms.RolForm.descripcion">
+<span class="sig-name descname"><span class="pre">descripcion</span></span><a class="headerlink" href="#roles.forms.RolForm.descripcion" title="Link to this definition"></a></dt>
+<dd><p>Campo para la descripción del rol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.forms.RolForm.permisos">
+<span class="sig-name descname"><span class="pre">permisos</span></span><a class="headerlink" href="#roles.forms.RolForm.permisos" title="Link to this definition"></a></dt>
+<dd><p>Campo para seleccionar múltiples permisos personalizados. Opcional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ModelMultipleChoiceField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Este formulario excluye los permisos predeterminados de Django (add, change, delete, view).</p></li>
+</ul>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="roles.forms.RolForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/roles/forms.html#RolForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.forms.RolForm.Meta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Meta información del formulario.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.forms.RolForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#roles.forms.RolForm.Meta.model" title="Link to this definition"></a></dt>
+<dd><p>El modelo asociado al formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roles.models.Roles" title="roles.models.Roles">Roles</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.forms.RolForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#roles.forms.RolForm.Meta.fields" title="Link to this definition"></a></dt>
+<dd><p>Lista de campos incluidos en el formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>alias de <a class="reference internal" href="#roles.models.Roles" title="roles.models.Roles"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roles</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roles.forms.RolForm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/forms.html#RolForm.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.forms.RolForm.save" title="Link to this definition"></a></dt>
+<dd><p>Guarda el rol y asigna los permisos seleccionados.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>commit</strong> (<em>bool</em>) – Si es True, guarda el rol en la base de datos inmediatamente.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>La instancia del rol guardado.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roles.models.Roles" title="roles.models.Roles">Roles</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function" id="module-roles.signals">
+<dt class="sig sig-object py" id="roles.signals.asignar_permisos_administrador">
+<span class="sig-prename descclassname"><span class="pre">roles.signals.</span></span><span class="sig-name descname"><span class="pre">asignar_permisos_administrador</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/signals.html#asignar_permisos_administrador"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.signals.asignar_permisos_administrador" title="Link to this definition"></a></dt>
+<dd><p>Asigna todos los permisos existentes al rol “Administradores”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – El modelo que ha sido migrado.</p></li>
+<li><p><strong>**kwargs</strong> – Argumentos adicionales.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Este manejador de señales se ejecuta después de que se hayan aplicado las migraciones.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="usuarios.html" class="btn btn-neutral float-left" title="Usuarios" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="monedas.html" class="btn btn-neutral float-right" title="Monedas" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

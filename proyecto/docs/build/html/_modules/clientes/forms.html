@@ -1,0 +1,519 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clientes.forms &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">clientes.forms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para clientes.forms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Módulo de formularios para la gestión de clientes.</span>
+
+<span class="sd">Este módulo contiene los formularios de Django utilizados para la creación,</span>
+<span class="sd">edición y validación de datos de clientes, incluyendo integración con Stripe</span>
+<span class="sd">para el manejo de métodos de pago.</span>
+
+<span class="sd">Autor: Equipo de desarrollo</span>
+<span class="sd">Fecha: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django</span><span class="w"> </span><span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TarjetaNoPermitida</span><span class="p">,</span> <span class="n">MarcaNoPermitida</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Recargos</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
+
+<span class="c1"># Configurar Stripe</span>
+<span class="n">stripe</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+
+<div class="viewcode-block" id="ClienteForm">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ClienteForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para crear y editar clientes del sistema.</span>
+
+<span class="sd">    Este formulario maneja la validación y presentación de todos los campos</span>
+<span class="sd">    necesarios para crear o modificar un cliente, incluyendo validaciones</span>
+<span class="sd">    personalizadas para teléfono, documento e integración con Stripe.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Los campos del formulario corresponden directamente con los campos</span>
+<span class="sd">        del modelo Cliente, cada uno con sus respectivas validaciones y</span>
+<span class="sd">        mensajes de error personalizados.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; form = ClienteForm(data={</span>
+<span class="sd">        ...     &#39;nombre&#39;: &#39;Juan Pérez&#39;,</span>
+<span class="sd">        ...     &#39;tipo_documento&#39;: &#39;CI&#39;,</span>
+<span class="sd">        ...     &#39;numero_documento&#39;: &#39;12345678&#39;</span>
+<span class="sd">        ... })</span>
+<span class="sd">        &gt;&gt;&gt; if form.is_valid():</span>
+<span class="sd">        ...     cliente = form.save()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nombre</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el nombre.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El nombre no puede exceder los 100 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">numero_documento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de documento.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El documento no puede exceder los 10 caracteres.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;unique&#39;</span><span class="p">:</span> <span class="s1">&#39;Ya existe un cliente con este número de documento.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">tipo_documento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Cliente</span><span class="o">.</span><span class="n">TIPO_DOCUMENTO_CHOICES</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un tipo de documento.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">correo_electronico</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar un correo electrónico.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar un correo electrónico válido.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;unique&#39;</span><span class="p">:</span> <span class="s1">&#39;Ya existe un cliente con este correo electrónico.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">EmailInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">telefono</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar un número de teléfono.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El teléfono no puede exceder los 20 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">tipo</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Cliente</span><span class="o">.</span><span class="n">TIPO_CLIENTE_CHOICES</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un tipo de cliente.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">direccion</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar una dirección.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">ocupacion</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;La ocupación no puede exceder los 30 caracteres.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar una ocupación.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">segmento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Cliente</span><span class="o">.</span><span class="n">SEGMENTO_CHOICES</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un segmento.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+    <span class="n">declaracion_jurada</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">CheckboxInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-check-input&#39;</span><span class="p">})</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="ClienteForm.Meta">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.Meta">[documentos]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Cliente</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;tipo_documento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;numero_documento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;correo_electronico&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;telefono&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;tipo&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;direccion&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ocupacion&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;segmento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;declaracion_jurada&#39;</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ClienteForm.clean_telefono">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.clean_telefono">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_telefono</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida que el número de teléfono contenga únicamente dígitos.</span>
+
+<span class="sd">        Realiza validación personalizada del campo teléfono para asegurar</span>
+<span class="sd">        que solo contenga caracteres numéricos.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El número de teléfono validado</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el teléfono contiene caracteres no numéricos</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;telefono&#39;] = &#39;0981234567&#39;  # Válido</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;telefono&#39;] = &#39;098-123-4567&#39;  # Inválido</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">telefono</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;telefono&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">telefono</span><span class="p">:</span>
+            <span class="c1"># Validar que solo contenga números</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">telefono</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El teléfono debe contener solo números&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">telefono</span></div>
+
+
+<div class="viewcode-block" id="ClienteForm.clean_numero_documento">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.clean_numero_documento">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_numero_documento</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida que el número de documento contenga únicamente dígitos.</span>
+
+<span class="sd">        Realiza validación personalizada del campo documento de cliente</span>
+<span class="sd">        para asegurar que solo contenga caracteres numéricos.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El número de documento validado</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el documento contiene caracteres no numéricos</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Esta validación se aplica tanto para cédulas de identidad como</span>
+<span class="sd">            para números RUC, ambos deben ser completamente numéricos.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;numero_documento&#39;] = &#39;12345678&#39;  # Válido</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;numero_documento&#39;] = &#39;1234-5678-9&#39;  # Inválido</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc_cliente</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;numero_documento&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">doc_cliente</span><span class="p">:</span>
+            <span class="c1"># Validar que solo contenga números</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">doc_cliente</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El documento debe contener solo números&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">doc_cliente</span></div>
+
+    
+<div class="viewcode-block" id="ClienteForm.clean_tipo_documento">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.clean_tipo_documento">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_tipo_documento</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida que el tipo de documento sea consistente con el tipo de cliente.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># IMPORTANTE: Obtener &#39;tipo&#39; del cleaned_data, que ya ha sido limpiado por su propio clean_field</span>
+        <span class="n">tipo_documento</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_documento&#39;</span><span class="p">)</span>
+        <span class="n">tipo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo&#39;</span><span class="p">)</span> <span class="c1"># Asume que &#39;tipo&#39; ya ha sido limpiado</span>
+
+        <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;J&#39;</span> <span class="ow">and</span> <span class="n">tipo_documento</span> <span class="o">!=</span> <span class="s1">&#39;RUC&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Las personas jurídicas deben tener RUC.&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># --- SOLUCIÓN: DEBES RETORNAR EL VALOR LIMPIADO ---</span>
+        <span class="k">return</span> <span class="n">tipo_documento</span></div>
+
+        
+    
+<div class="viewcode-block" id="ClienteForm.clean_id_stripe">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.clean_id_stripe">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_id_stripe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida que el ID de Stripe sea válido y exista en la plataforma.</span>
+
+<span class="sd">        Realiza una consulta a la API de Stripe para verificar que el ID</span>
+<span class="sd">        proporcionado corresponde a un cliente existente en Stripe.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El ID de Stripe validado</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el ID de Stripe no es válido o no existe</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Esta validación requiere conexión a internet y hace una llamada</span>
+<span class="sd">            a la API de Stripe. El campo es opcional, por lo que la validación</span>
+<span class="sd">            solo se ejecuta si se proporciona un valor.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;id_stripe&#39;] = &#39;cus_1234567890abcdef&#39;  # Válido</span>
+<span class="sd">            &gt;&gt;&gt; form.cleaned_data[&#39;id_stripe&#39;] = &#39;invalid_id&#39;  # Inválido</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">id_stripe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id_stripe&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_stripe</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Intentar recuperar el cliente de Stripe para validar el ID</span>
+                <span class="n">stripe</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">id_stripe</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El ID de Stripe no es válido.&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error al validar el ID de Stripe: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">id_stripe</span></div>
+
+    
+<div class="viewcode-block" id="ClienteForm.save">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.ClienteForm.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">tipo_documento</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_documento&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">commit</span><span class="p">:</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">instance</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AgregarTarjetaForm">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.AgregarTarjetaForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgregarTarjetaForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para agregar una tarjeta de crédito a un cliente usando Stripe Elements.</span>
+
+<span class="sd">    Este formulario maneja la integración con Stripe para procesar tokens de tarjetas</span>
+<span class="sd">    de crédito generados en el frontend y asociarlas a un cliente específico.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        stripe_token (CharField): Campo oculto que contiene el token generado por Stripe Elements</span>
+<span class="sd">        cliente: Instancia del cliente al que se agregará la tarjeta</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Este formulario trabaja en conjunto con Stripe Elements en el frontend.</span>
+<span class="sd">        El token se genera de forma segura en el navegador del usuario y se</span>
+<span class="sd">        envía al backend para su procesamiento.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; form = AgregarTarjetaForm(</span>
+<span class="sd">        ...     data={&#39;stripe_token&#39;: &#39;tok_1234567890abcdef&#39;},</span>
+<span class="sd">        ...     cliente=cliente_instance</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; if form.is_valid():</span>
+<span class="sd">        ...     payment_method = form.save()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">stripe_token</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">(),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Token de Stripe requerido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el formulario con un cliente específico.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cliente: Instancia del cliente al que se agregará la tarjeta</span>
+<span class="sd">            *args: Argumentos posicionales pasados al constructor padre</span>
+<span class="sd">            **kwargs: Argumentos con nombre pasados al constructor padre</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cliente&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="AgregarTarjetaForm.clean_stripe_token">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.AgregarTarjetaForm.clean_stripe_token">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_stripe_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida que el token de Stripe esté presente y no esté vacío.</span>
+
+<span class="sd">        Realiza validación básica del token de Stripe para asegurar</span>
+<span class="sd">        que se ha proporcionado un valor válido.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El token de Stripe validado</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el token está vacío o es inválido</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Esta validación es básica. La validación completa del token</span>
+<span class="sd">            se realiza en la API de Stripe durante el método save().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stripe_token&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Token de Stripe inválido.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">token</span></div>
+
+
+<div class="viewcode-block" id="AgregarTarjetaForm.save">
+<a class="viewcode-back" href="../../clientes.html#clientes.forms.AgregarTarjetaForm.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Procesa el token de Stripe y agrega la tarjeta al cliente.</span>
+
+<span class="sd">        Este método maneja todo el proceso de agregar una tarjeta de crédito</span>
+<span class="sd">        al cliente, incluyendo la creación del cliente en Stripe si no existe,</span>
+<span class="sd">        el procesamiento del token y la asociación del método de pago.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            stripe.PaymentMethod: El método de pago creado y asociado al cliente</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si no se especifica cliente, si la tarjeta no es de </span>
+<span class="sd">                           crédito, si la marca no está en recargos, o si ocurre </span>
+<span class="sd">                           algún error durante el procesamiento en Stripe</span>
+
+<span class="sd">        Process:</span>
+<span class="sd">            1. Verifica que se haya especificado un cliente</span>
+<span class="sd">            2. Si el cliente no tiene ID de Stripe, lo crea en la plataforma</span>
+<span class="sd">            3. Crea el método de pago desde el token proporcionado</span>
+<span class="sd">            4. Verifica que la tarjeta sea de crédito y su marca esté en Recargos</span>
+<span class="sd">            5. Asocia el método de pago al cliente en Stripe</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; form = AgregarTarjetaForm(data={&#39;stripe_token&#39;: token}, cliente=cliente)</span>
+<span class="sd">            &gt;&gt;&gt; if form.is_valid():</span>
+<span class="sd">            ...     payment_method = form.save()</span>
+<span class="sd">            ...     print(f&quot;Tarjeta agregada: {payment_method.id}&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cliente no especificado.&#39;</span><span class="p">)</span>
+        
+        <span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;stripe_token&#39;</span><span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Si el cliente no tiene ID de Stripe, crearlo primero</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id_stripe</span><span class="p">:</span>
+                <span class="n">stripe_customer</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
+                    <span class="n">email</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">correo_electronico</span><span class="p">,</span>
+                    <span class="n">phone</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">telefono</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Cliente con </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">tipo_documento</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">numero_documento</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id_stripe</span> <span class="o">=</span> <span class="n">stripe_customer</span><span class="o">.</span><span class="n">id</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            
+            <span class="c1"># Crear el método de pago desde el token</span>
+            <span class="n">payment_method</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;card&#39;</span><span class="p">,</span>
+                <span class="n">card</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="n">token</span><span class="p">}</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">payment_method</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">funding</span> <span class="o">!=</span> <span class="s1">&#39;credit&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TarjetaNoPermitida</span>
+            
+            <span class="c1"># Verificar que la marca de la tarjeta esté en Recargos</span>
+            <span class="n">marca_tarjeta</span> <span class="o">=</span> <span class="n">payment_method</span><span class="o">.</span><span class="n">card</span><span class="o">.</span><span class="n">brand</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">marca_tarjeta</span><span class="p">,</span> <span class="n">medio</span><span class="o">=</span><span class="s1">&#39;Tarjeta de Crédito&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">MarcaNoPermitida</span>
+
+            <span class="c1"># Adjuntar el método de pago al cliente</span>
+            <span class="n">payment_method</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id_stripe</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">payment_method</span>
+            
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">CardError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error con la tarjeta: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">user_message</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">InvalidRequestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error en la solicitud: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">StripeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error de Stripe: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

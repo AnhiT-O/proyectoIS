@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>monedas.models &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">monedas.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para monedas.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_migrate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.dispatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">receiver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+
+<div class="viewcode-block" id="Moneda">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Moneda</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">nombre</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">simbolo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">activa</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tasa_base</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">comision_compra</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">comision_venta</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">decimales</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fecha_cotizacion</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Moneda.save">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
+            <span class="n">old</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">!=</span> <span class="n">old</span><span class="o">.</span><span class="n">tasa_base</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">comision_compra</span> <span class="o">!=</span> <span class="n">old</span><span class="o">.</span><span class="n">comision_compra</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">comision_venta</span> <span class="o">!=</span> <span class="n">old</span><span class="o">.</span><span class="n">comision_venta</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fecha_cotizacion</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">&#39;Moneda&#39;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s1">&#39;Monedas&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;monedas&#39;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Deshabilita permisos predeterminados</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;gestion&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede gestionar monedas (crear y editar)&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;activacion&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede activar/desactivar monedas&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;cotizacion&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede actualizar cotización de monedas&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+<div class="viewcode-block" id="Moneda.calcular_precio_venta">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.calcular_precio_venta">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calcular_precio_venta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;minorista&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcula el precio de venta aplicando el beneficio del cliente.</span>
+<span class="sd">        precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">segmento</span> <span class="o">==</span> <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Beneficio del 5% para clientes corporativos</span>
+        <span class="k">elif</span> <span class="n">segmento</span> <span class="o">==</span> <span class="s1">&#39;vip&#39;</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Beneficio del 10% para clientes VIP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Sin beneficio para clientes minoristas</span>
+
+        <span class="n">tasa_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasa_base</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="n">beneficio</span> <span class="o">=</span> <span class="n">porcentaje_beneficio</span> <span class="o">/</span> <span class="mi">100</span>
+        
+        <span class="n">precio</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">comision_venta</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">*</span> <span class="n">beneficio</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">precio</span></div>
+
+
+<div class="viewcode-block" id="Moneda.calcular_precio_compra">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.calcular_precio_compra">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calcular_precio_compra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;minorista&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcula el precio de compra aplicando el beneficio del cliente.</span>
+<span class="sd">        precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">segmento</span> <span class="o">==</span> <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Beneficio del 5% para clientes corporativos</span>
+        <span class="k">elif</span> <span class="n">segmento</span> <span class="o">==</span> <span class="s1">&#39;vip&#39;</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Beneficio del 10% para clientes VIP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">porcentaje_beneficio</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Sin beneficio para clientes minoristas</span>
+            
+        <span class="n">tasa_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasa_base</span>
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comision_compra</span>
+        <span class="n">beneficio</span> <span class="o">=</span> <span class="n">porcentaje_beneficio</span> <span class="o">/</span> <span class="mi">100</span>
+
+        <span class="n">precio</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="n">comision_compra</span> <span class="o">+</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">*</span> <span class="n">beneficio</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">precio</span></div>
+
+
+<div class="viewcode-block" id="Moneda.get_precios_cliente">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.get_precios_cliente">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_precios_cliente</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene los precios finales para un cliente específico&quot;&quot;&quot;</span>
+        <span class="n">precio_compra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="n">cliente</span><span class="o">.</span><span class="n">segmento</span><span class="p">)</span>
+        <span class="n">precio_venta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calcular_precio_venta</span><span class="p">(</span><span class="n">cliente</span><span class="o">.</span><span class="n">segmento</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precio_compra</span><span class="p">,</span>
+            <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precio_venta</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Moneda.clean">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.clean">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simbolo</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simbolo</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">({</span><span class="s1">&#39;simbolo&#39;</span><span class="p">:</span> <span class="s1">&#39;El símbolo debe contener solo letras en mayúsculas.&#39;</span><span class="p">})</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nombre</span></div>
+
+
+<div class="viewcode-block" id="crear_moneda_usd">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_moneda_usd">[documentos]</a>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crear_moneda_usd</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea automáticamente la moneda USD después de ejecutar las migraciones</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Solo crear si la migración es de la app monedas</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app_config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;monedas&#39;</span><span class="p">:</span>
+        <span class="c1"># Verificar si ya existe la moneda USD</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">simbolo</span><span class="o">=</span><span class="s1">&#39;USD&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Dólar estadounidense&#39;</span><span class="p">,</span>
+                <span class="n">simbolo</span><span class="o">=</span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
+                <span class="n">tasa_base</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span>
+                <span class="n">comision_compra</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                <span class="n">comision_venta</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span>
+                <span class="n">fecha_cotizacion</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">make_aware</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Moneda USD creada automáticamente&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StockGuaranies">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.StockGuaranies">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StockGuaranies</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo para almacenar el stock de guaraníes disponible en la casa de cambio</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cantidad</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BigIntegerField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">1000000000</span>
+    <span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">&#39;Stock de Guaraníes&#39;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s1">&#39;Stock de Guaraníes&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;stock_guaranies&#39;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Stock: Gs. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cantidad</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+    
+<div class="viewcode-block" id="crear_stock_guaranies_inicial">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_stock_guaranies_inicial">[documentos]</a>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crear_stock_guaranies_inicial</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea automáticamente el stock inicial de guaraníes después de ejecutar las migraciones</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app_config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;monedas&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stock inicial de guaraníes creado automáticamente&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Denominacion">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Denominacion">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Denominacion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo para representar las denominaciones de una moneda específica</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">valor</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">&#39;Denominación&#39;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s1">&#39;Denominaciones&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;denominaciones&#39;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">valor</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+    
+<div class="viewcode-block" id="crear_denominaciones_iniciales">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_denominaciones_iniciales">[documentos]</a>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crear_denominaciones_iniciales</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea automáticamente algunas denominaciones iniciales para USD y el stock de guaraníes</span>
+<span class="sd">    después de ejecutar las migraciones</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app_config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;monedas&#39;</span><span class="p">:</span>
+        <span class="n">usd</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">simbolo</span><span class="o">=</span><span class="s1">&#39;USD&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">usd</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">valor</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+                <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">usd</span><span class="p">,</span> <span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Denominaciones iniciales para USD creadas automáticamente&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">valor</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="mi">100000</span><span class="p">]:</span>
+            <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Denominaciones iniciales para Stock de Guaraníes creadas automáticamente&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HistorialCotizacion">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.HistorialCotizacion">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HistorialCotizacion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo para almacenar el historial de cotizaciones de las monedas</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;historial_cotizaciones&#39;</span><span class="p">)</span>
+    <span class="n">nombre_moneda</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># Nombre de la moneda para facilitar consultas</span>
+    <span class="n">fecha</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">()</span>
+    <span class="n">tasa_base</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">comision_compra</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">comision_venta</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">precio_compra</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>  <span class="c1"># tasa_base - comision_compra</span>
+    <span class="n">precio_venta</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>   <span class="c1"># tasa_base + comision_venta</span>
+    <span class="n">fecha_registro</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">verbose_name</span> <span class="o">=</span> <span class="s1">&#39;Historial de Cotización&#39;</span>
+        <span class="n">verbose_name_plural</span> <span class="o">=</span> <span class="s1">&#39;Historial de Cotizaciones&#39;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;historial_cotizaciones&#39;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Removemos unique_together para permitir múltiples ediciones por día</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-fecha&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fecha</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="HistorialCotizacion.save">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.HistorialCotizacion.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Guardar automáticamente el nombre de la moneda</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nombre_moneda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span>
+        
+        <span class="c1"># Calcular precios automáticamente</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precio_compra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">comision_compra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precio_venta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+<span class="c1"># Signal para crear registro en historial cuando se actualiza una moneda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_save</span>
+
+<div class="viewcode-block" id="crear_historial_cotizacion">
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_historial_cotizacion">[documentos]</a>
+<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Moneda</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">crear_historial_cotizacion</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crea un registro en el historial cuando se crea una moneda o se actualizan</span>
+<span class="sd">    sus campos de cotización (tasa_base, comision_compra, comision_venta)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Si es una moneda nueva, crear historial</span>
+    <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+        <span class="n">fecha_hoy</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">fecha_cotizacion</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+        <span class="n">HistorialCotizacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">moneda</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+            <span class="n">nombre_moneda</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
+            <span class="n">fecha</span><span class="o">=</span><span class="n">fecha_hoy</span><span class="p">,</span>
+            <span class="n">tasa_base</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">,</span>
+            <span class="n">comision_compra</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+            <span class="n">comision_venta</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Si es una edición, verificar si cambió algún campo de cotización</span>
+        <span class="n">old_instance</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">!=</span> <span class="n">old_instance</span><span class="o">.</span><span class="n">tasa_base</span> <span class="ow">or</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">comision_compra</span> <span class="o">!=</span> <span class="n">old_instance</span><span class="o">.</span><span class="n">comision_compra</span> <span class="ow">or</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">comision_venta</span> <span class="o">!=</span> <span class="n">old_instance</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="p">):</span>
+            <span class="n">fecha_hoy</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+            <span class="n">HistorialCotizacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">moneda</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                <span class="n">nombre_moneda</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
+                <span class="n">fecha</span><span class="o">=</span><span class="n">fecha_hoy</span><span class="p">,</span>
+                <span class="n">tasa_base</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">,</span>
+                <span class="n">comision_compra</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+                <span class="n">comision_venta</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_venta</span>
+            <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>monedas.views &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">monedas.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para monedas.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">permission_required</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moneda</span><span class="p">,</span> <span class="n">Denominacion</span><span class="p">,</span> <span class="n">HistorialCotizacion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">MonedaForm</span>
+
+
+<div class="viewcode-block" id="tiene_algun_permiso">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.tiene_algun_permiso">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tiene_algun_permiso</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios</span>
+<span class="sd">    para administrar monedas: creación, edición o activación.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">view_func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wrapped_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect_to_login</span>
+            <span class="k">return</span> <span class="n">redirect_to_login</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_full_path</span><span class="p">())</span>
+        
+        <span class="c1"># Permisos requeridos para administrar monedas</span>
+        <span class="n">permisos_requeridos</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;monedas.gestion&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;monedas.activacion&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;monedas.cotizacion&#39;</span>   <span class="c1"># Permiso para activar/desactivar monedas</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># Verificar si el usuario tiene al menos uno de los permisos</span>
+        <span class="k">for</span> <span class="n">permiso</span> <span class="ow">in</span> <span class="n">permisos_requeridos</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="n">permiso</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="c1"># Si no tiene ningún permiso, denegar acceso</span>
+        <span class="k">raise</span> <span class="n">PermissionDenied</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">_wrapped_view</span></div>
+
+
+<div class="viewcode-block" id="puede_editar">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.puede_editar">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">puede_editar</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios</span>
+<span class="sd">    para administrar monedas: creación, edición o activación.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">view_func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wrapped_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect_to_login</span>
+            <span class="k">return</span> <span class="n">redirect_to_login</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_full_path</span><span class="p">())</span>
+        
+        <span class="c1"># Permisos requeridos para administrar monedas</span>
+        <span class="n">permisos_requeridos</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;monedas.gestion&#39;</span><span class="p">,</span>       <span class="c1"># Permiso para editar monedas</span>
+            <span class="s1">&#39;monedas.cotizacion&#39;</span>  <span class="c1"># Permiso para cambiar la tasa base de una moneda</span>
+        <span class="p">]</span>
+        
+        <span class="c1"># Verificar si el usuario tiene al menos uno de los permisos</span>
+        <span class="k">for</span> <span class="n">permiso</span> <span class="ow">in</span> <span class="n">permisos_requeridos</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="n">permiso</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">view_func</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="c1"># Si no tiene ningún permiso, denegar acceso</span>
+        <span class="k">raise</span> <span class="n">PermissionDenied</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">_wrapped_view</span></div>
+
+
+<div class="viewcode-block" id="moneda_crear">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.moneda_crear">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;monedas.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">moneda_crear</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MonedaForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">moneda</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Moneda &quot;</span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s1">&quot; creada exitosamente.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;monedas:lista_monedas&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MonedaForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;monedas/moneda_form.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,})</span></div>
+
+
+<div class="viewcode-block" id="moneda_lista">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.moneda_lista">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@tiene_algun_permiso</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">moneda_lista</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># Manejar cambio de estado si se envía POST</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span> <span class="ow">and</span> <span class="s1">&#39;cambiar_estado&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">moneda_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda_id&#39;</span><span class="p">)</span>
+            <span class="n">moneda</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">)</span>
+            
+            <span class="c1"># Cambiar el estado de la moneda</span>
+            <span class="n">moneda</span><span class="o">.</span><span class="n">activa</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">moneda</span><span class="o">.</span><span class="n">activa</span>
+            <span class="n">moneda</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            
+            <span class="n">estado_texto</span> <span class="o">=</span> <span class="s2">&quot;activada&quot;</span> <span class="k">if</span> <span class="n">moneda</span><span class="o">.</span><span class="n">activa</span> <span class="k">else</span> <span class="s2">&quot;desactivada&quot;</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Moneda &quot;</span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s1">&quot; </span><span class="si">{</span><span class="n">estado_texto</span><span class="si">}</span><span class="s1"> exitosamente.&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Comprobar si hay un parámetro next para redirección</span>
+            <span class="n">next_url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;next&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">next_url</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">next_url</span><span class="p">)</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Error al cambiar el estado de la moneda.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener todas las monedas</span>
+    <span class="n">todas_las_monedas</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">monedas</span> <span class="o">=</span> <span class="n">todas_las_monedas</span>
+    
+    <span class="c1"># Manejar búsqueda</span>
+    <span class="n">busqueda</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;busqueda&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">busqueda</span><span class="p">:</span>
+        <span class="n">monedas</span> <span class="o">=</span> <span class="n">monedas</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">nombre__icontains</span><span class="o">=</span><span class="n">busqueda</span><span class="p">)</span> <span class="o">|</span> 
+            <span class="n">Q</span><span class="p">(</span><span class="n">simbolo__icontains</span><span class="o">=</span><span class="n">busqueda</span><span class="p">)</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># Ordenar por nombre</span>
+    <span class="n">monedas</span> <span class="o">=</span> <span class="n">monedas</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;nombre&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Calcular estadísticas</span>
+    <span class="n">monedas_activas</span> <span class="o">=</span> <span class="n">monedas</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">activa</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">monedas_inactivas</span> <span class="o">=</span> <span class="n">monedas</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">activa</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    
+    <span class="c1"># Total de monedas en el sistema (sin filtrar)</span>
+    <span class="n">total_monedas_sistema</span> <span class="o">=</span> <span class="n">todas_las_monedas</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;monedas&#39;</span><span class="p">:</span> <span class="n">monedas</span><span class="p">,</span>
+        <span class="s1">&#39;monedas_activas&#39;</span><span class="p">:</span> <span class="n">monedas_activas</span><span class="p">,</span>
+        <span class="s1">&#39;monedas_inactivas&#39;</span><span class="p">:</span> <span class="n">monedas_inactivas</span><span class="p">,</span>
+        <span class="s1">&#39;busqueda&#39;</span><span class="p">:</span> <span class="n">busqueda</span><span class="p">,</span>
+        <span class="s1">&#39;total_monedas_sistema&#39;</span><span class="p">:</span> <span class="n">total_monedas_sistema</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;monedas/moneda_lista.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="moneda_editar">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.moneda_editar">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@puede_editar</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">moneda_editar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="c1"># Instancia el formulario normalmente</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MonedaForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">moneda</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MonedaForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">moneda</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;monedas.gestion&#39;</span><span class="p">):</span>
+    <span class="c1"># Elimina campos según permisos</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;nombre&#39;</span><span class="p">)</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;simbolo&#39;</span><span class="p">)</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;decimales&#39;</span><span class="p">)</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;denominaciones&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Procesa el formulario</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Moneda </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="se">\&quot;</span><span class="s1"> editada exitosamente.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;monedas:lista_monedas&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;monedas/moneda_form.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span> <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,})</span></div>
+
+
+<div class="viewcode-block" id="moneda_detalle">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.moneda_detalle">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@tiene_algun_permiso</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">moneda_detalle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para mostrar los detalles completos de una moneda&quot;&quot;&quot;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="n">denominaciones</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
+        <span class="s1">&#39;denominaciones&#39;</span><span class="p">:</span> <span class="n">denominaciones</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;monedas/moneda_detalles.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="verificar_cambios_precios">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.verificar_cambios_precios">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verificar_cambios_precios</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">moneda_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;API para verificar cambios en los precios de una moneda&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;X-Requested-With&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;XMLHttpRequest&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">moneda</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">)</span>
+            <span class="n">cliente</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
+            
+            <span class="c1"># Obtener precios actuales</span>
+            <span class="n">precios_actuales</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">)</span>
+            
+            <span class="c1"># Obtener precios iniciales de la sesión</span>
+            <span class="n">precio_compra_inicial</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;precio_compra_inicial&#39;</span><span class="p">)</span>
+            <span class="n">precio_venta_inicial</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;precio_venta_inicial&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">precio_compra_inicial</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">precio_venta_inicial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Si no hay precios iniciales, guardarlos</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;precio_compra_inicial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">]</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;precio_venta_inicial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;hubo_cambio&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
+            
+            <span class="c1"># Verificar si hubo cambios</span>
+            <span class="n">hubo_cambio</span> <span class="o">=</span> <span class="p">(</span><span class="n">precio_compra_inicial</span> <span class="o">!=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">]</span> <span class="ow">or</span> 
+                          <span class="n">precio_venta_inicial</span> <span class="o">!=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">])</span>
+            
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;hubo_cambio&#39;</span><span class="p">:</span> <span class="n">hubo_cambio</span><span class="p">,</span>
+                <span class="s1">&#39;precios_anteriores&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;compra&#39;</span><span class="p">:</span> <span class="n">precio_compra_inicial</span><span class="p">,</span>
+                    <span class="s1">&#39;venta&#39;</span><span class="p">:</span> <span class="n">precio_venta_inicial</span>
+                <span class="p">},</span>
+                <span class="s1">&#39;precios_actuales&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;compra&#39;</span><span class="p">:</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;venta&#39;</span><span class="p">:</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">})</span>
+            
+        <span class="k">except</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Moneda no encontrada&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">404</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="n">status</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Solicitud inválida&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="evolucion_cotizacion">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.evolucion_cotizacion">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">evolucion_cotizacion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para mostrar la evolución de las cotizaciones de una moneda específica</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener datos históricos de los últimos 12 meses</span>
+    <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
+    <span class="n">historial</span> <span class="o">=</span> <span class="n">HistorialCotizacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">moneda</span><span class="o">=</span><span class="n">moneda</span><span class="p">,</span>
+        <span class="n">fecha__gte</span><span class="o">=</span><span class="n">fecha_limite</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;fecha&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Si no hay historial, crear algunos datos de ejemplo para demostración</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">historial</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="c1"># Generar algunos datos de ejemplo para los últimos 30 días</span>
+        <span class="n">datos_ejemplo</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">fecha</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1"># Variación pequeña en las tasas para simular evolución</span>
+            <span class="n">variacion</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>  <span class="c1"># Pequeña variación</span>
+            <span class="n">tasa_base</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">variacion</span>
+            
+            <span class="n">datos_ejemplo</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">fecha</span><span class="p">,</span>
+                <span class="s1">&#39;tasa_base&#39;</span><span class="p">:</span> <span class="n">tasa_base</span><span class="p">,</span>
+                <span class="s1">&#39;comision_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+                <span class="s1">&#39;comision_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span><span class="p">,</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">tasa_base</span> <span class="o">-</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">tasa_base</span> <span class="o">+</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Agregar datos actuales</span>
+        <span class="n">datos_ejemplo</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span>
+            <span class="s1">&#39;tasa_base&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">,</span>
+            <span class="s1">&#39;comision_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+            <span class="s1">&#39;comision_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span><span class="p">,</span>
+            <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+            <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="p">})</span>
+        
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
+            <span class="s1">&#39;historial&#39;</span><span class="p">:</span> <span class="n">datos_ejemplo</span><span class="p">,</span>
+            <span class="s1">&#39;datos_json&#39;</span><span class="p">:</span> <span class="n">datos_ejemplo</span>  <span class="c1"># Para JavaScript</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Convertir QuerySet a lista de diccionarios para JSON</span>
+        <span class="n">datos_json</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">registro</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">:</span>
+            <span class="n">datos_json</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">precio_compra</span><span class="p">,</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">precio_venta</span>
+            <span class="p">})</span>
+        
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
+            <span class="s1">&#39;historial&#39;</span><span class="p">:</span> <span class="n">historial</span><span class="p">,</span>
+            <span class="s1">&#39;datos_json&#39;</span><span class="p">:</span> <span class="n">datos_json</span>
+        <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;monedas/evolucion_cotizacion.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="api_evolucion_cotizacion">
+<a class="viewcode-back" href="../../monedas.html#monedas.views.api_evolucion_cotizacion">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">api_evolucion_cotizacion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    API para obtener datos de evolución en formato JSON para gráficos</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Moneda</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener parámetro de rango temporal</span>
+    <span class="n">rango</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rango&#39;</span><span class="p">,</span> <span class="s1">&#39;mes&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Calcular fecha límite según el rango</span>
+    <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;semana&#39;</span><span class="p">:</span>
+        <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;mes&#39;</span><span class="p">:</span>
+        <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;6meses&#39;</span><span class="p">:</span>
+        <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;año&#39;</span><span class="p">:</span>
+        <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fecha_limite</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener historial filtrado</span>
+    <span class="n">historial</span> <span class="o">=</span> <span class="n">HistorialCotizacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">moneda</span><span class="o">=</span><span class="n">moneda</span><span class="p">,</span>
+        <span class="n">fecha__gte</span><span class="o">=</span><span class="n">fecha_limite</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;fecha&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Si no hay historial, generar datos de ejemplo</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">historial</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">datos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dias</span> <span class="o">=</span> <span class="mi">7</span> <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;semana&#39;</span> <span class="k">else</span> <span class="p">(</span><span class="mi">30</span> <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;mes&#39;</span> <span class="k">else</span> <span class="p">(</span><span class="mi">180</span> <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;6meses&#39;</span> <span class="k">else</span> <span class="mi">365</span><span class="p">))</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dias</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">fecha</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">variacion</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+            <span class="n">tasa_base</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">variacion</span>
+            
+            <span class="n">datos</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;fecha_iso&#39;</span><span class="p">:</span> <span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">tasa_base</span> <span class="o">-</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">tasa_base</span> <span class="o">+</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Agregar dato actual</span>
+        <span class="n">datos</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;fecha_iso&#39;</span><span class="p">:</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+            <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">moneda</span><span class="o">.</span><span class="n">comision_venta</span>
+        <span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">datos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">registro</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">:</span>
+            <span class="n">datos</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;fecha_iso&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">),</span>
+                <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">precio_compra</span><span class="p">,</span>
+                <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">registro</span><span class="o">.</span><span class="n">precio_venta</span>
+            <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+        <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;nombre&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
+            <span class="s1">&#39;simbolo&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;datos&#39;</span><span class="p">:</span> <span class="n">datos</span><span class="p">,</span>
+        <span class="s1">&#39;rango&#39;</span><span class="p">:</span> <span class="n">rango</span>
+    <span class="p">})</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

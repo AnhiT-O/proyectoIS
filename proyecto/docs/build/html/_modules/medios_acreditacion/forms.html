@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>medios_acreditacion.forms &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">medios_acreditacion.forms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para medios_acreditacion.forms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Formularios para la gestión de medios de acreditación.</span>
+
+<span class="sd">Este módulo contiene los formularios de Django que manejan la validación y </span>
+<span class="sd">presentación de datos para los medios de acreditación, incluyendo cuentas </span>
+<span class="sd">bancarias y billeteras electrónicas.</span>
+
+<span class="sd">Los formularios incluyen validaciones personalizadas, mensajes de error </span>
+<span class="sd">personalizados y configuración de widgets para mejorar la experiencia del usuario.</span>
+
+<span class="sd">Clases:</span>
+<span class="sd">    CuentaBancariaForm: Formulario para crear y editar cuentas bancarias.</span>
+<span class="sd">    BilleteraForm: Formulario para crear y editar billeteras electrónicas.</span>
+<span class="sd">    TarjetaLocalForm: Formulario para agregar tarjetas locales (Panal y Cabal).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django</span><span class="w"> </span><span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuentaBancaria</span><span class="p">,</span> <span class="n">Billetera</span><span class="p">,</span> <span class="n">TarjetaLocal</span>
+
+
+<div class="viewcode-block" id="CuentaBancariaForm">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.CuentaBancariaForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CuentaBancariaForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para la gestión de cuentas bancarias.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario permite crear y editar cuentas bancarias con validaciones</span>
+<span class="sd">    personalizadas y mensajes de error específicos para cada campo.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        banco: Campo de selección para el banco.</span>
+<span class="sd">        numero_cuenta: Campo de texto para el número de cuenta.</span>
+<span class="sd">        nombre_titular: Campo de texto para el nombre del titular.</span>
+<span class="sd">        nro_documento: Campo de texto para el número de documento.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Campo de selección para el banco con validación personalizada</span>
+    <span class="n">banco</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">CuentaBancaria</span><span class="o">.</span><span class="n">BANCO_CHOICES</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Seleccione el banco al que pertenece la cuenta&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un banco.&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Seleccione el banco donde está registrada la cuenta&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># Campo de texto para el número de cuenta bancaria</span>
+    <span class="n">numero_cuenta</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese el número de cuenta&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de la cuenta bancaria&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de cuenta.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de cuenta no puede exceder los 30 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Ingrese el número de cuenta tal como aparece en el banco&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campo de texto para el nombre completo del titular de la cuenta</span>
+    <span class="n">nombre_titular</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre completo del titular&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre completo tal como aparece en el banco&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el nombre del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El nombre del titular no puede exceder los 100 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Nombre completo del titular tal como está registrado en el banco&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campo de texto para el número de documento del titular</span>
+    <span class="n">nro_documento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de documento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Cédula de identidad, RUC u otro documento&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de documento del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de documento no puede exceder los 20 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Número de cédula, RUC u otro documento de identidad&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="CuentaBancariaForm.Meta">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.CuentaBancariaForm.Meta">[documentos]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Metadatos del formulario CuentaBancariaForm.&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">CuentaBancaria</span>  <span class="c1"># Modelo asociado al formulario</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;banco&#39;</span><span class="p">,</span> <span class="s1">&#39;numero_cuenta&#39;</span><span class="p">,</span> <span class="s1">&#39;nombre_titular&#39;</span><span class="p">,</span> <span class="s1">&#39;nro_documento&#39;</span><span class="p">]</span>  <span class="c1"># Campos a incluir</span></div>
+
+
+<div class="viewcode-block" id="CuentaBancariaForm.clean_banco">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.CuentaBancariaForm.clean_banco">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_banco</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación personalizada para el campo banco.</span>
+<span class="sd">        </span>
+<span class="sd">        Verifica que se haya seleccionado un banco válido y no la opción por defecto.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El valor del banco seleccionado si es válido.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            forms.ValidationError: Si no se seleccionó un banco válido.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">banco</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;banco&#39;</span><span class="p">)</span>
+        <span class="c1"># Verificar que no sea la opción por defecto &quot;-------&quot;</span>
+        <span class="k">if</span> <span class="n">banco</span> <span class="o">==</span> <span class="s1">&#39;-------&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Debes seleccionar un banco válido.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">banco</span></div>
+</div>
+
+
+<div class="viewcode-block" id="BilleteraForm">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.BilleteraForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BilleteraForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para la gestión de billeteras electrónicas.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario permite crear y editar billeteras electrónicas con validaciones</span>
+<span class="sd">    personalizadas y mensajes de error específicos para cada campo.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        tipo_billetera: Campo de selección para el tipo de billetera.</span>
+<span class="sd">        telefono: Campo de texto para el número de teléfono.</span>
+<span class="sd">        nombre_titular: Campo de texto para el nombre del titular.</span>
+<span class="sd">        nro_documento: Campo de texto para el número de documento.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Campo de selección para el tipo de billetera electrónica</span>
+    <span class="n">tipo_billetera</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">Billetera</span><span class="o">.</span><span class="n">TIPO_BILLETERA_CHOICES</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Seleccione el tipo de billetera electrónica&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un tipo de billetera.&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Seleccione el tipo de billetera electrónica&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campo de texto para el número de teléfono asociado a la billetera</span>
+    <span class="n">telefono</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de teléfono&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de teléfono asociado a la billetera&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de teléfono asociado a la billetera.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de teléfono no puede exceder los 15 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Número de teléfono registrado en la billetera electrónica&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campo de texto para el nombre completo del titular de la billetera</span>
+    <span class="n">nombre_titular</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre completo del titular&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre completo tal como está registrado en la billetera&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el nombre del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El nombre del titular no puede exceder los 100 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Nombre completo del titular tal como está registrado en la billetera&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campo de texto para el número de documento del titular</span>
+    <span class="n">nro_documento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de documento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Cédula de identidad, RUC u otro documento&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de documento del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de documento no puede exceder los 20 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Número de cédula, RUC u otro documento de identidad&quot;</span>
+    <span class="p">)</span>
+    
+<div class="viewcode-block" id="BilleteraForm.Meta">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.BilleteraForm.Meta">[documentos]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Metadatos del formulario BilleteraForm.&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Billetera</span>  <span class="c1"># Modelo asociado al formulario</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tipo_billetera&#39;</span><span class="p">,</span> <span class="s1">&#39;telefono&#39;</span><span class="p">,</span> <span class="s1">&#39;nombre_titular&#39;</span><span class="p">,</span> <span class="s1">&#39;nro_documento&#39;</span><span class="p">]</span>  <span class="c1"># Campos a incluir</span></div>
+
+    
+<div class="viewcode-block" id="BilleteraForm.clean_tipo_billetera">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.BilleteraForm.clean_tipo_billetera">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_tipo_billetera</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación personalizada para el campo tipo_billetera.</span>
+<span class="sd">        </span>
+<span class="sd">        Verifica que se haya seleccionado un tipo de billetera válido y no la opción por defecto.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El valor del tipo de billetera seleccionado si es válido.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            forms.ValidationError: Si no se seleccionó un tipo de billetera válido.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tipo_billetera</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_billetera&#39;</span><span class="p">)</span>
+        <span class="c1"># Verificar que no sea la opción por defecto &quot;-------&quot;</span>
+        <span class="k">if</span> <span class="n">tipo_billetera</span> <span class="o">==</span> <span class="s1">&#39;-------&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Debes seleccionar un tipo de billetera válido.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tipo_billetera</span></div>
+</div>
+
+
+<div class="viewcode-block" id="TarjetaLocalForm">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TarjetaLocalForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para agregar tarjetas de crédito locales (Panal y Cabal).</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario maneja la captura y validación de datos de tarjetas locales,</span>
+<span class="sd">    incluyendo validaciones de número de tarjeta, fecha de expiración y CVV.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        brand: Campo de selección para el tipo de tarjeta.</span>
+<span class="sd">        numero_tarjeta: Campo de texto para el número de tarjeta.</span>
+<span class="sd">        nombre_titular: Campo de texto para el nombre del titular.</span>
+<span class="sd">        nro_documento: Campo de texto para el número de documento.</span>
+<span class="sd">        mes_expiracion: Campo de selección para el mes de expiración.</span>
+<span class="sd">        anio_expiracion: Campo de selección para el año de expiración.</span>
+<span class="sd">        cvv: Campo de texto para el código de seguridad.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">brand</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">TarjetaLocal</span><span class="o">.</span><span class="n">TIPO_TARJETA_CHOICES</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Seleccione el tipo de tarjeta&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un tipo de tarjeta.&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Seleccione Panal o Cabal&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">numero_tarjeta</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;1234 5678 9012 3456&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de tarjeta (16 dígitos)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;maxlength&#39;</span><span class="p">:</span> <span class="s1">&#39;19&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de tarjeta.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de tarjeta no puede exceder los 19 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Ingrese el número completo de la tarjeta&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">nombre_titular</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre completo del titular&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Nombre tal como aparece en la tarjeta&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el nombre del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El nombre del titular no puede exceder los 100 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Nombre completo tal como aparece en la tarjeta&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">nro_documento</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Número de documento&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Cédula de identidad del titular&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el número de documento del titular.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El número de documento no puede exceder los 20 caracteres.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Número de cédula del titular de la tarjeta&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">mes_expiracion</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">)],</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Mes de expiración&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar el mes de expiración.&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Mes de expiración (MM)&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">anio_expiracion</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ChoiceField</span><span class="p">(</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="mi">11</span><span class="p">)],</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Año de expiración&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar el año de expiración.&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Año de expiración (AAAA)&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="n">cvv</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">PasswordInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;CVV&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Código de seguridad (3 o 4 dígitos)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;maxlength&#39;</span><span class="p">:</span> <span class="s1">&#39;4&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el código CVV.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="s1">&#39;El CVV no puede exceder los 4 dígitos.&#39;</span>
+        <span class="p">},</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Código de seguridad de 3 o 4 dígitos&quot;</span>
+    <span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el formulario con el cliente asociado.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            cliente: Instancia del cliente al que se agregará la tarjeta.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cliente&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="TarjetaLocalForm.clean_numero_tarjeta">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm.clean_numero_tarjeta">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_numero_tarjeta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación del número de tarjeta.</span>
+<span class="sd">        Limpia espacios y verifica que contenga solo dígitos.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">numero</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;numero_tarjeta&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">numero</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El número de tarjeta debe contener solo dígitos.&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">numero</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El número de tarjeta debe tener 16 dígitos.&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Formatear con espacios para visualización</span>
+        <span class="n">numero_formateado</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">numero</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">numero</span><span class="p">),</span> <span class="mi">4</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">numero_formateado</span></div>
+
+    
+<div class="viewcode-block" id="TarjetaLocalForm.clean_cvv">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm.clean_cvv">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_cvv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación del CVV.</span>
+<span class="sd">        Verifica que contenga solo dígitos y tenga 3 o 4 caracteres.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cvv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cvv&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cvv</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El CVV debe contener solo dígitos.&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cvv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cvv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El CVV debe tener 3 o 4 dígitos.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">cvv</span></div>
+
+    
+<div class="viewcode-block" id="TarjetaLocalForm.clean">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm.clean">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación general del formulario.</span>
+<span class="sd">        Verifica que la fecha de expiración sea válida.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">mes</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mes_expiracion&#39;</span><span class="p">)</span>
+        <span class="n">anio</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;anio_expiracion&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">mes</span> <span class="ow">and</span> <span class="n">anio</span><span class="p">:</span>
+            <span class="n">mes_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mes</span><span class="p">)</span>
+            <span class="n">anio_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anio</span><span class="p">)</span>
+            <span class="n">fecha_actual</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            
+            <span class="c1"># Verificar que la tarjeta no esté expirada</span>
+            <span class="k">if</span> <span class="n">anio_int</span> <span class="o">&lt;</span> <span class="n">fecha_actual</span><span class="o">.</span><span class="n">year</span> <span class="ow">or</span> <span class="p">(</span><span class="n">anio_int</span> <span class="o">==</span> <span class="n">fecha_actual</span><span class="o">.</span><span class="n">year</span> <span class="ow">and</span> <span class="n">mes_int</span> <span class="o">&lt;</span> <span class="n">fecha_actual</span><span class="o">.</span><span class="n">month</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;La tarjeta está expirada.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">cleaned_data</span></div>
+
+    
+<div class="viewcode-block" id="TarjetaLocalForm.save">
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea y guarda la tarjeta local en la base de datos.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            TarjetaLocal: La instancia de la tarjeta creada.</span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si no se especifica cliente o si ocurre algún error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cliente no especificado.&#39;</span><span class="p">)</span>
+        
+        <span class="n">tarjeta</span> <span class="o">=</span> <span class="n">TarjetaLocal</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">cliente</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cliente</span><span class="p">,</span>
+            <span class="n">brand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">],</span>
+            <span class="n">numero_tarjeta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;numero_tarjeta&#39;</span><span class="p">],</span>
+            <span class="n">nombre_titular</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;nombre_titular&#39;</span><span class="p">],</span>
+            <span class="n">nro_documento</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;nro_documento&#39;</span><span class="p">],</span>
+            <span class="n">mes_expiracion</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;mes_expiracion&#39;</span><span class="p">]),</span>
+            <span class="n">anio_expiracion</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;anio_expiracion&#39;</span><span class="p">]),</span>
+            <span class="n">cvv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;cvv&#39;</span><span class="p">],</span>
+            <span class="n">activo</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">tarjeta</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
