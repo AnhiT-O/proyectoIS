@@ -131,6 +131,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.save"><code class="docutils literal notranslate"><span class="pre">VariablesForm.save()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.get_token_status_view"><code class="docutils literal notranslate"><span class="pre">get_token_status_view()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.resend_2fa_token"><code class="docutils literal notranslate"><span class="pre">resend_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.send_2fa_token"><code class="docutils literal notranslate"><span class="pre">send_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.verify_2fa_token"><code class="docutils literal notranslate"><span class="pre">verify_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.cleanup_expired_tokens"><code class="docutils literal notranslate"><span class="pre">cleanup_expired_tokens()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.create_transaction_token"><code class="docutils literal notranslate"><span class="pre">create_transaction_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.generate_2fa_token"><code class="docutils literal notranslate"><span class="pre">generate_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.get_token_status"><code class="docutils literal notranslate"><span class="pre">get_token_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.is_2fa_enabled"><code class="docutils literal notranslate"><span class="pre">is_2fa_enabled()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.send_2fa_email"><code class="docutils literal notranslate"><span class="pre">send_2fa_email()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.validate_2fa_token"><code class="docutils literal notranslate"><span class="pre">validate_2fa_token()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
@@ -217,6 +228,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.save"><code class="docutils literal notranslate"><span class="pre">VariablesForm.save()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.get_token_status_view"><code class="docutils literal notranslate"><span class="pre">get_token_status_view()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.resend_2fa_token"><code class="docutils literal notranslate"><span class="pre">resend_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.send_2fa_token"><code class="docutils literal notranslate"><span class="pre">send_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.verify_2fa_token"><code class="docutils literal notranslate"><span class="pre">verify_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.cleanup_expired_tokens"><code class="docutils literal notranslate"><span class="pre">cleanup_expired_tokens()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.create_transaction_token"><code class="docutils literal notranslate"><span class="pre">create_transaction_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.generate_2fa_token"><code class="docutils literal notranslate"><span class="pre">generate_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.get_token_status"><code class="docutils literal notranslate"><span class="pre">get_token_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.is_2fa_enabled"><code class="docutils literal notranslate"><span class="pre">is_2fa_enabled()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.send_2fa_email"><code class="docutils literal notranslate"><span class="pre">send_2fa_email()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.validate_2fa_token"><code class="docutils literal notranslate"><span class="pre">validate_2fa_token()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
@@ -1408,6 +1430,703 @@ de límites globales con los nuevos valores del formulario.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<p id="module-transacciones.views_2fa">Vistas específicas para autenticación de dos factores (2FA) en transacciones.</p>
+<p>Este módulo contiene las vistas AJAX y de procesamiento específicas
+para manejar el flujo de 2FA en transacciones.</p>
+<dl class="simple">
+<dt>Funcionalidades:</dt><dd><ul class="simple">
+<li><p>Envío de tokens 2FA por email</p></li>
+<li><p>Verificación de tokens ingresados por el usuario</p></li>
+<li><p>Consulta de estado de tokens</p></li>
+<li><p>Reenvío de tokens expirados o perdidos</p></li>
+</ul>
+</dd>
+<dt>Endpoints:</dt><dd><p>POST /transacciones/2fa/send/ - Enviar token 2FA
+POST /transacciones/2fa/verify/ - Verificar token ingresado
+GET  /transacciones/2fa/status/ - Consultar estado del token
+POST /transacciones/2fa/resend/ - Reenviar token</p>
+</dd>
+</dl>
+<p>Todas las vistas requieren autenticación de usuario y devuelven
+respuestas JSON para ser consumidas por JavaScript en el frontend.</p>
+<p>Author: Sistema de Desarrollo Global Exchange
+Date: 2025</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views_2fa.get_token_status_view">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views_2fa.</span></span><span class="sig-name descname"><span class="pre">get_token_status_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views_2fa.html#get_token_status_view"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views_2fa.get_token_status_view" title="Link to this definition"></a></dt>
+<dd><p>Vista AJAX para obtener el estado actual del token del usuario.</p>
+<p>Consulta y devuelve información sobre el token más reciente del usuario,
+incluyendo si existe, si es válido, y tiempo restante hasta expiración.
+Útil para actualizar la UI del frontend (temporizadores, etc.).</p>
+<dl class="simple">
+<dt>Decoradores:</dt><dd><p>&#64;login_required: Requiere usuario autenticado
+&#64;require_http_methods([«GET»]): Solo acepta método GET</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto request de Django con:
+- user: Usuario autenticado</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Respuesta JSON con estructura:</dt><dd><dl>
+<dt>En caso de éxito:</dt><dd><dl>
+<dt>{</dt><dd><p>“success”: True,
+“token_status”: {</p>
+<blockquote>
+<div><p>”exists”: bool - Si existe un token,
+“valid”: bool - Si el token es válido,
+“expires_at”: datetime - Fecha de expiración,
+“created_at”: datetime - Fecha de creación,
+“time_remaining”: float - Segundos restantes,
+“message”: str - Descripción del estado</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+<dt>En caso de error:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: False,
+“message”: str - Descripción del error,
+“error”: str - Código de error</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl>
+<dt>Códigos de error:</dt><dd><ul class="simple">
+<li><p>2FA_DISABLED: El sistema 2FA no está habilitado</p></li>
+<li><p>SERVER_ERROR: Error interno del servidor</p></li>
+</ul>
+</dd>
+<dt>Example (JavaScript):</dt><dd><p>fetch(“/transacciones/2fa/status/”)
+.then(response =&gt; response.json())
+.then(data =&gt; {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>if (data.success &amp;&amp; data.token_status.valid) {</dt><dd><p>const seconds = data.token_status.time_remaining;
+updateCountdown(seconds);</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>});</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>No modifica el estado del token</p></li>
+<li><p>Puede llamarse repetidamente para actualizar el estado</p></li>
+<li><p>Útil para implementar temporizadores en el frontend</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views_2fa.resend_2fa_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views_2fa.</span></span><span class="sig-name descname"><span class="pre">resend_2fa_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views_2fa.html#resend_2fa_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views_2fa.resend_2fa_token" title="Link to this definition"></a></dt>
+<dd><p>Vista AJAX para reenviar el token 2FA.</p>
+<p>Genera un nuevo token y lo envía por email. Útil cuando el token anterior
+ha expirado o el usuario no recibió el email. Invalida el token anterior
+al crear uno nuevo.</p>
+<dl class="simple">
+<dt>Decoradores:</dt><dd><p>&#64;login_required: Requiere usuario autenticado
+&#64;require_http_methods([«POST»]): Solo acepta método POST</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto request de Django con:
+- user: Usuario autenticado
+- session[“transaccion_id”]: ID de la transacción pendiente</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Respuesta JSON con estructura:</dt><dd><dl>
+<dt>En caso de éxito:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: True,
+“message”: str - Mensaje de confirmación,
+“expires_at”: str - Fecha de expiración ISO format,
+“expiry_minutes”: int - Minutos de validez del nuevo token</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+<dt>En caso de error:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: False,
+“message”: str - Descripción del error,
+“error”: str - Código de error</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl>
+<dt>Códigos de error:</dt><dd><ul class="simple">
+<li><p>2FA_DISABLED: El sistema 2FA no está habilitado</p></li>
+<li><p>NO_EMAIL: El usuario no tiene email registrado</p></li>
+<li><p>NO_TRANSACTION_DATA: No se encontró transacción en la sesión</p></li>
+<li><p>TRANSACTION_NOT_FOUND: La transacción no existe en la BD</p></li>
+<li><p>EMAIL_SEND_FAILED: Error al enviar el email</p></li>
+<li><p>SERVER_ERROR: Error interno del servidor</p></li>
+</ul>
+</dd>
+<dt>Example (JavaScript):</dt><dd><dl class="simple">
+<dt>fetch(“/transacciones/2fa/resend/”, {</dt><dd><p>method: “POST”,
+headers: {“X-CSRFToken”: csrftoken}</p>
+</dd>
+</dl>
+<p>})
+.then(response =&gt; response.json())
+.then(data =&gt; {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>if (data.success) {</dt><dd><p>alert(“Nuevo código enviado a tu email”);
+resetCountdown(data.expiry_minutes * 60);</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>});</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Invalida automáticamente el token anterior</p></li>
+<li><p>El nuevo token tiene la misma duración que el anterior</p></li>
+<li><p>Requiere que exista transaccion_id en la sesión</p></li>
+<li><p>Útil para implementar botón «Reenviar código»</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views_2fa.send_2fa_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views_2fa.</span></span><span class="sig-name descname"><span class="pre">send_2fa_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views_2fa.html#send_2fa_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views_2fa.send_2fa_token" title="Link to this definition"></a></dt>
+<dd><p>Vista AJAX para enviar token 2FA al email del usuario.</p>
+<p>Se llama cuando el usuario hace clic en «Confirmar transacción».
+Obtiene los datos de la transacción de la sesión, genera un token
+y lo envía por email.</p>
+<dl class="simple">
+<dt>Decoradores:</dt><dd><p>&#64;login_required: Requiere usuario autenticado
+&#64;require_http_methods([«POST»]): Solo acepta método POST</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto request de Django con:
+- user: Usuario autenticado
+- session[“transaccion_id”]: ID de la transacción pendiente</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Respuesta JSON con estructura:</dt><dd><dl>
+<dt>En caso de éxito:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: True,
+“message”: str - Mensaje de confirmación,
+“expires_at”: str - Fecha de expiración ISO format,
+“expiry_minutes”: int - Minutos de validez del token</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+<dt>En caso de error:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: False,
+“message”: str - Descripción del error,
+“error”: str - Código de error</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl>
+<dt>Códigos de error:</dt><dd><ul class="simple">
+<li><p>2FA_DISABLED: El sistema 2FA no está habilitado</p></li>
+<li><p>NO_EMAIL: El usuario no tiene email registrado</p></li>
+<li><p>NO_TRANSACTION_DATA: No se encontró transacción en la sesión</p></li>
+<li><p>TRANSACTION_NOT_FOUND: La transacción no existe en la BD</p></li>
+<li><p>EMAIL_SEND_FAILED: Error al enviar el email</p></li>
+<li><p>SERVER_ERROR: Error interno del servidor</p></li>
+</ul>
+</dd>
+<dt>Example (JavaScript):</dt><dd><dl class="simple">
+<dt>fetch(“/transacciones/2fa/send/”, {</dt><dd><p>method: “POST”,
+headers: {“X-CSRFToken”: csrftoken}</p>
+</dd>
+</dl>
+<p>})
+.then(response =&gt; response.json())
+.then(data =&gt; {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>if (data.success) {</dt><dd><p>console.log(“Token enviado, expira en:”, data.expiry_minutes);</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>});</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Requiere que exista transaccion_id en la sesión</p></li>
+<li><p>El token se envía al email del usuario autenticado</p></li>
+<li><p>El token expira según la configuración TOKEN_EXPIRY_MINUTES</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views_2fa.verify_2fa_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views_2fa.</span></span><span class="sig-name descname"><span class="pre">verify_2fa_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views_2fa.html#verify_2fa_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views_2fa.verify_2fa_token" title="Link to this definition"></a></dt>
+<dd><p>Vista AJAX para verificar el token 2FA ingresado por el usuario.</p>
+<p>Valida el token ingresado contra el token almacenado en la base de datos.
+Si es válido, prepara la transacción para continuar con el flujo normal.</p>
+<dl class="simple">
+<dt>Decoradores:</dt><dd><p>&#64;login_required: Requiere usuario autenticado
+&#64;require_http_methods([«POST»]): Solo acepta método POST</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto request de Django con:
+- user: Usuario autenticado
+- body: JSON con {“token”: str} - Token de 6 dígitos ingresado</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Respuesta JSON con estructura:</dt><dd><dl>
+<dt>En caso de éxito:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: True,
+“message”: str - Mensaje de confirmación,
+“transaccion_id”: int - ID de la transacción verificada,
+“redirect_url”: str - URL para redirección</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+<dt>En caso de error:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“success”: False,
+“message”: str - Descripción del error,
+“error”: str - Código de error</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl>
+<dt>Códigos de error:</dt><dd><ul class="simple">
+<li><p>2FA_DISABLED: El sistema 2FA no está habilitado</p></li>
+<li><p>EMPTY_TOKEN: No se ingresó ningún token</p></li>
+<li><p>INVALID_FORMAT: El token no tiene el formato correcto (6 dígitos)</p></li>
+<li><p>NO_TOKEN_FOUND: No hay token pendiente para el usuario</p></li>
+<li><p>TOKEN_EXPIRED: El token ha expirado</p></li>
+<li><p>INVALID_TOKEN: El token ingresado es incorrecto</p></li>
+<li><p>TRANSACTION_NOT_FOUND: La transacción no existe</p></li>
+<li><p>INVALID_JSON: Los datos enviados no son JSON válido</p></li>
+<li><p>SERVER_ERROR: Error interno del servidor</p></li>
+</ul>
+</dd>
+<dt>Example (JavaScript):</dt><dd><dl>
+<dt>fetch(“/transacciones/2fa/verify/”, {</dt><dd><p>method: “POST”,
+headers: {</p>
+<blockquote>
+<div><p>“Content-Type”: “application/json”,
+“X-CSRFToken”: csrftoken</p>
+</div></blockquote>
+<p>},
+body: JSON.stringify({token: “123456”})</p>
+</dd>
+</dl>
+<p>})
+.then(response =&gt; response.json())
+.then(data =&gt; {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>if (data.success) {</dt><dd><p>window.location.href = data.redirect_url;</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>});</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>El token debe ser exactamente 6 dígitos numéricos</p></li>
+<li><p>El token se marca como usado después de una verificación exitosa</p></li>
+<li><p>La URL de redirección depende del tipo de transacción (compra/venta)</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<p id="module-transacciones.utils_2fa">Utilidades para autenticación de dos factores (2FA) en transacciones.</p>
+<p>Este módulo contiene todas las funciones necesarias para implementar
+el sistema de autenticación de dos factores para transacciones,
+incluyendo generación de tokens, envío de emails y validaciones.</p>
+<dl>
+<dt>Funcionalidades principales:</dt><dd><ul class="simple">
+<li><p>Verificación de estado de 2FA en el sistema</p></li>
+<li><p>Generación de tokens aleatorios de 6 dígitos</p></li>
+<li><p>Envío de tokens por email</p></li>
+<li><p>Validación de tokens ingresados por usuarios</p></li>
+<li><p>Gestión del ciclo de vida de tokens (creación, validación, expiración)</p></li>
+<li><p>Limpieza de tokens expirados</p></li>
+</ul>
+</dd>
+<dt>Configuración requerida en settings.py:</dt><dd><p>ENABLE_2FA_TRANSACTIONS: bool - Habilita/deshabilita el sistema 2FA
+TWO_FACTOR_AUTH: dict - Configuración de parámetros del sistema 2FA</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>TOKEN_LENGTH: int - Longitud del token (default: 6)</p></li>
+<li><p>TOKEN_EXPIRY_MINUTES: int - Minutos de validez del token (default: 1)</p></li>
+<li><p>EMAIL_SUBJECT: str - Asunto del email</p></li>
+<li><p>EMAIL_FROM: str - Email remitente</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+<p>Author: Sistema de Desarrollo Global Exchange
+Date: 2025</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.cleanup_expired_tokens">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">cleanup_expired_tokens</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#cleanup_expired_tokens"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.cleanup_expired_tokens" title="Link to this definition"></a></dt>
+<dd><p>Limpia tokens expirados de la base de datos.</p>
+<p>Elimina todos los tokens cuya fecha de expiración sea anterior al momento
+actual. Esta función es útil para mantener la base de datos limpia y
+mejorar el rendimiento.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Número de tokens eliminados</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">deleted_count</span> <span class="o">=</span> <span class="n">cleanup_expired_tokens</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Se eliminaron </span><span class="si">{</span><span class="n">deleted_count</span><span class="si">}</span><span class="s2"> tokens expirados&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Esta función debería ejecutarse periódicamente (cron job, celery task, etc.)</p></li>
+<li><p>No afecta a tokens válidos aún no expirados</p></li>
+<li><p>Registra el resultado en el logger del módulo</p></li>
+<li><p>Es seguro ejecutarla múltiples veces</p></li>
+</ul>
+</div>
+<dl>
+<dt>Suggested Usage:</dt><dd><p>Configurar como tarea periódica en celery:</p>
+<p>&#64;periodic_task(run_every=timedelta(hours=1))
+def cleanup_tokens():</p>
+<blockquote>
+<div><p>from transacciones.utils_2fa import cleanup_expired_tokens
+cleanup_expired_tokens()</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.create_transaction_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">create_transaction_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#create_transaction_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.create_transaction_token" title="Link to this definition"></a></dt>
+<dd><p>Crea un token de transacción y envía el email de verificación.</p>
+<p>Esta es la función principal para iniciar el flujo 2FA. Genera un token,
+lo almacena en la base de datos asociado a los datos de la transacción,
+y envía el token al usuario por email.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>usuario</strong> (<a class="reference internal" href="usuarios.html#usuarios.models.Usuario" title="usuarios.models.Usuario"><em>Usuario</em></a>) – Usuario para el que crear el token</p></li>
+<li><p><strong>transaccion_data</strong> (<em>dict</em>) – Datos de la transacción a almacenar. Debe contener:
+- transaccion_id: int - ID de la transacción
+- cliente_id: int - ID del cliente
+- tipo: str - Tipo de transacción (“compra” o “venta”)
+- monto: str - Monto de la transacción
+- moneda_id: int - ID de la moneda
+- precio_final: Decimal - Precio final calculado
+- medio_pago: str - Medio de pago seleccionado (opcional)
+- medio_cobro: str - Medio de cobro seleccionado (opcional)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con el resultado de la operación:</dt><dd><ul class="simple">
+<li><p>success (bool): True si se creó y envió correctamente</p></li>
+<li><p>message (str): Mensaje descriptivo del resultado</p></li>
+<li><p>token_id (int): ID del token creado (solo si success=True)</p></li>
+<li><p>expires_at (datetime): Fecha de expiración (solo si success=True)</p></li>
+<li><p>error (str): Código de error (solo si success=False)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">transaccion_data</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;cliente_id&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;tipo&#39;</span><span class="p">:</span> <span class="s1">&#39;compra&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;monto&#39;</span><span class="p">:</span> <span class="s1">&#39;100.00&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;moneda_id&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;precio_final&#39;</span><span class="p">:</span> <span class="mi">700000</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">create_transaction_token</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">transaccion_data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Token enviado, expira: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;expires_at&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Si el envío del email falla, el token se elimina automáticamente</p></li>
+<li><p>El token tiene una duración limitada según TOKEN_EXPIRY_MINUTES</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.generate_2fa_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">generate_2fa_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#generate_2fa_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.generate_2fa_token" title="Link to this definition"></a></dt>
+<dd><p>Genera un token aleatorio de dígitos numéricos.</p>
+<p>Utiliza la configuración TOKEN_LENGTH del sistema para determinar
+la longitud del token. Por defecto genera 6 dígitos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Token numérico aleatorio</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">token</span> <span class="o">=</span> <span class="n">generate_2fa_token</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>El token generado es aleatorio y no se garantiza que sea único
+sin validación adicional contra la base de datos.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.get_token_status">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">get_token_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#get_token_status"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.get_token_status" title="Link to this definition"></a></dt>
+<dd><p>Obtiene el estado del token actual del usuario.</p>
+<p>Consulta el token más reciente no usado del usuario y devuelve información
+detallada sobre su estado (si existe, si es válido, tiempo restante, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>usuario</strong> (<a class="reference internal" href="usuarios.html#usuarios.models.Usuario" title="usuarios.models.Usuario"><em>Usuario</em></a>) – Usuario para verificar el estado del token</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con información del estado del token:</dt><dd><ul class="simple">
+<li><p>exists (bool): True si existe un token pendiente</p></li>
+<li><p>valid (bool): True si el token es válido (no expirado)</p></li>
+<li><p>expires_at (datetime): Fecha de expiración (solo si exists=True)</p></li>
+<li><p>created_at (datetime): Fecha de creación (solo si exists=True)</p></li>
+<li><p>time_remaining (float): Segundos restantes hasta expiración (solo si valid=True)</p></li>
+<li><p>message (str): Mensaje descriptivo del estado</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">status</span> <span class="o">=</span> <span class="n">get_token_status</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s1">&#39;valid&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>    <span class="n">remaining</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s1">&#39;time_remaining&#39;</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Token válido por </span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s2"> segundos más&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Útil para mostrar información en el frontend (temporizador, etc.)</p></li>
+<li><p>No modifica el estado del token</p></li>
+<li><p>Siempre busca el token más reciente no usado</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.is_2fa_enabled">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">is_2fa_enabled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#is_2fa_enabled"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.is_2fa_enabled" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el 2FA está habilitado globalmente en el sistema.</p>
+<p>Esta función consulta la configuración del sistema para determinar
+si la autenticación de dos factores está activa para las transacciones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si el 2FA está habilitado, False en caso contrario</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">send_2fa_token</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">process_transaction_directly</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.send_2fa_email">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">send_2fa_email</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#send_2fa_email"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.send_2fa_email" title="Link to this definition"></a></dt>
+<dd><p>Envía un email con el token 2FA al usuario.</p>
+<p>Renderiza un template HTML con el token y lo envía al email del usuario.
+También genera una versión de texto plano como fallback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>usuario</strong> (<a class="reference internal" href="usuarios.html#usuarios.models.Usuario" title="usuarios.models.Usuario"><em>Usuario</em></a>) – Usuario al que enviar el token. Debe tener un email válido.</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – Token numérico a enviar al usuario</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si el email se envió correctamente, False en caso contrario</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>No lanza excepciones</strong><strong>, </strong><strong>las captura y registra en el log.</strong> – </p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;test_user&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token</span> <span class="o">=</span> <span class="s1">&#39;123456&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">success</span> <span class="o">=</span> <span class="n">send_2fa_email</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Email enviado correctamente&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Requiere configuración SMTP válida en settings.py</p></li>
+<li><p>Utiliza el template “transacciones/emails/2fa_token.html”</p></li>
+<li><p>Registra el resultado en el logger del módulo</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.utils_2fa.validate_2fa_token">
+<span class="sig-prename descclassname"><span class="pre">transacciones.utils_2fa.</span></span><span class="sig-name descname"><span class="pre">validate_2fa_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/utils_2fa.html#validate_2fa_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.utils_2fa.validate_2fa_token" title="Link to this definition"></a></dt>
+<dd><p>Valida un token 2FA ingresado por el usuario.</p>
+<p>Busca el token más reciente no usado del usuario, verifica que no haya
+expirado y que coincida con el token ingresado. Si es válido, marca el
+token como usado y devuelve los datos de la transacción asociada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>usuario</strong> (<a class="reference internal" href="usuarios.html#usuarios.models.Usuario" title="usuarios.models.Usuario"><em>Usuario</em></a>) – Usuario que intenta validar el token</p></li>
+<li><p><strong>token_input</strong> (<em>str</em>) – Token numérico ingresado por el usuario</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con el resultado de la validación:</dt><dd><ul class="simple">
+<li><p>success (bool): True si el token es válido</p></li>
+<li><p>message (str): Mensaje descriptivo del resultado</p></li>
+<li><p>transaccion_data (dict): Datos de la transacción (solo si success=True)</p></li>
+<li><p>error (str): Código de error (solo si success=False)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Posibles errores:</dt><dd><ul class="simple">
+<li><p>NO_TOKEN_FOUND: No hay token pendiente para el usuario</p></li>
+<li><p>TOKEN_EXPIRED: El token ha expirado</p></li>
+<li><p>INVALID_TOKEN: El token ingresado no coincide</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">validate_2fa_token</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;123456&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>    <span class="n">transaccion_data</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;transaccion_data&#39;</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="n">process_transaction</span><span class="p">(</span><span class="n">transaccion_data</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Los tokens expirados se eliminan automáticamente al ser detectados</p></li>
+<li><p>Un token solo puede usarse una vez</p></li>
+<li><p>Busca solo entre tokens no usados del usuario</p></li>
+</ul>
+</div>
 </dd></dl>
 
 </section>

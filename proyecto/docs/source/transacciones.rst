@@ -20,3 +20,15 @@ Para las operaciones de compra/venta de monedas extranjeras.
     :undoc-members:
     :show-inheritance:   
     :exclude-members: _state, _meta, objects
+
+.. automodule:: transacciones.views_2fa
+    :members:
+    :undoc-members:
+    :show-inheritance:   
+    :exclude-members: _state, _meta, objects
+
+.. automodule:: transacciones.utils_2fa
+    :members:
+    :undoc-members:
+    :show-inheritance:   
+    :exclude-members: _state, _meta, objects

@@ -270,6 +270,8 @@
 </li>
       <li><a href="usuarios.html#usuarios.forms.EditarPerfilForm.clean_username">clean_username() (método de usuarios.forms.EditarPerfilForm)</a>
 </li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.cleanup_expired_tokens">cleanup_expired_tokens() (en el módulo transacciones.utils_2fa)</a>
+</li>
       <li><a href="clientes.html#clientes.forms.AgregarTarjetaForm.cliente">cliente (atributo de clientes.forms.AgregarTarjetaForm)</a>
 
       <ul>
@@ -366,6 +368,8 @@
       <li><a href="roles.html#roles.models.crear_roles_predefinidos">crear_roles_predefinidos() (en el módulo roles.models)</a>
 </li>
       <li><a href="monedas.html#monedas.models.crear_stock_guaranies_inicial">crear_stock_guaranies_inicial() (en el módulo monedas.models)</a>
+</li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.create_transaction_token">create_transaction_token() (en el módulo transacciones.utils_2fa)</a>
 </li>
       <li><a href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria">CuentaBancaria (clase en medios_acreditacion.models)</a>
 </li>
@@ -513,6 +517,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="transacciones.html#transacciones.models.generar_token_transaccion">generar_token_transaccion() (en el módulo transacciones.models)</a>
 </li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.generate_2fa_token">generate_2fa_token() (en el módulo transacciones.utils_2fa)</a>
+</li>
       <li><a href="transacciones.html#transacciones.models.TransactionToken.generate_token">generate_token() (método de clase de transacciones.models.TransactionToken)</a>
 </li>
       <li><a href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria.get_banco_display">get_banco_display() (método de medios_acreditacion.models.CuentaBancaria)</a>
@@ -537,10 +543,10 @@
 </li>
       <li><a href="transacciones.html#transacciones.models.Transaccion.get_next_by_fecha_hora">get_next_by_fecha_hora() (método de transacciones.models.Transaccion)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="monedas.html#monedas.models.HistorialCotizacion.get_next_by_fecha_registro">get_next_by_fecha_registro() (método de monedas.models.HistorialCotizacion)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado">get_numero_enmascarado() (método de medios_acreditacion.models.TarjetaLocal)</a>
 </li>
       <li><a href="monedas.html#monedas.models.Moneda.get_precios_cliente">get_precios_cliente() (método de monedas.models.Moneda)</a>
@@ -567,6 +573,10 @@
 </li>
       <li><a href="clientes.html#clientes.models.Cliente.get_tipo_documento_display">get_tipo_documento_display() (método de clientes.models.Cliente)</a>
 </li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.get_token_status">get_token_status() (en el módulo transacciones.utils_2fa)</a>
+</li>
+      <li><a href="transacciones.html#transacciones.views_2fa.get_token_status_view">get_token_status_view() (en el módulo transacciones.views_2fa)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -592,6 +602,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="proyecto.html#proyecto.views.inicio">inicio() (en el módulo proyecto.views)</a>
+</li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.is_2fa_enabled">is_2fa_enabled() (en el módulo transacciones.utils_2fa)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -762,7 +774,11 @@
 </li>
         <li><a href="transacciones.html#module-transacciones.models">transacciones.models</a>
 </li>
+        <li><a href="transacciones.html#module-transacciones.utils_2fa">transacciones.utils_2fa</a>
+</li>
         <li><a href="transacciones.html#module-transacciones.views">transacciones.views</a>
+</li>
+        <li><a href="transacciones.html#module-transacciones.views_2fa">transacciones.views_2fa</a>
 </li>
         <li><a href="usuarios.html#module-usuarios.forms">usuarios.forms</a>
 </li>
@@ -972,10 +988,12 @@
 </li>
       <li><a href="monedas.html#monedas.forms.NoBracketsArrayWidget.render">render() (método de monedas.forms.NoBracketsArrayWidget)</a>
 </li>
-      <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
+      <li><a href="transacciones.html#transacciones.views_2fa.resend_2fa_token">resend_2fa_token() (en el módulo transacciones.views_2fa)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usuarios.html#usuarios.views.reset_password_confirm">reset_password_confirm() (en el módulo usuarios.views)</a>
+</li>
       <li><a href="transacciones.html#transacciones.views.revisar_tausers">revisar_tausers() (en el módulo transacciones.views)</a>
 </li>
       <li><a href="usuarios.html#usuarios.forms.AsignarRolForm.rol">rol (atributo de usuarios.forms.AsignarRolForm)</a>
@@ -1052,6 +1070,10 @@
 </li>
       <li><a href="transacciones.html#transacciones.forms.SeleccionMonedaMontoForm">SeleccionMonedaMontoForm (clase en transacciones.forms)</a>
 </li>
+      <li><a href="transacciones.html#transacciones.utils_2fa.send_2fa_email">send_2fa_email() (en el módulo transacciones.utils_2fa)</a>
+</li>
+      <li><a href="transacciones.html#transacciones.views_2fa.send_2fa_token">send_2fa_token() (en el módulo transacciones.views_2fa)</a>
+</li>
       <li><a href="proyecto.html#proyecto.forms.SimuladorForm">SimuladorForm (clase en proyecto.forms)</a>
 </li>
       <li><a href="proyecto.html#proyecto.views.simular">simular() (en el módulo proyecto.views)</a>
@@ -1098,12 +1120,12 @@
 </li>
       <li><a href="medios_acreditacion.html#medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES">TIPO_BILLETERA_CHOICES (atributo de medios_acreditacion.models.Billetera)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.TIPO_CLIENTE_CHOICES">TIPO_CLIENTE_CHOICES (atributo de clientes.models.Cliente)</a>, <a href="clientes.html#id1">[1]</a>
 </li>
       <li><a href="usuarios.html#usuarios.models.Usuario.tipo_documento">tipo_documento (atributo de usuarios.models.Usuario)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="clientes.html#clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES">TIPO_DOCUMENTO_CHOICES (atributo de clientes.models.Cliente)</a>, <a href="clientes.html#id2">[1]</a>
 </li>
       <li><a href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.TIPO_TARJETA_CHOICES">TIPO_TARJETA_CHOICES (atributo de medios_acreditacion.models.TarjetaLocal)</a>
@@ -1129,10 +1151,24 @@
 </li>
       </ul></li>
       <li>
+    transacciones.utils_2fa
+
+      <ul>
+        <li><a href="transacciones.html#module-transacciones.utils_2fa">module</a>
+</li>
+      </ul></li>
+      <li>
     transacciones.views
 
       <ul>
         <li><a href="transacciones.html#module-transacciones.views">module</a>
+</li>
+      </ul></li>
+      <li>
+    transacciones.views_2fa
+
+      <ul>
+        <li><a href="transacciones.html#module-transacciones.views_2fa">module</a>
 </li>
       </ul></li>
       <li><a href="transacciones.html#transacciones.models.TransactionToken">TransactionToken (clase en transacciones.models)</a>
@@ -1194,6 +1230,8 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="transacciones.html#transacciones.utils_2fa.validate_2fa_token">validate_2fa_token() (en el módulo transacciones.utils_2fa)</a>
+</li>
       <li><a href="transacciones.html#transacciones.forms.VariablesForm">VariablesForm (clase en transacciones.forms)</a>
 </li>
       <li><a href="transacciones.html#transacciones.views.venta_confirmacion">venta_confirmacion() (en el módulo transacciones.views)</a>
@@ -1221,6 +1259,8 @@
       <li><a href="monedas.html#monedas.views.verificar_cambios_precios">verificar_cambios_precios() (en el módulo monedas.views)</a>
 </li>
       <li><a href="transacciones.html#transacciones.views.verificar_estado_tauser">verificar_estado_tauser() (en el módulo transacciones.views)</a>
+</li>
+      <li><a href="transacciones.html#transacciones.views_2fa.verify_2fa_token">verify_2fa_token() (en el módulo transacciones.views_2fa)</a>
 </li>
   </ul></td>
 </tr></table>

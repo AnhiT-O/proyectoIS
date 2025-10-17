@@ -1,0 +1,665 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transacciones.views_2fa &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">transacciones.views_2fa</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para transacciones.views_2fa</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Vistas específicas para autenticación de dos factores (2FA) en transacciones.</span>
+
+<span class="sd">Este módulo contiene las vistas AJAX y de procesamiento específicas</span>
+<span class="sd">para manejar el flujo de 2FA en transacciones.</span>
+
+<span class="sd">Funcionalidades:</span>
+<span class="sd">    - Envío de tokens 2FA por email</span>
+<span class="sd">    - Verificación de tokens ingresados por el usuario</span>
+<span class="sd">    - Consulta de estado de tokens</span>
+<span class="sd">    - Reenvío de tokens expirados o perdidos</span>
+
+<span class="sd">Endpoints:</span>
+<span class="sd">    POST /transacciones/2fa/send/ - Enviar token 2FA</span>
+<span class="sd">    POST /transacciones/2fa/verify/ - Verificar token ingresado</span>
+<span class="sd">    GET  /transacciones/2fa/status/ - Consultar estado del token</span>
+<span class="sd">    POST /transacciones/2fa/resend/ - Reenviar token</span>
+
+<span class="sd">Todas las vistas requieren autenticación de usuario y devuelven</span>
+<span class="sd">respuestas JSON para ser consumidas por JavaScript en el frontend.</span>
+
+<span class="sd">Author: Sistema de Desarrollo Global Exchange  </span>
+<span class="sd">Date: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.views.decorators.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_http_methods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.views.decorators.csrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">csrf_exempt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">method_decorator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils_2fa</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">is_2fa_enabled</span><span class="p">,</span> <span class="n">create_transaction_token</span><span class="p">,</span> 
+    <span class="n">validate_2fa_token</span><span class="p">,</span> <span class="n">get_token_status</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transaccion</span><span class="p">,</span> <span class="n">calcular_conversion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="send_2fa_token">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.views_2fa.send_2fa_token">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@require_http_methods</span><span class="p">([</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">send_2fa_token</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista AJAX para enviar token 2FA al email del usuario.</span>
+<span class="sd">    </span>
+<span class="sd">    Se llama cuando el usuario hace clic en &quot;Confirmar transacción&quot;.</span>
+<span class="sd">    Obtiene los datos de la transacción de la sesión, genera un token</span>
+<span class="sd">    y lo envía por email.</span>
+<span class="sd">    </span>
+<span class="sd">    Decoradores:</span>
+<span class="sd">        @login_required: Requiere usuario autenticado</span>
+<span class="sd">        @require_http_methods([&quot;POST&quot;]): Solo acepta método POST</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto request de Django con:</span>
+<span class="sd">            - user: Usuario autenticado</span>
+<span class="sd">            - session[&#39;transaccion_id&#39;]: ID de la transacción pendiente</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta JSON con estructura:</span>
+<span class="sd">            En caso de éxito:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: True,</span>
+<span class="sd">                    &#39;message&#39;: str - Mensaje de confirmación,</span>
+<span class="sd">                    &#39;expires_at&#39;: str - Fecha de expiración ISO format,</span>
+<span class="sd">                    &#39;expiry_minutes&#39;: int - Minutos de validez del token</span>
+<span class="sd">                }</span>
+<span class="sd">            En caso de error:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: False,</span>
+<span class="sd">                    &#39;message&#39;: str - Descripción del error,</span>
+<span class="sd">                    &#39;error&#39;: str - Código de error</span>
+<span class="sd">                }</span>
+<span class="sd">    </span>
+<span class="sd">    Códigos de error:</span>
+<span class="sd">        - 2FA_DISABLED: El sistema 2FA no está habilitado</span>
+<span class="sd">        - NO_EMAIL: El usuario no tiene email registrado</span>
+<span class="sd">        - NO_TRANSACTION_DATA: No se encontró transacción en la sesión</span>
+<span class="sd">        - TRANSACTION_NOT_FOUND: La transacción no existe en la BD</span>
+<span class="sd">        - EMAIL_SEND_FAILED: Error al enviar el email</span>
+<span class="sd">        - SERVER_ERROR: Error interno del servidor</span>
+<span class="sd">        </span>
+<span class="sd">    Example (JavaScript):</span>
+<span class="sd">        fetch(&#39;/transacciones/2fa/send/&#39;, {</span>
+<span class="sd">            method: &#39;POST&#39;,</span>
+<span class="sd">            headers: {&#39;X-CSRFToken&#39;: csrftoken}</span>
+<span class="sd">        })</span>
+<span class="sd">        .then(response =&gt; response.json())</span>
+<span class="sd">        .then(data =&gt; {</span>
+<span class="sd">            if (data.success) {</span>
+<span class="sd">                console.log(&#39;Token enviado, expira en:&#39;, data.expiry_minutes);</span>
+<span class="sd">            }</span>
+<span class="sd">        });</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - Requiere que exista transaccion_id en la sesión</span>
+<span class="sd">        - El token se envía al email del usuario autenticado</span>
+<span class="sd">        - El token expira según la configuración TOKEN_EXPIRY_MINUTES</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verificar si 2FA está habilitado</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;El sistema de verificación 2FA no está habilitado&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;2FA_DISABLED&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Verificar que el usuario tenga email</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;No tienes un email registrado en tu cuenta&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;NO_EMAIL&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Obtener datos de la transacción desde la sesión</span>
+        <span class="n">transaccion_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transaccion_id&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">transaccion_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;No se encontró información de transacción&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;NO_TRANSACTION_DATA&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">transaccion_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Transacción no encontrada&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;TRANSACTION_NOT_FOUND&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Preparar datos de la transacción para el token</span>
+        <span class="n">transaccion_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;cliente_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;tipo&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span><span class="p">,</span>
+            <span class="s1">&#39;monto&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span>
+            <span class="s1">&#39;moneda_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;precio_final&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span>
+            <span class="s1">&#39;medio_pago&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">,</span>
+            <span class="s1">&#39;medio_cobro&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Crear token y enviar email</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">create_transaction_token</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">transaccion_data</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;expires_at&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;expires_at&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s1">&#39;expiry_minutes&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">TWO_FACTOR_AUTH</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TOKEN_EXPIRY_MINUTES&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;UNKNOWN_ERROR&#39;</span><span class="p">)</span>
+            <span class="p">})</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error en send_2fa_token: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error interno del servidor&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;SERVER_ERROR&#39;</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="verify_2fa_token">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.views_2fa.verify_2fa_token">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@require_http_methods</span><span class="p">([</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_2fa_token</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista AJAX para verificar el token 2FA ingresado por el usuario.</span>
+<span class="sd">    </span>
+<span class="sd">    Valida el token ingresado contra el token almacenado en la base de datos.</span>
+<span class="sd">    Si es válido, prepara la transacción para continuar con el flujo normal.</span>
+<span class="sd">    </span>
+<span class="sd">    Decoradores:</span>
+<span class="sd">        @login_required: Requiere usuario autenticado</span>
+<span class="sd">        @require_http_methods([&quot;POST&quot;]): Solo acepta método POST</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto request de Django con:</span>
+<span class="sd">            - user: Usuario autenticado</span>
+<span class="sd">            - body: JSON con {&#39;token&#39;: str} - Token de 6 dígitos ingresado</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta JSON con estructura:</span>
+<span class="sd">            En caso de éxito:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: True,</span>
+<span class="sd">                    &#39;message&#39;: str - Mensaje de confirmación,</span>
+<span class="sd">                    &#39;transaccion_id&#39;: int - ID de la transacción verificada,</span>
+<span class="sd">                    &#39;redirect_url&#39;: str - URL para redirección</span>
+<span class="sd">                }</span>
+<span class="sd">            En caso de error:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: False,</span>
+<span class="sd">                    &#39;message&#39;: str - Descripción del error,</span>
+<span class="sd">                    &#39;error&#39;: str - Código de error</span>
+<span class="sd">                }</span>
+<span class="sd">    </span>
+<span class="sd">    Códigos de error:</span>
+<span class="sd">        - 2FA_DISABLED: El sistema 2FA no está habilitado</span>
+<span class="sd">        - EMPTY_TOKEN: No se ingresó ningún token</span>
+<span class="sd">        - INVALID_FORMAT: El token no tiene el formato correcto (6 dígitos)</span>
+<span class="sd">        - NO_TOKEN_FOUND: No hay token pendiente para el usuario</span>
+<span class="sd">        - TOKEN_EXPIRED: El token ha expirado</span>
+<span class="sd">        - INVALID_TOKEN: El token ingresado es incorrecto</span>
+<span class="sd">        - TRANSACTION_NOT_FOUND: La transacción no existe</span>
+<span class="sd">        - INVALID_JSON: Los datos enviados no son JSON válido</span>
+<span class="sd">        - SERVER_ERROR: Error interno del servidor</span>
+<span class="sd">        </span>
+<span class="sd">    Example (JavaScript):</span>
+<span class="sd">        fetch(&#39;/transacciones/2fa/verify/&#39;, {</span>
+<span class="sd">            method: &#39;POST&#39;,</span>
+<span class="sd">            headers: {</span>
+<span class="sd">                &#39;Content-Type&#39;: &#39;application/json&#39;,</span>
+<span class="sd">                &#39;X-CSRFToken&#39;: csrftoken</span>
+<span class="sd">            },</span>
+<span class="sd">            body: JSON.stringify({token: &#39;123456&#39;})</span>
+<span class="sd">        })</span>
+<span class="sd">        .then(response =&gt; response.json())</span>
+<span class="sd">        .then(data =&gt; {</span>
+<span class="sd">            if (data.success) {</span>
+<span class="sd">                window.location.href = data.redirect_url;</span>
+<span class="sd">            }</span>
+<span class="sd">        });</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - El token debe ser exactamente 6 dígitos numéricos</span>
+<span class="sd">        - El token se marca como usado después de una verificación exitosa</span>
+<span class="sd">        - La URL de redirección depende del tipo de transacción (compra/venta)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Verificar si 2FA está habilitado</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;El sistema de verificación 2FA no está habilitado&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;2FA_DISABLED&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Obtener token del request</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">token_input</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;token&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token_input</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el código de verificación&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;EMPTY_TOKEN&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Validar formato del token (6 dígitos)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token_input</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_input</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;El código debe contener exactamente 6 dígitos&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;INVALID_FORMAT&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Validar el token</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">validate_2fa_token</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">token_input</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+            <span class="c1"># Token válido - continuar con el flujo normal de la transacción</span>
+            <span class="n">transaccion_data</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;transaccion_data&#39;</span><span class="p">]</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Obtener la transacción</span>
+                <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">transaccion_data</span><span class="p">[</span><span class="s1">&#39;transaccion_id&#39;</span><span class="p">])</span>
+                
+                <span class="c1"># No cambiar el estado aquí, dejar que el flujo normal lo maneje</span>
+                <span class="c1"># Restaurar la transacción_id en la sesión para el flujo normal</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span>
+                
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Token 2FA validado exitosamente para transacción </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> por usuario </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Redirigir al flujo normal de éxito según el tipo de transacción</span>
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+                    <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/comprar/exito/&#39;</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># venta</span>
+                    <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/vender/exito/&#39;</span>
+                
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Token verificado correctamente. Continuando con la transacción...&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s1">&#39;redirect_url&#39;</span><span class="p">:</span> <span class="n">redirect_url</span>
+                <span class="p">})</span>
+                
+            <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: transacción no encontrada&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;TRANSACTION_NOT_FOUND&#39;</span>
+                <span class="p">})</span>
+                
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;VALIDATION_FAILED&#39;</span><span class="p">)</span>
+            <span class="p">})</span>
+            
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Datos inválidos en la solicitud&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;INVALID_JSON&#39;</span>
+        <span class="p">})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error en verify_2fa_token: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error interno del servidor&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;SERVER_ERROR&#39;</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="get_token_status_view">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.views_2fa.get_token_status_view">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@require_http_methods</span><span class="p">([</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_token_status_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista AJAX para obtener el estado actual del token del usuario.</span>
+<span class="sd">    </span>
+<span class="sd">    Consulta y devuelve información sobre el token más reciente del usuario,</span>
+<span class="sd">    incluyendo si existe, si es válido, y tiempo restante hasta expiración.</span>
+<span class="sd">    Útil para actualizar la UI del frontend (temporizadores, etc.).</span>
+<span class="sd">    </span>
+<span class="sd">    Decoradores:</span>
+<span class="sd">        @login_required: Requiere usuario autenticado</span>
+<span class="sd">        @require_http_methods([&quot;GET&quot;]): Solo acepta método GET</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto request de Django con:</span>
+<span class="sd">            - user: Usuario autenticado</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta JSON con estructura:</span>
+<span class="sd">            En caso de éxito:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: True,</span>
+<span class="sd">                    &#39;token_status&#39;: {</span>
+<span class="sd">                        &#39;exists&#39;: bool - Si existe un token,</span>
+<span class="sd">                        &#39;valid&#39;: bool - Si el token es válido,</span>
+<span class="sd">                        &#39;expires_at&#39;: datetime - Fecha de expiración,</span>
+<span class="sd">                        &#39;created_at&#39;: datetime - Fecha de creación,</span>
+<span class="sd">                        &#39;time_remaining&#39;: float - Segundos restantes,</span>
+<span class="sd">                        &#39;message&#39;: str - Descripción del estado</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">            En caso de error:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: False,</span>
+<span class="sd">                    &#39;message&#39;: str - Descripción del error,</span>
+<span class="sd">                    &#39;error&#39;: str - Código de error</span>
+<span class="sd">                }</span>
+<span class="sd">    </span>
+<span class="sd">    Códigos de error:</span>
+<span class="sd">        - 2FA_DISABLED: El sistema 2FA no está habilitado</span>
+<span class="sd">        - SERVER_ERROR: Error interno del servidor</span>
+<span class="sd">        </span>
+<span class="sd">    Example (JavaScript):</span>
+<span class="sd">        fetch(&#39;/transacciones/2fa/status/&#39;)</span>
+<span class="sd">        .then(response =&gt; response.json())</span>
+<span class="sd">        .then(data =&gt; {</span>
+<span class="sd">            if (data.success &amp;&amp; data.token_status.valid) {</span>
+<span class="sd">                const seconds = data.token_status.time_remaining;</span>
+<span class="sd">                updateCountdown(seconds);</span>
+<span class="sd">            }</span>
+<span class="sd">        });</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - No modifica el estado del token</span>
+<span class="sd">        - Puede llamarse repetidamente para actualizar el estado</span>
+<span class="sd">        - Útil para implementar temporizadores en el frontend</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;El sistema de verificación 2FA no está habilitado&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;2FA_DISABLED&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="n">status</span> <span class="o">=</span> <span class="n">get_token_status</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;token_status&#39;</span><span class="p">:</span> <span class="n">status</span>
+        <span class="p">})</span>
+        
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error en get_token_status_view: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error al obtener estado del token&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;SERVER_ERROR&#39;</span>
+        <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="resend_2fa_token">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.views_2fa.resend_2fa_token">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@require_http_methods</span><span class="p">([</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resend_2fa_token</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista AJAX para reenviar el token 2FA.</span>
+<span class="sd">    </span>
+<span class="sd">    Genera un nuevo token y lo envía por email. Útil cuando el token anterior</span>
+<span class="sd">    ha expirado o el usuario no recibió el email. Invalida el token anterior</span>
+<span class="sd">    al crear uno nuevo.</span>
+<span class="sd">    </span>
+<span class="sd">    Decoradores:</span>
+<span class="sd">        @login_required: Requiere usuario autenticado</span>
+<span class="sd">        @require_http_methods([&quot;POST&quot;]): Solo acepta método POST</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto request de Django con:</span>
+<span class="sd">            - user: Usuario autenticado</span>
+<span class="sd">            - session[&#39;transaccion_id&#39;]: ID de la transacción pendiente</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        JsonResponse: Respuesta JSON con estructura:</span>
+<span class="sd">            En caso de éxito:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: True,</span>
+<span class="sd">                    &#39;message&#39;: str - Mensaje de confirmación,</span>
+<span class="sd">                    &#39;expires_at&#39;: str - Fecha de expiración ISO format,</span>
+<span class="sd">                    &#39;expiry_minutes&#39;: int - Minutos de validez del nuevo token</span>
+<span class="sd">                }</span>
+<span class="sd">            En caso de error:</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;success&#39;: False,</span>
+<span class="sd">                    &#39;message&#39;: str - Descripción del error,</span>
+<span class="sd">                    &#39;error&#39;: str - Código de error</span>
+<span class="sd">                }</span>
+<span class="sd">    </span>
+<span class="sd">    Códigos de error:</span>
+<span class="sd">        - 2FA_DISABLED: El sistema 2FA no está habilitado</span>
+<span class="sd">        - NO_EMAIL: El usuario no tiene email registrado</span>
+<span class="sd">        - NO_TRANSACTION_DATA: No se encontró transacción en la sesión</span>
+<span class="sd">        - TRANSACTION_NOT_FOUND: La transacción no existe en la BD</span>
+<span class="sd">        - EMAIL_SEND_FAILED: Error al enviar el email</span>
+<span class="sd">        - SERVER_ERROR: Error interno del servidor</span>
+<span class="sd">        </span>
+<span class="sd">    Example (JavaScript):</span>
+<span class="sd">        fetch(&#39;/transacciones/2fa/resend/&#39;, {</span>
+<span class="sd">            method: &#39;POST&#39;,</span>
+<span class="sd">            headers: {&#39;X-CSRFToken&#39;: csrftoken}</span>
+<span class="sd">        })</span>
+<span class="sd">        .then(response =&gt; response.json())</span>
+<span class="sd">        .then(data =&gt; {</span>
+<span class="sd">            if (data.success) {</span>
+<span class="sd">                alert(&#39;Nuevo código enviado a tu email&#39;);</span>
+<span class="sd">                resetCountdown(data.expiry_minutes * 60);</span>
+<span class="sd">            }</span>
+<span class="sd">        });</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - Invalida automáticamente el token anterior</span>
+<span class="sd">        - El nuevo token tiene la misma duración que el anterior</span>
+<span class="sd">        - Requiere que exista transaccion_id en la sesión</span>
+<span class="sd">        - Útil para implementar botón &quot;Reenviar código&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;El sistema de verificación 2FA no está habilitado&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;2FA_DISABLED&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Verificar que el usuario tenga email</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;No tienes un email registrado en tu cuenta&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;NO_EMAIL&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Obtener datos de la transacción desde la sesión</span>
+        <span class="n">transaccion_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transaccion_id&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">transaccion_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;No se encontró información de transacción&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;NO_TRANSACTION_DATA&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">transaccion_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Transacción no encontrada&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;TRANSACTION_NOT_FOUND&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Preparar datos de la transacción para el token</span>
+        <span class="n">transaccion_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;cliente_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;tipo&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span><span class="p">,</span>
+            <span class="s1">&#39;monto&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span>
+            <span class="s1">&#39;moneda_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">&#39;precio_final&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span>
+            <span class="s1">&#39;medio_pago&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">,</span>
+            <span class="s1">&#39;medio_cobro&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Crear nuevo token y enviar email</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">create_transaction_token</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">transaccion_data</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Nuevo código enviado a tu email&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;expires_at&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;expires_at&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s1">&#39;expiry_minutes&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">TWO_FACTOR_AUTH</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;TOKEN_EXPIRY_MINUTES&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;UNKNOWN_ERROR&#39;</span><span class="p">)</span>
+            <span class="p">})</span>
+            
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error en resend_2fa_token: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+            <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Error interno del servidor&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;SERVER_ERROR&#39;</span>
+        <span class="p">})</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
