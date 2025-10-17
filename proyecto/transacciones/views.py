@@ -23,6 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 from monedas.models import Moneda, StockGuaranies
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
@@ -30,6 +31,7 @@ from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conver
 from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
+from django.contrib.auth.models import User
 import ast
 import stripe
 import logging
@@ -37,6 +39,17 @@ from datetime import date, timedelta
 from django.utils import timezone
 from django.db import models
 import stripe
+
+# Importaciones para exportación de archivos (se importan en las funciones para manejo de errores)
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.pagesizes import letter, A4
+# from reportlab.lib.styles import getSampleStyleSheet
+# from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+# from reportlab.lib import colors
+# from reportlab.lib.units import inch
+# import openpyxl
+# from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+# from io import BytesIO
 
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1855,3 +1868,694 @@ def recibir_pago(request):
     
     logger.warning("Método no permitido")
     return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido'}, status=405)
+
+
+
+# ============================================================================
+# VISTAS PARA DESCARGA DE HISTORIAL DE TRANSACCIONES
+# ============================================================================
+
+@login_required
+def descargar_historial_pdf(request):
+    """
+    Vista para descargar el historial de transacciones en formato PDF.
+    
+    Genera un archivo PDF profesional con las transacciones filtradas, donde cada 
+    transacción se presenta en su propia página individual con títulos, filtros 
+    aplicados y detalles completos de la operación.
+    
+    Características del PDF generado:
+        - Formato A4 con márgenes de 2cm en todos los bordes
+        - Cada página contiene: títulos corporativos, filtros aplicados y una transacción
+        - Tablas optimizadas con fuentes legibles y espaciado profesional
+        - Información completa de cada transacción incluyendo cálculos y estados
+        - Formato de fecha/hora sincronizado con la zona horaria local
+    
+    Filtros soportados:
+        - cliente: ID del cliente específico (requerido)
+        - busqueda: Búsqueda por nombre/documento de cliente o username de usuario
+        - tipo_operacion: Filtro por tipo ('compra' o 'venta')
+        - estado: Filtro por estado de transacción
+        - usuario: ID del usuario que procesó la transacción
+    
+    Seguridad:
+        - Verifica permisos del usuario para acceder al cliente solicitado
+        - Valida existencia del cliente antes de procesar
+        - Aplica los mismos filtros de seguridad que la vista de historial
+    
+    Estructura del PDF:
+        - Página 1: Títulos + Filtros + Primera transacción
+        - Páginas N: Títulos + Filtros + Transacción N
+        - Cada transacción incluye: tabla principal y tabla de detalles expandida
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro en GET
+            - cliente (str): ID del cliente (requerido)
+            - busqueda (str, opcional): Término de búsqueda
+            - tipo_operacion (str, opcional): 'compra' o 'venta'
+            - estado (str, opcional): Estado de la transacción
+            - usuario (str, opcional): ID del usuario
+        
+    Returns:
+        HttpResponse: Archivo PDF para descarga con content-type 'application/pdf'
+            - Nombre del archivo: 'historial_transacciones_{cliente_nombre}.pdf'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(400): Si no se proporciona ID de cliente
+        HttpResponse(404): Si el cliente no existe
+        redirect('inicio'): Si el usuario no tiene permisos para el cliente
+    
+    Dependencias:
+        - ReportLab: Para generación de PDF (SimpleDocTemplate, Table, etc.)
+        - Django timezone: Para formateo de fechas consistente
+        - Modelos: Cliente, Transaccion, Usuario
+    
+    """
+    from django.http import HttpResponse
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from io import BytesIO
+    
+    # Obtener parámetros de filtro
+    cliente_id = request.GET.get('cliente')
+    busqueda = request.GET.get('busqueda', '')
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
+    
+    # Obtener transacciones con los mismos filtros que la vista principal
+    try:
+        if cliente_id:
+            cliente = Cliente.objects.get(id=cliente_id)
+            transacciones = Transaccion.objects.filter(cliente=cliente).order_by('-fecha_hora')
+            
+            # Verificar permisos del usuario
+            if not request.user.clientes_operados.filter(id=cliente.id).exists():
+                messages.error(request, "No tienes permiso para descargar el historial de este cliente.")
+                return redirect('inicio')
+        else:
+            return HttpResponse("Cliente no especificado", status=400)
+    except Cliente.DoesNotExist:
+        return HttpResponse("Cliente no encontrado", status=404)
+    
+    # Aplicar los mismos filtros que en la vista de historial
+    if busqueda:
+        transacciones = transacciones.filter(
+            models.Q(cliente__nombre__icontains=busqueda) | 
+            models.Q(cliente__numero_documento__icontains=busqueda) |
+            models.Q(cliente__usuarios__username__icontains=busqueda)
+        )
+    
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
+    
+    # Crear el PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+    
+    # Crear sección de transacciones con detalles
+    for i, transaccion in enumerate(transacciones):
+        # Si no es la primera transacción, agregar salto de página
+        if i > 0:
+            story.append(PageBreak())
+        
+        # Agregar títulos y filtros en cada página
+        # Título de la empresa
+        company_title = "Global Exchange"
+        title_style = styles['Title'].clone('CompactTitle')
+        title_style.fontSize = 20  # Ligeramente aumentado
+        title_style.leading = 24
+        story.append(Paragraph(company_title, title_style))
+        story.append(Spacer(1, 8))  # Ligeramente aumentado
+        
+        # Título del historial centrado
+        historial_title = f"Historial de Transacciones - {cliente.nombre}"
+        # Crear estilo centrado para el título
+        centered_style = styles['Heading1'].clone('CenteredHeading1')
+        centered_style.fontSize = 15  # Ligeramente aumentado
+        centered_style.leading = 18
+        centered_style.alignment = 1  # 1 = CENTER
+        story.append(Paragraph(historial_title, centered_style))
+        story.append(Spacer(1, 12))  # Ligeramente aumentado
+        
+        # Información de filtros aplicados
+        if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
+            filtro_style = styles['Normal'].clone('CompactNormal')
+            filtro_style.fontSize = 11  # Ligeramente aumentado
+            filtro_style.leading = 13
+            story.append(Paragraph("Filtros aplicados:", filtro_style))
+            story.append(Spacer(1, 5))  # Ligeramente aumentado
+            
+            if busqueda:
+                story.append(Paragraph(f"• Búsqueda: '{busqueda}'", filtro_style))
+            if tipo_operacion:
+                story.append(Paragraph(f"• Tipo de operación: {tipo_operacion.title()}", filtro_style))
+            if estado_filtro:
+                story.append(Paragraph(f"• Estado: {estado_filtro.title()}", filtro_style))
+            if usuario_filtro:
+                try:
+                    from usuarios.models import Usuario
+                    usuario = Usuario.objects.get(id=usuario_filtro)
+                    story.append(Paragraph(f"• Usuario: {usuario.nombre_completo() or usuario.username}", filtro_style))
+                except:
+                    pass
+            
+            story.append(Spacer(1, 10))  # Ligeramente aumentado
+        
+        # Crear tabla principal para cada transacción
+        # Usar timezone local como en el template HTML
+        fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
+        fecha_str = fecha_hora_local.strftime("%d/%m/%Y %H:%M:%S")
+        usuario_str = transaccion.usuario.nombre_completo() or transaccion.usuario.username
+        operacion_str = transaccion.tipo.title()
+        # Formatear el monto con los decimales correspondientes a la moneda
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        moneda_str = f"{monto_formateado} {transaccion.moneda.simbolo}"
+        estado_str = transaccion.estado
+        
+        # Cada transacción tiene su propio encabezado
+        moneda_simbolo = transaccion.moneda.simbolo  # Solo el símbolo sin monto
+        main_data = [
+            ['Fecha/Hora', 'Operación', 'Moneda', 'Estado'],
+            [fecha_str, operacion_str, moneda_simbolo, estado_str]
+        ]
+        
+        
+        # Distribuir proporcionalmente: Fecha/Hora más ancha, otras iguales
+        main_colWidths = [2.4*inch, 1.15*inch, 1.15*inch, 1.15*inch]  # Total: 5.85 inches (ligeramente aumentado)
+        main_table = Table(main_data, colWidths=main_colWidths)
+        main_table.setStyle(TableStyle([
+            # Estilo del encabezado
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            # Estilo de la fila de datos
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 11),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 10),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 1), (-1, -1), 7),
+            # Alineación y bordes
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(main_table)
+        
+        # Tabla de detalles completos de la transacción
+        details_data = [
+            ['Detalles Completos de la Transacción'],
+            ['Usuario', usuario_str],
+            ['Segmento Cliente', transaccion.cliente.get_segmento_display()],
+            ['Tipo de Transacción', f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}"],
+            ['Medio de Pago', transaccion.medio_pago],
+            ['Medio de Cobro', transaccion.medio_cobro]
+        ]
+        
+        # Detalles específicos por tipo de transacción
+        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
+        
+        if transaccion.tipo == 'compra':
+            details_data.extend([
+                ['Monto ingresado para compra', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
+                ['Redondeo por medio cobro Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Monto a comprar', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Cotización para compra', f"Gs. {transaccion.cotizacion:,.0f}"],
+                ['Precio base para compra', f"Gs. {transaccion.precio_base:,.0f}"]
+            ])
+        else:
+            details_data.extend([
+                ['Monto ingresado para venta', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
+                ['Monto a vender', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                ['Cotización para venta', f"Gs. {transaccion.cotizacion:,.0f}"],
+                ['Precio base para venta', f"Gs. {transaccion.precio_base:,.0f}"]
+            ])
+            
+            if transaccion.medio_pago == 'Efectivo':
+                details_data.append(['Redondeo por medio pago Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"])
+        
+        # Beneficios y recargos
+        if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
+            details_data.append(['Beneficio por segmento', f"Gs. {transaccion.beneficio_segmento:,.0f}"])
+        
+        
+        details_data.append([f'Recargo por medio de pago ({transaccion.porc_recargo_pago})', f"Gs. {transaccion.recargo_pago:,.0f}"])
+        
+        
+        if transaccion.tipo == 'venta':
+            details_data.append([f'Recargo por medio de cobro ({transaccion.porc_recargo_cobro})', f"Gs. {transaccion.recargo_cobro:,.0f}"])
+        
+        # Redondeo efectivo para precio final si aplica
+        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
+            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
+            details_data.append(['Redondeo efectivo precio final', f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}"])
+        
+        # Montos finales
+        if transaccion.tipo == 'compra':
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            details_data.extend([
+                [f'Monto {estado_texto}', f"Gs. {transaccion.precio_final:,.0f}"],
+                [f'Monto {recibido_texto}', f"{monto_formateado} {transaccion.moneda.simbolo}"]
+            ])
+        else:
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            details_data.extend([
+                [f'Monto {estado_texto}', f"{monto_formateado} {transaccion.moneda.simbolo}"],
+                [f'Monto {recibido_texto}', f"Gs. {transaccion.precio_final:,.0f}"]
+            ])
+        
+        # Mostrar monto pagado si es parcial
+        if ((transaccion.tipo == 'compra' and transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa') or
+            (transaccion.tipo == 'venta' and transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa')):
+            if transaccion.tipo == 'compra':
+                details_data.append(['Monto pagado', f"Gs. {transaccion.pagado:,.0f}"])
+            else:
+                details_data.append(['Monto pagado', f"{transaccion.pagado:.{transaccion.moneda.decimales}f} {transaccion.moneda.simbolo}"])
+        
+        # Token si existe y está pendiente/confirmada
+        if transaccion.token and transaccion.estado in ['Pendiente', 'Confirmada']:
+            details_data.append(['Código de transacción', transaccion.token])
+        
+        details_table = Table(details_data, colWidths=[2.4*inch, 3.45*inch])  # Ligeramente aumentado
+        details_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkgrey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 0), (-1, 0), 7),
+            ('SPAN', (0, 0), (-1, 0)),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),  # Ligeramente aumentado
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 7),  # Ligeramente aumentado
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('LEFTPADDING', (0, 1), (-1, -1), 7),  # Ligeramente aumentado
+            ('RIGHTPADDING', (0, 1), (-1, -1), 7)  # Ligeramente aumentado
+        ]))
+        
+        story.append(details_table)
+        story.append(Spacer(1, 15))  # Espacio ligeramente mayor al final
+    
+    # Construir el PDF
+    doc.build(story)
+    
+    # Preparar la respuesta
+    buffer.seek(0)
+    response = HttpResponse(buffer.read(), content_type='application/pdf')
+    filename = f"historial_transacciones_{cliente.nombre.replace(' ', '_')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+
+@login_required  
+def descargar_historial_excel(request):
+    """
+    Vista para descargar el historial de transacciones en formato Excel.
+    
+    Genera un archivo Excel (.xlsx) con formato profesional que incluye títulos 
+    corporativos, filtros aplicados y detalles expandidos de cada transacción 
+    con encabezados individuales para mejor organización.
+    
+    Características del Excel generado:
+        - Hoja única con todas las transacciones organizadas secuencialmente
+        - Títulos corporativos y filtros aplicados al inicio
+        - Cada transacción tiene su propio encabezado con información principal
+        - Detalles expandidos con todos los cálculos y montos de cada operación
+        - Formato profesional con colores, fuentes en negrita y alineación
+        - Anchos de columna optimizados para legibilidad
+        - Bordes y estilos aplicados consistentemente
+    
+    Filtros soportados:
+        - cliente: ID del cliente específico (requerido)
+        - busqueda: Búsqueda por nombre/documento de cliente o username de usuario
+        - tipo_operacion: Filtro por tipo ('compra' o 'venta')
+        - estado: Filtro por estado de transacción
+        - usuario: ID del usuario que procesó la transacción
+    
+    Seguridad:
+        - Verifica permisos del usuario para acceder al cliente solicitado
+        - Valida existencia del cliente antes de procesar
+        - Aplica los mismos filtros de seguridad que la vista de historial
+    
+    Estructura del Excel:
+        - Fila 1-3: Título "Global Exchange" y "Historial de Transacciones"
+        - Fila 4+: Filtros aplicados (si existen)
+        - Por cada transacción:
+            * Encabezado con datos principales (fecha, operación, moneda, estado)
+            * Detalle expandido con todos los cálculos, medios de pago/cobro
+            * Montos finales y información de pagos parciales
+            * Código de transacción si aplica
+    
+    Formato y Estilos:
+        - Encabezados en negrita con fondo gris
+        - Datos alineados apropiadamente (centro, izquierda, derecha)
+        - Bordes en todas las celdas para mejor visualización
+        - Anchos de columna: [25, 18, 20, 15, 15] para óptima legibilidad
+        - Formato de números con separadores de miles
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro en GET
+            - cliente (str): ID del cliente (requerido)
+            - busqueda (str, opcional): Término de búsqueda
+            - tipo_operacion (str, opcional): 'compra' o 'venta'
+            - estado (str, opcional): Estado de la transacción
+            - usuario (str, opcional): ID del usuario
+        
+    Returns:
+        HttpResponse: Archivo Excel para descarga con content-type 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            - Nombre del archivo: 'historial_transacciones_{cliente_nombre}.xlsx'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(400): Si no se proporciona ID de cliente
+        HttpResponse(404): Si el cliente no existe
+        redirect('inicio'): Si el usuario no tiene permisos para el cliente
+    
+    Dependencias:
+        - OpenPyXL: Para generación de archivos Excel (Workbook, estilos, etc.)
+        - Django timezone: Para formateo de fechas consistente
+        - Modelos: Cliente, Transaccion, Usuario
+    
+    """
+    from django.http import HttpResponse
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from io import BytesIO
+    
+    # Obtener parámetros de filtro
+    cliente_id = request.GET.get('cliente')
+    busqueda = request.GET.get('busqueda', '')
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
+    
+    # Obtener transacciones con los mismos filtros que la vista principal
+    try:
+        if cliente_id:
+            cliente = Cliente.objects.get(id=cliente_id)
+            transacciones = Transaccion.objects.filter(cliente=cliente).order_by('-fecha_hora')
+            
+            # Verificar permisos del usuario
+            if not request.user.clientes_operados.filter(id=cliente.id).exists():
+                messages.error(request, "No tienes permiso para descargar el historial de este cliente.")
+                return redirect('inicio')
+        else:
+            return HttpResponse("Cliente no especificado", status=400)
+    except Cliente.DoesNotExist:
+        return HttpResponse("Cliente no encontrado", status=404)
+    
+    # Aplicar los mismos filtros que en la vista de historial
+    if busqueda:
+        transacciones = transacciones.filter(
+            models.Q(cliente__nombre__icontains=busqueda) | 
+            models.Q(cliente__numero_documento__icontains=busqueda) |
+            models.Q(cliente__usuarios__username__icontains=busqueda)
+        )
+    
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
+    
+    # Crear el libro de Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Historial de Transacciones"
+    
+    # Estilos
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'), 
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    
+    # Título de la empresa (fila 1)
+    ws.merge_cells('A1:E1') 
+    ws['A1'] = "Global Exchange"
+    ws['A1'].font = Font(bold=True, size=16)
+    ws['A1'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    # Título del historial (fila 2)
+    ws.merge_cells('A2:E2')
+    ws['A2'] = f"Historial de Transacciones - {cliente.nombre}"
+    ws['A2'].font = Font(bold=True, size=14)
+    ws['A2'].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    # Información de filtros (si aplica)
+    row_start = 4  
+    if busqueda or tipo_operacion or estado_filtro or usuario_filtro:
+        current_row = 3  # Comenzar en la fila 3 después de los títulos
+        
+        # Título de filtros
+        ws.merge_cells(f'A{current_row}:E{current_row}')  # Ahora son 5 columnas
+        ws[f'A{current_row}'] = "Filtros aplicados:"
+        ws[f'A{current_row}'].font = Font(bold=True, italic=True)
+        ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+        current_row += 1
+        
+        # Filtros individuales por fila
+        if busqueda:
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
+            ws[f'A{current_row}'] = f"• Búsqueda: '{busqueda}'"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            current_row += 1
+        if tipo_operacion:
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
+            ws[f'A{current_row}'] = f"• Tipo de operación: {tipo_operacion.title()}"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            current_row += 1
+        if estado_filtro:
+            ws.merge_cells(f'A{current_row}:E{current_row}') 
+            ws[f'A{current_row}'] = f"• Estado: {estado_filtro.title()}"
+            ws[f'A{current_row}'].font = Font(italic=True)
+            ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            current_row += 1
+        if usuario_filtro:
+            try:
+                from usuarios.models import Usuario
+                usuario = Usuario.objects.get(id=usuario_filtro)
+                ws.merge_cells(f'A{current_row}:E{current_row}')  # Ahora son 5 columnas
+                ws[f'A{current_row}'] = f"• Usuario: {usuario.nombre_completo() or usuario.username}"
+                ws[f'A{current_row}'].font = Font(italic=True)
+                ws[f'A{current_row}'].alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+                current_row += 1
+            except:
+                pass
+        
+        row_start = current_row + 1
+    
+    # Datos de las transacciones con detalles - cada una con su propio encabezado
+    current_row = row_start
+    
+    for transaccion in transacciones:
+        # Agregar encabezado para cada transacción
+        headers = ['Fecha', 'Hora', 'Operación', 'Moneda', 'Estado']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=current_row, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        current_row += 1
+        # Fila principal de la transacción - sin columna Usuario y Moneda solo símbolo
+        # Usar timezone local como en el template HTML
+        fecha_hora_local = timezone.localtime(transaccion.fecha_hora)
+        data_row = [
+            fecha_hora_local.strftime("%d/%m/%Y"),
+            fecha_hora_local.strftime("%H:%M:%S"),
+            transaccion.tipo.title(),
+            transaccion.moneda.simbolo,  
+            transaccion.estado
+        ]
+        
+        # Aplicar estilo mejorado a la fila principal
+        for col_num, value in enumerate(data_row, 1):
+            cell = ws.cell(row=current_row, column=col_num)
+            cell.value = value
+            cell.border = border
+            cell.fill = PatternFill(start_color="E6F3FF", end_color="E6F3FF", fill_type="solid")
+            cell.font = Font(bold=True, size=11)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        
+        current_row += 1
+        
+        # Filas de detalles completos de la transacción
+        detail_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+        detail_font = Font(italic=True, size=9)
+        
+        def add_detail_row(label, value):
+            """Helper para agregar filas de detalle con formato mejorado"""
+            # Celda de etiqueta
+            label_cell = ws.cell(row=current_row, column=1)
+            label_cell.value = label
+            label_cell.font = Font(bold=True, size=10)
+            label_cell.fill = detail_fill
+            label_cell.alignment = Alignment(horizontal="right", vertical="center", wrap_text=True)
+            label_cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            # Celda de valor
+            value_cell = ws.cell(row=current_row, column=2)
+            value_cell.value = value
+            value_cell.font = detail_font
+            value_cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+            value_cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            value_cell.border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            return current_row + 1
+        
+        # Información básica
+        current_row = add_detail_row("Usuario:", transaccion.usuario.nombre_completo() or transaccion.usuario.username)
+        current_row = add_detail_row("Segmento Cliente:", transaccion.cliente.get_segmento_display())
+        current_row = add_detail_row("Tipo de Transacción:", f"{transaccion.tipo.title()} de {transaccion.moneda.nombre}")
+        current_row = add_detail_row("Medio de Pago:", transaccion.medio_pago)
+        current_row = add_detail_row("Medio de Cobro:", transaccion.medio_cobro)
+        
+        # Detalles específicos por tipo de transacción
+        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
+        monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
+        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
+        
+        if transaccion.tipo == 'compra':
+            current_row = add_detail_row("Monto ingresado para compra:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Redondeo por medio cobro Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Monto a comprar:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Cotización para compra:", f"Gs. {transaccion.cotizacion:,.0f}")
+            current_row = add_detail_row("Precio base para compra:", f"Gs. {transaccion.precio_base:,.0f}")
+        else:
+            current_row = add_detail_row("Monto ingresado para venta:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Monto a vender:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row("Cotización para venta:", f"Gs. {transaccion.cotizacion:,.0f}")
+            current_row = add_detail_row("Precio base para venta:", f"Gs. {transaccion.precio_base:,.0f}")
+            
+            if transaccion.medio_pago == 'Efectivo':
+                current_row = add_detail_row("Redondeo por medio pago Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
+        
+        # Beneficios y recargos
+        if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
+            current_row = add_detail_row("Beneficio por segmento:", f"Gs. {transaccion.beneficio_segmento:,.0f}")
+        
+        
+        current_row = add_detail_row(f"Recargo por medio de pago ({transaccion.porc_recargo_pago}):", f"Gs. {transaccion.recargo_pago:,.0f}")
+        
+        
+        if transaccion.tipo == 'venta':
+            current_row = add_detail_row(f"Recargo por medio de cobro ({transaccion.porc_recargo_cobro}):", f"Gs. {transaccion.recargo_cobro:,.0f}")
+        
+        # Redondeo efectivo para precio final si aplica
+        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
+            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
+            current_row = add_detail_row("Redondeo efectivo precio final:", f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}")
+        
+        # Montos finales
+        if transaccion.tipo == 'compra':
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            current_row = add_detail_row(f"Monto {estado_texto}:", f"Gs. {transaccion.precio_final:,.0f}")
+            current_row = add_detail_row(f"Monto {recibido_texto}:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+        else:
+            estado_texto = 'pagado' if transaccion.estado in ['Completa', 'Confirmada'] else 'a pagar'
+            recibido_texto = 'recibido' if transaccion.estado == 'Completa' else 'a recibir'
+            
+            current_row = add_detail_row(f"Monto {estado_texto}:", f"{monto_formateado} {transaccion.moneda.simbolo}")
+            current_row = add_detail_row(f"Monto {recibido_texto}:", f"Gs. {transaccion.precio_final:,.0f}")
+        
+        # Mostrar monto pagado si es parcial
+        if ((transaccion.tipo == 'compra' and transaccion.pagado < transaccion.precio_final and transaccion.estado != 'Completa') or
+            (transaccion.tipo == 'venta' and transaccion.pagado < transaccion.monto and transaccion.estado != 'Completa')):
+            if transaccion.tipo == 'compra':
+                current_row = add_detail_row("Monto pagado:", f"Gs. {transaccion.pagado:,.0f}")
+            else:
+                current_row = add_detail_row("Monto pagado:", f"{transaccion.pagado:.{transaccion.moneda.decimales}f} {transaccion.moneda.simbolo}")
+        
+        # Token si existe y está pendiente/confirmada
+        if transaccion.token and transaccion.estado in ['Pendiente', 'Confirmada']:
+            current_row = add_detail_row("Código de transacción:", transaccion.token)
+
+        
+        # Fila de separación entre transacciones
+        current_row += 1
+    
+    # Ajustar ancho de columnas para que coincidan proporcionalmente con detalles
+    # Proporcionalmente similar a PDF: más ancho para fecha, iguales para el resto
+    column_widths = [25, 18, 20, 15, 15]  # Fecha, Hora, Operación, Moneda, Estado
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+    
+    # Ajustar altura de filas para mejor legibilidad
+    for row in ws.iter_rows():
+        ws.row_dimensions[row[0].row].height = 20
+    
+    # Guardar en buffer
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    # Preparar la respuesta
+    response = HttpResponse(
+        buffer.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"historial_transacciones_{cliente.nombre.replace(' ', '_')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response

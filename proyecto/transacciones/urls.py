@@ -48,6 +48,10 @@ urlpatterns = [
     # URLs para historial de transacciones
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),
     path('detalle/<int:transaccion_id>/', views.detalle_historial, name='historial_detalle'),
+    
+    # URLs para descargas de historial
+    path('descargar/historial/pdf/', views.descargar_historial_pdf, name='descargar_historial_pdf'),
+    path('descargar/historial/excel/', views.descargar_historial_excel, name='descargar_historial_excel'),
 
     path('gestion-transacciones/', views.ver_variables, name='ver_variables'),
     path('edicion-transacciones/', views.editar_variables, name='editar_variables'),
