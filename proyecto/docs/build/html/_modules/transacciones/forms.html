@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transacciones.forms &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">transacciones.forms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para transacciones.forms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Formularios para el sistema de transacciones de Global Exchange.</span>
+
+<span class="sd">Este módulo contiene los formularios utilizados en el proceso de transacciones,</span>
+<span class="sd">incluyendo la selección de monedas, montos y configuración de recargos.</span>
+
+<span class="sd">Formularios principales:</span>
+<span class="sd">    - SeleccionMonedaMontoForm: Selección de moneda y monto para transacciones</span>
+<span class="sd">    - RecargoForm: Gestión de recargos por medio de pago</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django</span><span class="w"> </span><span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">monedas.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moneda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Recargos</span><span class="p">,</span> <span class="n">LimiteGlobal</span>
+
+
+<div class="viewcode-block" id="SeleccionMonedaMontoForm">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.forms.SeleccionMonedaMontoForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SeleccionMonedaMontoForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para seleccionar moneda y monto en operaciones de compra/venta.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario permite al usuario seleccionar la moneda extranjera</span>
+<span class="sd">    y especificar el monto que desea comprar o vender. Incluye validaciones</span>
+<span class="sd">    específicas para cada moneda según sus decimales configurados.</span>
+<span class="sd">    </span>
+<span class="sd">    Fields:</span>
+<span class="sd">        moneda (ModelChoiceField): Selector de moneda activa del sistema</span>
+<span class="sd">        monto (DecimalField): Monto en la moneda seleccionada</span>
+<span class="sd">        </span>
+<span class="sd">    Validaciones:</span>
+<span class="sd">        - El monto debe ser positivo y mayor al mínimo permitido</span>
+<span class="sd">        - Se respetan los decimales configurados para cada moneda</span>
+<span class="sd">        - Consistente con el comportamiento del simulador</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">moneda</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ModelChoiceField</span><span class="p">(</span>
+        <span class="n">queryset</span><span class="o">=</span><span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">activa</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">empty_label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;id_moneda&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar una moneda.&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">monto</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;id_monto&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingresa el monto en la moneda extranjera&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar un monto numérico.&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="SeleccionMonedaMontoForm.clean">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.forms.SeleccionMonedaMontoForm.clean">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validación personalizada para el monto en moneda extranjera.</span>
+<span class="sd">        </span>
+<span class="sd">        Realiza validaciones específicas sobre el monto ingresado:</span>
+<span class="sd">        - Verifica que sea un valor positivo</span>
+<span class="sd">        - Comprueba que respete el monto mínimo según los decimales de la moneda</span>
+<span class="sd">        - Convierte el monto a tipo Decimal para precisión</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Datos limpios del formulario incluyendo monto_decimal</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el monto no cumple las validaciones</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">moneda</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda&#39;</span><span class="p">)</span>
+        <span class="n">monto</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;monto&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">monto</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">moneda</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">monto</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">monto</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">monto</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="s1">&#39;El monto debe ser mayor a 0.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">cleaned_data</span>
+                
+                <span class="c1"># Para monto en moneda extranjera, usar los decimales de la moneda seleccionada</span>
+                <span class="n">monto_minimo</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;10&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="n">moneda</span><span class="o">.</span><span class="n">decimales</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">monto</span> <span class="o">&lt;</span> <span class="n">monto_minimo</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;El monto mínimo para </span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s1"> es </span><span class="si">{</span><span class="n">monto_minimo</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">cleaned_data</span>
+                    
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="s1">&#39;Por favor, ingrese un monto válido.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">cleaned_data</span>
+        
+        <span class="c1"># Agregar el monto convertido a los datos limpios</span>
+        <span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;monto_decimal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">monto</span>
+        <span class="k">return</span> <span class="n">cleaned_data</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariablesForm">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.forms.VariablesForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariablesForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para editar los recargos por medio de pago y los límites globales de transacciones.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario permite a los administradores modificar:</span>
+<span class="sd">    - Los porcentajes de recargo para cada medio de pago (VISA, MASTERCARD, PANAL, CABAL, billeteras electrónicas)</span>
+<span class="sd">    - Los límites diarios y mensuales globales según la ley de casas de cambio</span>
+<span class="sd">    </span>
+<span class="sd">    Fields:</span>
+<span class="sd">        recargo_visa (DecimalField): Porcentaje de recargo para tarjetas VISA</span>
+<span class="sd">        recargo_mastercard (DecimalField): Porcentaje de recargo para tarjetas MASTERCARD</span>
+<span class="sd">        recargo_tigo_money (DecimalField): Porcentaje de recargo para Tigo Money</span>
+<span class="sd">        recargo_billetera_personal (DecimalField): Porcentaje de recargo para Billetera Personal</span>
+<span class="sd">        recargo_zimple (DecimalField): Porcentaje de recargo para Zimple</span>
+<span class="sd">        recargo_panal (DecimalField): Porcentaje de recargo para tarjetas PANAL</span>
+<span class="sd">        recargo_cabal (DecimalField): Porcentaje de recargo para tarjetas CABAL</span>
+<span class="sd">        limite_diario (IntegerField): Límite diario global en guaraníes</span>
+<span class="sd">        limite_mensual (IntegerField): Límite mensual global en guaraníes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Campos para recargos</span>
+    <span class="n">recargo_visa</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_mastercard</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_tigo_money</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_billetera_personal</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_zimple</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_panal</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">recargo_cabal</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede ser negativo.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El recargo no puede exceder el 100%.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor decimal válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="c1"># Campos para límites globales</span>
+    <span class="n">limite_diario</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El límite diario debe ser al menos 1 guaraní.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor entero válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="n">limite_mensual</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;min_value&#39;</span><span class="p">:</span> <span class="s1">&#39;El límite diario debe ser al menos 1 guaraní.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;invalid&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese un valor entero válido.&#39;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el formulario con los valores actuales de la base de datos.</span>
+<span class="sd">        </span>
+<span class="sd">        Carga automáticamente los valores existentes de recargos y límites globales</span>
+<span class="sd">        para que aparezcan pre-poblados en el formulario.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="c1"># Cargar valores actuales de recargos</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">visa_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;VISA&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_visa&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">visa_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_visa&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">1.0</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mastercard_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;MASTERCARD&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_mastercard&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">mastercard_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_mastercard&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">1.5</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tigo_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;Tigo Money&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_tigo_money&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">tigo_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_tigo_money&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">2.0</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">billetera_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;Billetera Personal&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_billetera_personal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">billetera_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_billetera_personal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">2.0</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">zimple_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;Zimple&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_zimple&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">zimple_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_zimple&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">3.0</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">panal_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;PANAL&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_panal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">panal_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_panal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">2.0</span>
+            
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cabal_recargo</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="s1">&#39;CABAL&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_cabal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">cabal_recargo</span><span class="o">.</span><span class="n">recargo</span>
+        <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;recargo_cabal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mf">1.0</span>
+        
+        <span class="c1"># Cargar valores actuales de límites globales</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">limite_global</span> <span class="o">=</span> <span class="n">LimiteGlobal</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">limite_global</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_diario&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">limite_global</span><span class="o">.</span><span class="n">limite_diario</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_mensual&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="n">limite_global</span><span class="o">.</span><span class="n">limite_mensual</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Valores por defecto si no existe registro</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_diario&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mi">90000000</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_mensual&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mi">450000000</span>
+        <span class="k">except</span> <span class="n">LimiteGlobal</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_diario&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mi">90000000</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;limite_mensual&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">initial</span> <span class="o">=</span> <span class="mi">450000000</span>
+    
+<div class="viewcode-block" id="VariablesForm.save">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.forms.VariablesForm.save">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Guarda los cambios en la base de datos.</span>
+<span class="sd">        </span>
+<span class="sd">        Actualiza todos los registros de recargos existentes y el registro</span>
+<span class="sd">        de límites globales con los nuevos valores del formulario.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Diccionario con información sobre los cambios realizados</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Actualizar recargos</span>
+        <span class="n">recargos_data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;VISA&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_visa&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;MASTERCARD&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_mastercard&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;Tigo Money&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_tigo_money&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;Billetera Personal&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_billetera_personal&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;Zimple&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_zimple&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;PANAL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_panal&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s1">&#39;CABAL&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recargo_cabal&#39;</span><span class="p">]),</span>
+        <span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">marca</span><span class="p">,</span> <span class="n">nuevo_recargo</span> <span class="ow">in</span> <span class="n">recargos_data</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">recargo_obj</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">marca</span><span class="p">)</span>
+                <span class="n">recargo_anterior</span> <span class="o">=</span> <span class="n">recargo_obj</span><span class="o">.</span><span class="n">recargo</span>
+                <span class="n">recargo_obj</span><span class="o">.</span><span class="n">recargo</span> <span class="o">=</span> <span class="n">nuevo_recargo</span>
+                <span class="n">recargo_obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="c1"># Si no existe, crear el recargo</span>
+                <span class="n">medio</span> <span class="o">=</span> <span class="s1">&#39;Tarjeta de Crédito&#39;</span> <span class="k">if</span> <span class="n">marca</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;VISA&#39;</span><span class="p">,</span> <span class="s1">&#39;MASTERCARD&#39;</span><span class="p">,</span> <span class="s1">&#39;PANAL&#39;</span><span class="p">,</span> <span class="s1">&#39;CABAL&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;Billetera Electrónica&#39;</span>
+                <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="n">marca</span><span class="o">=</span><span class="n">marca</span><span class="p">,</span>
+                    <span class="n">medio</span><span class="o">=</span><span class="n">medio</span><span class="p">,</span>
+                    <span class="n">recargo</span><span class="o">=</span><span class="n">nuevo_recargo</span>
+                <span class="p">)</span>
+        
+        <span class="c1"># Actualizar límites globales</span>
+        <span class="n">limite_global</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">LimiteGlobal</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+            <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;limite_diario&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;limite_diario&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;limite_mensual&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;limite_mensual&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">created</span><span class="p">:</span>
+            <span class="n">limite_global</span><span class="o">.</span><span class="n">limite_diario</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;limite_diario&#39;</span><span class="p">]</span>
+            <span class="n">limite_global</span><span class="o">.</span><span class="n">limite_mensual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;limite_mensual&#39;</span><span class="p">]</span>
+            <span class="n">limite_global</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="kc">True</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

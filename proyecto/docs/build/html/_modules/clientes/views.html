@@ -1,0 +1,946 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clientes.views &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">clientes.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para clientes.views</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Módulo de vistas para la gestión de clientes.</span>
+
+<span class="sd">Este módulo contiene todas las vistas necesarias para el CRUD de clientes,</span>
+<span class="sd">incluyendo funcionalidades de creación, listado, detalle, edición y gestión</span>
+<span class="sd">de medios de pago y acreditación. También incluye funciones de utilidad</span>
+<span class="sd">para el control de acceso y navegación.</span>
+
+<span class="sd">Autor: Equipo de desarrollo</span>
+<span class="sd">Fecha: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">permission_required</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClienteForm</span><span class="p">,</span> <span class="n">AgregarTarjetaForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">medios_acreditacion.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuentaBancaria</span><span class="p">,</span> <span class="n">Billetera</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">medios_acreditacion.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuentaBancariaForm</span><span class="p">,</span> <span class="n">BilleteraForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transaccion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configurar Stripe y logging</span>
+<span class="n">stripe</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="verificar_acceso_cliente">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.verificar_acceso_cliente">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verificar_acceso_cliente</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifica si un usuario tiene acceso para operar con un cliente específico.</span>
+
+<span class="sd">    Esta función implementa un sistema de acceso híbrido que permite el acceso</span>
+<span class="sd">    a un cliente a través de dos mecanismos:</span>
+<span class="sd">    1. Permisos administrativos globales (clientes.gestion)</span>
+<span class="sd">    2. Asociación directa usuario-cliente</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user: Instancia del usuario que solicita acceso</span>
+<span class="sd">        cliente: Instancia del cliente al que se solicita acceso</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True si el usuario tiene acceso, False en caso contrario</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; usuario_admin = Usuario.objects.get(id=1)  # Con permisos admin</span>
+<span class="sd">        &gt;&gt;&gt; usuario_operador = Usuario.objects.get(id=2)  # Sin permisos admin</span>
+<span class="sd">        &gt;&gt;&gt; cliente = Cliente.objects.get(id=1)</span>
+<span class="sd">        &gt;&gt;&gt; verificar_acceso_cliente(usuario_admin, cliente)  # True</span>
+<span class="sd">        &gt;&gt;&gt; verificar_acceso_cliente(usuario_operador, cliente)  # Depende de asociación</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">)</span> <span class="ow">or</span> 
+            <span class="n">cliente</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">clientes_operados</span><span class="o">.</span><span class="n">all</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="get_cliente_detalle_redirect">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.get_cliente_detalle_redirect">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente_pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determina la URL correcta de redirección según el tipo de usuario.</span>
+
+<span class="sd">    Esta función analiza el contexto del usuario y su origen de navegación</span>
+<span class="sd">    para determinar la vista de detalle de cliente apropiada, proporcionando</span>
+<span class="sd">    una experiencia de navegación coherente.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con información de la petición</span>
+<span class="sd">        cliente_pk: Clave primaria del cliente</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponseRedirect: Redirección a la vista apropiada</span>
+
+<span class="sd">    Logic:</span>
+<span class="sd">        - Si viene de la sección usuarios o no tiene permisos admin: vista de usuario</span>
+<span class="sd">        - Si tiene permisos admin y viene de gestión: vista administrativa</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # Usuario operador sin permisos admin</span>
+<span class="sd">        &gt;&gt;&gt; redirect_response = get_cliente_detalle_redirect(request, 1)</span>
+<span class="sd">        &gt;&gt;&gt; # Redirige a: /usuarios/cliente/1/</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; # Usuario administrador</span>
+<span class="sd">        &gt;&gt;&gt; redirect_response = get_cliente_detalle_redirect(request, 1)</span>
+<span class="sd">        &gt;&gt;&gt; # Redirige a: /clientes/1/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">referer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HTTP_REFERER&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;usuarios/cliente&#39;</span> <span class="ow">in</span> <span class="n">referer</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;usuarios:detalle_cliente&#39;</span><span class="p">,</span> <span class="n">cliente_id</span><span class="o">=</span><span class="n">cliente_pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_detalle&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">cliente_pk</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_cliente_detalle_url">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.get_cliente_detalle_url">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cliente_detalle_url</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente_pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determina la URL correcta de detalle del cliente para uso en templates.</span>
+
+<span class="sd">    Similar a get_cliente_detalle_redirect, pero retorna la URL como string</span>
+<span class="sd">    para ser utilizada en enlaces y formularios dentro de templates.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con información de la petición</span>
+<span class="sd">        cliente_pk: Clave primaria del cliente</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: URL string de la vista de detalle apropiada</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # Para usuario operador</span>
+<span class="sd">        &gt;&gt;&gt; url = get_cliente_detalle_url(request, 1)</span>
+<span class="sd">        &gt;&gt;&gt; print(url)  # &#39;/usuarios/cliente/1/&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; # Para administrador</span>
+<span class="sd">        &gt;&gt;&gt; url = get_cliente_detalle_url(request, 1)  </span>
+<span class="sd">        &gt;&gt;&gt; print(url)  # &#39;/clientes/1/&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">referer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HTTP_REFERER&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;usuarios/cliente&#39;</span> <span class="ow">in</span> <span class="n">referer</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;/usuarios/cliente/</span><span class="si">{</span><span class="n">cliente_pk</span><span class="si">}</span><span class="s1">/&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;/clientes/</span><span class="si">{</span><span class="n">cliente_pk</span><span class="si">}</span><span class="s1">/&#39;</span></div>
+
+
+<div class="viewcode-block" id="procesar_medios_acreditacion_cliente">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.procesar_medios_acreditacion_cliente">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">procesar_medios_acreditacion_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">,</span> <span class="n">usuario</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Procesa y obtiene los medios de acreditación asociados a un cliente.</span>
+
+<span class="sd">    Esta función auxiliar centraliza la lógica de obtención de medios de</span>
+<span class="sd">    acreditación y determinación de permisos del usuario para presentar</span>
+<span class="sd">    la información de manera consistente en las vistas.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cliente: Instancia del cliente cuyos medios se van a procesar</span>
+<span class="sd">        usuario: Instancia del usuario que solicita la información</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Diccionario con la siguiente estructura:</span>
+<span class="sd">            - es_administrador (bool): Si el usuario tiene permisos administrativos</span>
+<span class="sd">            - cuentas_bancarias (QuerySet): Cuentas bancarias del cliente</span>
+<span class="sd">            - billeteras (QuerySet): Billeteras electrónicas del cliente</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; cliente = Cliente.objects.get(id=1)</span>
+<span class="sd">        &gt;&gt;&gt; usuario = request.user</span>
+<span class="sd">        &gt;&gt;&gt; datos = procesar_medios_acreditacion_cliente(cliente, usuario)</span>
+<span class="sd">        &gt;&gt;&gt; print(f&quot;Es admin: {datos[&#39;es_administrador&#39;]}&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; print(f&quot;Cuentas: {datos[&#39;cuentas_bancarias&#39;].count()}&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determinar si es administrador</span>
+    <span class="n">es_administrador</span> <span class="o">=</span> <span class="n">usuario</span><span class="o">.</span><span class="n">has_perm</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener medios de acreditación</span>
+    <span class="n">cuentas_bancarias</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">cuentas_bancarias</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">billeteras</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">billeteras</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;es_administrador&#39;</span><span class="p">:</span> <span class="n">es_administrador</span><span class="p">,</span>
+        <span class="s1">&#39;cuentas_bancarias&#39;</span><span class="p">:</span> <span class="n">cuentas_bancarias</span><span class="p">,</span>
+        <span class="s1">&#39;billeteras&#39;</span><span class="p">:</span> <span class="n">billeteras</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="cliente_crear">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_crear">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_crear</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para crear un nuevo cliente.</span>
+
+<span class="sd">    Permite a los usuarios con permisos administrativos crear nuevos clientes</span>
+<span class="sd">    en el sistema mediante un formulario de Django. Maneja tanto la presentación</span>
+<span class="sd">    del formulario (GET) como el procesamiento de los datos (POST).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Renderiza el formulario o redirecciona tras creación exitosa</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        - @login_required: Requiere usuario autenticado</span>
+<span class="sd">        - @permission_required: Requiere permiso &#39;clientes.gestion&#39;</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_form.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - form: Instancia del formulario ClienteForm</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # GET: Muestra el formulario vacío</span>
+<span class="sd">        &gt;&gt;&gt; # POST: Procesa datos y crea cliente si es válido</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ClienteForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">cliente</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cliente creado exitosamente.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_detalle&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ClienteForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_form.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="cliente_lista">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_lista">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_lista</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para listar todos los clientes con funciones de filtrado y búsqueda.</span>
+
+<span class="sd">    Presenta una lista paginada de clientes con opciones de filtrado por segmento</span>
+<span class="sd">    y búsqueda por nombre o documento. Incluye estadísticas por segmento para</span>
+<span class="sd">    facilitar la navegación y gestión.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página con la lista de clientes filtrada</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        - @login_required: Requiere usuario autenticado</span>
+<span class="sd">        - @permission_required: Requiere permiso &#39;clientes.gestion&#39;</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_lista.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - clientes: QuerySet de clientes filtrados</span>
+<span class="sd">        - hay_clientes: Boolean indicando si existen clientes</span>
+<span class="sd">        - busqueda: Término de búsqueda aplicado</span>
+<span class="sd">        - segmento_filtro: Segmento seleccionado para filtrar</span>
+<span class="sd">        - stats_segmentos: Estadísticas de clientes por segmento</span>
+
+<span class="sd">    Query Parameters:</span>
+<span class="sd">        - segmento: Filtro por segmento (vip, corporativo, minorista)</span>
+<span class="sd">        - busqueda: Término de búsqueda por nombre o documento</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Obtener todos los clientes para verificar si hay alguno</span>
+    <span class="n">todos_los_clientes</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    
+    <span class="c1"># Obtener clientes para mostrar (con filtros aplicados)</span>
+    <span class="n">clientes</span> <span class="o">=</span> <span class="n">todos_los_clientes</span>
+    
+    <span class="c1"># Manejar filtro por segmento</span>
+    <span class="n">segmento_filtro</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;segmento&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">segmento_filtro</span> <span class="ow">and</span> <span class="n">segmento_filtro</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;vip&#39;</span><span class="p">,</span> <span class="s1">&#39;corporativo&#39;</span><span class="p">,</span> <span class="s1">&#39;minorista&#39;</span><span class="p">]:</span>
+        <span class="n">clientes</span> <span class="o">=</span> <span class="n">clientes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">segmento</span><span class="o">=</span><span class="n">segmento_filtro</span><span class="p">)</span>
+    
+    <span class="c1"># Manejar búsqueda</span>
+    <span class="n">busqueda</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;busqueda&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">busqueda</span><span class="p">:</span>
+        <span class="n">clientes</span> <span class="o">=</span> <span class="n">clientes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">nombre__icontains</span><span class="o">=</span><span class="n">busqueda</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">numero_documento__icontains</span><span class="o">=</span><span class="n">busqueda</span><span class="p">)</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># Ordenar por nombre</span>
+    <span class="n">clientes</span> <span class="o">=</span> <span class="n">clientes</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;nombre&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Estadísticas por segmento para mostrar en filtros</span>
+    <span class="n">stats_segmentos</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;vip&#39;</span><span class="p">:</span> <span class="n">todos_los_clientes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;vip&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span> <span class="n">todos_los_clientes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;corporativo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+        <span class="s1">&#39;minorista&#39;</span><span class="p">:</span> <span class="n">todos_los_clientes</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;minorista&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+    <span class="p">}</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;clientes&#39;</span><span class="p">:</span> <span class="n">clientes</span><span class="p">,</span>
+        <span class="s1">&#39;hay_clientes&#39;</span><span class="p">:</span> <span class="n">todos_los_clientes</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span>
+        <span class="s1">&#39;busqueda&#39;</span><span class="p">:</span> <span class="n">busqueda</span><span class="p">,</span>
+        <span class="s1">&#39;segmento_filtro&#39;</span><span class="p">:</span> <span class="n">segmento_filtro</span><span class="p">,</span>
+        <span class="s1">&#39;stats_segmentos&#39;</span><span class="p">:</span> <span class="n">stats_segmentos</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_lista.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cliente_detalle">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_detalle">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_detalle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista de detalle del cliente con acceso híbrido.</span>
+
+<span class="sd">    Muestra la información detallada de un cliente específico, incluyendo</span>
+<span class="sd">    datos personales, medios de acreditación y tarjetas de Stripe. Implementa</span>
+<span class="sd">    un sistema de acceso híbrido donde tanto administradores como usuarios</span>
+<span class="sd">    operadores asociados pueden ver los detalles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+<span class="sd">        pk: Clave primaria del cliente a mostrar</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página de detalle del cliente o redirección si no tiene acceso</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        - @login_required: Requiere usuario autenticado</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_detalle.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - cliente: Instancia del cliente</span>
+<span class="sd">        - tarjetas_stripe: Lista de tarjetas de crédito del cliente</span>
+<span class="sd">        - total_tarjetas: Número total de tarjetas</span>
+<span class="sd">        - es_administrador: Si el usuario tiene permisos administrativos</span>
+<span class="sd">        - cuentas_bancarias: Cuentas bancarias del cliente</span>
+<span class="sd">        - billeteras: Billeteras electrónicas del cliente</span>
+
+<span class="sd">    Access Control:</span>
+<span class="sd">        - Administradores con permiso &#39;clientes.gestion&#39;: Acceso completo</span>
+<span class="sd">        - Usuarios operadores asociados: Acceso limitado al cliente específico</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="n">tarjetas_stripe</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">obtener_tarjetas_stripe</span><span class="p">()</span>
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para ver este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Usar función auxiliar para procesar medios de acreditación</span>
+    <span class="n">medios_data</span> <span class="o">=</span> <span class="n">procesar_medios_acreditacion_cliente</span><span class="p">(</span><span class="n">cliente</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;tarjetas_stripe&#39;</span><span class="p">:</span> <span class="n">tarjetas_stripe</span><span class="p">,</span>
+        <span class="s1">&#39;total_tarjetas&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tarjetas_stripe</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">medios_data</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_detalle.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cliente_editar">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_editar">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_editar</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para editar un cliente existente.</span>
+
+<span class="sd">    Permite a los usuarios con permisos administrativos modificar la información</span>
+<span class="sd">    de un cliente existente mediante un formulario prellenado con los datos actuales.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+<span class="sd">        pk: Clave primaria del cliente a editar</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Formulario de edición o redirección tras actualización exitosa</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        - @login_required: Requiere usuario autenticado</span>
+<span class="sd">        - @permission_required: Requiere permiso &#39;clientes.gestion&#39;</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_form.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - form: Instancia del formulario ClienteForm con datos del cliente</span>
+<span class="sd">        - cliente: Instancia del cliente siendo editado</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # GET: Muestra formulario prellenado con datos actuales</span>
+<span class="sd">        &gt;&gt;&gt; # POST: Procesa cambios y actualiza si son válidos</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ClienteForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cliente actualizado exitosamente.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_detalle&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ClienteForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_form.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span> <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="agregar_tarjeta">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.agregar_tarjeta">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">agregar_tarjeta</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para agregar tarjeta de crédito a un cliente con acceso híbrido.</span>
+
+<span class="sd">    Permite tanto a administradores como a usuarios operadores asociados</span>
+<span class="sd">    agregar tarjetas de crédito a un cliente específico mediante integración</span>
+<span class="sd">    con Stripe Elements.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+<span class="sd">        pk: Clave primaria del cliente al que agregar la tarjeta</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Formulario de tarjeta o redirección tras procesamiento</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        - @login_required: Requiere usuario autenticado</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_agregar_cuenta.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - form: Instancia del formulario AgregarTarjetaForm</span>
+<span class="sd">        - cliente: Instancia del cliente</span>
+<span class="sd">        - stripe_public_key: Clave pública de Stripe para el frontend</span>
+
+<span class="sd">    Access Control:</span>
+<span class="sd">        - Administradores con permiso &#39;clientes.gestion&#39;: Acceso completo</span>
+<span class="sd">        - Usuarios operadores asociados al cliente: Acceso específico</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Esta vista trabaja con Stripe Elements en el frontend para</span>
+<span class="sd">        procesamiento seguro de datos de tarjetas de crédito.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para gestionar las tarjetas de este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AgregarTarjetaForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">numero_cuenta</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;numero_cuenta&#39;</span><span class="p">]</span>
+            
+            <span class="c1"># Buscar si existe una cuenta con EXACTAMENTE los mismos datos</span>
+            <span class="n">cuenta_existente</span> <span class="o">=</span> <span class="n">MedioPagoCliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span>
+                <span class="n">medio_pago__tipo</span><span class="o">=</span><span class="s1">&#39;transferencia&#39;</span><span class="p">,</span>
+                <span class="n">numero_cuenta</span><span class="o">=</span><span class="n">numero_cuenta</span><span class="p">,</span>
+                <span class="n">nombre_titular_cuenta</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;nombre_titular_cuenta&#39;</span><span class="p">],</span>
+                <span class="n">banco</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;banco&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                <span class="n">tipo_cuenta</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_cuenta&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">cuenta_existente</span><span class="p">:</span>
+                <span class="c1"># Si existe con exactamente los mismos datos pero está inactiva, reactivarla</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">cuenta_existente</span><span class="o">.</span><span class="n">activo</span> <span class="ow">or</span> <span class="n">cuenta_existente</span><span class="o">.</span><span class="n">is_deleted</span><span class="p">:</span>
+                    <span class="n">cuenta_existente</span><span class="o">.</span><span class="n">activo</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">cuenta_existente</span><span class="o">.</span><span class="n">is_deleted</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">cuenta_existente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cuenta bancaria agregada exitosamente.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Esta cuenta bancaria ya está activa y asociada al cliente.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Verificar si existe una cuenta con el mismo número pero datos diferentes</span>
+                <span class="n">cuenta_mismo_numero</span> <span class="o">=</span> <span class="n">MedioPagoCliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                    <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span>
+                    <span class="n">medio_pago__tipo</span><span class="o">=</span><span class="s1">&#39;transferencia&#39;</span><span class="p">,</span>
+                    <span class="n">numero_cuenta</span><span class="o">=</span><span class="n">numero_cuenta</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                
+                <span class="k">if</span> <span class="n">cuenta_mismo_numero</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Ya existe una cuenta con este número pero con datos diferentes. Si desea cambiar los datos, primero debe eliminar la cuenta anterior.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_agregar_cuenta.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+                        <span class="s1">&#39;titulo&#39;</span><span class="p">:</span> <span class="s1">&#39;Agregar Cuenta Bancaria&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;cancelar_url&#39;</span><span class="p">:</span> <span class="n">get_cliente_detalle_url</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+                    <span class="p">})</span>
+                
+                <span class="c1"># Obtener o crear el medio de pago tipo transferencia</span>
+                <span class="n">medio_pago_transferencia</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">MedioPago</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                    <span class="n">tipo</span><span class="o">=</span><span class="s1">&#39;transferencia&#39;</span><span class="p">,</span>
+                    <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;activo&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Crear un nuevo registro en la tabla intermedia</span>
+                <span class="n">MedioPagoCliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span>
+                    <span class="n">medio_pago</span><span class="o">=</span><span class="n">medio_pago_transferencia</span><span class="p">,</span>
+                    <span class="n">numero_cuenta</span><span class="o">=</span><span class="n">numero_cuenta</span><span class="p">,</span>
+                    <span class="n">nombre_titular_cuenta</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;nombre_titular_cuenta&#39;</span><span class="p">],</span>
+                    <span class="n">banco</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;banco&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">tipo_cuenta</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_cuenta&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                    <span class="n">activo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">is_deleted</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+                
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cuenta bancaria agregada exitosamente.&#39;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AgregarTarjetaForm</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;stripe_public_key&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_PUBLIC_KEY</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_agregar_cuenta.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cliente_agregar_cuenta_bancaria">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_agregar_cuenta_bancaria">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_agregar_cuenta_bancaria</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para agregar una cuenta bancaria al cliente con acceso híbrido.</span>
+
+<span class="sd">    Permite tanto a administradores como a usuarios operadores asociados</span>
+<span class="sd">    agregar cuentas bancarias como medio de acreditación para un cliente específico.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        request: Objeto HttpRequest con la información de la petición</span>
+<span class="sd">        pk: Clave primaria del cliente al que agregar la cuenta bancaria</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Formulario de cuenta bancaria o redirección tras creación</span>
+
+<span class="sd">    Decorators:</span>
+<span class="sd">        Ninguno específico, pero utiliza verificación de acceso manual</span>
+
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/agregar_cuenta_bancaria.html</span>
+
+<span class="sd">    Context:</span>
+<span class="sd">        - form: Instancia del formulario CuentaBancariaForm</span>
+<span class="sd">        - cliente: Instancia del cliente</span>
+<span class="sd">        - titulo: Título para mostrar en el template</span>
+<span class="sd">        - cancelar_url: URL para el botón de cancelar</span>
+
+<span class="sd">    Access Control:</span>
+<span class="sd">        - Administradores con permiso &#39;clientes.gestion&#39;: Acceso completo</span>
+<span class="sd">        - Usuarios operadores asociados al cliente: Acceso específico</span>
+
+<span class="sd">    Validation:</span>
+<span class="sd">        - Verifica duplicados de cuentas bancarias para evitar registros repetidos</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para gestionar este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">CuentaBancariaForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">cuenta_bancaria</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">cuenta_bancaria</span><span class="o">.</span><span class="n">cliente</span> <span class="o">=</span> <span class="n">cliente</span>
+            
+            <span class="c1"># Verificar si ya existe una cuenta con los mismos datos</span>
+            <span class="n">cuenta_existente</span> <span class="o">=</span> <span class="n">CuentaBancaria</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span>
+                <span class="n">banco</span><span class="o">=</span><span class="n">cuenta_bancaria</span><span class="o">.</span><span class="n">banco</span><span class="p">,</span>
+                <span class="n">numero_cuenta</span><span class="o">=</span><span class="n">cuenta_bancaria</span><span class="o">.</span><span class="n">numero_cuenta</span><span class="p">,</span>
+                <span class="n">nombre_titular</span><span class="o">=</span><span class="n">cuenta_bancaria</span><span class="o">.</span><span class="n">nombre_titular</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">cuenta_existente</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Ya existe una cuenta bancaria con estos datos para este cliente.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cuenta_bancaria</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Cuenta bancaria agregada exitosamente.&#39;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">CuentaBancariaForm</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;titulo&#39;</span><span class="p">:</span> <span class="s1">&#39;Agregar Cuenta Bancaria&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cancelar_url&#39;</span><span class="p">:</span> <span class="n">get_cliente_detalle_url</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/agregar_cuenta_bancaria.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="eliminar_tarjeta">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.eliminar_tarjeta">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">eliminar_tarjeta</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">payment_method_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para eliminar tarjeta de crédito de un cliente - Acceso híbrido&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Método no permitido.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="n">medio_pago_cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">MedioPagoCliente</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">medio_id</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+    
+    <span class="c1"># Cambiar el estado</span>
+    <span class="n">medio_pago_cliente</span><span class="o">.</span><span class="n">activo</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">medio_pago_cliente</span><span class="o">.</span><span class="n">activo</span>
+    <span class="n">medio_pago_cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    
+    <span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;activado&#39;</span> <span class="k">if</span> <span class="n">medio_pago_cliente</span><span class="o">.</span><span class="n">activo</span> <span class="k">else</span> <span class="s1">&#39;desactivado&#39;</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Medio de pago </span><span class="si">{</span><span class="n">estado</span><span class="si">}</span><span class="s1"> exitosamente.&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_detalle&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cliente_eliminar_medio_acreditacion">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_eliminar_medio_acreditacion">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_eliminar_medio_acreditacion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">tipo</span><span class="p">,</span> <span class="n">medio_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para eliminar un medio de acreditación (cuenta bancaria o billetera) - Acceso híbrido&quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para gestionar este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;cuenta&#39;</span><span class="p">:</span>
+            <span class="n">medio</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">CuentaBancaria</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">medio_id</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+            <span class="n">descripcion</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Cuenta </span><span class="si">{</span><span class="n">medio</span><span class="o">.</span><span class="n">banco</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">medio</span><span class="o">.</span><span class="n">numero_cuenta</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">elif</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;billetera&#39;</span><span class="p">:</span>
+            <span class="n">medio</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Billetera</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">medio_id</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+            <span class="n">descripcion</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Billetera </span><span class="si">{</span><span class="n">medio</span><span class="o">.</span><span class="n">get_tipo_billetera_display</span><span class="p">()</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">medio</span><span class="o">.</span><span class="n">telefono</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Tipo de medio de acreditación no válido.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        
+        <span class="n">medio</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">descripcion</span><span class="si">}</span><span class="s1"> eliminado exitosamente.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Solo aceptar POST</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Acción no permitida.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cliente_agregar_billetera">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_agregar_billetera">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_agregar_billetera</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vista para agregar una billetera electrónica al cliente - Acceso híbrido&quot;&quot;&quot;</span>
+    <span class="n">cliente</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Cliente</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para gestionar este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">BilleteraForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">billetera</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">billetera</span><span class="o">.</span><span class="n">cliente</span> <span class="o">=</span> <span class="n">cliente</span>
+            
+            <span class="c1"># Verificar si ya existe una billetera con los mismos datos</span>
+            <span class="n">billetera_existente</span> <span class="o">=</span> <span class="n">Billetera</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span>
+                <span class="n">tipo_billetera</span><span class="o">=</span><span class="n">billetera</span><span class="o">.</span><span class="n">tipo_billetera</span><span class="p">,</span>
+                <span class="n">telefono</span><span class="o">=</span><span class="n">billetera</span><span class="o">.</span><span class="n">telefono</span><span class="p">,</span>
+                <span class="n">nombre_titular</span><span class="o">=</span><span class="n">billetera</span><span class="o">.</span><span class="n">nombre_titular</span><span class="p">,</span>
+                <span class="n">nro_documento</span><span class="o">=</span><span class="n">billetera</span><span class="o">.</span><span class="n">nro_documento</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">billetera_existente</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Ya existe una billetera con estos datos para este cliente.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">billetera</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Billetera agregada exitosamente.&#39;</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">get_cliente_detalle_redirect</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">BilleteraForm</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;titulo&#39;</span><span class="p">:</span> <span class="s1">&#39;Agregar Billetera Electrónica&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cancelar_url&#39;</span><span class="p">:</span> <span class="n">get_cliente_detalle_url</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/agregar_billetera.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="historial_transacciones">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.historial_transacciones">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">historial_transacciones</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para el historial de transacciones de un cliente específico.</span>
+<span class="sd">    </span>
+<span class="sd">    Muestra un listado de transacciones con capacidades de filtrado</span>
+<span class="sd">    específico para un cliente determinado, incluyendo filtros por</span>
+<span class="sd">    usuario, tipo de operación y estado.</span>
+<span class="sd">    </span>
+<span class="sd">    Filtros disponibles:</span>
+<span class="sd">        - Tipo de operación (compra/venta)</span>
+<span class="sd">        - Estado de transacción (pendiente/completada/etc.)</span>
+<span class="sd">        - Usuario específico que procesó la transacción</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Petición HTTP con parámetros de filtro</span>
+<span class="sd">        cliente_id (int): ID específico del cliente</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Listado de transacciones del cliente</span>
+<span class="sd">        </span>
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_historial_transacciones.html</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        - transacciones: QuerySet de transacciones filtradas del cliente</span>
+<span class="sd">        - cliente: Instancia del cliente</span>
+<span class="sd">        - tipo_operacion: Filtro de tipo aplicado</span>
+<span class="sd">        - estado_filtro: Filtro de estado aplicado</span>
+<span class="sd">        - usuario_filtro: Usuario específico si aplica</span>
+<span class="sd">        - usuarios_cliente: Usuarios asociados al cliente</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cliente</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">cliente_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;Cliente no encontrado&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_lista&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para ver el historial de este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="n">transacciones_pasadas</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span> <span class="n">estado</span><span class="o">=</span><span class="s1">&#39;Pendiente&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">transacciones_pasadas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transacciones_pasadas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">&lt;</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Expira el tiempo para confirmar la transacción&#39;</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    
+    <span class="c1"># Obtener parámetros de filtrado</span>
+    <span class="n">tipo_operacion</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo_operacion&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">estado_filtro</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;estado&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">usuario_filtro</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;usuario&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener todas las transacciones del cliente</span>
+    <span class="n">transacciones</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-fecha_hora&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener usuarios asociados al cliente</span>
+    <span class="n">usuarios_cliente</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">usuarios</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    
+    <span class="c1"># Aplicar filtros según parámetros recibidos</span>
+    <span class="k">if</span> <span class="n">tipo_operacion</span><span class="p">:</span>
+        <span class="n">transacciones</span> <span class="o">=</span> <span class="n">transacciones</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tipo</span><span class="o">=</span><span class="n">tipo_operacion</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">estado_filtro</span><span class="p">:</span>
+        <span class="n">transacciones</span> <span class="o">=</span> <span class="n">transacciones</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="n">estado_filtro</span><span class="p">)</span>
+    
+    <span class="c1"># Filtrar por usuario si se especifica</span>
+    <span class="k">if</span> <span class="n">usuario_filtro</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usuario_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">usuario_filtro</span><span class="p">)</span>
+            <span class="n">transacciones</span> <span class="o">=</span> <span class="n">transacciones</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">usuario_id</span><span class="o">=</span><span class="n">usuario_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="k">pass</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;transacciones&#39;</span><span class="p">:</span> <span class="n">transacciones</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+        <span class="s1">&#39;tipo_operacion&#39;</span><span class="p">:</span> <span class="n">tipo_operacion</span><span class="p">,</span>
+        <span class="s1">&#39;estado_filtro&#39;</span><span class="p">:</span> <span class="n">estado_filtro</span><span class="p">,</span>
+        <span class="s1">&#39;usuario_filtro&#39;</span><span class="p">:</span> <span class="n">usuario_filtro</span><span class="p">,</span>
+        <span class="s1">&#39;usuarios_cliente&#39;</span><span class="p">:</span> <span class="n">usuarios_cliente</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_historial_transacciones.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cliente_detalle_transaccion">
+<a class="viewcode-back" href="../../clientes.html#clientes.views.cliente_detalle_transaccion">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@permission_required</span><span class="p">(</span><span class="s1">&#39;clientes.gestion&#39;</span><span class="p">,</span> <span class="n">raise_exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cliente_detalle_transaccion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">cliente_id</span><span class="p">,</span> <span class="n">transaccion_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista de detalle para una transacción específica desde el contexto de cliente.</span>
+<span class="sd">    </span>
+<span class="sd">    Muestra información completa y detallada de una transacción individual</span>
+<span class="sd">    del cliente, incluyendo todos los datos relevantes como montos calculados,</span>
+<span class="sd">    medios de pago/cobro, información del cliente y estado actual.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Petición HTTP</span>
+<span class="sd">        cliente_id (int): ID del cliente</span>
+<span class="sd">        transaccion_id (int): ID de la transacción a mostrar</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página de detalle o redirección si no existe</span>
+<span class="sd">        </span>
+<span class="sd">    Template:</span>
+<span class="sd">        clientes/cliente_detalle_transaccion.html</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        - transaccion: Instancia de la transacción</span>
+<span class="sd">        - cliente: Instancia del cliente</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cliente</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">cliente_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;Cliente no encontrado&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_lista&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar acceso híbrido (admin o usuario asociado)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">verificar_acceso_cliente</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No tienes permisos para ver las transacciones de este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">transaccion_id</span><span class="p">,</span> <span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;La transacción solicitada no existe para este cliente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;clientes:cliente_historial&#39;</span><span class="p">,</span> <span class="n">cliente_id</span><span class="o">=</span><span class="n">cliente_id</span><span class="p">)</span>
+
+    <span class="n">transacciones_pasadas</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cliente</span><span class="o">=</span><span class="n">cliente</span><span class="p">,</span> <span class="n">estado</span><span class="o">=</span><span class="s1">&#39;Pendiente&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">transacciones_pasadas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transacciones_pasadas</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">&lt;</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Expira el tiempo para confirmar la transacción&#39;</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;transaccion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="p">,</span>
+        <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente</span><span class="p">,</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;clientes/cliente_detalle_transaccion.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

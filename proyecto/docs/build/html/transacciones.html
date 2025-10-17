@@ -1,0 +1,2078 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transacciones &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Medios de Acreditación" href="medios_acreditacion.html" />
+    <link rel="prev" title="Monedas" href="monedas.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transacciones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.cantidad"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.cantidad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.denominacion"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.denominacion_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.objects"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.tauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.tauser_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.id"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.limite_diario"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.limite_diario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.limite_mensual"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.limite_mensual</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.objects"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.objects</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Recargos.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Recargos.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.id"><code class="docutils literal notranslate"><span class="pre">Recargos.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.marca"><code class="docutils literal notranslate"><span class="pre">Recargos.marca</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.medio"><code class="docutils literal notranslate"><span class="pre">Recargos.medio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.objects"><code class="docutils literal notranslate"><span class="pre">Recargos.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.recargo"><code class="docutils literal notranslate"><span class="pre">Recargos.recargo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Tauser.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Tauser.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.billetes"><code class="docutils literal notranslate"><span class="pre">Tauser.billetes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.billetestauser_set"><code class="docutils literal notranslate"><span class="pre">Tauser.billetestauser_set</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.esta_activo"><code class="docutils literal notranslate"><span class="pre">Tauser.esta_activo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.id"><code class="docutils literal notranslate"><span class="pre">Tauser.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.objects"><code class="docutils literal notranslate"><span class="pre">Tauser.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.puerto"><code class="docutils literal notranslate"><span class="pre">Tauser.puerto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.sucursal"><code class="docutils literal notranslate"><span class="pre">Tauser.sucursal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.tipo"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.estado"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token_expiracion"><code class="docutils literal notranslate"><span class="pre">Transaccion.token_expiracion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Transaccion.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Transaccion.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.beneficio_segmento"><code class="docutils literal notranslate"><span class="pre">Transaccion.beneficio_segmento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cotizacion"><code class="docutils literal notranslate"><span class="pre">Transaccion.cotizacion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_next_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_next_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_previous_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_previous_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.id"><code class="docutils literal notranslate"><span class="pre">Transaccion.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.monto_original"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto_original</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.objects"><code class="docutils literal notranslate"><span class="pre">Transaccion.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.pagado"><code class="docutils literal notranslate"><span class="pre">Transaccion.pagado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_beneficio_segmento"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_beneficio_segmento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_recargo_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_recargo_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_recargo_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_recargo_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.precio_base"><code class="docutils literal notranslate"><span class="pre">Transaccion.precio_base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.precio_final"><code class="docutils literal notranslate"><span class="pre">Transaccion.precio_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.razon"><code class="docutils literal notranslate"><span class="pre">Transaccion.razon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.recargo_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.recargo_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.recargo_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.recargo_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.redondeo_efectivo_monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.redondeo_efectivo_monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.redondeo_efectivo_precio_final"><code class="docutils literal notranslate"><span class="pre">Transaccion.redondeo_efectivo_precio_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">TransactionToken.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">TransactionToken.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.created_at</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.expires_at</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.generate_token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.generate_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.is_valid"><code class="docutils literal notranslate"><span class="pre">TransactionToken.is_valid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.mark_as_used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.mark_as_used()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.objects"><code class="docutils literal notranslate"><span class="pre">TransactionToken.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.transaccion_data"><code class="docutils literal notranslate"><span class="pre">TransactionToken.transaccion_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.used</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.usuario"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.usuario_id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_exito"><code class="docutils literal notranslate"><span class="pre">compra_exito()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.recibir_pago"><code class="docutils literal notranslate"><span class="pre">recibir_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.revisar_tausers"><code class="docutils literal notranslate"><span class="pre">revisar_tausers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.tauser_detalle"><code class="docutils literal notranslate"><span class="pre">tauser_detalle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_confirmacion"><code class="docutils literal notranslate"><span class="pre">venta_confirmacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_exito"><code class="docutils literal notranslate"><span class="pre">venta_exito()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_cobro"><code class="docutils literal notranslate"><span class="pre">venta_medio_cobro()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_pago"><code class="docutils literal notranslate"><span class="pre">venta_medio_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_monto_moneda"><code class="docutils literal notranslate"><span class="pre">venta_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.ver_variables"><code class="docutils literal notranslate"><span class="pre">ver_variables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.verificar_estado_tauser"><code class="docutils literal notranslate"><span class="pre">verificar_estado_tauser()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.base_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.base_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.clean"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.clean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.declared_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.media"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.VariablesForm"><code class="docutils literal notranslate"><span class="pre">VariablesForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.base_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.base_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.declared_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.media"><code class="docutils literal notranslate"><span class="pre">VariablesForm.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.save"><code class="docutils literal notranslate"><span class="pre">VariablesForm.save()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transacciones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.cantidad"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.cantidad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.denominacion"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.denominacion_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.objects"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.tauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.tauser_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.id"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.limite_diario"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.limite_diario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.limite_mensual"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.limite_mensual</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.LimiteGlobal.objects"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal.objects</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Recargos.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Recargos.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.id"><code class="docutils literal notranslate"><span class="pre">Recargos.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.marca"><code class="docutils literal notranslate"><span class="pre">Recargos.marca</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.medio"><code class="docutils literal notranslate"><span class="pre">Recargos.medio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.objects"><code class="docutils literal notranslate"><span class="pre">Recargos.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Recargos.recargo"><code class="docutils literal notranslate"><span class="pre">Recargos.recargo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Tauser.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Tauser.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.billetes"><code class="docutils literal notranslate"><span class="pre">Tauser.billetes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.billetestauser_set"><code class="docutils literal notranslate"><span class="pre">Tauser.billetestauser_set</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.esta_activo"><code class="docutils literal notranslate"><span class="pre">Tauser.esta_activo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.id"><code class="docutils literal notranslate"><span class="pre">Tauser.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.objects"><code class="docutils literal notranslate"><span class="pre">Tauser.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.puerto"><code class="docutils literal notranslate"><span class="pre">Tauser.puerto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.sucursal"><code class="docutils literal notranslate"><span class="pre">Tauser.sucursal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.tipo"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.estado"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token_expiracion"><code class="docutils literal notranslate"><span class="pre">Transaccion.token_expiracion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Transaccion.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Transaccion.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.beneficio_segmento"><code class="docutils literal notranslate"><span class="pre">Transaccion.beneficio_segmento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cotizacion"><code class="docutils literal notranslate"><span class="pre">Transaccion.cotizacion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_next_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_next_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_previous_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_previous_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.id"><code class="docutils literal notranslate"><span class="pre">Transaccion.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.monto_original"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto_original</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.objects"><code class="docutils literal notranslate"><span class="pre">Transaccion.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.pagado"><code class="docutils literal notranslate"><span class="pre">Transaccion.pagado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_beneficio_segmento"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_beneficio_segmento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_recargo_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_recargo_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.porc_recargo_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.porc_recargo_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.precio_base"><code class="docutils literal notranslate"><span class="pre">Transaccion.precio_base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.precio_final"><code class="docutils literal notranslate"><span class="pre">Transaccion.precio_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.razon"><code class="docutils literal notranslate"><span class="pre">Transaccion.razon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.recargo_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.recargo_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.recargo_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.recargo_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.redondeo_efectivo_monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.redondeo_efectivo_monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.redondeo_efectivo_precio_final"><code class="docutils literal notranslate"><span class="pre">Transaccion.redondeo_efectivo_precio_final</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">TransactionToken.DoesNotExist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">TransactionToken.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.created_at</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.expires_at</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.generate_token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.generate_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.is_valid"><code class="docutils literal notranslate"><span class="pre">TransactionToken.is_valid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.mark_as_used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.mark_as_used()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.objects"><code class="docutils literal notranslate"><span class="pre">TransactionToken.objects</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.transaccion_data"><code class="docutils literal notranslate"><span class="pre">TransactionToken.transaccion_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.used</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.usuario"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.usuario_id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_exito"><code class="docutils literal notranslate"><span class="pre">compra_exito()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.recibir_pago"><code class="docutils literal notranslate"><span class="pre">recibir_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.revisar_tausers"><code class="docutils literal notranslate"><span class="pre">revisar_tausers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.tauser_detalle"><code class="docutils literal notranslate"><span class="pre">tauser_detalle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_confirmacion"><code class="docutils literal notranslate"><span class="pre">venta_confirmacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_exito"><code class="docutils literal notranslate"><span class="pre">venta_exito()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_cobro"><code class="docutils literal notranslate"><span class="pre">venta_medio_cobro()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_pago"><code class="docutils literal notranslate"><span class="pre">venta_medio_pago()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_monto_moneda"><code class="docutils literal notranslate"><span class="pre">venta_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.ver_variables"><code class="docutils literal notranslate"><span class="pre">ver_variables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.verificar_estado_tauser"><code class="docutils literal notranslate"><span class="pre">verificar_estado_tauser()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.base_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.base_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.clean"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.clean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.declared_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.media"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.VariablesForm"><code class="docutils literal notranslate"><span class="pre">VariablesForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.base_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.base_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.declared_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.media"><code class="docutils literal notranslate"><span class="pre">VariablesForm.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.save"><code class="docutils literal notranslate"><span class="pre">VariablesForm.save()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Transacciones</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/transacciones.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="transacciones">
+<h1>Transacciones<a class="headerlink" href="#transacciones" title="Link to this heading"></a></h1>
+<p>Documentación del módulo de Transacciones.
+Para las operaciones de compra/venta de monedas extranjeras.</p>
+<p id="module-transacciones.models">Modelos para el sistema de transacciones de Global Exchange.</p>
+<p>Este módulo contiene los modelos de datos relacionados con las transacciones
+financieras, incluyendo la gestión de recargos y el procesamiento de
+transacciones de compra y venta de monedas extranjeras.</p>
+<dl class="simple">
+<dt>Clases principales:</dt><dd><ul class="simple">
+<li><p>Recargos: Gestiona los recargos aplicables por tipo de medio de pago</p></li>
+<li><p>Transaccion: Representa una transacción de compra o venta de monedas</p></li>
+</ul>
+</dd>
+</dl>
+<p>Author: Equipo de desarrollo Global Exchange
+Date: 2024</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">BilletesTauser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tauser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cantidad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#BilletesTauser"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.BilletesTauser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.cantidad">
+<span class="sig-name descname"><span class="pre">cantidad</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.cantidad" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.denominacion">
+<span class="sig-name descname"><span class="pre">denominacion</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.denominacion" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.denominacion_id">
+<span class="sig-name descname"><span class="pre">denominacion_id</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.denominacion_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.BilletesTauser.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.tauser">
+<span class="sig-name descname"><span class="pre">tauser</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.tauser" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.tauser_id">
+<span class="sig-name descname"><span class="pre">tauser_id</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.tauser_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">LimiteGlobal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#LimiteGlobal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.LimiteGlobal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar los límites globales de transacciones
+que aplican a todos los clientes según la ley de casas de cambio</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.LimiteGlobal.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.LimiteGlobal.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.LimiteGlobal.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.limite_diario">
+<span class="sig-name descname"><span class="pre">limite_diario</span></span><a class="headerlink" href="#transacciones.models.LimiteGlobal.limite_diario" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.limite_mensual">
+<span class="sig-name descname"><span class="pre">limite_mensual</span></span><a class="headerlink" href="#transacciones.models.LimiteGlobal.limite_mensual" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.LimiteGlobal.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Recargos">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Recargos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Recargos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Recargos" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar recargos aplicables según el medio de pago.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.Recargos.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.Recargos.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.Recargos.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.marca">
+<span class="sig-name descname"><span class="pre">marca</span></span><a class="headerlink" href="#transacciones.models.Recargos.marca" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.medio">
+<span class="sig-name descname"><span class="pre">medio</span></span><a class="headerlink" href="#transacciones.models.Recargos.medio" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.Recargos.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Recargos.recargo">
+<span class="sig-name descname"><span class="pre">recargo</span></span><a class="headerlink" href="#transacciones.models.Recargos.recargo" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Tauser">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Tauser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">puerto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sucursal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Tauser"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Tauser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.Tauser.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.Tauser.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.billetes">
+<span class="sig-name descname"><span class="pre">billetes</span></span><a class="headerlink" href="#transacciones.models.Tauser.billetes" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related objects manager on the forward and reverse sides of
+a many-to-many relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Pizza</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">toppings</span> <span class="o">=</span> <span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Topping</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;pizzas&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Pizza.toppings</span></code> and <code class="docutils literal notranslate"><span class="pre">Topping.pizzas</span></code> are <code class="docutils literal notranslate"><span class="pre">ManyToManyDescriptor</span></code>
+instances.</p>
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code class="docutils literal notranslate"><span class="pre">create_forward_many_to_many_manager()</span></code> defined below.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.billetestauser_set">
+<span class="sig-name descname"><span class="pre">billetestauser_set</span></span><a class="headerlink" href="#transacciones.models.Tauser.billetestauser_set" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related objects manager on the reverse side of a
+many-to-one relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Parent.children</span></code> is a <code class="docutils literal notranslate"><span class="pre">ReverseManyToOneDescriptor</span></code> instance.</p>
+<p>Most of the implementation is delegated to a dynamically defined manager
+class built by <code class="docutils literal notranslate"><span class="pre">create_forward_many_to_many_manager()</span></code> defined below.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.esta_activo">
+<span class="sig-name descname"><span class="pre">esta_activo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Tauser.esta_activo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Tauser.esta_activo" title="Link to this definition"></a></dt>
+<dd><p>Verifica si hay un servidor Django corriendo en el puerto del TAUser.</p>
+<p>Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP
+para confirmar que es un servidor Django.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si hay un servidor Django corriendo, False en caso contrario</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.Tauser.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.Tauser.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.puerto">
+<span class="sig-name descname"><span class="pre">puerto</span></span><a class="headerlink" href="#transacciones.models.Tauser.puerto" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.sucursal">
+<span class="sig-name descname"><span class="pre">sucursal</span></span><a class="headerlink" href="#transacciones.models.Tauser.sucursal" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Transaccion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo principal para representar transacciones de compra y venta de monedas.</p>
+<p>Una transacción registra todos los detalles de una operación de cambio de moneda,
+incluyendo el cliente, tipo de operación, medios de pago/cobro, montos y estado.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#transacciones.models.Transaccion.cliente" title="Link to this definition"></a></dt>
+<dd><p>Cliente que realiza la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.tipo">
+<span class="sig-name descname"><span class="pre">tipo</span></span><a class="headerlink" href="#transacciones.models.Transaccion.tipo" title="Link to this definition"></a></dt>
+<dd><p>Tipo de operación (“compra” o “venta”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.moneda">
+<span class="sig-name descname"><span class="pre">moneda</span></span><a class="headerlink" href="#transacciones.models.Transaccion.moneda" title="Link to this definition"></a></dt>
+<dd><p>Moneda extranjera involucrada en la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.monto">
+<span class="sig-name descname"><span class="pre">monto</span></span><a class="headerlink" href="#transacciones.models.Transaccion.monto" title="Link to this definition"></a></dt>
+<dd><p>Cantidad de la moneda extranjera</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DecimalField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.medio_pago">
+<span class="sig-name descname"><span class="pre">medio_pago</span></span><a class="headerlink" href="#transacciones.models.Transaccion.medio_pago" title="Link to this definition"></a></dt>
+<dd><p>Forma de pago del cliente (efectivo, tarjeta, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.medio_cobro">
+<span class="sig-name descname"><span class="pre">medio_cobro</span></span><a class="headerlink" href="#transacciones.models.Transaccion.medio_cobro" title="Link to this definition"></a></dt>
+<dd><p>Forma de cobro para entregar el dinero al cliente</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.fecha_hora">
+<span class="sig-name descname"><span class="pre">fecha_hora</span></span><a class="headerlink" href="#transacciones.models.Transaccion.fecha_hora" title="Link to this definition"></a></dt>
+<dd><p>Timestamp de creación/actualización de la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.estado">
+<span class="sig-name descname"><span class="pre">estado</span></span><a class="headerlink" href="#transacciones.models.Transaccion.estado" title="Link to this definition"></a></dt>
+<dd><p>Estado actual de la transacción (Pendiente, Completada, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.token">
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#transacciones.models.Transaccion.token" title="Link to this definition"></a></dt>
+<dd><p>Token único para transacciones que lo requieren</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.token_expiracion">
+<span class="sig-name descname"><span class="pre">token_expiracion</span></span><a class="headerlink" href="#transacciones.models.Transaccion.token_expiracion" title="Link to this definition"></a></dt>
+<dd><p>Fecha y hora de expiración del token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.usuario">
+<span class="sig-name descname"><span class="pre">usuario</span></span><a class="headerlink" href="#transacciones.models.Transaccion.usuario" title="Link to this definition"></a></dt>
+<dd><p>Usuario del sistema que procesó la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>Meta:</dt><dd><p>verbose_name: «Transacción»
+verbose_name_plural: «Transacciones»
+db_table: «transacciones»</p>
+</dd>
+</dl>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.Transaccion.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.Transaccion.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.beneficio_segmento">
+<span class="sig-name descname"><span class="pre">beneficio_segmento</span></span><a class="headerlink" href="#transacciones.models.Transaccion.beneficio_segmento" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.cotizacion">
+<span class="sig-name descname"><span class="pre">cotizacion</span></span><a class="headerlink" href="#transacciones.models.Transaccion.cotizacion" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">estado</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">fecha_hora</span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.get_next_by_fecha_hora">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_hora</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_hora&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.Transaccion.get_next_by_fecha_hora" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.get_previous_by_fecha_hora">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_hora</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_hora&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.Transaccion.get_previous_by_fecha_hora" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">medio_cobro</span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">medio_pago</span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">moneda</span></span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">monto</span></span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.monto_original">
+<span class="sig-name descname"><span class="pre">monto_original</span></span><a class="headerlink" href="#transacciones.models.Transaccion.monto_original" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.Transaccion.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.pagado">
+<span class="sig-name descname"><span class="pre">pagado</span></span><a class="headerlink" href="#transacciones.models.Transaccion.pagado" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.porc_beneficio_segmento">
+<span class="sig-name descname"><span class="pre">porc_beneficio_segmento</span></span><a class="headerlink" href="#transacciones.models.Transaccion.porc_beneficio_segmento" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.porc_recargo_cobro">
+<span class="sig-name descname"><span class="pre">porc_recargo_cobro</span></span><a class="headerlink" href="#transacciones.models.Transaccion.porc_recargo_cobro" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.porc_recargo_pago">
+<span class="sig-name descname"><span class="pre">porc_recargo_pago</span></span><a class="headerlink" href="#transacciones.models.Transaccion.porc_recargo_pago" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.precio_base">
+<span class="sig-name descname"><span class="pre">precio_base</span></span><a class="headerlink" href="#transacciones.models.Transaccion.precio_base" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.precio_final">
+<span class="sig-name descname"><span class="pre">precio_final</span></span><a class="headerlink" href="#transacciones.models.Transaccion.precio_final" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.razon">
+<span class="sig-name descname"><span class="pre">razon</span></span><a class="headerlink" href="#transacciones.models.Transaccion.razon" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.recargo_cobro">
+<span class="sig-name descname"><span class="pre">recargo_cobro</span></span><a class="headerlink" href="#transacciones.models.Transaccion.recargo_cobro" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.recargo_pago">
+<span class="sig-name descname"><span class="pre">recargo_pago</span></span><a class="headerlink" href="#transacciones.models.Transaccion.recargo_pago" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.redondeo_efectivo_monto">
+<span class="sig-name descname"><span class="pre">redondeo_efectivo_monto</span></span><a class="headerlink" href="#transacciones.models.Transaccion.redondeo_efectivo_monto" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.redondeo_efectivo_precio_final">
+<span class="sig-name descname"><span class="pre">redondeo_efectivo_precio_final</span></span><a class="headerlink" href="#transacciones.models.Transaccion.redondeo_efectivo_precio_final" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">tipo</span></span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">usuario</span></span><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.usuario_id">
+<span class="sig-name descname"><span class="pre">usuario_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.usuario_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">TransactionToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar tokens temporales de autenticación de dos factores
+para transacciones que requieren verificación adicional.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.DoesNotExist">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.DoesNotExist" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.MultipleObjectsReturned">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.MultipleObjectsReturned" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.created_at" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.expires_at">
+<span class="sig-name descname"><span class="pre">expires_at</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.expires_at" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.generate_token">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.generate_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.generate_token" title="Link to this definition"></a></dt>
+<dd><p>Genera un nuevo token para un usuario y datos de transacción específicos.
+Elimina tokens previos no usados del mismo usuario.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_next_by_created_at">
+<span class="sig-name descname"><span class="pre">get_next_by_created_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">created_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_next_by_created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_next_by_expires_at">
+<span class="sig-name descname"><span class="pre">get_next_by_expires_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">expires_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_next_by_expires_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_previous_by_created_at">
+<span class="sig-name descname"><span class="pre">get_previous_by_created_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">created_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_previous_by_created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_previous_by_expires_at">
+<span class="sig-name descname"><span class="pre">get_previous_by_expires_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">expires_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_previous_by_expires_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.id" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.is_valid"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.is_valid" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el token es válido (no usado y no expirado)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.mark_as_used">
+<span class="sig-name descname"><span class="pre">mark_as_used</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.mark_as_used"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.mark_as_used" title="Link to this definition"></a></dt>
+<dd><p>Marca el token como usado</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.objects">
+<span class="sig-name descname"><span class="pre">objects</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.db.models.manager.Manager</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#transacciones.models.TransactionToken.objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.token">
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.token" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.transaccion_data">
+<span class="sig-name descname"><span class="pre">transaccion_data</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.transaccion_data" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.used">
+<span class="sig-name descname"><span class="pre">used</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.used" title="Link to this definition"></a></dt>
+<dd><p>A wrapper for a deferred-loading field. When the value is read from this
+object the first time, the query is executed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.usuario">
+<span class="sig-name descname"><span class="pre">usuario</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.usuario" title="Link to this definition"></a></dt>
+<dd><p>Accessor to the related object on the forward side of a many-to-one or
+one-to-one (via ForwardOneToOneDescriptor subclass) relation.</p>
+<p>In the example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Child</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">Parent</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Child.parent</span></code> is a <code class="docutils literal notranslate"><span class="pre">ForwardManyToOneDescriptor</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.usuario_id">
+<span class="sig-name descname"><span class="pre">usuario_id</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.usuario_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.calcular_conversion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">calcular_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moneda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pago</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cobro</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentacion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#calcular_conversion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.calcular_conversion" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
+redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
+redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
+cotizacion (int): Cotización de la moneda según el tipo de operación
+precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
+porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
+beneficio_segmento (int): Beneficio aplicado en la operación según el segmento del cliente
+monto_recargo_pago (int): Monto del recargo aplicado según el medio de pago
+porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
+monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
+porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
+monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+precio_final (int): Monto en guaraníes final a pagar o cobrar</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>monto_original (Decimal)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.crear_limite_global_inicial">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">crear_limite_global_inicial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#crear_limite_global_inicial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.crear_limite_global_inicial" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente el límite global inicial después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.crear_recargos">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">crear_recargos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#crear_recargos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.crear_recargos" title="Link to this definition"></a></dt>
+<dd><p>Signal handler que crea automáticamente los recargos predeterminados.</p>
+<p>Se ejecuta después de aplicar las migraciones de la aplicación transacciones.
+Crea los recargos estándar para diferentes medios de pago si no existen.</p>
+<dl class="simple">
+<dt>Recargos creados:</dt><dd><ul class="simple">
+<li><p>VISA: 1%</p></li>
+<li><p>MASTERCARD: 1,5%</p></li>
+<li><p>Tigo Money: 2%</p></li>
+<li><p>Billetera Personal: 2%</p></li>
+<li><p>Zimple: 3%</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – La aplicación que envía la señal</p></li>
+<li><p><strong>**kwargs</strong> – Argumentos adicionales de la señal post_migrate</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.generar_token_transaccion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">generar_token_transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#generar_token_transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.generar_token_transaccion" title="Link to this definition"></a></dt>
+<dd><p>Genera un token único de seguridad para transacciones específicas.</p>
+<p>Se utiliza para transacciones con medios de pago que requieren verificación
+adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.procesar_pago_stripe">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">procesar_pago_stripe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_method_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#procesar_pago_stripe"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.procesar_pago_stripe" title="Link to this definition"></a></dt>
+<dd><p>Procesa un pago con Stripe para una transacción dada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transaccion</strong> (<a class="reference internal" href="#transacciones.models.Transaccion" title="transacciones.models.Transaccion"><em>Transaccion</em></a>) – La transacción a procesar</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diccionario con “token” (str) y “datos” (dict) de la transacción</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Si la transacción no existe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.procesar_transaccion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">procesar_transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recibido</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#procesar_transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.procesar_transaccion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.redondear_efectivo">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">redondear_efectivo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominaciones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#redondear_efectivo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.redondear_efectivo" title="Link to this definition"></a></dt>
+<dd><p>Redondea un monto al múltiplo más cercano según las denominaciones disponibles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monto</strong> (<em>Decimal</em>) – Monto a redondear</p></li>
+<li><p><strong>denominaciones</strong> (<em>list</em>) – Lista de denominaciones disponibles (enteros)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Monto redondeado</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decimal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.verificar_cambio_cotizacion_sesion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">verificar_cambio_cotizacion_sesion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tipo_transaccion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'compra'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#verificar_cambio_cotizacion_sesion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.verificar_cambio_cotizacion_sesion" title="Link to this definition"></a></dt>
+<dd><p>Verifica si ha habido cambios en la cotización durante el proceso de transacción.</p>
+<p>Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con datos de sesión</p></li>
+<li><p><strong>tipo_transaccion</strong> (<em>str</em>) – “compra” o “venta”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con información de cambios o None si no hay cambios</dt><dd><ul class="simple">
+<li><p>’hay_cambios”: boolean indicando si hubo cambios</p></li>
+<li><p>’valores_anteriores”: dict con precio_compra y precio_venta originales</p></li>
+<li><p>’valores_actuales”: dict con precio_compra y precio_venta actuales</p></li>
+<li><p>’moneda”: instancia de la moneda</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-transacciones.views">Vistas para el sistema de transacciones de Global Exchange.</p>
+<p>Este módulo contiene todas las vistas necesarias para el procesamiento de transacciones
+de compra y venta de monedas extranjeras, incluyendo la gestión del flujo completo
+desde la selección inicial hasta la confirmación final.</p>
+<dl class="simple">
+<dt>Funcionalidades principales:</dt><dd><ul class="simple">
+<li><p>Proceso completo de compra de monedas (4 pasos)</p></li>
+<li><p>Proceso completo de venta de monedas (4 pasos)</p></li>
+<li><p>Gestión de recargos por medio de pago</p></li>
+<li><p>Historial y consulta de transacciones</p></li>
+<li><p>Validaciones de límites en tiempo real</p></li>
+<li><p>Generación y gestión de tokens de seguridad</p></li>
+</ul>
+</dd>
+</dl>
+<p>Author: Equipo de desarrollo Global Exchange
+Date: 2025</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.compra_confirmacion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">compra_confirmacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#compra_confirmacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.compra_confirmacion" title="Link to this definition"></a></dt>
+<dd><p>Cuarto paso del proceso de compra: confirmación y creación de transacción.</p>
+<p>Muestra un resumen completo de la transacción y procede a crearla en
+la base de datos. Para medios de pago como Efectivo o Transferencia,
+genera un token de seguridad con validez de 5 minutos.</p>
+<dl class="simple">
+<dt>Acciones realizadas:</dt><dd><ul class="simple">
+<li><p>Verificación de cambios en cotización</p></li>
+<li><p>Creación de registro de transacción en base de datos</p></li>
+<li><p>Generación de token para medios específicos</p></li>
+<li><p>Configuración del estado inicial como “Pendiente”</p></li>
+<li><p>Vinculación con cliente y usuario activos</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP de confirmación</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza página de confirmación o modal de cambio</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/confirmacion.html o transacciones/cotizacion_cambiada.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda de la transacción</p></li>
+<li><p>monto: Monto de la transacción</p></li>
+<li><p>medio_pago: Medio de pago seleccionado</p></li>
+<li><p>medio_cobro: Medio de cobro seleccionado</p></li>
+<li><p>cliente_activo: Cliente que realiza la transacción</p></li>
+<li><p>transaccion: Instancia de transacción creada</p></li>
+<li><p>paso_actual: Número del paso actual (4)</p></li>
+<li><p>total_pasos: Total de pasos en el proceso (4)</p></li>
+<li><p>titulo_paso: Título descriptivo del paso</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.compra_exito">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">compra_exito</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#compra_exito"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.compra_exito" title="Link to this definition"></a></dt>
+<dd><p>Página final del proceso de compra: mensaje de éxito.</p>
+<p>Verifica si hay cambios en la cotización antes de finalizar la transacción.
+Si hay cambios, muestra el modal de confirmación. Si no hay cambios o el usuario
+acepta los nuevos precios, muestra confirmación de éxito.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP</p></li>
+<li><p><strong>token</strong> (<em>str</em><em>, </em><em>optional</em>) – Token de la transacción para retorno de la pasarela</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de éxito o modal de cambio de cotización</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/exito.html o transacciones/cotizacion_cambiada.html</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.compra_medio_cobro">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">compra_medio_cobro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#compra_medio_cobro"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.compra_medio_cobro" title="Link to this definition"></a></dt>
+<dd><p>Tercer paso del proceso de compra: selección del medio de cobro.</p>
+<p>Permite al usuario seleccionar cómo va a recibir la moneda extranjera
+que está comprando. Actualmente solo se ofrece la opción de efectivo
+como medio de cobro para las compras.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Datos de pasos anteriores deben existir en sesión</p></li>
+<li><p>Usuario debe tener cliente activo</p></li>
+<li><p>Medio de cobro debe estar disponible</p></li>
+<li><p>Verificación de cambios en cotización</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con selección de medio de cobro</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_medio_cobro.html o transacciones/cotizacion_cambiada.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda seleccionada</p></li>
+<li><p>monto: Monto seleccionado</p></li>
+<li><p>medio_pago: Medio de pago seleccionado</p></li>
+<li><p>medios_cobro: Lista de medios de cobro disponibles</p></li>
+<li><p>medio_cobro_seleccionado: Medio de cobro actualmente seleccionado</p></li>
+<li><p>cliente_activo: Cliente activo del usuario</p></li>
+<li><p>paso_actual: Número del paso actual (3)</p></li>
+<li><p>total_pasos: Total de pasos en el proceso (4)</p></li>
+<li><p>titulo_paso: Título descriptivo del paso</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.compra_medio_pago">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">compra_medio_pago</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#compra_medio_pago"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.compra_medio_pago" title="Link to this definition"></a></dt>
+<dd><p>Segundo paso del proceso de compra: selección del medio de pago.</p>
+<p>Permite al usuario seleccionar cómo va a pagar por la moneda extranjera.
+Las opciones incluyen efectivo, billetera electrónica, transferencia
+bancaria y tarjetas de crédito registradas en Stripe.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Datos del paso anterior deben existir en sesión</p></li>
+<li><p>Usuario debe tener cliente activo</p></li>
+<li><p>Medio de pago debe estar disponible para el cliente</p></li>
+<li><p>Verificación de cambios en cotización</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con selección de medio de pago</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_medio_pago.html o transacciones/cotizacion_cambiada.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda seleccionada en el paso anterior</p></li>
+<li><p>monto: Monto seleccionado en el paso anterior</p></li>
+<li><p>medios_pago: Lista de medios de pago disponibles</p></li>
+<li><p>medio_pago_seleccionado: Medio actualmente seleccionado</p></li>
+<li><p>cliente_activo: Cliente activo del usuario</p></li>
+<li><p>paso_actual: Número del paso actual (2)</p></li>
+<li><p>total_pasos: Total de pasos en el proceso (4)</p></li>
+<li><p>titulo_paso: Título descriptivo del paso</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.compra_monto_moneda">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">compra_monto_moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#compra_monto_moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.compra_monto_moneda" title="Link to this definition"></a></dt>
+<dd><p>Primer paso del proceso de compra: selección de moneda y monto.</p>
+<p>Permite al usuario seleccionar la moneda extranjera que desea comprar
+y especificar el monto. Incluye validaciones de límites de transacción
+antes de proceder al siguiente paso.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Usuario debe tener un cliente activo</p></li>
+<li><p>Monto debe cumplir con límites diarios y mensuales</p></li>
+<li><p>Moneda debe estar activa en el sistema</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con datos del formulario</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_moneda_monto.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>form: Formulario de selección de moneda y monto</p></li>
+<li><p>paso_actual: Número del paso actual (1)</p></li>
+<li><p>total_pasos: Total de pasos en el proceso (4)</p></li>
+<li><p>titulo_paso: Título descriptivo del paso</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
+<li><p>limites_disponibles: Información de límites del cliente</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.detalle_historial">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">detalle_historial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#detalle_historial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.detalle_historial" title="Link to this definition"></a></dt>
+<dd><p>Vista de detalle para una transacción específica.</p>
+<p>Muestra información completa y detallada de una transacción individual,
+incluyendo todos los datos relevantes como montos calculados, medios
+de pago/cobro, información del cliente y estado actual.</p>
+<dl class="simple">
+<dt>Cálculos realizados:</dt><dd><ul class="simple">
+<li><p>Para compras: Convierte monto extranjero a guaraníes usando precio de venta</p></li>
+<li><p>Para ventas: Convierte monto extranjero a guaraníes usando precio de compra</p></li>
+<li><p>Aplica beneficios del segmento del cliente</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP</p></li>
+<li><p><strong>transaccion_id</strong> (<em>int</em>) – ID de la transacción a mostrar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de detalle o redirecciona si no existe</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/detalle_transaccion.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>transaccion: Instancia de la transacción</p></li>
+<li><p>monto_origen: Monto en moneda de origen (guaraníes o extranjera)</p></li>
+<li><p>monto_destino: Monto en moneda de destino (extranjera o guaraníes)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.editar_variables">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">editar_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#editar_variables"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.editar_variables" title="Link to this definition"></a></dt>
+<dd><p>Vista para editar variables de gestión de transacciones.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.historial_transacciones">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">historial_transacciones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#historial_transacciones"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.historial_transacciones" title="Link to this definition"></a></dt>
+<dd><p>Vista principal para el historial y consulta de transacciones.</p>
+<p>Muestra un listado completo de transacciones con capacidades de filtrado
+avanzado por cliente, usuario, tipo de operación y estado. Si se proporciona
+un cliente_id específico, filtra solo las transacciones de ese cliente.</p>
+<dl class="simple">
+<dt>Filtros disponibles:</dt><dd><ul class="simple">
+<li><p>Búsqueda por nombre/documento de cliente o usuario</p></li>
+<li><p>Tipo de operación (compra/venta)</p></li>
+<li><p>Estado de transacción (pendiente/completada/etc.)</p></li>
+<li><p>Usuario específico que procesó la transacción</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con parámetros de filtro</p></li>
+<li><p><strong>cliente_id</strong> (<em>int</em><em>, </em><em>optional</em>) – ID específico de cliente para filtrar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Listado de transacciones filtrado</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/historial_transacciones.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>transacciones: QuerySet de transacciones filtradas</p></li>
+<li><p>busqueda: Término de búsqueda aplicado</p></li>
+<li><p>tipo_operacion: Filtro de tipo aplicado</p></li>
+<li><p>estado_filtro: Filtro de estado aplicado</p></li>
+<li><p>cliente_filtrado: Cliente específico si aplica</p></li>
+<li><p>usuario_filtro: Usuario específico si aplica</p></li>
+<li><p>usuarios_cliente: Usuarios asociados al cliente (si aplica)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.recibir_pago">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">recibir_pago</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#recibir_pago"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.recibir_pago" title="Link to this definition"></a></dt>
+<dd><p>Vista para recibir y verificar notificaciones de la pasarela</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.revisar_tausers">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">revisar_tausers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#revisar_tausers"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.revisar_tausers" title="Link to this definition"></a></dt>
+<dd><p>Vista para revisar la información de los TAUsers.</p>
+<p>Muestra un listado de todos los TAUsers del sistema con su información básica
+incluyendo puerto, estado de activación (detectado dinámicamente) y opciones de acción.</p>
+<dl class="simple">
+<dt>Funcionalidades:</dt><dd><ul class="simple">
+<li><p>Listado completo de TAUsers</p></li>
+<li><p>Búsqueda por puerto</p></li>
+<li><p>Filtrado por estado (activo/inactivo) detectado automáticamente</p></li>
+<li><p>Estadísticas de TAUsers activos e inactivos</p></li>
+<li><p>Opción de ver detalles de cada TAUser</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con parámetros de filtro opcionales</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza listado de TAUsers</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/tausers_lista.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>tausers: Lista de TAUsers con estado detectado dinámicamente</p></li>
+<li><p>busqueda: Término de búsqueda aplicado</p></li>
+<li><p>tausers_activos: Cantidad de TAUsers activos</p></li>
+<li><p>tausers_inactivos: Cantidad de TAUsers inactivos</p></li>
+<li><p>total_tausers_sistema: Total de TAUsers en el sistema</p></li>
+<li><p>filtro_estado: Estado seleccionado para filtrar</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.tauser_detalle">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">tauser_detalle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#tauser_detalle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.tauser_detalle" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar los detalles completos de un TAUser específico.</p>
+<p>Muestra información detallada del TAUser incluyendo puerto, estado,
+billetes asociados y sus cantidades disponibles.
+Incluye filtrado por moneda para billetes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP</p></li>
+<li><p><strong>pk</strong> (<em>int</em>) – ID del TAUser a mostrar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de detalle del TAUser</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/tauser_detalles.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>tauser: Instancia del TAUser</p></li>
+<li><p>billetes_tauser: QuerySet de billetes asociados al TAUser</p></li>
+<li><p>monedas_disponibles: Lista de monedas que tienen billetes en este TAUser</p></li>
+<li><p>moneda_filtro: Moneda seleccionada para filtrar (si aplica)</p></li>
+<li><p>totales_por_moneda: Diccionario con totales por moneda</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.venta_confirmacion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">venta_confirmacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#venta_confirmacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.venta_confirmacion" title="Link to this definition"></a></dt>
+<dd><p>Cuarto paso del proceso de venta: confirmación y creación de transacción.</p>
+<p>Muestra un resumen completo de la transacción de venta y procede a crearla
+en la base de datos. Para ventas en efectivo, genera un token de seguridad
+con validez de 5 minutos.</p>
+<dl class="simple">
+<dt>Acciones realizadas:</dt><dd><ul class="simple">
+<li><p>Creación de registro de transacción en base de datos</p></li>
+<li><p>Generación de token para pagos en efectivo</p></li>
+<li><p>Configuración del estado inicial como “Pendiente”</p></li>
+<li><p>Vinculación con cliente y usuario activos</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP de confirmación</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza página de confirmación</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/confirmacion.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda de la transacción</p></li>
+<li><p>monto: Monto de la transacción</p></li>
+<li><p>medio_pago: Medio de pago seleccionado</p></li>
+<li><p>medio_cobro: Medio de cobro seleccionado</p></li>
+<li><p>cliente_activo: Cliente que realiza la transacción</p></li>
+<li><p>transaccion: Instancia de transacción creada</p></li>
+<li><p>paso_actual: Número del paso actual (4)</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“venta”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.venta_exito">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">venta_exito</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#venta_exito"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.venta_exito" title="Link to this definition"></a></dt>
+<dd><p>Página final del proceso de venta: mensaje de éxito.</p>
+<p>Verifica si hay cambios en la cotización antes de finalizar la transacción.
+Si hay cambios, muestra el modal de confirmación. Si no hay cambios o el usuario
+acepta los nuevos precios, muestra confirmación de éxito.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de éxito o modal de cambio de cotización</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/exito.html o transacciones/cotizacion_cambiada.html</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.venta_medio_cobro">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">venta_medio_cobro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#venta_medio_cobro"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.venta_medio_cobro" title="Link to this definition"></a></dt>
+<dd><p>Tercer paso del proceso de venta: selección del medio de cobro.</p>
+<p>Permite al usuario seleccionar cómo va a entregar la moneda extranjera
+que está vendiendo. Incluye opciones como efectivo, cuentas bancarias
+registradas y billeteras electrónicas del cliente.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Datos de pasos anteriores deben existir en sesión</p></li>
+<li><p>Usuario debe tener cliente activo</p></li>
+<li><p>Medios disponibles según configuración del cliente</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con selección de medio de cobro</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_medio_cobro.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda seleccionada</p></li>
+<li><p>monto: Monto seleccionado</p></li>
+<li><p>medio_pago: Medio de pago seleccionado</p></li>
+<li><p>medios_cobro: Lista de medios de cobro disponibles (efectivo, cuentas, billeteras)</p></li>
+<li><p>medio_cobro_seleccionado: Medio de cobro actualmente seleccionado</p></li>
+<li><p>cliente_activo: Cliente activo del usuario</p></li>
+<li><p>paso_actual: Número del paso actual (3)</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“venta”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.venta_medio_pago">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">venta_medio_pago</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#venta_medio_pago"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.venta_medio_pago" title="Link to this definition"></a></dt>
+<dd><p>Segundo paso del proceso de venta: selección del medio de pago.</p>
+<p>Permite al usuario seleccionar cómo va a recibir el pago por la moneda
+extranjera que está vendiendo. Para ventas, principalmente se ofrece
+efectivo, y para USD también tarjetas de crédito registradas.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Datos del paso anterior deben existir en sesión</p></li>
+<li><p>Usuario debe tener cliente activo</p></li>
+<li><p>Para tarjetas: solo disponibles para USD y clientes con tarjetas activas</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con selección de medio de pago</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_medio_pago.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>moneda: Moneda seleccionada en el paso anterior</p></li>
+<li><p>monto: Monto seleccionado en el paso anterior</p></li>
+<li><p>medios_pago: Lista de medios de pago disponibles</p></li>
+<li><p>medio_pago_seleccionado: Medio actualmente seleccionado</p></li>
+<li><p>cliente_activo: Cliente activo del usuario</p></li>
+<li><p>paso_actual: Número del paso actual (2)</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“venta”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.venta_monto_moneda">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">venta_monto_moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#venta_monto_moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.venta_monto_moneda" title="Link to this definition"></a></dt>
+<dd><p>Primer paso del proceso de venta: selección de moneda y monto.</p>
+<p>Permite al usuario seleccionar la moneda extranjera que desea vender
+y especificar el monto. Similar al proceso de compra pero con validaciones
+específicas para operaciones de venta.</p>
+<dl class="simple">
+<dt>Validaciones realizadas:</dt><dd><ul class="simple">
+<li><p>Usuario debe tener un cliente activo</p></li>
+<li><p>Monto debe cumplir con límites diarios y mensuales</p></li>
+<li><p>Moneda debe estar activa en el sistema</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con datos del formulario</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Renderiza formulario o redirecciona al siguiente paso</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>transacciones/seleccion_moneda_monto.html</p>
+</dd>
+<dt>Context:</dt><dd><ul class="simple">
+<li><p>form: Formulario de selección de moneda y monto</p></li>
+<li><p>paso_actual: Número del paso actual (1)</p></li>
+<li><p>total_pasos: Total de pasos en el proceso (4)</p></li>
+<li><p>titulo_paso: Título descriptivo del paso</p></li>
+<li><p>tipo_transaccion: Tipo de operación (“venta”)</p></li>
+<li><p>limites_disponibles: Información de límites del cliente</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.ver_variables">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">ver_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#ver_variables"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.ver_variables" title="Link to this definition"></a></dt>
+<dd><p>Vista para ver variables de gestión de transacciones.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.verificar_estado_tauser">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">verificar_estado_tauser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tauser_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#verificar_estado_tauser"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.verificar_estado_tauser" title="Link to this definition"></a></dt>
+<dd><p>Vista AJAX para verificar el estado de un TAUser específico.</p>
+<p>Útil para verificaciones individuales sin recargar toda la página.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP (debe ser AJAX)</p></li>
+<li><p><strong>tauser_id</strong> (<em>int</em>) – ID del TAUser a verificar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estado del TAUser y información adicional</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-transacciones.forms">Formularios para el sistema de transacciones de Global Exchange.</p>
+<p>Este módulo contiene los formularios utilizados en el proceso de transacciones,
+incluyendo la selección de monedas, montos y configuración de recargos.</p>
+<dl class="simple">
+<dt>Formularios principales:</dt><dd><ul class="simple">
+<li><p>SeleccionMonedaMontoForm: Selección de moneda y monto para transacciones</p></li>
+<li><p>RecargoForm: Gestión de recargos por medio de pago</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.forms.SeleccionMonedaMontoForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.forms.</span></span><span class="sig-name descname"><span class="pre">SeleccionMonedaMontoForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_order=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_field_class=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/forms.html#SeleccionMonedaMontoForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.forms.SeleccionMonedaMontoForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></p>
+<p>Formulario para seleccionar moneda y monto en operaciones de compra/venta.</p>
+<p>Este formulario permite al usuario seleccionar la moneda extranjera
+y especificar el monto que desea comprar o vender. Incluye validaciones
+específicas para cada moneda según sus decimales configurados.</p>
+<dl class="simple">
+<dt>Fields:</dt><dd><p>moneda (ModelChoiceField): Selector de moneda activa del sistema
+monto (DecimalField): Monto en la moneda seleccionada</p>
+</dd>
+<dt>Validaciones:</dt><dd><ul class="simple">
+<li><p>El monto debe ser positivo y mayor al mínimo permitido</p></li>
+<li><p>Se respetan los decimales configurados para cada moneda</p></li>
+<li><p>Consistente con el comportamiento del simulador</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.forms.SeleccionMonedaMontoForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moneda':</span> <span class="pre">&lt;django.forms.models.ModelChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'monto':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#transacciones.forms.SeleccionMonedaMontoForm.base_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.forms.SeleccionMonedaMontoForm.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/forms.html#SeleccionMonedaMontoForm.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.forms.SeleccionMonedaMontoForm.clean" title="Link to this definition"></a></dt>
+<dd><p>Validación personalizada para el monto en moneda extranjera.</p>
+<p>Realiza validaciones específicas sobre el monto ingresado:
+- Verifica que sea un valor positivo
+- Comprueba que respete el monto mínimo según los decimales de la moneda
+- Convierte el monto a tipo Decimal para precisión</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Datos limpios del formulario incluyendo monto_decimal</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si el monto no cumple las validaciones</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.forms.SeleccionMonedaMontoForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moneda':</span> <span class="pre">&lt;django.forms.models.ModelChoiceField</span> <span class="pre">object&gt;,</span> <span class="pre">'monto':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#transacciones.forms.SeleccionMonedaMontoForm.declared_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="transacciones.forms.SeleccionMonedaMontoForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#transacciones.forms.SeleccionMonedaMontoForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.forms.VariablesForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.forms.</span></span><span class="sig-name descname"><span class="pre">VariablesForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/forms.html#VariablesForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.forms.VariablesForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></p>
+<p>Formulario para editar los recargos por medio de pago y los límites globales de transacciones.</p>
+<p>Este formulario permite a los administradores modificar:
+- Los porcentajes de recargo para cada medio de pago (VISA, MASTERCARD, PANAL, CABAL, billeteras electrónicas)
+- Los límites diarios y mensuales globales según la ley de casas de cambio</p>
+<dl class="simple">
+<dt>Fields:</dt><dd><p>recargo_visa (DecimalField): Porcentaje de recargo para tarjetas VISA
+recargo_mastercard (DecimalField): Porcentaje de recargo para tarjetas MASTERCARD
+recargo_tigo_money (DecimalField): Porcentaje de recargo para Tigo Money
+recargo_billetera_personal (DecimalField): Porcentaje de recargo para Billetera Personal
+recargo_zimple (DecimalField): Porcentaje de recargo para Zimple
+recargo_panal (DecimalField): Porcentaje de recargo para tarjetas PANAL
+recargo_cabal (DecimalField): Porcentaje de recargo para tarjetas CABAL
+limite_diario (IntegerField): Límite diario global en guaraníes
+limite_mensual (IntegerField): Límite mensual global en guaraníes</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.forms.VariablesForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'limite_diario':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_mensual':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_billetera_personal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_cabal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_mastercard':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_panal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_tigo_money':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_visa':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_zimple':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#transacciones.forms.VariablesForm.base_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.forms.VariablesForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'limite_diario':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'limite_mensual':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_billetera_personal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_cabal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_mastercard':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_panal':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_tigo_money':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_visa':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;,</span> <span class="pre">'recargo_zimple':</span> <span class="pre">&lt;django.forms.fields.DecimalField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#transacciones.forms.VariablesForm.declared_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="transacciones.forms.VariablesForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#transacciones.forms.VariablesForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.forms.VariablesForm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/forms.html#VariablesForm.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.forms.VariablesForm.save" title="Link to this definition"></a></dt>
+<dd><p>Guarda los cambios en la base de datos.</p>
+<p>Actualiza todos los registros de recargos existentes y el registro
+de límites globales con los nuevos valores del formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Diccionario con información sobre los cambios realizados</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="monedas.html" class="btn btn-neutral float-left" title="Monedas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="medios_acreditacion.html" class="btn btn-neutral float-right" title="Medios de Acreditación" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
