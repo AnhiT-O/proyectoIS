@@ -20,10 +20,10 @@ class TestRegistroUsuarioForm:
         """Prueba 1: RegistroUsuarioForm: registro exitoso con datos válidos."""
         form_data = {
             'username': 'testuser',
-            'email': 'test@example.com',
             'first_name': 'Test',
             'last_name': 'User',
-            'tipo_documento': 'CI',
+            'email': 'test@example.com',
+            'telefono': '099123456',
             'numero_documento': '12345678',
             'password1': 'TestPass123!',
             'password2': 'TestPass123!'
@@ -36,7 +36,6 @@ class TestRegistroUsuarioForm:
         assert user.email == 'test@example.com'
         assert user.first_name == 'Test'
         assert user.last_name == 'User'
-        assert user.tipo_documento == 'CI'
         assert user.numero_documento == '12345678'
 
     def test_error_cedula_no_numerica(self):
@@ -81,7 +80,6 @@ class TestRegistroUsuarioForm:
             email='existing@example.com',
             first_name='Existing',
             last_name='User',
-            tipo_documento='CI',
             numero_documento='87654321'
         )
         existing_user.set_password('existingpass')
@@ -109,7 +107,7 @@ class TestRegistroUsuarioForm:
             email='test@example.com',
             first_name='Existing',
             last_name='User',
-            tipo_documento='CI',
+            telefono='099123456',
             numero_documento='87654321'
         )
         existing_user.set_password('existingpass')
@@ -120,7 +118,7 @@ class TestRegistroUsuarioForm:
             'email': 'test@example.com',  # Ya existe
             'first_name': 'Test',
             'last_name': 'User',
-            'tipo_documento': 'CI',
+            'telefono': '099123456',
             'numero_documento': '12345678',
             'password1': 'TestPass123!',
             'password2': 'TestPass123!'
@@ -236,7 +234,7 @@ class TestRecuperarPasswordForm:
             email='inactive@example.com',
             first_name='Inactive',
             last_name='User',
-            tipo_documento='CI',
+            telefono='099123459',
             numero_documento='12345678',
             is_active=False
         )
@@ -263,7 +261,7 @@ class TestEstablecerPasswordForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
+            telefono='099123456',
             numero_documento='12345678'
         )
         user.set_password('oldpassword')
@@ -285,7 +283,7 @@ class TestEstablecerPasswordForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
+            telefono='099123456',
             numero_documento='12345678'
         )
         user.set_password('oldpassword')
@@ -307,7 +305,7 @@ class TestEstablecerPasswordForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
+            telefono='099123456',
             numero_documento='12345678'
         )
         user.set_password('oldpassword')
@@ -340,7 +338,6 @@ class TestAsignarRolForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
             numero_documento='12345678'
         )
         user.set_password('password')
@@ -367,7 +364,6 @@ class TestAsignarClienteForm:
         # Crear clientes
         cliente1 = Cliente.objects.create(
             nombre='Cliente 1',
-            tipo_documento='CI',
             numero_documento='12345678',
             correo_electronico='cliente1@example.com',
             telefono='123456789',
@@ -377,7 +373,6 @@ class TestAsignarClienteForm:
         )
         cliente2 = Cliente.objects.create(
             nombre='Cliente 2',
-            tipo_documento='CI',
             numero_documento='87654321',
             correo_electronico='cliente2@example.com',
             telefono='987654321',
@@ -392,7 +387,6 @@ class TestAsignarClienteForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
             numero_documento='11111111'
         )
         user.set_password('password')

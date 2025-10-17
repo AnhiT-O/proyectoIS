@@ -108,7 +108,6 @@ class TestClienteViews:
         
         assert cliente.nombre == 'Cliente Básico'
         assert cliente.segmento == 'corporativo'
-        assert cliente.beneficio_segmento == 5  # Corporativo = 5
 
     def test_cliente_str_method(self):
         """

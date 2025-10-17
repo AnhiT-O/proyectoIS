@@ -117,7 +117,6 @@ class TestClienteForm:
         cliente = form.save()
         assert cliente.nombre == 'Cliente Test'
         assert cliente.segmento == 'vip'
-        assert cliente.beneficio_segmento == 10  # VIP tiene beneficio 10
 
 
 @pytest.mark.django_db

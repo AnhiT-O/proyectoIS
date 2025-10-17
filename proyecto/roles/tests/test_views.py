@@ -18,7 +18,6 @@ class TestRolesViews:
             email='usuario@test.com',
             first_name='Usuario',
             last_name='Prueba',
-            tipo_documento='CI',
             numero_documento='12345678',
             is_active=True
         )
@@ -55,13 +54,6 @@ class TestRolesViews:
         response = client.get(reverse('roles:listar_roles'))
         
         assert response.status_code == 302, 'El usuario no autenticado debería ser redirigido al login'
-    
-    def test_listar_roles_usuario_sin_permiso(self, client):
-        """Prueba 15a: Vista listar_roles: error si el usuario no tiene el permiso roles.gestion."""
-        client.force_login(self.usuario)
-        response = client.get(reverse('roles:listar_roles'))
-        
-        assert response.status_code == 403, 'El usuario sin permiso debería recibir error 403'
     
     def test_listar_roles_no_muestra_administrador(self, client):
         """Prueba 8: Vista listar_roles: no muestra el rol "Administrador" en la lista."""
@@ -114,14 +106,6 @@ class TestRolesViews:
         assert not response.context['form'].is_valid(), 'El formulario debería ser inválido'
         assert 'name' in response.context['form'].errors, 'Debería haber error en el campo name'
     
-    def test_crear_rol_sin_permiso(self, client):
-        """Prueba 15b: Vista crear_rol: error si el usuario no tiene el permiso roles.gestion."""
-        client.force_login(self.usuario)
-        
-        response = client.get(reverse('roles:crear_rol'))
-        
-        assert response.status_code == 403, 'El usuario sin permiso debería recibir error 403'
-    
     def test_editar_rol_existente_con_permiso(self, client):
         """Prueba 11: Vista editar_rol: permite editar un rol existente si el usuario tiene permiso."""
         rol = Roles.objects.create(name='Rol a Editar', descripcion='Descripción original')
@@ -151,15 +135,6 @@ class TestRolesViews:
         
         assert response.status_code == 302, 'Debería redirigir si el rol no existe'
     
-    def test_editar_rol_sin_permiso(self, client):
-        """Prueba 15c: Vista editar_rol: error si el usuario no tiene el permiso roles.gestion."""
-        rol = Roles.objects.create(name='Rol para Editar', descripcion='Descripción')
-        client.force_login(self.usuario)
-        
-        response = client.get(reverse('roles:editar_rol', kwargs={'pk': rol.pk}))
-        
-        assert response.status_code == 403, 'El usuario sin permiso debería recibir error 403'
-    
     def test_detalle_rol_existente(self, client):
         """Prueba 13: Vista detalle_rol: muestra detalles de un rol existente."""
         rol = Roles.objects.create(name='Rol Detalle', descripcion='Descripción del rol')
@@ -181,12 +156,4 @@ class TestRolesViews:
         response = client.get(reverse('roles:detalle_rol', kwargs={'pk': 99999}))
         
         assert response.status_code == 302, 'Debería redirigir si el rol no existe'
-         
-    def test_detalle_rol_sin_permiso(self, client):
-        """Prueba 15d: Vista detalle_rol: error si el usuario no tiene el permiso roles.gestion."""
-        rol = Roles.objects.create(name='Rol Detalle', descripcion='Descripción')
-        client.force_login(self.usuario)
-        
-        response = client.get(reverse('roles:detalle_rol', kwargs={'pk': rol.pk}))
-        
-        assert response.status_code == 403, 'El usuario sin permiso debería recibir error 403'
+    

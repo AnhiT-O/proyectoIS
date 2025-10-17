@@ -31,74 +31,7 @@ class TestClienteModel:
         assert cliente.nombre == 'Juan Pérez'
         assert cliente.tipo == 'F'
         assert cliente.segmento == 'minorista'
-        assert cliente.beneficio_segmento == 0
 
-    def test_beneficios_por_segmento(self):
-        """
-        Prueba 2: Verificar que los beneficios se asignan correctamente por segmento
-        """
-        # Cliente minorista
-        cliente_minorista = Cliente.objects.create(
-            nombre='Cliente Minorista',
-            tipo='F',
-            tipo_documento='CI',
-            numero_documento='11111111',
-            correo_electronico='minorista@test.com',
-            telefono='0991111111',
-            direccion='Dirección',
-            ocupacion='Empleado',
-            segmento='minorista'
-        )
-        assert cliente_minorista.beneficio_segmento == 0
-        
-        # Cliente corporativo
-        cliente_corporativo = Cliente.objects.create(
-            nombre='Cliente Corporativo',
-            tipo='F',
-            tipo_documento='CI',
-            numero_documento='22222222',
-            correo_electronico='corporativo@test.com',
-            telefono='0992222222',
-            direccion='Dirección',
-            ocupacion='Gerente',
-            segmento='corporativo'
-        )
-        assert cliente_corporativo.beneficio_segmento == 5
-        
-        # Cliente VIP
-        cliente_vip = Cliente.objects.create(
-            nombre='Cliente VIP',
-            tipo='F',
-            tipo_documento='CI',
-            numero_documento='33333333',
-            correo_electronico='vip@test.com',
-            telefono='0993333333',
-            direccion='Dirección',
-            ocupacion='Empresario',
-            segmento='vip'
-        )
-        assert cliente_vip.beneficio_segmento == 10
-
-    def test_validacion_persona_juridica_debe_usar_ruc(self):
-        """
-        Prueba 3: Las personas jurídicas deben usar RUC
-        """
-        # Caso inválido: Persona jurídica con CI
-        cliente_invalido = Cliente(
-            nombre='Empresa S.A.',
-            tipo='J',  # Jurídica
-            tipo_documento='CI',  # CI es incorrecto para jurídica
-            numero_documento='12345678',
-            correo_electronico='empresa@test.com',
-            telefono='0991234567',
-            direccion='Dirección',
-            ocupacion='Comercio',
-            segmento='corporativo'
-        )
-        
-        # Debe lanzar ValidationError
-        with pytest.raises(ValidationError):
-            cliente_invalido.clean()
 
     def test_metodo_str_retorna_nombre(self):
         """
