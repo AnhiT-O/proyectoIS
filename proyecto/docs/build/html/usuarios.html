@@ -58,8 +58,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.bloqueado"><code class="docutils literal notranslate"><span class="pre">Usuario.bloqueado</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.is_active"><code class="docutils literal notranslate"><span class="pre">Usuario.is_active</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.date_joined"><code class="docutils literal notranslate"><span class="pre">Usuario.date_joined</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Usuario.DoesNotExist</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Usuario.MultipleObjectsReturned</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.es_admin"><code class="docutils literal notranslate"><span class="pre">Usuario.es_admin()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.nombre_completo"><code class="docutils literal notranslate"><span class="pre">Usuario.nombre_completo()</span></code></a></li>
 </ul>
@@ -180,7 +178,6 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Usuarios</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/usuarios.rst.txt" rel="nofollow"> Ver código fuente de la página</a>
       </li>
   </ul>
   <hr/>
@@ -315,18 +312,6 @@ Usuario es aquel que puede iniciar sesión y operar en el sistema.</p>
 <li><p>Se definen permisos personalizados para bloquear/desbloquear usuarios, asignar/desasignar clientes y roles a usuarios.</p></li>
 </ul>
 </div>
-<dl class="py exception">
-<dt class="sig sig-object py" id="usuarios.models.Usuario.DoesNotExist">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#usuarios.models.Usuario.DoesNotExist" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></p>
-</dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="usuarios.models.Usuario.MultipleObjectsReturned">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultipleObjectsReturned</span></span><a class="headerlink" href="#usuarios.models.Usuario.MultipleObjectsReturned" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleObjectsReturned</span></code></p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="usuarios.models.Usuario.es_admin">
 <span class="sig-name descname"><span class="pre">es_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario.es_admin"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario.es_admin" title="Link to this definition"></a></dt>
@@ -425,8 +410,8 @@ Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Strip
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar clientes.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
-<li><p><a class="reference internal" href="clientes.html#clientes.models.Cliente.DoesNotExist" title="clientes.models.Cliente.DoesNotExist"><strong>Cliente.DoesNotExist</strong></a> – Si no existen clientes creados en el sistema.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Cliente.DoesNotExist</strong> – Si no existen clientes creados en el sistema.</p></li>
 </ul>
 </dd>
 </dl>
@@ -449,7 +434,7 @@ Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Strip
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar roles.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
 </ul>
 </dd>
 </dl>
@@ -473,7 +458,7 @@ Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Strip
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para bloquear usuarios.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
 </ul>
 </dd>
 </dl>
@@ -517,7 +502,7 @@ para desadjuntar el método de pago del cliente.</p>
 </dd>
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="clientes.html#clientes.models.Cliente.DoesNotExist" title="clientes.models.Cliente.DoesNotExist"><strong>Cliente.DoesNotExist</strong></a> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p></li>
+<li><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p></li>
 <li><p><strong>Exception</strong> – Si ocurre un error al eliminar la tarjeta.</p></li>
 </ul>
 </dd>
@@ -609,8 +594,8 @@ que se incluye en el email.</p>
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar clientes.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
-<li><p><a class="reference internal" href="clientes.html#clientes.models.Cliente.DoesNotExist" title="clientes.models.Cliente.DoesNotExist"><strong>Cliente.DoesNotExist</strong></a> – Si el cliente con el ID proporcionado no existe.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe.</p></li>
 </ul>
 </dd>
 </dl>
@@ -630,7 +615,7 @@ que se incluye en el email.</p>
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar roles.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
 <li><p><strong>Group.DoesNotExist</strong> – Si el rol con el ID proporcionado no existe.</p></li>
 </ul>
 </dd>
@@ -665,7 +650,7 @@ que el usuario realiza en el sistema.</p>
 <dd class="field-odd"><p><strong>cliente_id</strong> (<em>int</em>) – ID del cliente a seleccionar como activo.</p>
 </dd>
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="clientes.html#clientes.models.Cliente.DoesNotExist" title="clientes.models.Cliente.DoesNotExist"><strong>Cliente.DoesNotExist</strong></a> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p>
+<dd class="field-even"><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -702,7 +687,7 @@ para administrar usuarios: bloqueo, asignación de roles o asignación de client
 <dt class="field-even">Muestra<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permisos para ver detalles de usuarios.</p></li>
-<li><p><a class="reference internal" href="#usuarios.models.Usuario.DoesNotExist" title="usuarios.models.Usuario.DoesNotExist"><strong>Usuario.DoesNotExist</strong></a> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1239,7 +1224,9 @@ contenga al menos un caracter especial y al menos un número.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Derechos de autor 2025, Grupo 1.</p>
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
   </div>
 
   Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un

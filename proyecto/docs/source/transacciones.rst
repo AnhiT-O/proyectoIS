@@ -7,13 +7,16 @@ Para las operaciones de compra/venta de monedas extranjeras.
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: _state, _meta, objects
 
 .. automodule:: transacciones.views
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: _state, _meta, objects
 
 .. automodule:: transacciones.forms
     :members:
     :undoc-members:
     :show-inheritance:   
+    :exclude-members: _state, _meta, objects
