@@ -23,7 +23,6 @@ class TestRegistroUsuarioForm:
             'email': 'test@example.com',
             'first_name': 'Test',
             'last_name': 'User',
-            'tipo_documento': 'CI',
             'numero_documento': '12345678',
             'password1': 'TestPass123!',
             'password2': 'TestPass123!'
@@ -36,7 +35,6 @@ class TestRegistroUsuarioForm:
         assert user.email == 'test@example.com'
         assert user.first_name == 'Test'
         assert user.last_name == 'User'
-        assert user.tipo_documento == 'CI'
         assert user.numero_documento == '12345678'
 
     def test_error_cedula_no_numerica(self):
@@ -340,7 +338,6 @@ class TestAsignarRolForm:
             email='test@example.com',
             first_name='Test',
             last_name='User',
-            tipo_documento='CI',
             numero_documento='12345678'
         )
         user.set_password('password')
