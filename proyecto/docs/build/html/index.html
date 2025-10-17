@@ -51,8 +51,6 @@
 <li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 <li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
-<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
-<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 </ul>
 
         </div>
@@ -193,6 +191,8 @@
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.descargar_historial_excel"><code class="docutils literal notranslate"><span class="pre">descargar_historial_excel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.descargar_historial_pdf"><code class="docutils literal notranslate"><span class="pre">descargar_historial_pdf()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
@@ -240,65 +240,6 @@
 <li class="toctree-l2"><a class="reference internal" href="proyecto.html#proyecto.views.login_usuario"><code class="docutils literal notranslate"><span class="pre">login_usuario()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="proyecto.html#proyecto.views.logout_usuario"><code class="docutils literal notranslate"><span class="pre">logout_usuario()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="proyecto.html#proyecto.views.simular"><code class="docutils literal notranslate"><span class="pre">simular()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_exito"><code class="docutils literal notranslate"><span class="pre">compra_exito()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.recibir_pago"><code class="docutils literal notranslate"><span class="pre">recibir_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.revisar_tausers"><code class="docutils literal notranslate"><span class="pre">revisar_tausers()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.tauser_detalle"><code class="docutils literal notranslate"><span class="pre">tauser_detalle()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.venta_confirmacion"><code class="docutils literal notranslate"><span class="pre">venta_confirmacion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.venta_exito"><code class="docutils literal notranslate"><span class="pre">venta_exito()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.venta_medio_cobro"><code class="docutils literal notranslate"><span class="pre">venta_medio_cobro()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.venta_medio_pago"><code class="docutils literal notranslate"><span class="pre">venta_medio_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.venta_monto_moneda"><code class="docutils literal notranslate"><span class="pre">venta_monto_moneda()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.ver_variables"><code class="docutils literal notranslate"><span class="pre">ver_variables()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.verificar_estado_tauser"><code class="docutils literal notranslate"><span class="pre">verificar_estado_tauser()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.forms.SeleccionMonedaMontoForm"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.forms.VariablesForm"><code class="docutils literal notranslate"><span class="pre">VariablesForm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views_2fa.get_token_status_view"><code class="docutils literal notranslate"><span class="pre">get_token_status_view()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views_2fa.resend_2fa_token"><code class="docutils literal notranslate"><span class="pre">resend_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views_2fa.send_2fa_token"><code class="docutils literal notranslate"><span class="pre">send_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views_2fa.verify_2fa_token"><code class="docutils literal notranslate"><span class="pre">verify_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.cleanup_expired_tokens"><code class="docutils literal notranslate"><span class="pre">cleanup_expired_tokens()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.create_transaction_token"><code class="docutils literal notranslate"><span class="pre">create_transaction_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.generate_2fa_token"><code class="docutils literal notranslate"><span class="pre">generate_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.get_token_status"><code class="docutils literal notranslate"><span class="pre">get_token_status()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.is_2fa_enabled"><code class="docutils literal notranslate"><span class="pre">is_2fa_enabled()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.send_2fa_email"><code class="docutils literal notranslate"><span class="pre">send_2fa_email()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.validate_2fa_token"><code class="docutils literal notranslate"><span class="pre">validate_2fa_token()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.Billetera"><code class="docutils literal notranslate"><span class="pre">Billetera</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.forms.BilleteraForm"><code class="docutils literal notranslate"><span class="pre">BilleteraForm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.forms.CuentaBancariaForm"><code class="docutils literal notranslate"><span class="pre">CuentaBancariaForm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.forms.TarjetaLocalForm"><code class="docutils literal notranslate"><span class="pre">TarjetaLocalForm</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.apps.MediosAcreditacionConfig"><code class="docutils literal notranslate"><span class="pre">MediosAcreditacionConfig</span></code></a></li>
 </ul>
 </li>
 </ul>

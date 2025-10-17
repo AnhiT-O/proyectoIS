@@ -104,6 +104,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.descargar_historial_excel"><code class="docutils literal notranslate"><span class="pre">descargar_historial_excel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.descargar_historial_pdf"><code class="docutils literal notranslate"><span class="pre">descargar_historial_pdf()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
@@ -146,102 +148,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 <li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Transacciones</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.denominacion_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion_id</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.BilletesTauser.tauser_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser_id</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Tauser.esta_activo"><code class="docutils literal notranslate"><span class="pre">Tauser.esta_activo()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.tipo"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.medio_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.estado"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.token_expiracion"><code class="docutils literal notranslate"><span class="pre">Transaccion.token_expiracion</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.cliente_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente_id</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_next_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_next_by_fecha_hora()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.get_previous_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_previous_by_fecha_hora()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda_id</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.Transaccion.usuario_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario_id</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.generate_token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.generate_token()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_created_at()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_next_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_expires_at()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_created_at()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.get_previous_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_expires_at()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.is_valid"><code class="docutils literal notranslate"><span class="pre">TransactionToken.is_valid()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.mark_as_used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.mark_as_used()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.models.TransactionToken.usuario_id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario_id</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_exito"><code class="docutils literal notranslate"><span class="pre">compra_exito()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.editar_variables"><code class="docutils literal notranslate"><span class="pre">editar_variables()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.historial_transacciones"><code class="docutils literal notranslate"><span class="pre">historial_transacciones()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.recibir_pago"><code class="docutils literal notranslate"><span class="pre">recibir_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.revisar_tausers"><code class="docutils literal notranslate"><span class="pre">revisar_tausers()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.tauser_detalle"><code class="docutils literal notranslate"><span class="pre">tauser_detalle()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_confirmacion"><code class="docutils literal notranslate"><span class="pre">venta_confirmacion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_exito"><code class="docutils literal notranslate"><span class="pre">venta_exito()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_cobro"><code class="docutils literal notranslate"><span class="pre">venta_medio_cobro()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_medio_pago"><code class="docutils literal notranslate"><span class="pre">venta_medio_pago()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.venta_monto_moneda"><code class="docutils literal notranslate"><span class="pre">venta_monto_moneda()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.ver_variables"><code class="docutils literal notranslate"><span class="pre">ver_variables()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.verificar_estado_tauser"><code class="docutils literal notranslate"><span class="pre">verificar_estado_tauser()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.base_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.base_fields</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.clean"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.clean()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.declared_fields</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.SeleccionMonedaMontoForm.media"><code class="docutils literal notranslate"><span class="pre">SeleccionMonedaMontoForm.media</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.forms.VariablesForm"><code class="docutils literal notranslate"><span class="pre">VariablesForm</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.base_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.base_fields</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">VariablesForm.declared_fields</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.media"><code class="docutils literal notranslate"><span class="pre">VariablesForm.media</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#transacciones.forms.VariablesForm.save"><code class="docutils literal notranslate"><span class="pre">VariablesForm.save()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.get_token_status_view"><code class="docutils literal notranslate"><span class="pre">get_token_status_view()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.resend_2fa_token"><code class="docutils literal notranslate"><span class="pre">resend_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.send_2fa_token"><code class="docutils literal notranslate"><span class="pre">send_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.views_2fa.verify_2fa_token"><code class="docutils literal notranslate"><span class="pre">verify_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.cleanup_expired_tokens"><code class="docutils literal notranslate"><span class="pre">cleanup_expired_tokens()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.create_transaction_token"><code class="docutils literal notranslate"><span class="pre">create_transaction_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.generate_2fa_token"><code class="docutils literal notranslate"><span class="pre">generate_2fa_token()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.get_token_status"><code class="docutils literal notranslate"><span class="pre">get_token_status()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.is_2fa_enabled"><code class="docutils literal notranslate"><span class="pre">is_2fa_enabled()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.send_2fa_email"><code class="docutils literal notranslate"><span class="pre">send_2fa_email()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.utils_2fa.validate_2fa_token"><code class="docutils literal notranslate"><span class="pre">validate_2fa_token()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a></li>
 </ul>
 
         </div>
@@ -908,6 +814,179 @@ antes de proceder al siguiente paso.</p>
 <li><p>titulo_paso: Título descriptivo del paso</p></li>
 <li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
 <li><p>limites_disponibles: Información de límites del cliente</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.descargar_historial_excel">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">descargar_historial_excel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#descargar_historial_excel"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.descargar_historial_excel" title="Link to this definition"></a></dt>
+<dd><p>Vista para descargar el historial de transacciones en formato Excel.</p>
+<p>Genera un archivo Excel (.xlsx) con formato profesional que incluye títulos
+corporativos, filtros aplicados y detalles expandidos de cada transacción
+con encabezados individuales para mejor organización.</p>
+<dl class="simple">
+<dt>Características del Excel generado:</dt><dd><ul class="simple">
+<li><p>Hoja única con todas las transacciones organizadas secuencialmente</p></li>
+<li><p>Títulos corporativos y filtros aplicados al inicio</p></li>
+<li><p>Cada transacción tiene su propio encabezado con información principal</p></li>
+<li><p>Detalles expandidos con todos los cálculos y montos de cada operación</p></li>
+<li><p>Formato profesional con colores, fuentes en negrita y alineación</p></li>
+<li><p>Anchos de columna optimizados para legibilidad</p></li>
+<li><p>Bordes y estilos aplicados consistentemente</p></li>
+</ul>
+</dd>
+<dt>Filtros soportados:</dt><dd><ul class="simple">
+<li><p>cliente: ID del cliente específico (requerido)</p></li>
+<li><p>busqueda: Búsqueda por nombre/documento de cliente o username de usuario</p></li>
+<li><p>tipo_operacion: Filtro por tipo (“compra” o “venta”)</p></li>
+<li><p>estado: Filtro por estado de transacción</p></li>
+<li><p>usuario: ID del usuario que procesó la transacción</p></li>
+</ul>
+</dd>
+<dt>Seguridad:</dt><dd><ul class="simple">
+<li><p>Verifica permisos del usuario para acceder al cliente solicitado</p></li>
+<li><p>Valida existencia del cliente antes de procesar</p></li>
+<li><p>Aplica los mismos filtros de seguridad que la vista de historial</p></li>
+</ul>
+</dd>
+<dt>Estructura del Excel:</dt><dd><ul class="simple">
+<li><p>Fila 1-3: Título «Global Exchange» y «Historial de Transacciones»</p></li>
+<li><p>Fila 4+: Filtros aplicados (si existen)</p></li>
+<li><dl class="simple">
+<dt>Por cada transacción:</dt><dd><ul>
+<li><p>Encabezado con datos principales (fecha, operación, moneda, estado)</p></li>
+<li><p>Detalle expandido con todos los cálculos, medios de pago/cobro</p></li>
+<li><p>Montos finales y información de pagos parciales</p></li>
+<li><p>Código de transacción si aplica</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Formato y Estilos:</dt><dd><ul class="simple">
+<li><p>Encabezados en negrita con fondo gris</p></li>
+<li><p>Datos alineados apropiadamente (centro, izquierda, derecha)</p></li>
+<li><p>Bordes en todas las celdas para mejor visualización</p></li>
+<li><p>Anchos de columna: [25, 18, 20, 15, 15] para óptima legibilidad</p></li>
+<li><p>Formato de números con separadores de miles</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con parámetros de filtro en GET
+- cliente (str): ID del cliente (requerido)
+- busqueda (str, opcional): Término de búsqueda
+- tipo_operacion (str, opcional): “compra” o “venta”
+- estado (str, opcional): Estado de la transacción
+- usuario (str, opcional): ID del usuario</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Archivo Excel para descarga con content-type “application/vnd.openxmlformats-officedocument.spreadsheetml.sheet”</dt><dd><ul class="simple">
+<li><p>Nombre del archivo: “historial_transacciones_{cliente_nombre}.xlsx”</p></li>
+<li><p>Headers configurados para descarga automática</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>400</strong><strong>)</strong> – Si no se proporciona ID de cliente</p></li>
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>404</strong><strong>)</strong> – Si el cliente no existe</p></li>
+<li><p><strong>redirect</strong><strong>(</strong><strong>'inicio'</strong><strong>)</strong> – Si el usuario no tiene permisos para el cliente</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Dependencias:</dt><dd><ul class="simple">
+<li><p>OpenPyXL: Para generación de archivos Excel (Workbook, estilos, etc.)</p></li>
+<li><p>Django timezone: Para formateo de fechas consistente</p></li>
+<li><p>Modelos: Cliente, Transaccion, Usuario</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.descargar_historial_pdf">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">descargar_historial_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#descargar_historial_pdf"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.descargar_historial_pdf" title="Link to this definition"></a></dt>
+<dd><p>Vista para descargar el historial de transacciones en formato PDF.</p>
+<p>Genera un archivo PDF profesional con las transacciones filtradas, donde cada
+transacción se presenta en su propia página individual con títulos, filtros
+aplicados y detalles completos de la operación.</p>
+<dl class="simple">
+<dt>Características del PDF generado:</dt><dd><ul class="simple">
+<li><p>Formato A4 con márgenes de 2cm en todos los bordes</p></li>
+<li><p>Cada página contiene: títulos corporativos, filtros aplicados y una transacción</p></li>
+<li><p>Tablas optimizadas con fuentes legibles y espaciado profesional</p></li>
+<li><p>Información completa de cada transacción incluyendo cálculos y estados</p></li>
+<li><p>Formato de fecha/hora sincronizado con la zona horaria local</p></li>
+</ul>
+</dd>
+<dt>Filtros soportados:</dt><dd><ul class="simple">
+<li><p>cliente: ID del cliente específico (requerido)</p></li>
+<li><p>busqueda: Búsqueda por nombre/documento de cliente o username de usuario</p></li>
+<li><p>tipo_operacion: Filtro por tipo (“compra” o “venta”)</p></li>
+<li><p>estado: Filtro por estado de transacción</p></li>
+<li><p>usuario: ID del usuario que procesó la transacción</p></li>
+</ul>
+</dd>
+<dt>Seguridad:</dt><dd><ul class="simple">
+<li><p>Verifica permisos del usuario para acceder al cliente solicitado</p></li>
+<li><p>Valida existencia del cliente antes de procesar</p></li>
+<li><p>Aplica los mismos filtros de seguridad que la vista de historial</p></li>
+</ul>
+</dd>
+<dt>Estructura del PDF:</dt><dd><ul class="simple">
+<li><p>Página 1: Títulos + Filtros + Primera transacción</p></li>
+<li><p>Páginas N: Títulos + Filtros + Transacción N</p></li>
+<li><p>Cada transacción incluye: tabla principal y tabla de detalles expandida</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con parámetros de filtro en GET
+- cliente (str): ID del cliente (requerido)
+- busqueda (str, opcional): Término de búsqueda
+- tipo_operacion (str, opcional): “compra” o “venta”
+- estado (str, opcional): Estado de la transacción
+- usuario (str, opcional): ID del usuario</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Archivo PDF para descarga con content-type “application/pdf”</dt><dd><ul class="simple">
+<li><p>Nombre del archivo: “historial_transacciones_{cliente_nombre}.pdf”</p></li>
+<li><p>Headers configurados para descarga automática</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>400</strong><strong>)</strong> – Si no se proporciona ID de cliente</p></li>
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>404</strong><strong>)</strong> – Si el cliente no existe</p></li>
+<li><p><strong>redirect</strong><strong>(</strong><strong>'inicio'</strong><strong>)</strong> – Si el usuario no tiene permisos para el cliente</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Dependencias:</dt><dd><ul class="simple">
+<li><p>ReportLab: Para generación de PDF (SimpleDocTemplate, Table, etc.)</p></li>
+<li><p>Django timezone: Para formateo de fechas consistente</p></li>
+<li><p>Modelos: Cliente, Transaccion, Usuario</p></li>
 </ul>
 </dd>
 </dl>
