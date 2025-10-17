@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ titulo }} - Global Exchange{% endblock %}
+{% block title %}{% if rol %}Editar Rol - Global Exchange{% else %}Nuevo Rol - Global Exchange{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
@@ -14,7 +14,7 @@
         <h2>{{ titulo }}</h2>
         <p class="subtitulo">
         {% if rol %}
-            Modifica los datos del rol {{ rol.name }}
+            Edita los datos del rol {{ rol.name }}
         {% else %}
             Crea un nuevo rol para el sistema
         {% endif %}

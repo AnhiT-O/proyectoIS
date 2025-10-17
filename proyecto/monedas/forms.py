@@ -1,7 +1,17 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from .models import Moneda, LimiteGlobal
+from .models import Moneda, Denominacion
+from transacciones.models import BilletesTauser
+
+class NoBracketsArrayWidget(forms.TextInput):
+    """
+    Widget personalizado para renderizar ArrayField como una cadena separada por comas.
+    """
+    def render(self, name, value, attrs=None, renderer=None):
+        if value is not None and isinstance(value, (list, tuple)):
+            # Convierte la lista/tupla en una cadena separada por comas
+            value = ', '.join(map(str, value))
+        return super().render(name, value, attrs, renderer)
 
 class MonedaForm(forms.ModelForm):
 
@@ -77,24 +87,23 @@ class MonedaForm(forms.ModelForm):
             'value': '3'
         })
     )
-
-    stock = forms.IntegerField(
-        required= True,
+    denominaciones = forms.CharField(
+        required=True,
         error_messages={
-            'required': 'Debe ingresar una cantidad de stock'
+            'required': 'Debes ingresar las denominaciones disponibles.'
         },
-        widget= forms.NumberInput(attrs={
+        widget=NoBracketsArrayWidget(attrs={
             'class': 'form-control',
-            'min': '0',
-            'type': 'number'
-        })
-
+            'placeholder': 'Ej: 1,2,5,10,20,50,100',
+            'data-toggle': 'tooltip',
+            'title': 'Ingresa las denominaciones separadas por comas'
+        }),
+        help_text='Ingresa las denominaciones disponibles separadas por comas (ej: 1,2,5,10,20,50,100)'
     )
-
 
     class Meta:
         model = Moneda
-        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'stock']
+        fields = ['nombre', 'simbolo', 'tasa_base', 'decimales', 'comision_compra', 'comision_venta', 'denominaciones']
 
     def clean_simbolo(self):
         """
@@ -112,6 +121,9 @@ class MonedaForm(forms.ModelForm):
 
     def clean_decimales(self):
         value = self.cleaned_data.get('decimales')
+        if value:
+            if value > 8:
+                raise ValidationError('El número de decimales no puede ser mayor a 8.')
         return value if value is not None else 3
 
     def clean_tasa_base(self):
@@ -119,8 +131,9 @@ class MonedaForm(forms.ModelForm):
         Valida que la tasa base sea un número positivo.
         """
         tasa_base = self.cleaned_data.get('tasa_base')
-        if tasa_base is not None and tasa_base < 0:
-            raise ValidationError('La tasa base debe ser un número positivo.')
+        if tasa_base:
+            if tasa_base < 0:
+                raise ValidationError('La tasa base debe ser un número positivo.')
         return tasa_base
 
     def clean_comision_compra(self):
@@ -128,8 +141,9 @@ class MonedaForm(forms.ModelForm):
         Valida que la comisión de compra sea un número positivo.
         """
         comision_compra = self.cleaned_data.get('comision_compra')
-        if comision_compra is not None and comision_compra < 0:
-            raise ValidationError('La comisión de compra debe ser un número positivo.')
+        if comision_compra:
+            if comision_compra < 0:
+                raise ValidationError('La comisión de compra debe ser un número positivo.')
         return comision_compra
 
     def clean_comision_venta(self):
@@ -137,125 +151,80 @@ class MonedaForm(forms.ModelForm):
         Valida que la comisión de venta sea un número positivo.
         """
         comision_venta = self.cleaned_data.get('comision_venta')
-        if comision_venta is not None and comision_venta < 0:
-            raise ValidationError('La comisión de venta debe ser un número positivo.')
+        if comision_venta:
+            if comision_venta < 0:
+                raise ValidationError('La comisión de venta debe ser un número positivo.')
         return comision_venta
 
-    def es_moneda_base(self):
+    def clean_denominaciones(self):
         """
-        Verifica si la moneda actual es la moneda base del sistema (Guaraní).
+        Convierte el string de denominaciones a una lista de enteros.
         """
-        simbolo = self.cleaned_data.get('simbolo', '').upper()
-        moneda_base = settings.MONEDA_BASE_GUARANIES
-        return simbolo == moneda_base['simbolo']
-
-    def get_moneda_base_info(self):
+        denominaciones_str = self.cleaned_data.get('denominaciones')
+        if not denominaciones_str:
+            raise ValidationError('Debes ingresar al menos una denominación.')
+        
+        try:
+            # Separar por comas y convertir a enteros
+            denominaciones_list = [int(x.strip()) for x in denominaciones_str.split(',') if x.strip()]
+            
+            # Validar que no esté vacía
+            if not denominaciones_list:
+                raise ValidationError('Debes ingresar al menos una denominación válida.')
+            
+            # Validar que todos sean números positivos
+            for denominacion in denominaciones_list:
+                if denominacion <= 0:
+                    raise ValidationError('Todas las denominaciones deben ser números positivos.')
+            
+            # Remover duplicados y ordenar
+            denominaciones_list = sorted(list(set(denominaciones_list)))
+            
+            # Validar restricciones de eliminación solo si estamos editando una moneda existente
+            if self.instance and self.instance.pk:
+                denominaciones_existentes = Denominacion.objects.filter(moneda=self.instance)
+                for denominacion_obj in denominaciones_existentes.exclude(valor__in=denominaciones_list):
+                    if BilletesTauser.objects.filter(denominacion=denominacion_obj).exists():
+                        raise ValidationError(f'No se puede eliminar la denominación {denominacion_obj.valor} porque está en uso en un Tauser.')
+            
+            return denominaciones_list
+            
+        except ValueError:
+            raise ValidationError('Las denominaciones deben ser números enteros separados por comas.')
+        
+    def save(self, commit=True):
         """
-        Retorna la información de la moneda base del sistema.
+        Guarda el formulario y maneja las denominaciones como objetos relacionados.
         """
-        return settings.MONEDA_BASE_GUARANIES
+        moneda = super().save(commit=commit)
+        
+        if commit:
+            # Obtener las denominaciones del campo limpio
+            denominaciones_list = self.cleaned_data.get('denominaciones', [])
+            
+            # Crear/actualizar denominaciones
+            if denominaciones_list:
+                for denominacion in denominaciones_list:
+                    # Verificar si ya existe antes de crear
+                    if not Denominacion.objects.filter(moneda=moneda, valor=denominacion).exists():
+                        Denominacion.objects.create(moneda=moneda, valor=denominacion)
+                
+                # Eliminar denominaciones que ya no están en la lista
+                # (La validación de restricciones ya se hizo en clean_denominaciones)
+                Denominacion.objects.filter(moneda=moneda).exclude(valor__in=denominaciones_list).delete()
+        
+        return moneda
 
-
-class LimiteGlobalForm(forms.ModelForm):
-    """
-    Formulario para gestionar los límites globales de transacciones
-    """
-    
-    limite_diario = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'min': '1',
-            'step': '1000',
-        }),
-        error_messages={
-            'required': 'Debes ingresar el límite diario.',
-            'invalid': 'El límite diario debe ser un número entero.',
-            'min_value': 'El límite diario debe ser mayor a 0.',
-        },
-        help_text='Límite diario en guaraníes'
-    )
-    
-    limite_mensual = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'min': '1',
-            'step': '1000',
-        }),
-        error_messages={
-            'required': 'Debes ingresar el límite mensual.',
-            'invalid': 'El límite mensual debe ser un número entero.',
-            'min_value': 'El límite mensual debe ser mayor a 0.',
-        },
-        help_text='Límite mensual en guaraníes'
-    )
-    
-    fecha_inicio = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        error_messages={
-            'required': 'Debes seleccionar la fecha de inicio.',
-            'invalid': 'Formato de fecha inválido.',
-        },
-        help_text='Fecha desde cuando rige este límite'
-    )
-    
-    fecha_fin = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        error_messages={
-            'invalid': 'Formato de fecha inválido.',
-        },
-        help_text='Fecha hasta cuando rige este límite (opcional)'
-    )
-    
-    activo = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'class': 'form-check-input'
-        }),
-        help_text='Marcar si este límite está vigente'
-    )
-
-    class Meta:
-        model = LimiteGlobal
-        fields = ['limite_diario', 'limite_mensual', 'fecha_inicio', 'fecha_fin', 'activo']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        limite_diario = cleaned_data.get('limite_diario')
-        limite_mensual = cleaned_data.get('limite_mensual')
-        fecha_inicio = cleaned_data.get('fecha_inicio')
-        fecha_fin = cleaned_data.get('fecha_fin')
-
-        # Validar que el límite diario no sea mayor al mensual
-        if limite_diario and limite_mensual:
-            if limite_diario > limite_mensual:
-                raise ValidationError(
-                    'El límite diario no puede ser mayor al límite mensual.'
-                )
-
-        # Validar fechas
-        if fecha_inicio and fecha_fin:
-            if fecha_fin <= fecha_inicio:
-                raise ValidationError(
-                    'La fecha de fin debe ser posterior a la fecha de inicio.'
-                )
-
-        return cleaned_data
-
-    def clean_limite_diario(self):
-        limite_diario = self.cleaned_data.get('limite_diario')
-        if limite_diario and limite_diario <= 0:
-            raise ValidationError('El límite diario debe ser mayor a 0.')
-        return limite_diario
-
-    def clean_limite_mensual(self):
-        limite_mensual = self.cleaned_data.get('limite_mensual')
-        if limite_mensual and limite_mensual <= 0:
-            raise ValidationError('El límite mensual debe ser mayor a 0.')
-        return limite_mensual
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si estamos editando una moneda existente, cargar las denominaciones
+        if self.instance and self.instance.pk:
+            # Obtener las denominaciones existentes para esta moneda
+            denominaciones_existentes = Denominacion.objects.filter(
+                moneda=self.instance
+            ).values_list('valor', flat=True).order_by('valor')
+            
+            if denominaciones_existentes:
+                # Convertir la lista de valores a string separado por comas
+                denominaciones_str = ','.join(map(str, denominaciones_existentes))
+                self.fields['denominaciones'].initial = denominaciones_str

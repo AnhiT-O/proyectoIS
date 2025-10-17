@@ -1,0 +1,262 @@
+/* === TEMA OSCURO - EDITAR PERFIL === */
+
+/* === CONTENEDORES DE CONTRASEÑA === */
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.password-display {
+    flex: 1;
+    letter-spacing: 2px;
+    font-family: monospace;
+}
+
+.zona-cambio-password .password-field-container {
+    gap: 0;
+}
+
+.zona-cambio-password .password-field-container .form-control {
+    padding-right: 50px;
+}
+
+/* === BOTONES - TEMA OSCURO === */
+.btn-cambiar-password {
+    padding: 8px 16px;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-cambiar-password.btn-primario {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cambiar-password.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.btn-cancelar-password {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar-password:hover {
+    background: #4b5563;
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-password:hover,
+.btn-toggle-password.active {
+    color: #d1d5db;
+    background: rgba(156, 163, 175, 0.15);
+}
+
+.btn-toggle-password.active:hover {
+    background: rgba(156, 163, 175, 0.2);
+}
+
+/* === ZONA DE CAMBIO DE CONTRASEÑA === */
+.zona-cambio-password {
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    animation: slideDown 0.3s ease-out;
+}
+
+.zona-cambio-password .declaracion-titulo {
+    color: #f9fafb;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.password-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+/* === ICONOS === */
+.material-icons {
+    font-size: 22px;
+    user-select: none;
+}
+
+/* === CAMPOS DESHABILITADOS === */
+.form-control:disabled {
+    background-color: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+    opacity: 0.85;
+    cursor: not-allowed;
+    font-weight: 500;
+}
+
+.form-control:disabled:focus {
+    box-shadow: none;
+    border-color: #4b5563;
+}
+
+/* === SECCIÓN DE ROLES - TEMA OSCURO === */
+.roles-section {
+    position: relative;
+    width: 100%;
+}
+
+.btn-roles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    color: #f9fafb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.btn-roles:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.roles-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.roles-text {
+    font-weight: 500;
+}
+
+.roles-count {
+    font-size: 12px;
+    color: #d1d5db;
+    background: #1f2937;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-roles .material-icons {
+    font-size: 20px;
+    transition: transform 0.2s ease;
+    color: #9ca3af;
+}
+
+.btn-roles.expanded .material-icons {
+    transform: rotate(180deg);
+}
+
+.roles-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    animation: slideDown 0.2s ease-out;
+}
+
+.roles-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.role-item {
+    padding: 12px 16px;
+    color: #f9fafb;
+    font-size: 14px;
+    border-bottom: 1px solid #374151;
+    transition: background-color 0.2s ease;
+}
+
+.role-item:last-child {
+    border-bottom: none;
+}
+
+.role-item:hover {
+    background: #374151;
+}
+
+.role-name {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.role-name::before {
+    content: "•";
+    margin-right: 8px;
+    color: #8b5cf6;
+    font-weight: bold;
+}
+
+.no-roles {
+    padding: 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* === ANIMACIONES === */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

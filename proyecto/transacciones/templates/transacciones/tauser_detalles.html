@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Tauser - Sucursal {{ tauser.sucursal }} - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/detalles.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/detalles.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="detalle-cabecera">
+        <h1 class="detalle-nombre">
+            Tauser - Sucursal {{ tauser.sucursal }}
+        </h1>
+    </div>
+
+    <div class="zona-detalle">
+        {% if billetes_tauser or monedas_disponibles %}
+        {% if totales_por_moneda %}
+        <div class="seccion-info">
+            <div class="info-columna" style="grid-column: 1 / -1;">
+                <div class="info-celda">
+                    <div class="info-icono">💰</div>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Totales por Moneda</div>
+                        <div class="seccion-info" style="grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); justify-content: start;">
+                            {% for key, total in totales_por_moneda.items %}
+                            <div class="info-columna" style="padding: 1rem; min-width: fit-content; width: auto; border-color: #01881e;">
+                                <div class="info-celda">
+                                    <div class="info-contenido">
+                                        <div class="info-titulo">{{ total.nombre }}</div>
+                                        <div class="info-valor">{{ total.total|intcomma }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="seccion-info">
+            <div class="info-columna denominaciones-seccion" style="grid-column: 1 / -1;">
+                <div class="info-celda">
+                    <span class="info-icono">💵</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Billetes Disponibles</div>
+                        
+                        {% if monedas_disponibles %}
+                        <div class="filtros-zona">
+                            <div class="filtro-grupo">
+                                <label for="filtro-moneda" class="filtro-etiqueta">Filtrar por moneda:</label>
+                                <select id="filtro-moneda" class="filtro-select">
+                                    <option value="">Todas las monedas</option>
+                                    {% for moneda in monedas_disponibles %}
+                                        <option value="{{ moneda.id }}" {% if moneda_filtro == moneda.id|stringformat:"s" or moneda_filtro == moneda.id %}selected{% endif %}>
+                                            {{ moneda.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="info-valor">
+                            {% if billetes_tauser %}
+                            <div class="billetes-tabla">
+                                <table class="tabla-billetes">
+                                    <thead>
+                                        <tr>
+                                            <th>Moneda</th>
+                                            <th>Denominación</th>
+                                            <th>Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for billete in billetes_tauser %}
+                                        <tr>
+                                            {% if billete.denominacion.moneda %}
+                                                <td>{{ billete.denominacion.moneda.nombre }}</td>
+                                                <td>{{ billete.denominacion.valor|intcomma }} {{ billete.denominacion.moneda.simbolo }}</td>
+                                            {% else %}
+                                                <td>Guaraní</td>
+                                                <td>Gs. {{ billete.denominacion.valor|intcomma }}</td>
+                                            {% endif %}
+                                            <td>{{ billete.cantidad }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <span class="texto-vacio">No hay billetes para la moneda seleccionada</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="seccion-info">
+            <div class="info-columna denominaciones-seccion" style="grid-column: 1 / -1;">
+                <div class="info-celda">
+                    <span class="info-icono">💵</span>
+                    <div class="info-contenido">
+                        <div class="info-titulo">Billetes Disponibles</div>
+                        <div class="info-valor">
+                            <span class="texto-vacio">No hay billetes configurados para este Tauser</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="zona-acciones">
+        <div class="acciones-contenido">
+            <a href="{% url 'transacciones:revisar_tausers' %}" class="btn-secundario">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroMoneda = document.getElementById('filtro-moneda');
+    if (filtroMoneda) {
+        filtroMoneda.addEventListener('change', function() {
+            const valorSeleccionado = this.value;
+            const url = new URL(window.location);
+            
+            if (valorSeleccionado) {
+                url.searchParams.set('moneda', valorSeleccionado);
+            } else {
+                url.searchParams.delete('moneda');
+            }
+            
+            window.location.href = url.toString();
+        });
+    }
+});
+</script>
+{% endblock %}

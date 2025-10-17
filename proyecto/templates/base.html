@@ -14,17 +14,26 @@
     {% block navbar %}
     <nav class="zona-barra">
         <div class="barra-contenido">
-            <a href="{% url 'inicio' %}" class="barra-logo">
-                💰 Global Exchange
-            </a>
+            <div class="barra-izquierda">
+                <a href="{% url 'inicio' %}" class="barra-logo">
+                    💰 Global Exchange
+                </a>
+                {% if user.is_authenticated %}
+                <span class="usuario-nombre">Hola, {{ user.first_name }}!</span>
+                {% endif %}
+            </div>
             
-            <div class="barra-navegacion">
+            <div class="barra-derecha">
                 {% if user.is_authenticated %}
                     <div class="zona-usuario">
-                        <span class="usuario-nombre">Hola, {{ user.first_name }}!</span>
-
+                        {% if user.cliente_activo %}
+                            <div class="cliente-seleccionado">
+                                <div class="cliente-etiqueta">Cliente seleccionado:</div>
+                                <div class="cliente-nombre">{{ user.cliente_activo.nombre }}</div>
+                            </div>
+                        {% endif %}
                         <!-- Panel de Administración basado en permisos -->
-                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas %}
+                        {% if perms.usuarios or perms.clientes or perms.roles or perms.monedas or perms.transacciones %}
                             <div class="panel-gestiones">
                                 <a href="#" class="btn-panel" onclick="toggleAdminMenu(event)">
                                     ⚙️ Panel de Gestiones
@@ -38,7 +47,7 @@
                                     {% endif %}
                                     
                                     <!-- Gestión de Roles -->
-                                    {% if perms.roles %}
+                                    {% if user.es_admin %}
                                         <a href="{% url 'roles:listar_roles' %}" class="gestion-seleccion">
                                             🎭 Gestionar Roles
                                         </a>
@@ -57,14 +66,16 @@
                                             💱 Gestionar Monedas
                                         </a>
                                     {% endif %}
-                                    
-                                    <!-- Gestión de Límites -->
-                                    {% if perms.monedas.gestion %}
-                                        <a href="{% url 'monedas:lista_limites' %}" class="gestion-seleccion">
-                                            📊 Gestionar Límites
+                                    {% if perms.transacciones.edicion %}
+                                        <a href="{% url 'transacciones:ver_variables' %}" class="gestion-seleccion">
+                                            💳 Gestionar Transacciones
                                         </a>
                                     {% endif %}
-                                  
+                                    {% if perms.transacciones.revision %}
+                                        <a href="{% url 'transacciones:revisar_tausers' %}" class="gestion-seleccion">
+                                            🏧 Revisar Tausers
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endif %}

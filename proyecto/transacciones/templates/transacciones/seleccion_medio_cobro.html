@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
     {% if tipo_transaccion == 'venta' %}
@@ -20,7 +21,7 @@
 <div class="contenido extendido">
     <!-- Barra de progreso -->
     <div class="barra-progreso-container">
-        <div class="barra-progreso" data-progreso="{{ paso_actual }}">
+        <div class="barra-progreso">
             <div class="paso {% if paso_actual == 1 %}activo{% elif paso_actual > 1 %}completado{% endif %}">
                 <div class="paso-numero">1</div>
                 <div class="paso-titulo">Selección de<br>Moneda y Monto</div>
@@ -45,13 +46,6 @@
     <div class="form-cabecera">
         <h2>{{ titulo_paso }}</h2>
         <div style="margin: 2rem;">
-            <div class="info-cliente">
-                <div class="info-titulo">Cliente seleccionado:</div>
-                <div class="info-valor">{{ user.cliente_activo.nombre }}</div>
-                <div style="margin-top: 0.5rem;"></div>
-                <div class="info-titulo">Segmento:</div>
-                <div class="info-valor">{{ user.cliente_activo.get_segmento_display }}</div>
-            </div>
             <p class="subtitulo">
                 Complete la información requerida para continuar con su operación de 
             {% if tipo_transaccion == 'venta' %}venta{% else %}compra{% endif %}.
@@ -110,5 +104,32 @@
         </a>
     </div>
     </form>
+    {% if cambios %}
+    <div class="popup-overlay" style="display: flex">
+        <div class="popup-contenido" style="max-width: 700px;">
+            <div class="popup-cabecera">
+                <h3>¡La cotización ha cambiado!</h3>
+            </div>
+            <div class="popup-cuerpo">
+                {% if tipo_transaccion == 'compra' %}
+                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|intcomma }} a Gs. {{ cambios.valores_actuales.precio_venta|intcomma }}</p>
+                {% else %}
+                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|intcomma }} a Gs. {{ cambios.valores_actuales.precio_compra|intcomma }}</p>
+                {% endif %}
+                <form method="post">
+                {% csrf_token %}
+                    <div class="zona-botones">
+                        <button type="submit" name="action" value="aceptar" class="btn-enviar">
+                            Aceptar Nuevo Precio
+                        </button>
+                        <button type="submit" name="action" value="cancelar" class="btn-atras">
+                            Cancelar Operación
+                        </button>
+                    </div>
+                </form>    
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -18,6 +18,7 @@ Date: 2024
 
 from django.urls import path
 from . import views
+from . import views_2fa
 
 app_name = 'transacciones'
 
@@ -28,6 +29,13 @@ urlpatterns = [
     path('comprar/medio-cobro/', views.compra_medio_cobro, name='compra_medio_cobro'),
     path('comprar/confirmacion/', views.compra_confirmacion, name='compra_confirmacion'),
     path('comprar/exito/', views.compra_exito, name='compra_exito'),
+    path('comprar/exito/<str:token>/', views.compra_exito, name='compra_exito_token'),
+    # =========================================================
+    # 📌 ENDPOINTS DE RECEPCIÓN DE PAGO DE LA PASARELA
+    # =========================================================
+    # Endpoint para notificaciones POST de la pasarela
+    path('recibir_pago/', views.recibir_pago, name='recibir_pago'),
+    path('api/pago/', views.recibir_pago, name='recibir_pago'),
     
     # URLs para proceso de venta
     path('vender/', views.venta_monto_moneda, name='venta_monto_moneda'),
@@ -35,20 +43,27 @@ urlpatterns = [
     path('vender/medio-cobro/', views.venta_medio_cobro, name='venta_medio_cobro'),
     path('vender/confirmacion/', views.venta_confirmacion, name='venta_confirmacion'),
     path('vender/exito/', views.venta_exito, name='venta_exito'),
-
-    # URLs para edicion de recargos
-    path('recargos/', views.editar_recargos, name='editar_recargos'),
-    
-    # URLs para funcionalidades auxiliares de límites
-    path('limites/cliente/', views.obtener_limites_cliente, name='obtener_limites_cliente'),
-    path('limites/simular/', views.simular_transaccion_limites, name='simular_transaccion_limites'),
+    path('vender/exito/<str:token>/', views.venta_exito, name='venta_exito_token'),
     
     # URLs para historial de transacciones
-    path('historial/', views.historial_transacciones, name='historial'),
     path('historial/<int:cliente_id>/', views.historial_transacciones, name='historial_cliente'),
-    path('detalle/<int:transaccion_id>/', views.detalle_transaccion, name='detalle'),
-    path('editar/<int:transaccion_id>/', views.editar_transaccion, name='editar'),
+    path('detalle/<int:transaccion_id>/', views.detalle_historial, name='historial_detalle'),
+    
+    # URLs para descargas de historial
+    path('descargar/historial/pdf/', views.descargar_historial_pdf, name='descargar_historial_pdf'),
+    path('descargar/historial/excel/', views.descargar_historial_excel, name='descargar_historial_excel'),
 
-    # URL para timeout
-    path('cancelar-por-timeout/', views.cancelar_por_timeout, name='cancelar_por_timeout'),
+    path('gestion-transacciones/', views.ver_variables, name='ver_variables'),
+    path('edicion-transacciones/', views.editar_variables, name='editar_variables'),
+    
+    # URLs para gestión de TAUsers
+    path('tausers/', views.revisar_tausers, name='revisar_tausers'),
+    path('tausers/<int:pk>/', views.tauser_detalle, name='tauser_detalle'),
+    path('tausers/<int:tauser_id>/verificar-estado/', views.verificar_estado_tauser, name='verificar_estado_tauser'),
+    
+    # URLs para autenticación de dos factores (2FA)
+    path('2fa/send-token/', views_2fa.send_2fa_token, name='send_2fa_token'),
+    path('2fa/verify-token/', views_2fa.verify_2fa_token, name='verify_2fa_token'),
+    path('2fa/token-status/', views_2fa.get_token_status_view, name='token_status'),
+    path('2fa/resend-token/', views_2fa.resend_2fa_token, name='resend_2fa_token'),
 ]

@@ -10,6 +10,8 @@ Autor: Equipo de desarrollo
 Fecha: 2025
 """
 
+from datetime import timedelta
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -19,6 +21,8 @@ from .models import Cliente
 from .forms import ClienteForm, AgregarTarjetaForm
 from medios_acreditacion.models import CuentaBancaria, Billetera
 from medios_acreditacion.forms import CuentaBancariaForm, BilleteraForm
+from transacciones.models import Transaccion
+from django.db import models
 import stripe
 import logging
 
@@ -243,7 +247,7 @@ def cliente_lista(request):
     if busqueda:
         clientes = clientes.filter(
             Q(nombre__icontains=busqueda) |
-            Q(docCliente__icontains=busqueda)
+            Q(numero_documento__icontains=busqueda)
         )
     
     # Ordenar por nombre
@@ -639,3 +643,149 @@ def cliente_agregar_billetera(request, pk):
         'cancelar_url': get_cliente_detalle_url(request, cliente.pk)
     }
     return render(request, 'clientes/agregar_billetera.html', context)
+
+@login_required
+@permission_required('clientes.gestion', raise_exception=True)
+def historial_transacciones(request, cliente_id):
+    """
+    Vista para el historial de transacciones de un cliente específico.
+    
+    Muestra un listado de transacciones con capacidades de filtrado
+    específico para un cliente determinado, incluyendo filtros por
+    usuario, tipo de operación y estado.
+    
+    Filtros disponibles:
+        - Tipo de operación (compra/venta)
+        - Estado de transacción (pendiente/completada/etc.)
+        - Usuario específico que procesó la transacción
+    
+    Args:
+        request (HttpRequest): Petición HTTP con parámetros de filtro
+        cliente_id (int): ID específico del cliente
+        
+    Returns:
+        HttpResponse: Listado de transacciones del cliente
+        
+    Template:
+        clientes/cliente_historial_transacciones.html
+        
+    Context:
+        - transacciones: QuerySet de transacciones filtradas del cliente
+        - cliente: Instancia del cliente
+        - tipo_operacion: Filtro de tipo aplicado
+        - estado_filtro: Filtro de estado aplicado
+        - usuario_filtro: Usuario específico si aplica
+        - usuarios_cliente: Usuarios asociados al cliente
+    """
+    try:
+        cliente = Cliente.objects.get(id=cliente_id)
+    except Cliente.DoesNotExist:
+        messages.error(request, "Cliente no encontrado")
+        return redirect('clientes:cliente_lista')
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para ver el historial de este cliente.')
+        return redirect('inicio')
+    
+    transacciones_pasadas = Transaccion.objects.filter(cliente=cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.save()
+    
+    # Obtener parámetros de filtrado
+    tipo_operacion = request.GET.get('tipo_operacion', '')
+    estado_filtro = request.GET.get('estado', '')
+    usuario_filtro = request.GET.get('usuario', '')
+    
+    # Obtener todas las transacciones del cliente
+    transacciones = Transaccion.objects.filter(cliente=cliente).order_by('-fecha_hora')
+    
+    # Obtener usuarios asociados al cliente
+    usuarios_cliente = cliente.usuarios.all()
+    
+    # Aplicar filtros según parámetros recibidos
+    if tipo_operacion:
+        transacciones = transacciones.filter(tipo=tipo_operacion)
+    
+    if estado_filtro:
+        transacciones = transacciones.filter(estado__iexact=estado_filtro)
+    
+    # Filtrar por usuario si se especifica
+    if usuario_filtro:
+        try:
+            usuario_id = int(usuario_filtro)
+            transacciones = transacciones.filter(usuario_id=usuario_id)
+        except (ValueError, TypeError):
+            pass
+    
+    context = {
+        'transacciones': transacciones,
+        'cliente': cliente,
+        'tipo_operacion': tipo_operacion,
+        'estado_filtro': estado_filtro,
+        'usuario_filtro': usuario_filtro,
+        'usuarios_cliente': usuarios_cliente
+    }
+    
+    return render(request, 'clientes/cliente_historial_transacciones.html', context)
+
+@login_required
+@permission_required('clientes.gestion', raise_exception=True)
+def cliente_detalle_transaccion(request, cliente_id, transaccion_id):
+    """
+    Vista de detalle para una transacción específica desde el contexto de cliente.
+    
+    Muestra información completa y detallada de una transacción individual
+    del cliente, incluyendo todos los datos relevantes como montos calculados,
+    medios de pago/cobro, información del cliente y estado actual.
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        cliente_id (int): ID del cliente
+        transaccion_id (int): ID de la transacción a mostrar
+        
+    Returns:
+        HttpResponse: Página de detalle o redirección si no existe
+        
+    Template:
+        clientes/cliente_detalle_transaccion.html
+        
+    Context:
+        - transaccion: Instancia de la transacción
+        - cliente: Instancia del cliente
+    """
+    try:
+        cliente = Cliente.objects.get(id=cliente_id)
+    except Cliente.DoesNotExist:
+        messages.error(request, "Cliente no encontrado")
+        return redirect('clientes:cliente_lista')
+    
+    # Verificar acceso híbrido (admin o usuario asociado)
+    if not verificar_acceso_cliente(request.user, cliente):
+        messages.error(request, 'No tienes permisos para ver las transacciones de este cliente.')
+        return redirect('inicio')
+    
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id, cliente=cliente)
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'La transacción solicitada no existe para este cliente.')
+        return redirect('clientes:cliente_historial', cliente_id=cliente_id)
+
+    transacciones_pasadas = Transaccion.objects.filter(cliente=cliente, estado='Pendiente')
+    if transacciones_pasadas:
+        for t in transacciones_pasadas:
+            if t.fecha_hora < timezone.now() - timedelta(minutes=5):
+                t.estado = 'Cancelada'
+                t.razon = 'Expira el tiempo para confirmar la transacción'
+                t.save()
+    
+    context = {
+        'transaccion': transaccion,
+        'cliente': cliente,
+    }
+    
+    return render(request, 'clientes/cliente_detalle_transaccion.html', context)

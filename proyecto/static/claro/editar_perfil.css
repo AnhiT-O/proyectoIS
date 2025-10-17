@@ -1,0 +1,260 @@
+/* === CONTENEDORES DE CONTRASEÑA === */
+.password-field-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.password-display {
+    flex: 1;
+    letter-spacing: 2px;
+    font-family: monospace;
+}
+
+.zona-cambio-password .password-field-container {
+    gap: 0;
+}
+
+.zona-cambio-password .password-field-container .form-control {
+    padding-right: 50px;
+}
+
+/* === BOTONES === */
+.btn-cambiar-password {
+    padding: 8px 16px;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-cambiar-password.btn-primario {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-cambiar-password.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-cancelar-password {
+    background: var(--color-cancelar, #6c757d);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar-password:hover {
+    background: var(--color-cancelar-hover, #545b62);
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #5f6368;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-password:hover,
+.btn-toggle-password.active {
+    color: #5f6368;
+    background: rgba(95, 99, 104, 0.08);
+}
+
+.btn-toggle-password.active:hover {
+    background: rgba(95, 99, 104, 0.12);
+}
+
+/* === ZONA DE CAMBIO DE CONTRASEÑA === */
+.zona-cambio-password {
+    background: var(--color-fondo-secundario, #f8f9fa);
+    border: 1px solid var(--color-borde, #dee2e6);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    animation: slideDown 0.3s ease-out;
+}
+
+.zona-cambio-password .declaracion-titulo {
+    color: var(--color-texto-principal, #333);
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.password-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+/* === ICONOS === */
+.material-icons {
+    font-size: 22px;
+    user-select: none;
+}
+
+/* === CAMPOS DESHABILITADOS === */
+.form-control:disabled {
+    background-color: var(--color-fondo-deshabilitado, #f8f9fa);
+    color: var(--color-texto-deshabilitado, #495057);
+    border-color: var(--color-borde-deshabilitado, #dee2e6);
+    opacity: 0.85;
+    cursor: not-allowed;
+    font-weight: 500;
+}
+
+.form-control:disabled:focus {
+    box-shadow: none;
+    border-color: var(--color-borde-deshabilitado, #dee2e6);
+}
+
+/* === SECCIÓN DE ROLES === */
+.roles-section {
+    position: relative;
+    width: 100%;
+}
+
+.btn-roles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-fondo-secundario, #f8f9fa);
+    border: 1px solid var(--color-borde, #dee2e6);
+    border-radius: 8px;
+    color: var(--color-texto-principal, #333);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+}
+
+.btn-roles:hover {
+    background: var(--color-fondo-hover, #e9ecef);
+    border-color: var(--color-borde-hover, #adb5bd);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.roles-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.roles-text {
+    font-weight: 500;
+}
+
+.roles-count {
+    font-size: 12px;
+    color: var(--color-texto-secundario, white);
+    background: var(--color-fondo-principal, #667eea);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-roles .material-icons {
+    font-size: 20px;
+    transition: transform 0.2s ease;
+    color: var(--color-texto-secundario, #6c757d);
+}
+
+.btn-roles.expanded .material-icons {
+    transform: rotate(180deg);
+}
+
+.roles-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-fondo-principal, white);
+    border: 1px solid var(--color-borde, #dee2e6);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    animation: slideDown 0.2s ease-out;
+}
+
+.roles-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.role-item {
+    padding: 12px 16px;
+    color: var(--color-texto-principal, #333);
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-borde-suave, #f1f3f4);
+    transition: background-color 0.2s ease;
+}
+
+.role-item:last-child {
+    border-bottom: none;
+}
+
+.role-item:hover {
+    background: var(--color-fondo-hover-suave, #f8f9fa);
+}
+
+.role-name {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.role-name::before {
+    content: "•";
+    margin-right: 8px;
+    color: var(--color-accent, #667eea);
+    font-weight: bold;
+}
+
+.no-roles {
+    padding: 16px;
+    text-align: center;
+    color: var(--color-texto-secundario, #6c757d);
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* === ANIMACIONES === */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

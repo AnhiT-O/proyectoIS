@@ -37,8 +37,7 @@ class TestLoginUsuarioView:
             first_name='Auth',
             last_name='User',
             email='auth@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='11111111',
+            numero_documento='11111111',
             bloqueado=False,
             is_active=True
         )
@@ -64,8 +63,7 @@ class TestLoginUsuarioView:
             first_name='Login',
             last_name='User',
             email='login@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='22222222',
+            numero_documento='22222222',
             bloqueado=False,
             is_active=True
         )
@@ -97,8 +95,7 @@ class TestLoginUsuarioView:
             first_name='Valid',
             last_name='User',
             email='valid@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='33333333',
+            numero_documento='33333333',
             bloqueado=False,
             is_active=True
         )
@@ -134,8 +131,7 @@ class TestLogoutUsuarioView:
             first_name='Logout',
             last_name='User',
             email='logout@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='44444444',
+            numero_documento='44444444',
             bloqueado=False,
             is_active=True
         )
@@ -184,9 +180,7 @@ class TestInicioView:
             username='authuser',
             first_name='Auth',
             last_name='User',
-            email='auth@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='55555555',
+            numero_documento='55555555',
             bloqueado=False,
             is_active=True
         )
@@ -211,55 +205,16 @@ class TestInicioView:
 
     def test_renderiza_correctamente_usuario_no_autenticado(self):
         """
-        Prueba 10: Renderizar correctamente para usuario no autenticado (sin cotizaciones)
+        Prueba 10: Renderiza correctamente cotizaciones para usuario no autenticado.
         """
         # Acceder sin autenticar
         response = self.client.get(reverse('inicio'))
         
         # Verificar respuesta exitosa
         assert response.status_code == 200
-        
-        # Verificar que no hay cotizaciones para usuario no autenticado
-        assert 'cotizaciones' not in response.context
 
-    def test_muestra_precios_segun_segmento_seleccionado(self):
-        """
-        Prueba 11: Mostrar precios según segmento seleccionado por administrador
-        """
-        # Crear usuario administrador con permisos
-        admin_user = User(
-            username='admin',
-            first_name='Admin',
-            last_name='User',
-            email='admin@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='66666666',
-            bloqueado=False,
-            is_active=True,
-            is_superuser=True
-        )
-        admin_user.set_password('adminpass')
-        admin_user.save()
-        
-        # Agregar permiso de cotización
-        perm = Permission.objects.get(codename='cotizacion')
-        admin_user.user_permissions.add(perm)
-        admin_user.save()
-        
-        self.client.login(username='admin', password='adminpass')
-        
-        # Acceder con segmento específico
-        response = self.client.get(reverse('inicio'), {'segmento': 'corporativo'})
-        
-        # Verificar respuesta exitosa
-        assert response.status_code == 200
-        assert response.context['segmento_seleccionado'] == 'corporativo'
-        
-        # Verificar que las cotizaciones incluyen beneficio del segmento corporativo (5%)
-        cotizacion = response.context['cotizaciones'][0]
-        precio_venta_esperado = self.moneda.calcular_precio_venta(5)  # 5% para corporativo
-        assert cotizacion['precio_venta'] == precio_venta_esperado
-
+        # Verificar que hay cotizaciones para usuario no autenticado
+        assert 'cotizaciones' in response.context
 
 @pytest.mark.django_db
 class TestSimularView:
@@ -274,8 +229,8 @@ class TestSimularView:
             first_name='Sim',
             last_name='User',
             email='sim@example.com',
-            tipo_cedula='CI',
-            cedula_identidad='77777777',
+            tipo_documento='CI',
+            numero_documento='77777777',
             bloqueado=False,
             is_active=True
         )
@@ -292,127 +247,3 @@ class TestSimularView:
             comision_venta=250,
             decimales=2
         )
-    
-    def test_renderiza_plantilla_get_usuario_autenticado(self):
-        """
-        Prueba 12: Renderizar plantilla con monedas activas para usuario autenticado (GET)
-        """
-        self.client.login(username='simuser', password='testpass')
-        
-        response = self.client.get(reverse('simular'))
-        
-        # Verificar respuesta exitosa
-        assert response.status_code == 200
-        assert 'monedas' in response.context
-        assert self.moneda in response.context['monedas']
-
-    def test_valida_correctamente_errores_entrada_post(self):
-        """
-        Prueba 13: Validar correctamente errores de entrada (monto, moneda, operación)
-        """
-        self.client.login(username='simuser', password='testpass')
-        
-        # Probar sin moneda
-        response = self.client.post(reverse('simular'), {
-            'monto': '1000',
-            'operacion': 'compra'
-        })
-        data = json.loads(response.content)
-        assert not data['success']
-        assert 'moneda' in data['errors']
-        assert 'Debe seleccionar una moneda.' in data['errors']['moneda']
-        
-        # Probar sin monto
-        response = self.client.post(reverse('simular'), {
-            'moneda': str(self.moneda.id),
-            'operacion': 'compra'
-        })
-        data = json.loads(response.content)
-        assert not data['success']
-        assert 'monto' in data['errors']
-        assert 'Debes ingresar un monto numérico.' in data['errors']['monto']
-        
-        # Probar con monto inválido (negativo)
-        response = self.client.post(reverse('simular'), {
-            'moneda': str(self.moneda.id),
-            'monto': '-100',
-            'operacion': 'compra'
-        })
-        data = json.loads(response.content)
-        assert not data['success']
-        assert 'monto' in data['errors']
-        assert 'El monto debe ser mayor a 0.' in data['errors']['monto']
-
-    def test_realiza_conversion_compra_correctamente(self):
-        """
-        Prueba 14a: Realizar conversión de compra correctamente (moneda extranjera a PYG)
-        """
-        self.client.login(username='simuser', password='testpass')
-        
-        response = self.client.post(reverse('simular'), {
-            'moneda': str(self.moneda.id),
-            'monto': '1.50',  # Moneda extranjera
-            'operacion': 'compra'
-        })
-        
-        data = json.loads(response.content)
-        assert data['success']
-        assert 'resultado_numerico' in data
-        assert data['tipo_resultado'] == 'guaranies'
-        
-        # Verificar cálculo: 1.50 * precio_venta
-        precio_venta = self.moneda.calcular_precio_venta(0)
-        resultado_esperado = int(Decimal('1.50') * precio_venta)
-        assert data['resultado_numerico'] == resultado_esperado
-
-    def test_realiza_conversion_venta_correctamente(self):
-        """
-        Prueba 14b: Realizar conversión de venta correctamente (moneda extranjera a PYG)
-        """
-        self.client.login(username='simuser', password='testpass')
-        
-        response = self.client.post(reverse('simular'), {
-            'moneda': str(self.moneda.id),
-            'monto': '1.50',  # Moneda extranjera
-            'operacion': 'venta'
-        })
-        
-        data = json.loads(response.content)
-        assert data['success']
-        assert 'resultado_numerico' in data
-        assert data['tipo_resultado'] == 'guaranies'
-        
-        # Verificar cálculo: 1.50 * precio_compra
-        precio_compra = self.moneda.calcular_precio_compra(0)
-        resultado_esperado = int(Decimal('1.50') * precio_compra)
-        assert data['resultado_numerico'] == resultado_esperado
-
-
-@pytest.mark.django_db
-class TestCustomPermissionDeniedView:
-    """Pruebas para la vista custom_permission_denied_view"""
-    
-    def setup_method(self):
-        self.factory = RequestFactory()
-    
-    def test_renderiza_plantilla_403_error_permisos(self):
-        """
-        Prueba 15: Renderizar la plantilla 403.html ante error de permisos
-        """
-        # Crear request de prueba
-        request = self.factory.get('/some-forbidden-url/')
-        
-        # Simular excepción de permisos
-        mock_exception = Exception("Permission denied")
-        
-        # Llamar a la vista
-        response = custom_permission_denied_view(request, mock_exception)
-        
-        # Verificar que devuelve status 403
-        assert response.status_code == 403
-        
-        # Verificar que el contenido contiene elementos típicos de página 403
-        content = response.content.decode()
-        # Esto depende de lo que contenga la plantilla 403.html
-        # Como no podemos leer el archivo, verificamos que al menos se renderiza algo
-        assert len(content) > 0

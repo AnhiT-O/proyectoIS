@@ -2,13 +2,13 @@ from functools import wraps
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.db import transaction
 from django.http import JsonResponse
-from .models import Moneda, LimiteGlobal, ConsumoLimiteCliente
-from .forms import MonedaForm, LimiteGlobalForm
-from .services import LimiteService
+from django.utils import timezone
+from datetime import datetime, timedelta
+from .models import Moneda, Denominacion, HistorialCotizacion
+from .forms import MonedaForm
 
 
 def tiene_algun_permiso(view_func):
@@ -25,7 +25,8 @@ def tiene_algun_permiso(view_func):
         # Permisos requeridos para administrar monedas
         permisos_requeridos = [
             'monedas.gestion',
-            'monedas.activacion'    # Permiso para activar/desactivar monedas
+            'monedas.activacion',
+            'monedas.cotizacion'   # Permiso para activar/desactivar monedas
         ]
         
         # Verificar si el usuario tiene al menos uno de los permisos
@@ -149,6 +150,7 @@ def moneda_editar(request, pk):
         form.fields.pop('nombre')
         form.fields.pop('simbolo')
         form.fields.pop('decimales')
+        form.fields.pop('denominaciones')
 
     # Procesa el formulario
     if request.method == 'POST':
@@ -156,8 +158,6 @@ def moneda_editar(request, pk):
             form.save()
             messages.success(request, f'Moneda \"{moneda.nombre}\" editada exitosamente.')
             return redirect('monedas:lista_monedas')
-        else:
-            messages.error(request, 'Error al actualizar la moneda.')
     return render(request, 'monedas/moneda_form.html', {'form': form, 'moneda': moneda,})
 
 @login_required
@@ -165,420 +165,13 @@ def moneda_editar(request, pk):
 def moneda_detalle(request, pk):
     """Vista para mostrar los detalles completos de una moneda"""
     moneda = get_object_or_404(Moneda, pk=pk)
-    
-    # Calcular precios sin beneficios (cliente None)
-    precios = moneda.get_precios_cliente(None)
+    denominaciones = Denominacion.objects.filter(moneda=moneda).order_by('valor')
     
     context = {
         'moneda': moneda,
-        'precio_compra': precios['precio_compra'],
-        'precio_venta': precios['precio_venta'],
+        'denominaciones': denominaciones
     }
     return render(request, 'monedas/moneda_detalles.html', context)
-
-
-# ============================================================================
-# VISTAS PARA GESTIÓN DE LÍMITES
-# ============================================================================
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def lista_limites(request):
-    """Vista para listar todos los límites globales"""
-    limites = LimiteGlobal.objects.all().order_by('-fecha_inicio')
-    limite_vigente = LimiteGlobal.obtener_limite_vigente()
-    
-    context = {
-        'title': 'Gestión de Límites Globales',
-        'limites': limites,
-        'limite_vigente': limite_vigente,
-    }
-    return render(request, 'monedas/lista_limites.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def crear_limite(request):
-    """Vista para crear un nuevo límite global"""
-    if request.method == 'POST':
-        form = LimiteGlobalForm(request.POST)
-        if form.is_valid():
-            limite = form.save()
-            messages.success(request, f'Límite global creado exitosamente.')
-            return redirect('monedas:lista_limites')
-        else:
-            messages.error(request, 'Error al crear el límite global.')
-    else:
-        form = LimiteGlobalForm()
-    
-    context = {
-        'title': 'Crear Nuevo Límite Global',
-        'form': form,
-        'accion': 'Crear Límite'
-    }
-    return render(request, 'monedas/limite_form.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def editar_limite(request, pk):
-    """Vista para editar un límite global existente"""
-    limite = get_object_or_404(LimiteGlobal, pk=pk)
-    
-    if request.method == 'POST':
-        form = LimiteGlobalForm(request.POST, instance=limite)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Límite global actualizado exitosamente.')
-            return redirect('monedas:lista_limites')
-        else:
-            messages.error(request, 'Error al actualizar el límite global.')
-    else:
-        form = LimiteGlobalForm(instance=limite)
-    
-    context = {
-        'title': 'Editar Límite Global',
-        'form': form,
-        'accion': 'Actualizar Límite',
-        'limite': limite
-    }
-    return render(request, 'monedas/limite_form.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def activar_limite(request, pk):
-    """Vista para activar un límite específico (desactiva todos los demás)"""
-    if request.method == 'POST':
-        limite = get_object_or_404(LimiteGlobal, pk=pk)
-        
-        try:
-            with transaction.atomic():
-                # Desactivar todos los límites
-                LimiteGlobal.objects.all().update(activo=False)
-                # Activar el límite seleccionado
-                limite.activo = True
-                limite.save()
-                
-            messages.success(request, f'Límite activado exitosamente.')
-        except Exception as e:
-            messages.error(request, f'Error al activar el límite: {str(e)}')
-    
-    return redirect('monedas:lista_limites')
-
-
-# ============================================================================
-# APIS AJAX PARA LÍMITES
-# ============================================================================
-
-@login_required
-def consultar_limites_cliente(request):
-    """API AJAX para consultar límites disponibles de un cliente"""
-    if request.method == 'GET':
-        cliente_id = request.GET.get('cliente_id')
-        
-        if not cliente_id:
-            return JsonResponse({
-                'success': False,
-                'error': 'ID de cliente requerido'
-            })
-        
-        try:
-            from clientes.models import Cliente
-            cliente = Cliente.objects.get(id=cliente_id)
-            limites_info = LimiteService.obtener_limites_disponibles(cliente)
-            
-            return JsonResponse({
-                'success': True,
-                'data': {
-                    'cliente': {
-                        'id': cliente.id,
-                        'nombre': cliente.nombre
-                    },
-                    'limites': limites_info
-                }
-            })
-            
-        except Cliente.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'error': 'Cliente no encontrado'
-            })
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            })
-    
-    return JsonResponse({
-        'success': False,
-        'error': 'Método no permitido'
-    })
-
-
-@login_required
-def validar_transaccion_limite(request):
-    """API AJAX para validar si una transacción puede realizarse"""
-    if request.method == 'POST':
-        try:
-            cliente_id = request.POST.get('cliente_id')
-            moneda_id = request.POST.get('moneda_id')
-            tipo_transaccion = request.POST.get('tipo_transaccion')
-            monto = request.POST.get('monto')
-            
-            # Validar parámetros requeridos
-            if not all([cliente_id, moneda_id, tipo_transaccion, monto]):
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Todos los parámetros son requeridos'
-                })
-            
-            # Obtener objetos
-            from clientes.models import Cliente
-            cliente = Cliente.objects.get(id=cliente_id)
-            moneda = Moneda.objects.get(id=moneda_id)
-            monto = int(monto)
-            
-            # Validar tipo de transacción
-            if tipo_transaccion not in ['COMPRA', 'VENTA']:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Tipo de transacción inválido'
-                })
-            
-            # Validar límites (sin procesar la transacción)
-            monto_guaranies = LimiteService.convertir_a_guaranies(
-                monto, moneda, tipo_transaccion, cliente
-            )
-            
-            LimiteService.validar_limite_transaccion(cliente, monto_guaranies)
-            
-            # Si llegamos aquí, la transacción es válida
-            limites_restantes = LimiteService.obtener_limites_disponibles(cliente)
-            
-            return JsonResponse({
-                'success': True,
-                'data': {
-                    'monto_original': monto,
-                    'monto_guaranies': monto_guaranies,
-                    'cliente': cliente.nombre,
-                    'moneda': moneda.simbolo,
-                    'tipo_transaccion': tipo_transaccion,
-                    'limites_restantes': limites_restantes
-                }
-            })
-            
-        except (Cliente.DoesNotExist, Moneda.DoesNotExist):
-            return JsonResponse({
-                'success': False,
-                'error': 'Cliente o moneda no encontrados'
-            })
-        except ValidationError as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            })
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'Error inesperado: {str(e)}'
-            })
-    
-    return JsonResponse({
-        'success': False,
-        'error': 'Método no permitido'
-    })
-
-
-# ===== VISTAS PARA GESTIÓN DE LÍMITES =====
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def lista_limites(request):
-    """
-    Vista para listar todos los límites globales configurados
-    """
-    limites = LimiteGlobal.objects.all().order_by('-fecha_inicio')
-    limite_vigente = LimiteGlobal.obtener_limite_vigente()
-    
-    context = {
-        'limites': limites,
-        'limite_vigente': limite_vigente,
-        'title': 'Gestión de Límites Globales'
-    }
-    return render(request, 'monedas/lista_limites.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def crear_limite(request):
-    """
-    Vista para crear un nuevo límite global
-    """
-    if request.method == 'POST':
-        form = LimiteGlobalForm(request.POST)
-        if form.is_valid():
-            # Si se marca como activo, desactivar otros límites
-            if form.cleaned_data['activo']:
-                LimiteGlobal.objects.filter(activo=True).update(activo=False)
-            
-            form.save()
-            messages.success(request, 'Límite global creado exitosamente.')
-            return redirect('monedas:lista_limites')
-        else:
-            messages.error(request, 'Error al crear el límite. Revise los datos.')
-    else:
-        form = LimiteGlobalForm()
-    
-    context = {
-        'form': form,
-        'title': 'Crear Límite Global',
-        'accion': 'Crear'
-    }
-    return render(request, 'monedas/limite_form.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def editar_limite(request, pk):
-    """
-    Vista para editar un límite global existente
-    """
-    limite = get_object_or_404(LimiteGlobal, pk=pk)
-    
-    if request.method == 'POST':
-        form = LimiteGlobalForm(request.POST, instance=limite)
-        if form.is_valid():
-            # Si se marca como activo, desactivar otros límites
-            if form.cleaned_data['activo']:
-                LimiteGlobal.objects.exclude(pk=pk).update(activo=False)
-            
-            form.save()
-            messages.success(request, 'Límite global actualizado exitosamente.')
-            return redirect('monedas:lista_limites')
-        else:
-            messages.error(request, 'Error al actualizar el límite. Revise los datos.')
-    else:
-        form = LimiteGlobalForm(instance=limite)
-    
-    context = {
-        'form': form,
-        'limite': limite,
-        'title': 'Editar Límite Global',
-        'accion': 'Actualizar'
-    }
-    return render(request, 'monedas/limite_form.html', context)
-
-
-@login_required
-@permission_required('monedas.gestion', raise_exception=True)
-def activar_limite(request, pk):
-    """
-    Vista para activar un límite global específico
-    """
-    if request.method == 'POST':
-        limite = get_object_or_404(LimiteGlobal, pk=pk)
-        
-        # Desactivar todos los demás límites
-        LimiteGlobal.objects.exclude(pk=pk).update(activo=False)
-        
-        # Activar el límite seleccionado
-        limite.activo = True
-        limite.save()
-        
-        messages.success(request, f'Límite activado exitosamente.')
-        return redirect('monedas:lista_limites')
-    
-    return redirect('monedas:lista_limites')
-
-
-@login_required
-def consultar_limites_cliente(request):
-    """
-    Vista AJAX para consultar los límites disponibles de un cliente
-    """
-    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        cliente_id = request.GET.get('cliente_id')
-        
-        if not cliente_id:
-            return JsonResponse({'error': 'ID de cliente requerido'}, status=400)
-        
-        try:
-            from clientes.models import Cliente
-            cliente = get_object_or_404(Cliente, pk=cliente_id)
-            
-            limites_info = LimiteService.obtener_limites_disponibles(cliente)
-            
-            if 'error' in limites_info:
-                return JsonResponse({'error': limites_info['error']}, status=400)
-            
-            return JsonResponse({
-                'success': True,
-                'data': {
-                    'cliente': {
-                        'id': cliente.id,
-                        'nombre': cliente.nombre,
-                    },
-                    'limites': limites_info
-                }
-            })
-            
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-
-@login_required
-def validar_transaccion_limite(request):
-    """
-    Vista AJAX para validar si una transacción puede realizarse sin superar límites
-    """
-    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        try:
-            # Obtener datos del request
-            cliente_id = request.POST.get('cliente_id')
-            moneda_id = request.POST.get('moneda_id')
-            tipo_transaccion = request.POST.get('tipo_transaccion')
-            monto = request.POST.get('monto')
-            
-            # Validar datos requeridos
-            if not all([cliente_id, moneda_id, tipo_transaccion, monto]):
-                return JsonResponse({
-                    'error': 'Faltan datos requeridos: cliente_id, moneda_id, tipo_transaccion, monto'
-                }, status=400)
-            
-            # Obtener instancias
-            from clientes.models import Cliente
-            cliente = get_object_or_404(Cliente, pk=cliente_id)
-            moneda = get_object_or_404(Moneda, pk=moneda_id)
-            monto = int(monto)
-            
-            # Validar la transacción
-            resultado = LimiteService.validar_y_procesar_transaccion(
-                cliente=cliente,
-                moneda=moneda,
-                tipo_transaccion=tipo_transaccion.upper(),
-                monto_original=monto
-            )
-            
-            return JsonResponse({
-                'success': True,
-                'data': resultado
-            })
-            
-        except ValidationError as e:
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            }, status=400)
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'Error interno: {str(e)}'
-            }, status=500)
-    
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
 def verificar_cambios_precios(request, moneda_id):
@@ -623,3 +216,140 @@ def verificar_cambios_precios(request, moneda_id):
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Solicitud inválida'}, status=400)
+
+@login_required
+def evolucion_cotizacion(request, pk):
+    """
+    Vista para mostrar la evolución de las cotizaciones de una moneda específica
+    """
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Obtener datos históricos de los últimos 12 meses
+    fecha_limite = timezone.now().date() - timedelta(days=365)
+    historial = HistorialCotizacion.objects.filter(
+        moneda=moneda,
+        fecha__gte=fecha_limite
+    ).order_by('fecha')
+    
+    # Si no hay historial, crear algunos datos de ejemplo para demostración
+    if not historial.exists():
+        # Generar algunos datos de ejemplo para los últimos 30 días
+        datos_ejemplo = []
+        for i in range(30, 0, -1):
+            fecha = timezone.now().date() - timedelta(days=i)
+            # Variación pequeña en las tasas para simular evolución
+            variacion = (i % 5) * 10  # Pequeña variación
+            tasa_base = moneda.tasa_base + variacion
+            
+            datos_ejemplo.append({
+                'fecha': fecha,
+                'tasa_base': tasa_base,
+                'comision_compra': moneda.comision_compra,
+                'comision_venta': moneda.comision_venta,
+                'precio_compra': tasa_base - moneda.comision_compra,
+                'precio_venta': tasa_base + moneda.comision_venta
+            })
+        
+        # Agregar datos actuales
+        datos_ejemplo.append({
+            'fecha': timezone.now().date(),
+            'tasa_base': moneda.tasa_base,
+            'comision_compra': moneda.comision_compra,
+            'comision_venta': moneda.comision_venta,
+            'precio_compra': moneda.tasa_base - moneda.comision_compra,
+            'precio_venta': moneda.tasa_base + moneda.comision_venta
+        })
+        
+        context = {
+            'moneda': moneda,
+            'historial': datos_ejemplo,
+            'datos_json': datos_ejemplo  # Para JavaScript
+        }
+    else:
+        # Convertir QuerySet a lista de diccionarios para JSON
+        datos_json = []
+        for registro in historial:
+            datos_json.append({
+                'fecha': registro.fecha.strftime('%Y-%m-%d'),
+                'precio_compra': registro.precio_compra,
+                'precio_venta': registro.precio_venta
+            })
+        
+        context = {
+            'moneda': moneda,
+            'historial': historial,
+            'datos_json': datos_json
+        }
+    
+    return render(request, 'monedas/evolucion_cotizacion.html', context)
+
+@login_required
+def api_evolucion_cotizacion(request, pk):
+    """
+    API para obtener datos de evolución en formato JSON para gráficos
+    """
+    moneda = get_object_or_404(Moneda, pk=pk)
+    
+    # Obtener parámetro de rango temporal
+    rango = request.GET.get('rango', 'mes')
+    
+    # Calcular fecha límite según el rango
+    if rango == 'semana':
+        fecha_limite = timezone.now().date() - timedelta(days=7)
+    elif rango == 'mes':
+        fecha_limite = timezone.now().date() - timedelta(days=30)
+    elif rango == '6meses':
+        fecha_limite = timezone.now().date() - timedelta(days=180)
+    elif rango == 'año':
+        fecha_limite = timezone.now().date() - timedelta(days=365)
+    else:
+        fecha_limite = timezone.now().date() - timedelta(days=30)
+    
+    # Obtener historial filtrado
+    historial = HistorialCotizacion.objects.filter(
+        moneda=moneda,
+        fecha__gte=fecha_limite
+    ).order_by('fecha')
+    
+    # Si no hay historial, generar datos de ejemplo
+    if not historial.exists():
+        datos = []
+        dias = 7 if rango == 'semana' else (30 if rango == 'mes' else (180 if rango == '6meses' else 365))
+        
+        for i in range(dias, 0, -1):
+            fecha = timezone.now().date() - timedelta(days=i)
+            variacion = (i % 5) * 10
+            tasa_base = moneda.tasa_base + variacion
+            
+            datos.append({
+                'fecha': fecha.strftime('%d/%m/%Y'),
+                'fecha_iso': fecha.strftime('%Y-%m-%d'),
+                'precio_compra': tasa_base - moneda.comision_compra,
+                'precio_venta': tasa_base + moneda.comision_venta
+            })
+        
+        # Agregar dato actual
+        datos.append({
+            'fecha': timezone.now().date().strftime('%d/%m/%Y'),
+            'fecha_iso': timezone.now().date().strftime('%Y-%m-%d'),
+            'precio_compra': moneda.tasa_base - moneda.comision_compra,
+            'precio_venta': moneda.tasa_base + moneda.comision_venta
+        })
+    else:
+        datos = []
+        for registro in historial:
+            datos.append({
+                'fecha': registro.fecha.strftime('%d/%m/%Y'),
+                'fecha_iso': registro.fecha.strftime('%Y-%m-%d'),
+                'precio_compra': registro.precio_compra,
+                'precio_venta': registro.precio_venta
+            })
+    
+    return JsonResponse({
+        'moneda': {
+            'nombre': moneda.nombre,
+            'simbolo': moneda.simbolo
+        },
+        'datos': datos,
+        'rango': rango
+    })

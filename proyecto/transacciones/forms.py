@@ -7,14 +7,12 @@ incluyendo la selección de monedas, montos y configuración de recargos.
 Formularios principales:
     - SeleccionMonedaMontoForm: Selección de moneda y monto para transacciones
     - RecargoForm: Gestión de recargos por medio de pago
-
-Author: Equipo de desarrollo Global Exchange
-Date: 2024
 """
 
 from django import forms
 from monedas.models import Moneda
 from decimal import Decimal
+from .models import Recargos, LimiteGlobal
 
 
 class SeleccionMonedaMontoForm(forms.Form):
@@ -37,6 +35,7 @@ class SeleccionMonedaMontoForm(forms.Form):
     
     moneda = forms.ModelChoiceField(
         queryset=Moneda.objects.filter(activa=True),
+        empty_label="",
         widget=forms.Select(attrs={
             'class': 'form-control',
             'id': 'id_moneda'
@@ -50,8 +49,8 @@ class SeleccionMonedaMontoForm(forms.Form):
             'class': 'form-control',
             'id': 'id_monto',
             'placeholder': 'Ingresa el monto en la moneda extranjera',
-            'step': '0.01',
-            'min': '0.01'
+            'step': '1',
+            'min': '1'
         }),
         required=True,
         error_messages={'required': 'Debes ingresar un monto numérico.'}
@@ -97,81 +96,279 @@ class SeleccionMonedaMontoForm(forms.Form):
         cleaned_data['monto_decimal'] = monto
         return cleaned_data
 
-    def __init__(self, *args, **kwargs):
-        """
-        Inicializador del formulario con configuración personalizada.
-        
-        Configura las opciones del campo moneda con información adicional
-        para JavaScript, personaliza el widget select y establece
-        comportamientos específicos del formulario.
-        
-        Args:
-            *args: Argumentos posicionales del formulario padre
-            **kwargs: Argumentos de palabra clave del formulario padre
-        """
-        super().__init__(*args, **kwargs)
-        
-        # Personalizar el widget de moneda para mostrar símbolo y nombre, con datos para JS
-        monedas_choices = []
-        monedas_data = {}
-        for moneda in Moneda.objects.filter(activa=True):
-            choice_text = f"{moneda.simbolo} - {moneda.nombre}"
-            monedas_choices.append((moneda.pk, choice_text))
-            monedas_data[str(moneda.pk)] = {
-                'simbolo': moneda.simbolo,
-                'decimales': moneda.decimales
-            }
-        
-        self.fields['moneda'].choices = [('', 'Selecciona una moneda')] + monedas_choices
 
-        # Modificar el widget para que la opción inicial sea disabled, selected y hidden
-        self.fields['moneda'].widget.choices = self.fields['moneda'].choices
-        self.fields['moneda'].widget.attrs['onchange'] = "this.options[0].setAttribute('hidden', 'hidden');"
-        # Usar render_option para agregar los atributos (solo para Select, no para ModelChoiceField)
-        original_create_option = self.fields['moneda'].widget.create_option
-        def custom_create_option(*args, **kwargs):
-            option_dict = original_create_option(*args, **kwargs)
-            if option_dict['value'] == '':
-                option_dict['attrs']['disabled'] = True
-                option_dict['attrs']['selected'] = True
-                option_dict['attrs']['hidden'] = True
-            return option_dict
-        self.fields['moneda'].widget.create_option = custom_create_option
-
-        # Agregar atributos data para JavaScript dinámico
-        import json
-        self.fields['moneda'].widget.attrs.update({
-            'data-monedas': json.dumps(monedas_data)
-        })
-
-class RecargoForm(forms.ModelForm):
+class VariablesForm(forms.Form):
     """
-    Formulario para la gestión de recargos por medio de pago.
+    Formulario para editar los recargos por medio de pago y los límites globales de transacciones.
     
-    Permite a los administradores editar los porcentajes de recargo
-    aplicables a diferentes medios de pago en las transacciones.
+    Este formulario permite a los administradores modificar:
+    - Los porcentajes de recargo para cada medio de pago (VISA, MASTERCARD, PANAL, CABAL, billeteras electrónicas)
+    - Los límites diarios y mensuales globales según la ley de casas de cambio
     
     Fields:
-        recargo (IntegerField): Porcentaje de recargo (0-100)
-        
-    Validaciones:
-        - El recargo debe ser un valor numérico entero
-        - Rango permitido de 0 a 100 por ciento
+        recargo_visa (DecimalField): Porcentaje de recargo para tarjetas VISA
+        recargo_mastercard (DecimalField): Porcentaje de recargo para tarjetas MASTERCARD
+        recargo_tigo_money (DecimalField): Porcentaje de recargo para Tigo Money
+        recargo_billetera_personal (DecimalField): Porcentaje de recargo para Billetera Personal
+        recargo_zimple (DecimalField): Porcentaje de recargo para Zimple
+        recargo_panal (DecimalField): Porcentaje de recargo para tarjetas PANAL
+        recargo_cabal (DecimalField): Porcentaje de recargo para tarjetas CABAL
+        limite_diario (IntegerField): Límite diario global en guaraníes
+        limite_mensual (IntegerField): Límite mensual global en guaraníes
     """
-    recargo = forms.IntegerField(
+    
+    # Campos para recargos
+    recargo_visa = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'step': '1',
-            'min': '0',
-            'placeholder': 'Ingresa el recargo en porcentaje'
+            'step': '0.1'
         }),
-        required=True,
         error_messages={
-            'invalid': 'Por favor, ingresa un valor numérico válido para el recargo.'
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
         }
     )
     
-    class Meta:
-        from .models import Recargos
-        model = Recargos
-        fields = ['recargo']
+    recargo_mastercard = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_tigo_money = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_billetera_personal = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_zimple = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_panal = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    recargo_cabal = forms.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        min_value=0,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.1'
+        }),
+        error_messages={
+            'min_value': 'El recargo no puede ser negativo.',
+            'max_value': 'El recargo no puede exceder el 100%.',
+            'invalid': 'Ingrese un valor decimal válido.'
+        }
+    )
+    
+    # Campos para límites globales
+    limite_diario = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control'
+        }),
+        error_messages={
+            'min_value': 'El límite diario debe ser al menos 1 guaraní.',
+            'invalid': 'Ingrese un valor entero válido.'
+        }
+    )
+    
+    limite_mensual = forms.IntegerField(
+        min_value=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control'
+        }),
+        error_messages={
+            'min_value': 'El límite diario debe ser al menos 1 guaraní.',
+            'invalid': 'Ingrese un valor entero válido.'
+        }
+    )
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Inicializa el formulario con los valores actuales de la base de datos.
+        
+        Carga automáticamente los valores existentes de recargos y límites globales
+        para que aparezcan pre-poblados en el formulario.
+        """
+        super().__init__(*args, **kwargs)
+        
+        # Cargar valores actuales de recargos
+        try:
+            visa_recargo = Recargos.objects.get(marca='VISA')
+            self.fields['recargo_visa'].initial = visa_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_visa'].initial = 1.0
+            
+        try:
+            mastercard_recargo = Recargos.objects.get(marca='MASTERCARD')
+            self.fields['recargo_mastercard'].initial = mastercard_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_mastercard'].initial = 1.5
+            
+        try:
+            tigo_recargo = Recargos.objects.get(marca='Tigo Money')
+            self.fields['recargo_tigo_money'].initial = tigo_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_tigo_money'].initial = 2.0
+            
+        try:
+            billetera_recargo = Recargos.objects.get(marca='Billetera Personal')
+            self.fields['recargo_billetera_personal'].initial = billetera_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_billetera_personal'].initial = 2.0
+            
+        try:
+            zimple_recargo = Recargos.objects.get(marca='Zimple')
+            self.fields['recargo_zimple'].initial = zimple_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_zimple'].initial = 3.0
+            
+        try:
+            panal_recargo = Recargos.objects.get(marca='PANAL')
+            self.fields['recargo_panal'].initial = panal_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_panal'].initial = 2.0
+            
+        try:
+            cabal_recargo = Recargos.objects.get(marca='CABAL')
+            self.fields['recargo_cabal'].initial = cabal_recargo.recargo
+        except Recargos.DoesNotExist:
+            self.fields['recargo_cabal'].initial = 1.0
+        
+        # Cargar valores actuales de límites globales
+        try:
+            limite_global = LimiteGlobal.objects.first()
+            if limite_global:
+                self.fields['limite_diario'].initial = limite_global.limite_diario
+                self.fields['limite_mensual'].initial = limite_global.limite_mensual
+            else:
+                # Valores por defecto si no existe registro
+                self.fields['limite_diario'].initial = 90000000
+                self.fields['limite_mensual'].initial = 450000000
+        except LimiteGlobal.DoesNotExist:
+            self.fields['limite_diario'].initial = 90000000
+            self.fields['limite_mensual'].initial = 450000000
+    
+    def save(self):
+        """
+        Guarda los cambios en la base de datos.
+        
+        Actualiza todos los registros de recargos existentes y el registro
+        de límites globales con los nuevos valores del formulario.
+        
+        Returns:
+            dict: Diccionario con información sobre los cambios realizados
+        """
+        if not self.is_valid():
+            return False
+        
+        # Actualizar recargos
+        recargos_data = [
+            ('VISA', self.cleaned_data['recargo_visa']),
+            ('MASTERCARD', self.cleaned_data['recargo_mastercard']),
+            ('Tigo Money', self.cleaned_data['recargo_tigo_money']),
+            ('Billetera Personal', self.cleaned_data['recargo_billetera_personal']),
+            ('Zimple', self.cleaned_data['recargo_zimple']),
+            ('PANAL', self.cleaned_data['recargo_panal']),
+            ('CABAL', self.cleaned_data['recargo_cabal']),
+        ]
+        
+        for marca, nuevo_recargo in recargos_data:
+            try:
+                recargo_obj = Recargos.objects.get(marca=marca)
+                recargo_anterior = recargo_obj.recargo
+                recargo_obj.recargo = nuevo_recargo
+                recargo_obj.save()
+            except Recargos.DoesNotExist:
+                # Si no existe, crear el recargo
+                medio = 'Tarjeta de Crédito' if marca in ['VISA', 'MASTERCARD', 'PANAL', 'CABAL'] else 'Billetera Electrónica'
+                Recargos.objects.create(
+                    marca=marca,
+                    medio=medio,
+                    recargo=nuevo_recargo
+                )
+        
+        # Actualizar límites globales
+        limite_global, created = LimiteGlobal.objects.get_or_create(
+            defaults={
+                'limite_diario': self.cleaned_data['limite_diario'],
+                'limite_mensual': self.cleaned_data['limite_mensual']
+            }
+        )
+        
+        if not created:
+            limite_global.limite_diario = self.cleaned_data['limite_diario']
+            limite_global.limite_mensual = self.cleaned_data['limite_mensual']
+            limite_global.save()
+        
+        return True

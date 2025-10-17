@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -11,11 +11,13 @@ from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 from functools import wraps
-from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm
+from .forms import RegistroUsuarioForm, RecuperarPasswordForm, EstablecerPasswordForm, AsignarRolForm, AsignarClienteForm, EditarPerfilForm
 from .models import Usuario
-from clientes.models import Cliente, UsuarioCliente
+from clientes.models import Cliente
 from clientes.views import procesar_medios_acreditacion_cliente
+from clientes.exceptions import TarjetaNoPermitida, MarcaNoPermitida
 from roles.models import Roles
 from django.db.models import Q
 from django.contrib.sessions.models import Session
@@ -24,6 +26,15 @@ def tiene_algun_permiso(view_func):
     """
     Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
     para administrar usuarios: bloqueo, asignación de roles o asignación de clientes.
+
+    Args:
+        view_func (callable): La vista a envolver.
+
+    Raises:
+        PermissionDenied: Si el usuario no tiene ninguno de los permisos requeridos.
+    
+    Returns:
+        callable: La vista envuelta que verifica los permisos.
     """
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -49,25 +60,42 @@ def tiene_algun_permiso(view_func):
     return _wrapped_view
 
 def registro_usuario(request):
+    """
+    Vista para registrar un nuevo usuario.
+
+    -   Si el método es POST, procesa el formulario de registro y envía un email de confirmación de registro.
+    
+    -   Si el método es GET, muestra el formulario de registro para completarse.
+
+    Raises:
+        Exception: Si ocurre un error al guardar el usuario o enviar el email.
+    """
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            # Enviar email de confirmación
-            enviar_email_confirmacion(request, user)
-            messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
-            return redirect('login')
+            try:
+                user = form.save()
+                enviar_email_confirmacion(request, user)
+                messages.success(request, '¡Registro exitoso! Por favor, verifica tu correo para activar tu cuenta.')
+                return redirect('inicio')
+            except Exception as e:
+                messages.error(request, f'Error al registrar usuario: {e}')
     else:
         form = RegistroUsuarioForm()
     
     return render(request, 'usuarios/registro.html', {'form': form})
 
 def enviar_email_confirmacion(request, user):
-    # token de activación
+    """
+    Envía email de confirmación de registro con enlace de activación. Genera un token seguro
+    y un identificador único para el usuario, y construye un enlace de activación que
+    se incluye en el email.
+
+    Raises:
+        Exception: Si ocurre un error al enviar el email.
+    """
     token = default_token_generator.make_token(user)
-    # identificador del usuario a activar
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    # generación de enlace de activación
     activacion_url = request.build_absolute_uri(
         reverse('usuarios:activar_cuenta', kwargs={'uidb64': uid, 'token': token})
     )
@@ -97,18 +125,29 @@ El equipo de desarrollo
     
     msg = EmailMultiAlternatives(
         subject='Confirma tu cuenta',
-        body=text_content,  # Contenido de texto plano
+        body=text_content,  
         from_email=from_email,
         to=[user.email]
     )
     
-    # Adjuntar la versión HTML
+
     msg.attach_alternative(html_content, "text/html")
-    
-    # Enviar el email
-    msg.send()
+
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de confirmación: {e}')
 
 def activar_cuenta(request, uidb64, token):
+    """
+    Vista para activar la cuenta de un usuario a través del enlace enviado por email. Verifica
+    el token y activa la cuenta si es válido. Si el token ha expirado y el usuario no ha activado su cuenta,
+    elimina el usuario de la base de datos.
+
+    Args:
+        uidb64 (str): Identificador único del usuario codificado en base64.
+        token (str): Token de activación.
+    """
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = Usuario.objects.get(pk=uid)
@@ -117,11 +156,10 @@ def activar_cuenta(request, uidb64, token):
     
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
-        operador_role = Group.objects.get(name='Operador')
-        user.groups.add(operador_role)
+        user.groups.add(Group.objects.get(name='Operador'))
         user.save()
         login(request, user)
-        messages.success(request, '¡Cuenta activada exitosamente! Bienvenido.')
+        messages.success(request, 'Cuenta activada exitosamente. ¡Bienvenido!')
         return redirect('inicio')
     else:
         # Si el usuario existe pero el token es inválido o expiró
@@ -130,8 +168,8 @@ def activar_cuenta(request, uidb64, token):
             if not user.is_active:
                 # Eliminar el usuario de la base de datos
                 user.delete()
-                messages.error(request, 
-                    'El enlace de activación ha expirado y tu cuenta ha sido eliminada.'
+                messages.warning(request, 
+                    'El enlace de activación ha expirado y la cuenta ha sido eliminada.'
                     'Por favor, regístrate nuevamente.')
             else:
                 # Si el usuario ya está activo, solo mostrar error de enlace inválido
@@ -139,18 +177,23 @@ def activar_cuenta(request, uidb64, token):
         else:
             messages.error(request, 'Hubo un error inesperado. Contacta a soporte.')
 
-        return redirect('usuarios:registro')
-
-def registro_exitoso(request):
-    return render(request, 'usuarios/registro_exitoso.html')
+        return redirect('inicio')
 
 @login_required
 def perfil(request):
+    """
+    Vista para mostrar el perfil del usuario.
+    """
     return render(request, 'usuarios/perfil.html')
 
 
 def recuperar_password(request):
-    """Vista para solicitar recuperación de contraseña"""
+    """
+    Vista para solicitar recuperación de contraseña. 
+    
+    -   Si el método es POST, procesa el formulario de recuperación y envía un email con enlace para restablecer la contraseña.
+    -   Si el método es GET, muestra el formulario para ingresar el email asociado a la cuenta.
+    """
     if request.method == 'POST':
         form = RecuperarPasswordForm(request.POST)
         if form.is_valid():
@@ -160,11 +203,9 @@ def recuperar_password(request):
             
             # Enviar email de recuperación
             enviar_email_recuperacion(request, user)
-            
-            messages.success(request, 
-                'Se ha enviado un enlace de recuperación a tu correo electrónico. '
-                'Revisa tu bandeja de entrada y sigue las instrucciones.')
-            return redirect('login')
+
+            messages.success(request, 'Se ha enviado un enlace de recuperación a tu correo electrónico. Revisa tu bandeja de entrada y sigue las instrucciones.')
+            return redirect('inicio')
     else:
         form = RecuperarPasswordForm()
     
@@ -172,7 +213,14 @@ def recuperar_password(request):
 
 
 def enviar_email_recuperacion(request, user):
-    """Envía email con enlace para recuperar contraseña"""
+    """
+    Envía email con enlace para recuperar contraseña. Genera un token seguro
+    y un identificador único para el usuario, y construye un enlace de restablecimiento
+    que se incluye en el email.
+
+    Raises:
+        Exception: Si ocurre un error al enviar el email.
+    """
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     
@@ -216,12 +264,20 @@ El equipo de Global Exchange
     # Adjuntar la versión HTML
     msg.attach_alternative(html_content, "text/html")
     
-    # Enviar el email
-    msg.send()
+    try:
+        msg.send()
+    except Exception as e:
+        print(f'Error al enviar email de recuperación: {e}')
 
 
 def reset_password_confirm(request, uidb64, token):
-    """Vista para confirmar y establecer nueva contraseña"""
+    """
+    Vista para confirmar y establecer nueva contraseña. Verifica el token y permite al usuario
+    establecer una nueva contraseña si el token es válido.
+
+    -   Si el método es POST, procesa el formulario para establecer la nueva contraseña.
+    -   Si el método es GET, muestra el formulario para ingresar la nueva contraseña.
+    """
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = Usuario.objects.get(pk=uid)
@@ -253,7 +309,16 @@ def reset_password_confirm(request, uidb64, token):
 @login_required
 @tiene_algun_permiso
 def usuario_detalle(request, pk):
-    """Vista para mostrar detalles de un usuario"""
+    """
+    Vista para mostrar detalles de un usuario. Solo accesible para usuarios con permisos necesarios.
+
+    Args:
+        pk (int): ID del usuario a mostrar.
+    
+    Raises:
+        PermissionDenied: Si el usuario no tiene permisos para ver detalles de usuarios.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+    """
     try:
         usuario = Usuario.objects.get(pk=pk)
     except Usuario.DoesNotExist:
@@ -278,7 +343,10 @@ def usuario_detalle(request, pk):
 @login_required
 @tiene_algun_permiso
 def administrar_usuarios(request):
-    """Vista para administrar usuarios (para usuarios con permisos de bloqueo)"""
+    """
+    Vista para gestionar usuarios. Solo accesible para usuarios con permisos necesarios.
+    Posee filtros de búsqueda por nombre, apellido, nombre de usuario y por roles.
+    """
     # Iniciar el queryset base excluyendo al usuario actual
     usuarios = Usuario.objects.exclude(pk=request.user.pk)
     
@@ -329,7 +397,20 @@ def administrar_usuarios(request):
 @login_required
 @permission_required('usuarios.bloqueo', raise_exception=True)
 def bloquear_usuario(request, pk):
-    """Vista para bloquear/desbloquear usuarios"""
+    """
+    Vista para bloquear/desbloquear usuarios. Solo accesible para usuarios con permiso de bloqueo.
+
+    Args:
+        pk (int): ID del usuario a bloquear/desbloquear.
+
+    Raises:
+        PermissionDenied: Si el usuario no tiene permiso para bloquear usuarios.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+
+    Note:
+        -   No se permite bloquear otros administradores.
+        -   Si un usuario es bloqueado mientras está autenticado, se cierran todas sus sesiones activas.
+    """
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -351,7 +432,7 @@ def bloquear_usuario(request, pk):
                 if data.get('_auth_user_id') == str(usuario.pk):
                     session.delete()
         estado = 'desbloqueado' if not usuario.bloqueado else 'bloqueado'
-        messages.success(request, f'El usuario {usuario.get_full_name()} ha sido {estado}.')
+        messages.success(request, f'El usuario {usuario.nombre_completo()} ha sido {estado}.')
         
     except Usuario.DoesNotExist:
         messages.error(request, 'Usuario no encontrado.')
@@ -362,7 +443,20 @@ def bloquear_usuario(request, pk):
 @login_required
 @permission_required('usuarios.asignacion_roles', raise_exception=True)
 def asignar_rol(request, pk):
-    """Vista para asignar roles a usuarios"""
+    """
+    Vista para asignar roles a usuarios. Solo accesible para usuarios con permiso de asignación de roles.
+
+    Args:
+        pk (int): ID del usuario al que se le asignarán roles.
+    
+    Raises:
+        PermissionDenied: Si el usuario no tiene permiso para asignar roles.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+
+    Note:
+        -   No se permite asignar roles a otros administradores.
+        -   No se permite asignar el rol de 'Administrador' a través de esta vista.
+    """
     try:
         usuario = Usuario.objects.get(pk=pk)
     except Usuario.DoesNotExist:
@@ -381,15 +475,15 @@ def asignar_rol(request, pk):
             for rol in roles:
                 usuario.groups.add(rol)
             if len(roles) == 1:
-                messages.success(request, f'Rol "{list(roles)[0]}" asignado exitosamente a {usuario.get_full_name()}.')
+                messages.success(request, f'Rol "{list(roles)[0]}" asignado exitosamente a {usuario.nombre_completo()}.')
             else:
-                messages.success(request, f'{len(roles)} roles asignados exitosamente a {usuario.get_full_name()}.')
+                messages.success(request, f'{len(roles)} roles asignados exitosamente a {usuario.nombre_completo()}.')
             return redirect('usuarios:administrar_usuarios')
     else:
         form = AsignarRolForm(usuario=usuario)
         # Verificar si hay roles disponibles para asignar
         if not form.fields['rol'].queryset.exists():
-            messages.info(request, f'{usuario.get_full_name()} ya tiene todos los roles disponibles asignados.')
+            messages.info(request, f'{usuario.nombre_completo()} ya tiene todos los roles disponibles asignados.')
             return redirect('usuarios:administrar_usuarios')
 
     return render(request, 'usuarios/asignar_rol.html', {
@@ -404,7 +498,22 @@ def asignar_rol(request, pk):
 @login_required
 @permission_required('usuarios.asignacion_roles', raise_exception=True)
 def remover_rol(request, pk, rol_id):
-    """Vista para remover roles de usuarios"""
+    """
+    Vista para remover roles de usuarios. Solo accesible para usuarios con permiso de asignación de roles.
+
+    Args:
+        pk (int): ID del usuario al que se le removerá el rol.
+        rol_id (int): ID del rol a remover.
+    
+    Raises:
+        PermissionDenied: Si el usuario no tiene permiso para asignar roles.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+        Group.DoesNotExist: Si el rol con el ID proporcionado no existe.
+    
+    Note:
+        -   No se permite modificar roles de otros administradores.
+        -   Si el rol a remover es 'Operador', se desasocian todos los clientes del usuario, si hubiere.
+    """
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -419,25 +528,44 @@ def remover_rol(request, pk, rol_id):
     if usuario.groups.filter(name='Administrador').exists() and not request.user.groups.filter(name='Administrador').exists():
         messages.error(request, 'No puedes modificar los roles de otros administradores.')
         return redirect('usuarios:administrar_usuarios')
-    
+
+    if usuario.groups.count() == 1:
+        messages.warning(request, 'El usuario no puede quedarse sin roles.')
+        return redirect('usuarios:administrar_usuarios')
+
     # Si el rol a remover es 'Operador', desasociar todos los clientes del usuario
     if rol.name == 'Operador':
         clientes_asociados = usuario.clientes_operados.all()
+        if usuario.cliente_activo:
+            usuario.cliente_activo = None
+            usuario.save()
         for cliente in clientes_asociados:
             try:
-                relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
-                relacion.delete()
-            except UsuarioCliente.DoesNotExist:
+                cliente.usuarios.remove(usuario)
+            except cliente.usuarios.DoesNotExist:
                 pass
     usuario.groups.remove(rol)
-    messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.get_full_name()}.')
+    messages.success(request, f'Rol "{rol.name}" removido exitosamente de {usuario.nombre_completo()}.')
     return redirect('usuarios:administrar_usuarios')
 
 
 @login_required
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def asignar_clientes(request, pk):
-    """Vista para asignar clientes a usuarios"""
+    """
+    Vista para asignar clientes a usuarios.
+
+    Args:
+        pk (int): ID del usuario al que se le asignarán clientes.
+
+    Raises:
+        PermissionDenied: Si el usuario no tiene permiso para asignar clientes.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+        Cliente.DoesNotExist: Si no existen clientes creados en el sistema.
+
+    Note:
+        -   Solo se permite asignar clientes a usuarios con rol 'Operador'.
+    """
     try:
         usuario = Usuario.objects.get(pk=pk)
     except Usuario.DoesNotExist:
@@ -460,22 +588,18 @@ def asignar_clientes(request, pk):
             clientes = form.cleaned_data['clientes']
             # Crear las relaciones usuario-cliente
             for cliente in clientes:
-                UsuarioCliente.objects.get_or_create(
-                    usuario=usuario,
-                    cliente=cliente
-                )
-            
+                cliente.usuarios.add(usuario)
             if len(clientes) == 1:
-                messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.get_full_name()}.')
+                messages.success(request, f'Cliente "{clientes.first()}" asignado exitosamente a {usuario.nombre_completo()}.')
             else:
-                messages.success(request, f'{len(clientes)} clientes asignados exitosamente a {usuario.get_full_name()}.')
+                messages.success(request, f'{len(clientes)} clientes asignados exitosamente a {usuario.nombre_completo()}.')
             return redirect('usuarios:usuario_detalle', pk=usuario.pk)
     else:
         form = AsignarClienteForm(usuario=usuario)
     
     # Verificar si hay clientes disponibles para asignar
     if not form.fields['clientes'].queryset.exists():
-        messages.info(request, f'{usuario.get_full_name()} ya tiene todos los clientes disponibles asignados.')
+        messages.info(request, f'{usuario.nombre_completo()} ya tiene todos los clientes disponibles asignados.')
         return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
     return render(request, 'usuarios/asignar_clientes.html', {
@@ -486,7 +610,18 @@ def asignar_clientes(request, pk):
 @login_required
 @permission_required('usuarios.asignacion_clientes', raise_exception=True)
 def remover_cliente(request, pk, cliente_id):
-    """Vista para remover la asignación de un cliente a un usuario"""
+    """
+    Vista para remover la asignación de un cliente a un usuario.
+
+    Args:
+        pk (int): ID del usuario al que se le removerá el cliente.
+        cliente_id (int): ID del cliente a remover.
+    
+    Raises:
+        PermissionDenied: Si el usuario no tiene permiso para asignar clientes.
+        Usuario.DoesNotExist: Si el usuario con el ID proporcionado no existe.
+        Cliente.DoesNotExist: Si el cliente con el ID proporcionado no existe.
+    """
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:administrar_usuarios')
@@ -500,20 +635,21 @@ def remover_cliente(request, pk, cliente_id):
     
     # Verificar que la relación existe
     try:
-        relacion = UsuarioCliente.objects.get(usuario=usuario, cliente=cliente)
-        relacion.delete()
+        cliente.usuarios.remove(usuario)
         if usuario.cliente_activo == cliente:
             usuario.cliente_activo = None
             usuario.save()
-        messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.get_full_name()}.')
-    except UsuarioCliente.DoesNotExist:
-        messages.error(request, 'La asignación no existe.')
+        messages.success(request, f'Cliente "{cliente}" desasignado exitosamente de {usuario.nombre_completo()}.')
+    except cliente.usuarios.DoesNotExist:
+        messages.error(request, 'La asignación no se hizo correctamente.')
 
     return redirect('usuarios:usuario_detalle', pk=usuario.pk)
 
 @login_required
 def ver_clientes_asociados(request):
-    """Vista para que un usuario vea los clientes con los que está asociado"""
+    """
+    Vista para que un usuario vea los clientes con los que está asociado.
+    """
     # Obtener los clientes asociados al usuario actual
     clientes = request.user.clientes_operados.all()
     
@@ -527,7 +663,16 @@ def ver_clientes_asociados(request):
 
 @login_required
 def seleccionar_cliente_activo(request, cliente_id):
-    """Vista para seleccionar un cliente como activo"""
+    """
+    Vista para seleccionar un cliente como activo. El cliente activo se usa para operaciones
+    que el usuario realiza en el sistema.
+
+    Args:
+        cliente_id (int): ID del cliente a seleccionar como activo.
+    
+    Raises:
+        Cliente.DoesNotExist: Si el cliente con el ID proporcionado no existe o no está asociado al usuario.
+    """
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:mis_clientes')
@@ -549,21 +694,33 @@ def seleccionar_cliente_activo(request, cliente_id):
 
 @login_required
 def detalle_cliente(request, cliente_id):
-    """Vista para mostrar los detalles de un cliente específico"""
+    """
+    Vista para que el usuario vea los detalles de un cliente específico asociado.
+
+    Args:
+        cliente_id (int): ID del cliente a ver.
+    """
     try:
         # Verificar que el cliente existe y está asociado al usuario
         cliente = request.user.clientes_operados.get(pk=cliente_id)
         
         # Obtener las tarjetas de Stripe del cliente
         tarjetas_stripe = cliente.obtener_tarjetas_stripe()
+        
+        # Obtener las tarjetas locales del cliente
+        from medios_acreditacion.models import TarjetaLocal
+        tarjetas_locales = TarjetaLocal.objects.filter(cliente=cliente, activo=True)
 
         # Usar función auxiliar para procesar medios de acreditación
         medios_data = procesar_medios_acreditacion_cliente(cliente, request.user)
         
+        total_tarjetas = len(tarjetas_stripe) + tarjetas_locales.count()
+        
         context = {
             'cliente': cliente,
             'tarjetas_stripe': tarjetas_stripe,
-            'total_tarjetas': len(tarjetas_stripe),
+            'tarjetas_locales': tarjetas_locales,
+            'total_tarjetas': total_tarjetas,
             **medios_data
         }
         
@@ -576,7 +733,34 @@ def detalle_cliente(request, cliente_id):
 
 @login_required
 def agregar_tarjeta_cliente(request, pk):
-    """Vista para que un operador agregue tarjeta de crédito a su cliente asignado"""
+    """
+    Vista para mostrar opciones de tipos de tarjetas disponibles.
+    Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Stripe).
+
+    Args:
+        pk (int): ID del cliente al que se le agregará la tarjeta.
+    """
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    context = {
+        'cliente': cliente,
+    }
+    return render(request, 'usuarios/seleccionar_brand.html', context)
+
+
+@login_required
+def agregar_tarjeta_stripe_cliente(request, pk):
+    """
+    Vista para agregar tarjeta de crédito internacional (Stripe) a un cliente.
+
+    Args:
+        pk (int): ID del cliente al que se le agregará la tarjeta.
+    """
     try:
         # Verificar que el cliente existe y está asociado al usuario
         cliente = request.user.clientes_operados.get(pk=pk)
@@ -595,6 +779,10 @@ def agregar_tarjeta_cliente(request, pk):
                 messages.success(request, 'Tarjeta agregada exitosamente.')
                 return redirect('usuarios:detalle_cliente', cliente_id=pk)
                 
+            except TarjetaNoPermitida:
+                messages.error(request, 'Solo se permiten tarjetas de crédito.')
+            except MarcaNoPermitida:
+                messages.error(request, 'La marca de la tarjeta no está permitida.')
             except Exception as e:
                 messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
     else:
@@ -609,8 +797,56 @@ def agregar_tarjeta_cliente(request, pk):
 
 
 @login_required
+def agregar_tarjeta_local_cliente(request, pk):
+    """
+    Vista para agregar tarjeta de crédito local (Panal o Cabal) a un cliente.
+
+    Args:
+        pk (int): ID del cliente al que se le agregará la tarjeta.
+    """
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    # Importar el formulario aquí para evitar dependencia circular
+    from medios_acreditacion.forms import TarjetaLocalForm
+    
+    if request.method == 'POST':
+        form = TarjetaLocalForm(request.POST, cliente=cliente)
+        if form.is_valid():
+            try:
+                tarjeta = form.save()
+                messages.success(request, f'Tarjeta {tarjeta.get_brand_display()} agregada exitosamente.')
+                return redirect('usuarios:detalle_cliente', cliente_id=pk)
+            except Exception as e:
+                messages.error(request, f'Error al agregar la tarjeta: {str(e)}')
+    else:
+        form = TarjetaLocalForm(cliente=cliente)
+    
+    context = {
+        'form': form,
+        'cliente': cliente,
+    }
+    return render(request, 'usuarios/agregar_tarjeta_local.html', context)
+
+
+@login_required
 def eliminar_tarjeta_cliente(request, pk, payment_method_id):
-    """Vista para que un operador elimine tarjeta de crédito de su cliente asignado"""
+    """
+    Vista para que un operador elimine tarjeta de crédito de su cliente asignado. Utiliza la API de Stripe
+    para desadjuntar el método de pago del cliente.
+
+    Args:
+        pk (int): ID del cliente al que se le eliminará la tarjeta.
+        payment_method_id (str): ID del método de pago (tarjeta) a eliminar.
+
+    Raises:
+        Cliente.DoesNotExist: Si el cliente con el ID proporcionado no existe o no está asociado al usuario.
+        Exception: Si ocurre un error al eliminar la tarjeta.
+    """
     if request.method != 'POST':
         messages.error(request, 'Método no permitido.')
         return redirect('usuarios:mis_clientes')
@@ -641,3 +877,69 @@ def eliminar_tarjeta_cliente(request, pk, payment_method_id):
         messages.error(request, 'Error inesperado al eliminar la tarjeta.')
     
     return redirect('usuarios:detalle_cliente', cliente_id=pk)
+
+
+@login_required
+def eliminar_tarjeta_local_cliente(request, pk, tarjeta_id):
+    """
+    Vista para que un operador elimine una tarjeta local de su cliente asignado.
+
+    Args:
+        pk (int): ID del cliente al que se le eliminará la tarjeta.
+        tarjeta_id (int): ID de la tarjeta local a eliminar.
+    """
+    if request.method != 'POST':
+        messages.error(request, 'Método no permitido.')
+        return redirect('usuarios:mis_clientes')
+    
+    try:
+        # Verificar que el cliente existe y está asociado al usuario
+        cliente = request.user.clientes_operados.get(pk=pk)
+    except Cliente.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado o no autorizado.')
+        return redirect('usuarios:mis_clientes')
+    
+    from medios_acreditacion.models import TarjetaLocal
+    
+    try:
+        # Buscar y eliminar la tarjeta local
+        tarjeta = TarjetaLocal.objects.get(id=tarjeta_id, cliente=cliente)
+        brand = tarjeta.get_brand_display()
+        tarjeta.delete()
+        messages.success(request, f'Tarjeta {brand} eliminada exitosamente.')
+        
+    except TarjetaLocal.DoesNotExist:
+        messages.error(request, 'La tarjeta no existe o no pertenece al cliente.')
+    except Exception as e:
+        messages.error(request, f'Error al eliminar la tarjeta: {str(e)}')
+    
+    return redirect('usuarios:detalle_cliente', cliente_id=pk)
+
+
+@login_required
+def editar_perfil(request):
+    """
+    Vista para editar el perfil del usuario. Todos los campos se actualizan inmediatamente.
+    """
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            user = form.save()
+            
+            # Forzar recarga del usuario en la sesión si cambió contraseña
+            if form.has_password_changed():
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
+            
+            messages.success(request, 'Perfil actualizado exitosamente.')
+            return redirect('usuarios:perfil')
+    else:
+        form = EditarPerfilForm(instance=request.user, user=request.user)
+    
+    context = {
+        'form': form,
+        'usuario': request.user,
+    }
+    return render(request, 'usuarios/editar_perfil.html', context)
+
+

@@ -76,11 +76,11 @@
 
         <div class="form-fila">
             <div class="form-campo">
-                <label for="{{ form.tipo_cedula.id_for_label }}">Tipo de documento</label>
-                {{ form.tipo_cedula }}
-                {% if form.tipo_cedula.errors %}
+                <label for="{{ form.numero_documento.id_for_label }}">Número de documento</label>
+                {{ form.numero_documento }}
+                {% if form.numero_documento.errors %}
                     <div class="form-errores">
-                        {% for error in form.tipo_cedula.errors %}
+                        {% for error in form.numero_documento.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>
@@ -88,11 +88,11 @@
             </div>
 
             <div class="form-campo">
-                <label for="{{ form.cedula_identidad.id_for_label }}">Número de documento</label>
-                {{ form.cedula_identidad }}
-                {% if form.cedula_identidad.errors %}
+                <label for="{{ form.telefono.id_for_label }}">Número de teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}
                     <div class="form-errores">
-                        {% for error in form.cedula_identidad.errors %}
+                        {% for error in form.telefono.errors %}
                             <div class="mensaje-error">{{ error }}</div>
                         {% endfor %}
                     </div>

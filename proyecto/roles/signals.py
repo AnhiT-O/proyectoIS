@@ -5,7 +5,14 @@ from django.dispatch import receiver
 @receiver(post_migrate)
 def asignar_permisos_administrador(sender, **kwargs):
     """
-    Asigna todos los permisos existentes a un grupo llamado 'Administradores'.
+    Asigna todos los permisos existentes al rol 'Administradores'.
+
+    Args:
+        sender: El modelo que ha sido migrado.
+        **kwargs: Argumentos adicionales.
+    
+    Note:
+        -   Este manejador de señales se ejecuta después de que se hayan aplicado las migraciones.
     """
 
     # Obtener o crear el grupo

@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 80vh;
     padding: 1rem;
 }  
 
@@ -395,4 +395,21 @@
 .paso.completado .paso-titulo {
     color: #667eea;
     font-weight: 600;
+}
+
+/* Estilos para campo de denominaciones */
+.campo-ayuda {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.form-campo input[data-toggle="tooltip"] {
+    position: relative;
+}
+
+.form-campo input[data-toggle="tooltip"]:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }

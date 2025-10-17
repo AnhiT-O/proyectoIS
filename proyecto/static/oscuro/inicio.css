@@ -133,6 +133,38 @@
     box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
 }
 
+/* Estilos para filas clickeables */
+.fila-clickeable {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fila-clickeable:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%) !important;
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+}
+
+.fila-clickeable:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+/* Indicador de evolución */
+.ver-evolucion {
+    color: #8b5cf6;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.fila-clickeable:hover .ver-evolucion {
+    opacity: 1;
+    color: #a78bfa;
+    font-weight: 600;
+}
+
 .sin-cotizaciones {
     color: #6b7280;
     font-style: italic;

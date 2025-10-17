@@ -38,11 +38,9 @@
 
     <div class="zona-acciones">
         <div class="acciones-contenido">
-            {% if perms.auth.change_group %}
             <a href="{% url 'roles:editar_rol' rol.pk %}" class="btn-primario">
                  Editar Rol
             </a>
-            {% endif %}
             <a href="{% url 'roles:listar_roles' %}" class="btn-secundario">
                 Volver a la Lista
             </a>

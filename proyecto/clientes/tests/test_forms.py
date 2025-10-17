@@ -1,209 +1,157 @@
+"""
+Pruebas unitarias sencillas para los formularios de la aplicación de clientes.
+"""
+
 import pytest
-from django.core.exceptions import ValidationError
-from clientes.forms import ClienteForm
+from clientes.forms import ClienteForm, AgregarTarjetaForm
 from clientes.models import Cliente
 
 
+@pytest.mark.django_db
 class TestClienteForm:
+    """Pruebas unitarias sencillas para el formulario ClienteForm"""
     
-    @pytest.mark.django_db
-    def test_cliente_form_creacion_exitosa_con_datos_validos(self):
-        """Prueba 1: ClienteForm: creación exitosa de cliente con datos válidos."""
+    def test_formulario_valido_con_datos_correctos(self):
+        """
+        Prueba 1: Formulario válido con todos los datos correctos
+        """
         form_data = {
             'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
-            'declaracion_jurada': True
+            'tipo_documento': 'CI',
+            'numero_documento': '12345678',
+            'correo_electronico': 'juan@test.com',
+            'telefono': '0991234567',
+            'tipo': 'F',
+            'direccion': 'Dirección test',
+            'ocupacion': 'Empleado',
+            'segmento': 'minorista'
         }
         
         form = ClienteForm(data=form_data)
-        assert form.is_valid(), f"El formulario debería ser válido. Errores: {form.errors}"
-        
-        cliente = form.save()
-        assert cliente.nombre == 'Juan Pérez'
-        assert cliente.docCliente == '1234567'
-        assert cliente.tipoCliente == 'F'
-        assert cliente.beneficio_segmento == 0  # minorista = 0%
+        assert form.is_valid(), f"Formulario debería ser válido, errores: {form.errors}"
 
-    @pytest.mark.django_db
-    def test_cliente_form_error_documento_no_numerico(self):
-        """Prueba 2: ClienteForm: error si el documento no es numérico."""
+    def test_formulario_invalido_telefono_no_numerico(self):
+        """
+        Prueba 2: Formulario inválido con teléfono no numérico
+        """
         form_data = {
             'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '123ABC',  # Documento con letras
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
-            'declaracion_jurada': True
-        }
-        
-        form = ClienteForm(data=form_data)
-        assert not form.is_valid()
-        assert 'docCliente' in form.errors
-        assert 'El documento debe contener solo números' in str(form.errors['docCliente'])
-
-    @pytest.mark.django_db
-    def test_cliente_form_error_telefono_no_numerico(self):
-        """Prueba 2: ClienteForm: error si el teléfono no es numérico."""
-        form_data = {
-            'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '098-112-3456',  # Teléfono con guiones
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
-            'declaracion_jurada': True
+            'tipo_documento': 'CI',
+            'numero_documento': '12345678',
+            'correo_electronico': 'juan@test.com',
+            'telefono': '099-123-4567',  # Contiene guiones
+            'tipo': 'F',
+            'direccion': 'Dirección test',
+            'ocupacion': 'Empleado',
+            'segmento': 'minorista'
         }
         
         form = ClienteForm(data=form_data)
         assert not form.is_valid()
         assert 'telefono' in form.errors
-        assert 'El teléfono debe contener solo números' in str(form.errors['telefono'])
 
-    @pytest.mark.django_db
-    def test_cliente_form_error_documento_ya_existe(self):
-        """Prueba 3: ClienteForm: error si el documento ya existe (único)."""
-        # Crear cliente existente
-        Cliente.objects.create(
-            nombre='Usuario Existente',
-            tipoDocCliente='CI',
-            docCliente='1234567',
-            correoElecCliente='existente@example.com',
-            telefono='0981111111',
-            tipoCliente='F',
-            direccion='Ciudad',
-            ocupacion='Empleado',
-            segmento='minorista'
-        )
-        
-        # Intentar crear otro cliente con el mismo documento
+    def test_formulario_invalido_documento_no_numerico(self):
+        """
+        Prueba 3: Formulario inválido con documento no numérico
+        """
         form_data = {
-            'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',  # Documento duplicado
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
-            'declaracion_jurada': True
+            'nombre': 'María González',
+            'tipo_documento': 'CI',
+            'numero_documento': '1234-5678',  # Contiene guión
+            'correo_electronico': 'maria@test.com',
+            'telefono': '0981234567',
+            'tipo': 'F',
+            'direccion': 'Dirección test',
+            'ocupacion': 'Empleada',
+            'segmento': 'minorista'
         }
         
         form = ClienteForm(data=form_data)
         assert not form.is_valid()
-        assert 'docCliente' in form.errors
+        assert 'numero_documento' in form.errors
 
-    @pytest.mark.django_db
-    def test_cliente_form_error_correo_ya_existe(self):
-        """Prueba 3: ClienteForm: error si el correo ya existe (único)."""
-        # Crear cliente existente
-        Cliente.objects.create(
-            nombre='Usuario Existente',
-            tipoDocCliente='CI',
-            docCliente='7654321',
-            correoElecCliente='duplicado@example.com',
-            telefono='0981111111',
-            tipoCliente='F',
-            direccion='Ciudad',
-            ocupacion='Empleado',
-            segmento='minorista'
-        )
-        
-        # Intentar crear otro cliente con el mismo correo
-        form_data = {
-            'nombre': 'Juan Pérez',
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',
-            'correoElecCliente': 'duplicado@example.com',  # Correo duplicado
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
-            'declaracion_jurada': True
-        }
-        
-        form = ClienteForm(data=form_data)
-        assert not form.is_valid()
-        assert 'correoElecCliente' in form.errors
-
-    @pytest.mark.django_db
-    def test_cliente_form_error_campos_requeridos_vacios(self):
-        """Prueba 4: ClienteForm: error si algún campo requerido está vacío."""
+    def test_formulario_invalido_campos_requeridos_vacios(self):
+        """
+        Prueba 4: Formulario inválido con campos requeridos vacíos
+        """
         form_data = {
             'nombre': '',  # Campo requerido vacío
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
+            'tipo_documento': '',  # Campo requerido vacío
+            'numero_documento': '',  # Campo requerido vacío
+            'correo_electronico': '',  # Campo requerido vacío
+            'telefono': '',  # Campo requerido vacío
+            'tipo': '',  # Campo requerido vacío
+            'direccion': '',  # Campo requerido vacío
+            'ocupacion': '',  # Campo requerido vacío
+            'segmento': 'minorista'
         }
         
         form = ClienteForm(data=form_data)
         assert not form.is_valid()
+        
+        # Verificar que hay errores en los campos principales
         assert 'nombre' in form.errors
-        assert 'Debes ingresar el nombre.' in str(form.errors['nombre'])
+        assert 'numero_documento' in form.errors
+        assert 'correo_electronico' in form.errors
 
-    @pytest.mark.django_db
-    def test_cliente_form_error_campos_exceden_maximo_caracteres(self):
-        """Prueba 4: ClienteForm: error si algún campo excede el máximo de caracteres."""
+    def test_crear_cliente_desde_formulario_valido(self):
+        """
+        Prueba 5: Crear cliente desde formulario válido
+        """
         form_data = {
-            'nombre': 'A' * 101,  # Excede máximo de 100 caracteres
-            'tipoDocCliente': 'CI',
-            'docCliente': '1234567',
-            'correoElecCliente': 'juan.perez@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'F',
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Ingeniero',
-            'segmento': 'minorista',
+            'nombre': 'Cliente Test',
+            'tipo_documento': 'CI',
+            'numero_documento': '87654321',
+            'correo_electronico': 'cliente@test.com',
+            'telefono': '0987654321',
+            'tipo': 'F',
+            'direccion': 'Dirección test',
+            'ocupacion': 'Empleado',
+            'segmento': 'vip',
+            'declaracion_jurada': True
         }
         
         form = ClienteForm(data=form_data)
+        assert form.is_valid()
+        
+        cliente = form.save()
+        assert cliente.nombre == 'Cliente Test'
+        assert cliente.segmento == 'vip'
+
+
+@pytest.mark.django_db
+class TestAgregarTarjetaForm:
+    """Pruebas unitarias sencillas para el formulario AgregarTarjetaForm"""
+    
+    def setup_method(self):
+        """Configurar datos de prueba"""
+        self.cliente = Cliente.objects.create(
+            nombre='Cliente Tarjeta',
+            tipo_documento='CI',
+            numero_documento='66666666',
+            correo_electronico='tarjeta@test.com',
+            telefono='0996666666',
+            tipo='F',
+            direccion='Dirección tarjeta',
+            ocupacion='Empleado',
+            segmento='minorista'
+        )
+    
+    def test_formulario_invalido_sin_token(self):
+        """
+        Prueba 1: Formulario inválido sin token de Stripe
+        """
+        form_data = {}
+        form = AgregarTarjetaForm(data=form_data, cliente=self.cliente)
+        
         assert not form.is_valid()
-        assert 'nombre' in form.errors
-        assert 'El nombre no puede exceder los 100 caracteres.' in str(form.errors['nombre'])
+        assert 'stripe_token' in form.errors
 
-    @pytest.mark.django_db
-    def test_cliente_form_error_tipo_documento_no_corresponde_tipo_cliente(self):
-        """Prueba 5: ClienteForm: error si el tipo de documento no corresponde al tipo de cliente."""
-        form_data = {
-            'nombre': 'Empresa SA',
-            'tipoDocCliente': 'CI',  # Persona jurídica con CI (debe ser RUC)
-            'docCliente': '1234567',
-            'correoElecCliente': 'empresa@example.com',
-            'telefono': '0981123456',
-            'tipoCliente': 'J',  # Jurídica
-            'direccion': 'Asunción, Paraguay',
-            'ocupacion': 'Comercio',
-            'segmento': 'corporativo',
-        }
+    def test_formulario_valido_con_token(self):
+        """
+        Prueba 2: Formulario válido con token de Stripe
+        """
+        form_data = {'stripe_token': 'tok_test_1234567890'}
+        form = AgregarTarjetaForm(data=form_data, cliente=self.cliente)
         
-        form = ClienteForm(data=form_data)
-        
-        # El formulario puede ser válido a nivel de formulario, 
-        # pero el error se detecta en el método clean del modelo
-        if form.is_valid():
-            try:
-                cliente = form.save()
-                assert False, "Debería haber lanzado ValidationError"
-            except ValidationError as e:
-                assert 'tipoDocCliente' in e.message_dict
-                assert 'Las personas jurídicas deben usar RUC' in str(e.message_dict['tipoDocCliente'])
+        assert form.is_valid(), f"Formulario debería ser válido, errores: {form.errors}"

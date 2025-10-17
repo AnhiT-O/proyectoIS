@@ -1,9 +1,0 @@
-https://chatgpt.com/share/68d57978-a11c-8006-850f-135c60415a70
-https://chatgpt.com/share/68d579a7-a4d4-8006-b357-e829dd7e8e09
-https://chatgpt.com/share/68d579bd-8674-8006-90a0-8a96fa9d0080
-https://chatgpt.com/share/68d579cd-42c8-8006-8650-017cfee90980
-https://chatgpt.com/share/68d579ed-2cd8-8006-b71b-3ca9b0db00ed
-https://chatgpt.com/share/68d57a0a-9b1c-8006-a247-6989972c3868
-https://chatgpt.com/share/68d57a1a-a628-8006-852f-4e2c619411b0
-https://chatgpt.com/share/68d57a2e-55b8-8006-a566-4951c9f7075d
-https://chatgpt.com/share/68d57a3e-aab8-8006-aece-14f8a37984b2

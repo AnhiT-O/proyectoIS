@@ -33,7 +33,7 @@
                     <option value="">Todos los usuarios del cliente</option>
                     {% for usuario in usuarios_cliente %}
                     <option value="{{ usuario.id }}" {% if usuario_filtro == usuario.id|stringformat:"s" %}selected{% endif %}>
-                        {{ usuario.get_full_name|default:usuario.username }}
+                        {{ usuario.nombre_completo|default:usuario.username }}
                     </option>
                     {% endfor %}
                 </select>
@@ -74,10 +74,14 @@
                 <button type="submit" class="btn-buscar">
                     Buscar
                 </button>
+                <button type="button" class="btn-buscar" onclick="abrirModalDescarga()" 
+                        {% if cliente_filtrado %}data-cliente-id="{{ cliente_filtrado.id }}"{% endif %}>
+                    Descargar Historial
+                </button>
                 {% if busqueda or tipo_operacion or estado_filtro or usuario_filtro %}
-                <a href="{% if cliente_filtrado %}{% url 'transacciones:historial_cliente' cliente_filtrado.id %}{% elif usuario_filtro %}{% url 'transacciones:historial' %}?usuario={{ usuario_filtro }}{% else %}{% url 'transacciones:historial' %}{% endif %}" class="btn-limpiar">
-                    Limpiar
-                </a>
+                    <a href="{% url 'transacciones:historial_cliente' cliente_filtrado.id %}" class="btn-limpiar">
+                        Limpiar
+                    </a>
                 {% endif %}
             </div>
         </form>
@@ -103,11 +107,9 @@
                 <th>Fecha/Hora</th>
                 <th>Usuario</th>
                 <th>Operación</th>
-                <th>Origen</th>
-                <th>Destino</th>
-                <th style="min-width: 250px; max-width: 350px;">Medios</th>
+                <th>Moneda</th>
                 <th>Estado</th>
-                <!--<th>Acciones</th>-->
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -121,7 +123,7 @@
                 </td>
                 <td>
                     <div>
-                        {{ transaccion.usuario.get_full_name }}
+                        {{ transaccion.usuario.nombre_completo|default:transaccion.usuario.username }}
                     </div>
                 </td>
                 <td>
@@ -130,30 +132,7 @@
                     </div>
                 </td>
                 <td>
-                    {% if transaccion.tipo == 'compra' %}
-                        {{ transaccion.monto_origen|floatformat:0 }} PYG
-                    {% else %}
-                        {{ transaccion.monto_origen|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if transaccion.tipo == 'compra' %}
-                        {{ transaccion.monto_destino|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
-                    {% else %}
-                        {{ transaccion.monto_destino|floatformat:0 }} PYG
-                    {% endif %}
-                </td>
-                <td style="min-width: 250px; max-width: 350px; white-space: normal; text-overflow: unset; overflow: visible; padding: 0.8rem 1rem; text-align: left;">
-                    <div style="display: flex; flex-direction: column; gap: 0.4rem; line-height: 1.4;">
-                        <div style="display: flex; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
-                            <span style="font-weight: 600; min-width: 45px; flex-shrink: 0; font-size: 0.85rem;">Pago:</span>
-                            <span style="font-size: 0.85rem; word-break: break-word; flex: 1;">{{ transaccion.medio_pago_formateado }}</span>
-                        </div>
-                        <div style="display: flex; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap;">
-                            <span style="font-weight: 600; min-width: 45px; flex-shrink: 0; font-size: 0.85rem;">Cobro:</span>
-                            <span style="font-size: 0.85rem; word-break: break-word; flex: 1;">{{ transaccion.medio_cobro }}</span>
-                        </div>
-                    </div>
+                    {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
                 </td>
                 <td>
                     <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">
@@ -161,19 +140,17 @@
                     </div>
                 </td>
                 
-                <!--<td>
+                <td>
                     <div class="zona-acciones">
-                        <a href="{% url 'transacciones:detalle' transaccion.pk %}" class="btn-detalles" title="Ver detalles">
+                        <a href="{% url 'transacciones:historial_detalle' transaccion.pk %}" class="btn-detalles" title="Ver detalles">
                             Detalles
                         </a>
                     </div>
-                </td>
-            -->
-                
+                </td>    
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">
+                <td colspan="6">
                     {% if busqueda or tipo_operacion or estado_filtro or usuario_filtro or cliente_filtrado %}
                         No se encontraron transacciones que coincidan con los filtros aplicados.
                     {% else %}
@@ -184,5 +161,301 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="zona-acciones" style="margin-top: 2rem">
+        <div class="acciones-contenido">
+            <a href="{% url 'usuarios:detalle_cliente' cliente_filtrado.id %}" class="btn-secundario">
+                Volver al Cliente
+            </a>
+        </div>
+    </div>
 </div>
+
+<!-- Modal para seleccionar formato de descarga -->
+<div id="modalDescarga" class="modal-overlay" style="display: none;">
+    <div class="modal-contenido">
+        <div class="modal-cabecera">
+            <h3> Descargar Historial de Transacciones</h3>
+            <span class="cerrar-modal" onclick="cerrarModalDescarga()">&times;</span>
+        </div>
+        <div class="modal-cuerpo">
+            <p class="modal-descripcion">Selecciona el formato para descargar el historial de transacciones:</p>
+            <div class="opciones-descarga">
+                <button type="button" class="btn-modal-descargar btn-pdf" onclick="descargarHistorial('pdf')">
+                    Descargar en PDF
+                </button>
+                <button type="button" class="btn-modal-descargar btn-excel" onclick="descargarHistorial('excel')">
+                    Descargar en Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirModalDescarga() {
+    const modal = document.getElementById('modalDescarga');
+    modal.style.display = 'flex';
+    // Prevenir scroll del body cuando el modal está abierto
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalDescarga() {
+    const modal = document.getElementById('modalDescarga');
+    modal.style.display = 'none';
+    // Restaurar scroll del body
+    document.body.style.overflow = 'auto';
+}
+
+function descargarHistorial(formato) {
+    // Obtener los parámetros actuales de la URL para mantener los filtros
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // URLs base para descarga
+    const urlsPdf = "{% url 'transacciones:descargar_historial_pdf' %}";
+    const urlsExcel = "{% url 'transacciones:descargar_historial_excel' %}";
+    
+    let downloadUrl = formato === 'pdf' ? urlsPdf : urlsExcel;
+    
+    // Agregar parámetros de filtros si existen
+    const params = [];
+    if (urlParams.get('usuario')) params.push(`usuario=${urlParams.get('usuario')}`);
+    if (urlParams.get('tipo_operacion')) params.push(`tipo_operacion=${urlParams.get('tipo_operacion')}`);
+    if (urlParams.get('estado')) params.push(`estado=${urlParams.get('estado')}`);
+    if (urlParams.get('busqueda')) params.push(`busqueda=${urlParams.get('busqueda')}`);
+    
+
+    // Agregar ID del cliente si existe
+    const botonDescarga = document.querySelector('[data-cliente-id]');
+    if (botonDescarga && botonDescarga.dataset.clienteId) {
+        params.push(`cliente=${botonDescarga.dataset.clienteId}`);
+    }
+    
+    if (params.length > 0) {
+        downloadUrl += '?' + params.join('&');
+    }
+    
+    // Crear un enlace temporal para descargar
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Cerrar el modal
+    cerrarModalDescarga();
+}
+
+// Cerrar modal al hacer clic fuera de él
+window.onclick = function(event) {
+    const modal = document.getElementById('modalDescarga');
+    if (event.target === modal) {
+        cerrarModalDescarga();
+    }
+}
+</script>
+
+<style>
+/* Modal overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Contenido del modal (similar a popup-contenido) */
+.modal-contenido {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Cabecera del modal (similar a popup-cabecera) */
+.modal-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-cabecera h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Botón cerrar */
+.cerrar-modal {
+    font-size: 1.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+}
+
+.cerrar-modal:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Cuerpo del modal (similar a popup-cuerpo) */
+.modal-cuerpo {
+    padding: 2rem 1.5rem;
+}
+
+.modal-descripcion {
+    margin-bottom: 1.5rem;
+    color: #666;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Opciones de descarga (similar a popup-opciones) */
+.opciones-descarga {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn-modal-descargar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.btn-pdf:hover {
+    border-color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    color: white;
+}
+
+.btn-excel:hover {
+    border-color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+/* Tema oscuro */
+@media (prefers-color-scheme: dark) {
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .modal-contenido {
+        background: #2d3748;
+        border: 1px solid #4a5568;
+    }
+    
+    .modal-cabecera {
+        border-bottom: 1px solid #4a5568;
+        background: linear-gradient(135deg, #4c5fd7 0%, #6366f1 100%);
+    }
+    
+    .modal-descripcion {
+        color: #a0aec0;
+    }
+    
+    .btn-modal-descargar {
+        border: 2px solid #4a5568;
+        background: #1a202c;
+        color: #e0e6ed;
+    }
+    
+    .btn-pdf:hover {
+        border-color: #e53e3e;
+        box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3);
+        background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+    }
+    
+    .btn-excel:hover {
+        border-color: #38a169;
+        box-shadow: 0 8px 25px rgba(56, 161, 105, 0.3);
+        background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+    }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .modal-contenido {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-cabecera {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-cabecera h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-cuerpo {
+        padding: 1.5rem;
+    }
+}
+</style>
+
 {% endblock %}

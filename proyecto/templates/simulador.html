@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Simulador de Conversiones{% endblock %}
 
@@ -9,328 +10,88 @@
 {% endblock %}
 
 {% block content %}
-<div class="cuerpo">
-    <div class="contenido">
-        <div class="form-cabecera">
-            <div class="logo">Simulador de Conversiones</div>
-            <p class="subtitulo">Calcule el cambio de monedas en tiempo real</p>
-        </div>
-        
-        <form id="simulador-form" method="post" novalidate>
-            {% csrf_token %}
-            
-            <div class="form-campo">
-                <div class="tipo-operacion" style="display: flex; justify-content: center; gap: 10px;">
-                    <button type="button" class="btn-primario activo" data-operacion="compra">Compra</button>
-                    <button type="button" class="btn-secundario" data-operacion="venta">Venta</button>
-                </div>
-            </div>
-
-            <div class="form-campo">
-                <label for="moneda">Seleccionar moneda:</label>
-                <select id="moneda" 
-                        name="moneda" 
-                        class="form-control" 
-                        required>
-                    <option value="" disabled selected hidden>Selecciona una moneda</option>
-                    {% for moneda in monedas %}
-                        <option value="{{ moneda.id }}" data-simbolo="{{ moneda.simbolo }}">
-                            {{ moneda.simbolo }} - {{ moneda.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <div id="moneda-errors" class="form-errores" style="display: none;"></div>
-            </div>
-
-            <div class="form-campo">
-                <label for="monto">Monto:</label>
-                <input type="number" 
-                        id="monto" 
-                        name="monto" 
-                        class="form-control" 
-                        step="0.01" 
-                        min="0.01"
-                        placeholder="Seleccione primero una moneda"
-                        required>
-                <div id="monto-errors" class="form-errores" style="display: none;"></div>
-            </div>
-
-            <div class="form-campo" id="recargo-campo">
-                <label for="recargo">Medio de pago:</label>
-                {{ form.recargo }}
-                <div id="recargo-errors" class="form-errores" style="display: none;"></div>
-            </div>
-
-            <div class="form-campo">
-                <label for="resultado">Resultado:</label>
-                <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
-                    <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
-                </div>
-            </div>
-
-            <div class="zona-botones">
-                <button type="submit" class="btn-enviar">Calcular</button>
-                <a href="{% url 'inicio' %}" class="btn-atras">Volver</a>
-            </div>
-        </form>
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <div class="logo">Simulador de Conversiones</div>
+        <p class="subtitulo">Calcule el cambio de monedas en tiempo real</p>
     </div>
+    
+    <form id="simulador-form" method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="operacion" id="operacion" value="compra">
+            <div class="form-campo">
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button type="button" class="btn-primario" data-operacion="compra">Comprar</button>
+                    <button type="button" class="btn-secundario" data-operacion="venta">Vender</button>
+                </div>
+            </div>
+
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.moneda.id_for_label }}">Seleccionar moneda:</label>
+                    {{ form.moneda }}
+                    {% if form.moneda.errors %}
+                        <div class="form-errores">
+                            {% for error in form.moneda.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                <label for="{{ form.monto.id_for_label }}">Monto:</label>
+                {{ form.monto }}
+                    {% if form.monto.errors %}
+                        <div class="form-errores">
+                            {% for error in form.monto.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>  
+            </div>
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.medio_pago.id_for_label }}">Medio de pago:</label>
+                    {{ form.medio_pago }}
+                    {% if form.medio_pago.errors %}
+                        <div class="form-errores">
+                            {% for error in form.medio_pago.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-campo">
+                    <label for="{{ form.medio_cobro.id_for_label }}">Medio de cobro:</label>
+                    {{ form.medio_cobro }}
+                    {% if form.medio_cobro.errors %}
+                        <div class="form-errores">
+                            {% for error in form.medio_cobro.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        <div class="form-campo" style="justify-content: center; text-align: center;">
+            <label for="resultado">Resultado:</label>
+            <div class="info-usuario" style="padding: 1rem; width: auto; min-width: 40%;">
+                <div id="resultado" class="info-valor" style="font-size: large; font-weight: bold;">&nbsp;</div>
+            </div>
+        </div>
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">Calcular</button>
+            <a href="{% url 'inicio' %}" class="btn-atras">Volver</a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // Función para formatear números con separadores de miles (equivalente a intcomma)
-        function formatearNumero(numero) {
-            return new Intl.NumberFormat('es-PY', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(numero);
-        }
-
-        // Función para formatear números con decimales específicos
-        function formatearNumeroConDecimales(numero, decimales) {
-            return new Intl.NumberFormat('es-PY', {
-                minimumFractionDigits: decimales,
-                maximumFractionDigits: decimales
-            }).format(numero);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('simulador-form');
-        const btnCompra = document.querySelector('[data-operacion="compra"]');
-        const btnVenta = document.querySelector('[data-operacion="venta"]');
-        const montoInput = document.getElementById('monto');
-        const monedaSelect = document.getElementById('moneda');
-        const resultadoDiv = document.getElementById('resultado');
-        let tipoOperacion = 'compra';
-
-        // Función para actualizar el step y min del input según la operación y moneda
-        function actualizarStepMonto() {
-            // Tanto compra como venta ahora usan decimales según la moneda seleccionada (moneda extranjera)
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                montoInput.step = Math.pow(10, -decimales).toFixed(decimales);
-                montoInput.min = montoInput.step;
-            } else {
-                montoInput.step = '0.01';
-                montoInput.min = '0.01';
-            }
-        }
-
-        // Función para obtener los decimales de una moneda
-        function getDecimalesMoneda(monedaId) {
-            // Crear un objeto con los decimales de las monedas disponibles
-            const monedasDecimales = {
-                {% for moneda in monedas %}'{{ moneda.id }}': {{ moneda.decimales }}{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            };
-            return monedasDecimales[monedaId] || 2; // Por defecto 2 decimales
-        }
-
-        // Manejador de botones de operación
-        function toggleOperacion(btn) {
-            // Restaurar estilos por defecto
-            if (btn === btnCompra) {
-                btnCompra.classList.remove('btn-secundario');
-                btnCompra.classList.add('btn-primario', 'activo');
-                btnVenta.classList.remove('btn-primario', 'activo');
-                btnVenta.classList.add('btn-secundario');
-            } else {
-                btnVenta.classList.remove('btn-secundario');
-                btnVenta.classList.add('btn-primario', 'activo');
-                btnCompra.classList.remove('btn-primario', 'activo');
-                btnCompra.classList.add('btn-secundario');
-            }
-            tipoOperacion = btn.dataset.operacion;
-            
-            // Mostrar campo de recargo para ambas operaciones
-            const recargoCampo = document.getElementById('recargo-campo');
-            const recargoSelect = document.getElementById('recargo');
-            recargoCampo.style.display = 'block';
-            
-            // Actualizar placeholder según operación
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                
-                if (tipoOperacion === 'compra') {
-                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
-                } else {
-                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
-                }
-            } else {
-                montoInput.placeholder = 'Seleccione primero una moneda';
-            }
-                
-            // Actualizar step del input
-            actualizarStepMonto();
-                
-            // Limpiar campos
-            montoInput.value = '';
-            resultadoDiv.textContent = '\u00A0';
-            
-            // Ocultar información de recargo
-            const recargoInfo = document.getElementById('recargo-info');
-            if (recargoInfo) {
-                recargoInfo.style.display = 'none';
-            }
-            
-            // Limpiar errores
-            clearErrors();
-        }
-
-        // Event listener para cambio de moneda
-        monedaSelect.addEventListener('change', function() {
-            actualizarStepMonto();
-            
-            // Actualizar placeholder para cualquier operación
-            const monedaSeleccionada = monedaSelect.options[monedaSelect.selectedIndex];
-            if (monedaSeleccionada && monedaSeleccionada.value) {
-                const decimales = getDecimalesMoneda(monedaSeleccionada.value);
-                const montoMin = Math.pow(10, -decimales).toFixed(decimales);
-                const simbolo = monedaSeleccionada.dataset.simbolo || '';
-                
-                if (tipoOperacion === 'compra') {
-                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
-                } else {
-                    montoInput.placeholder = `Monto mínimo: ${montoMin} ${simbolo}`;
-                }
-            }
-            
-            // Limpiar campos cuando cambie la moneda
-            montoInput.value = '';
-            resultadoDiv.textContent = '\u00A0';
-            
-            // Limpiar errores
-            clearErrors();
-        });
-
-        btnCompra.addEventListener('click', () => toggleOperacion(btnCompra));
-        btnVenta.addEventListener('click', () => toggleOperacion(btnVenta));
-
-        // Inicializar step por defecto
-        actualizarStepMonto();
-        
-        // Inicializar visibilidad del campo de recargo (visible para ambas operaciones)
-        const recargoCampo = document.getElementById('recargo-campo');
-        recargoCampo.style.display = 'block';
-
-        // Manejar envío del formulario
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Limpiar errores previos
-            clearErrors();
-            
-            const formData = new FormData(form);
-            formData.append('operacion', tipoOperacion);
-
-            fetch('{% url "simular" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Aplicar formato según el tipo de resultado
-                    if (data.tipo_resultado === 'guaranies') {
-                        resultadoDiv.textContent = `Gs. ${formatearNumero(data.resultado_numerico)}`;
-                    } else if (data.tipo_resultado === 'moneda_extranjera') {
-                        const numeroFormateado = formatearNumeroConDecimales(data.resultado_numerico, data.decimales);
-                        resultadoDiv.textContent = `${numeroFormateado} ${data.simbolo}`;
-                    } else {
-                        // Fallback para compatibilidad
-                        resultadoDiv.textContent = data.resultado;
-                    }
-                    
-                    // Mostrar/ocultar información de recargo
-                    const recargoInfo = document.getElementById('recargo-info');
-                    const recargoTexto = document.getElementById('recargo-texto');
-                    if (recargoInfo && recargoTexto) {
-                        if (data.recargo_aplicado) {
-                            recargoTexto.textContent = `Recargo aplicado: ${data.porcentaje_recargo}%`;
-                            recargoInfo.style.display = 'block';
-                        } else {
-                            recargoInfo.style.display = 'none';
-                        }
-                    }
-                } else if (data.errors) {
-                    // Mostrar errores de validación específicos
-                    showErrors(data.errors);
-                } else {
-                    // Mostrar error general
-                    alert(data.error || 'Ocurrió un error al procesar la conversión');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error al procesar la conversión');
-            });
-        });
-
-        // Función para mostrar errores
-        function showErrors(errors) {
-            for (const field in errors) {
-                const errorContainer = document.getElementById(field + '-errors');
-                if (errorContainer) {
-                    errorContainer.style.display = 'block';
-                    errorContainer.innerHTML = '';
-                    errors[field].forEach(error => {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'mensaje-error';
-                        errorDiv.textContent = error;
-                        errorContainer.appendChild(errorDiv);
-                    });
-                }
-            }
-        }
-
-        // Función para limpiar errores
-        function clearErrors() {
-            const errorContainers = document.querySelectorAll('.form-errores');
-            errorContainers.forEach(container => {
-                container.style.display = 'none';
-                container.innerHTML = '';
-            });
-        }
-
-        // Limpiar errores cuando el usuario empiece a escribir o cambiar campos
-        montoInput.addEventListener('input', clearErrors);
-        monedaSelect.addEventListener('change', clearErrors);
-        recargoSelect.addEventListener('change', clearErrors);
-        
-        // Limpiar resultado cuando cambie el select de recargo
-        const recargoSelect = document.getElementById('recargo');
-        recargoSelect.addEventListener('change', function() {
-            resultadoDiv.textContent = '\u00A0';
-            const recargoInfo = document.getElementById('recargo-info');
-            if (recargoInfo) {
-                recargoInfo.style.display = 'none';
-            }
-        });
-    });
-
-    function resetForm() {
-        const form = document.getElementById('simulador-form');
-        const btnCompra = document.querySelector('[data-operacion="compra"]');
-        form.reset();
-        toggleOperacion(btnCompra);
-        
-        // Resetear el select de recargo al primer valor (vacío)
-        const recargoSelect = document.getElementById('recargo');
-        recargoSelect.selectedIndex = 0;
-        
-        // Ocultar información de recargo
-        const recargoInfo = document.getElementById('recargo-info');
-        if (recargoInfo) {
-            recargoInfo.style.display = 'none';
-        }
-    }
-    </script>
+    <script src="{% static 'simulador.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+    Información de Pago
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'pasarela_pago.js' %}"></script>
+    <script>
+    const datosTransaccion = {
+        monto: '{{ transaccion.monto }}',
+        moneda: '{{ transaccion.moneda.simbolo }}',
+        tipo_operacion: '{{ transaccion.tipo }}',
+        cliente_id: '{{ transaccion.cliente.id }}',
+        token: '{{ transaccion.token }}',
+        medio_pago: '{{ transaccion.medio_pago }}',
+        monto_minimo: '{{ transaccion.precio_final }}'
+    };
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <div class="logo">Transacción Iniciada</div>
+        <p class="subtitulo">
+            Usa la información de pago a continuación para confirmar tu transacción.
+        </p>
+        <div style="margin-top: 2rem;"></div>
+        {% if transaccion.medio_pago == 'Transferencia Bancaria' %}
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Banco:</div>
+            <div class="info-valor">Sudameris Bank</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número de Cuenta:</div>
+            <div class="info-valor">123456</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Titular:</div>
+            <div class="info-valor">Global Exchange</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Registro Único de Contribuyente:</div>
+            <div class="info-valor">1234567</div>
+        {% else %}
+        <div class="info-usuario" style="width: auto">
+            <div class="info-titulo">Marca de Billetera:</div>
+            <div class="info-valor">{{ transaccion.medio_pago }}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número:</div>
+            <div class="info-valor">{% if transaccion.medio_pago == 'Tigo Money' %}0981000001{% elif transaccion.medio_pago == 'Billetera Personal' %}0982000002{% else %}0983000003{% endif %}</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Titular:</div>
+            <div class="info-valor">Global Exchange</div>
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Número de Documento:</div>
+            <div class="info-valor">{% if transaccion.medio_pago == 'Tigo Money' %}1010101{% elif transaccion.medio_pago == 'Billetera Personal' %}2020202{% elif transaccion.medio_pago == 'Zimple' %}3030303{% else %}N/D{% endif %}</div>
+        {% endif %}
+            <div style="margin-top: 0.5rem;"></div>
+            <div class="info-titulo">Monto a Pagar:</div>
+            <div class="info-valor"> <strong>Gs. {{ transaccion.precio_final|intcomma }}</strong></div>
+        </div>
+    </div>
+    <div class="zona-botones">
+        <a href="#" class="btn-enviar" onclick="procesarPago(datosTransaccion)">Continuar con el Pago</a>
+    </div>
+</div>
+{% endblock %}

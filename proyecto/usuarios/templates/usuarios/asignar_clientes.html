@@ -15,7 +15,7 @@
         <div style="margin-top: 2rem;"></div>
         <div class="info-usuario" style="width: auto">
             <div class="info-titulo">Nombre del Usuario:</div>
-            <div class="info-valor">{{ usuario.get_full_name }}</div>
+            <div class="info-valor">{{ usuario.nombre_completo }}</div>
         </div>
     </div>
 
@@ -30,12 +30,12 @@
                     <div class="tarjeta">
                             <input class="form-casilla" type="checkbox" name="clientes" value="{{ cliente.pk }}" id="cliente_{{ cliente.pk }}">
                             <label class="form-casilla-label" for="cliente_{{ cliente.pk }}">
-                                <strong>{{ cliente.nombre }} ({{ cliente.docCliente }})</strong>
+                                <strong>{{ cliente.nombre }} ({{ cliente.numero_documento }})</strong>
                             </label>
                         <div class="tarjeta-detalles">
-                            Email: {{ cliente.correoElecCliente }}<br>
+                            Email: {{ cliente.correo_electronico }}<br>
                             Teléfono: {{ cliente.telefono }}<br>
-                            Tipo: {% if cliente.tipoCliente == 'F' %}Persona Física{% else %}Persona Jurídica{% endif %}
+                            Tipo: {% if cliente.tipo == 'F' %}Persona Física{% else %}Persona Jurídica{% endif %}
                         </div>
                     </div>
                 {% endfor %}

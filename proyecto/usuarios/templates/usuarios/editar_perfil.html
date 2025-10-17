@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Perfil - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="{% static 'claro/editar_perfil.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/editar_perfil.css' %}" media="(prefers-color-scheme: dark)">
+<!-- Fuente de Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'editar_perfil.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="contenido extendido">
+    <div class="form-cabecera">
+        <h2>Editar Perfil</h2>
+        <p class="subtitulo">
+            Actualiza tu información personal
+        </p>
+    </div>
+
+
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-errores">
+                        {% for error in form.username.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+                {{ form.email }}
+                {% comment %} <div class="campo-ayuda">
+                    Puedes cambiar tu correo electrónico libremente
+                </div> {% endcomment %}
+                {% if form.email.errors %}
+                    <div class="form-errores">
+                        {% for error in form.email.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            <div class="form-campo">
+                <label for="{{ form.first_name.id_for_label }}">Nombres</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="form-errores">
+                        {% for error in form.first_name.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="{{ form.last_name.id_for_label }}">Apellidos</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="form-errores">
+                        {% for error in form.last_name.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-fila">
+            {% comment %} <div class="form-campo">
+                <label for="numero_documento">Número de documento</label>
+                <input type="text" id="numero_documento" class="form-control" value="{{ user.numero_documento }}" disabled readonly>
+            </div> {% endcomment %}
+            <div class="form-campo">
+                <label for="{{ form.telefono.id_for_label }}">Número de teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}
+                    <div class="form-errores">
+                        {% for error in form.telefono.errors %}
+                            <div class="mensaje-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-campo">
+                <label for="password-display">Contraseña</label>
+                <div class="password-field-container">
+                    <input type="password" 
+                           value="••••••••••" 
+                           readonly 
+                           class="form-control password-display"
+                           id="password-display">
+                    <button type="button" 
+                            class="btn-cambiar-password btn-primario" 
+                            onclick="togglePasswordChange()">
+                        Cambiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de cambio de contraseña (inicialmente oculta) -->
+        <div class="zona-cambio-password" id="zona-cambio-password" style="display: none;">
+            <div class="declaracion-titulo">
+                Cambiar Contraseña
+            </div>
+            <div class="form-fila">
+                <div class="form-campo">
+                    <label for="{{ form.new_password1.id_for_label }}">Nueva Contraseña</label>
+                    <div class="password-field-container">
+                        {{ form.new_password1 }}
+                        <button type="button" 
+                                class="btn-toggle-password" 
+                                onclick="togglePasswordVisibility('{{ form.new_password1.id_for_label }}', this)">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                    </div>
+                    {% if form.new_password1.errors %}
+                        <div class="form-errores">
+                            {% for error in form.new_password1.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-campo">
+                    <label for="{{ form.new_password2.id_for_label }}">Confirmar Nueva Contraseña</label>
+                    <div class="password-field-container">
+                        {{ form.new_password2 }}
+                        <button type="button" 
+                                class="btn-toggle-password" 
+                                onclick="togglePasswordVisibility('{{ form.new_password2.id_for_label }}', this)">
+                            <span class="material-icons">visibility</span>
+                        </button>
+                    </div>
+                    {% if form.new_password2.errors %}
+                        <div class="form-errores">
+                            {% for error in form.new_password2.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="campo-ayuda">
+                La contraseña debe tener al menos 8 caracteres e incluir letras, números y símbolos.
+            </div>
+            <div class="password-actions">
+                <button type="button" class="btn-cancelar-password" onclick="cancelPasswordChange()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+
+        <div class="zona-declaracion">
+            <div class="declaracion-titulo">
+                Confirmación de Seguridad
+            </div>
+            <div class="form-fila" style="margin-bottom: 0.5rem;">
+                <div class="form-campo">
+                    <label for="{{ form.current_password.id_for_label }}">Contraseña Actual <span style="color: red;">*</span></label>
+                    {{ form.current_password }}
+                    <div class="campo-ayuda">La contraseña es requerida para confirmar cualquier cambio.</div>
+                    {% if form.current_password.errors %}
+                        <div class="form-errores">
+                            {% for error in form.current_password.errors %}
+                                <div class="mensaje-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="form-errores">
+                {% for error in form.non_field_errors %}
+                    <div class="mensaje-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">
+                Guardar Cambios
+            </button>
+            <a href="{% url 'usuarios:perfil' %}" class="btn-atras">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

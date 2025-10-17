@@ -18,7 +18,14 @@
 
     <div class="zona-perfil">
         <div class="perfil-info">
-            <h2 class="perfil-titulo">Información Personal</h2>
+            <div class="info-cabecera">
+                <h2 class="perfil-titulo">Información Personal</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'usuarios:editar_perfil' %}" class="btn-primario" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        Editar Perfil
+                    </a>
+                </div>
+            </div>
             <div class="info-campos">
                 <div class="info-campo">
                     <div class="info-titulo">Nombre Completo</div>
@@ -33,12 +40,12 @@
                     <div class="info-valor">{{ user.email }}</div>
                 </div>
                 <div class="info-campo">
-                    <div class="info-titulo">Tipo de Documento</div>
-                    <div class="info-valor">{{ user.get_tipo_cedula_display }}</div>
+                    <div class="info-titulo">Número de Documento</div>
+                    <div class="info-valor">{{ user.numero_documento }}</div>
                 </div>
                 <div class="info-campo">
-                    <div class="info-titulo">Número de Documento</div>
-                    <div class="info-valor">{{ user.cedula_identidad }}</div>
+                    <div class="info-titulo">Número de Teléfono</div>
+                    <div class="info-valor">{{ user.telefono }}</div>
                 </div>
                 <div class="info-campo">
                     <div class="info-titulo">Roles en el Sistema</div>
