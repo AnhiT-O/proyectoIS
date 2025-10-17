@@ -1,6 +1,6 @@
 dvenv/
 pvenv/
-.env/
+.env
 __pycache__/
 .vscode/
 staticfiles/

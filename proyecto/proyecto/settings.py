@@ -35,8 +35,7 @@ INSTALLED_APPS = [
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion',
-    'auditlog'
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [
