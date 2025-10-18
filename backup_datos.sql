@@ -88,6 +88,8 @@ COPY public.historial_cotizaciones (nombre_moneda, fecha, tasa_base, comision_co
 Euro	2025-10-10	8500	200	150	8300	8650	2025-10-10 10:50:00	2
 Real	2025-10-10	1310	20	30	1290	1340	2025-10-10 10:50:00	3
 Peso argentino	2025-10-10	5	1	1	4	6	2025-10-10 10:50:00	4
+Dólar estadounidense	2025-10-17	7000	30	70	6970	7070	2025-10-17 14:35:00	1
+Real	2025-10-17	1300	40	40	1260	1340	2025-10-17 14:35:00	3
 \.
 
 COPY public.denominaciones (valor, moneda_id) FROM stdin;

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}
     Información de Pago
@@ -63,7 +63,7 @@
         {% endif %}
             <div style="margin-top: 0.5rem;"></div>
             <div class="info-titulo">Monto a Pagar:</div>
-            <div class="info-valor"> <strong>Gs. {{ transaccion.precio_final|intcomma }}</strong></div>
+            <div class="info-valor"> <strong>Gs. {{ transaccion.precio_final|formateado }}</strong></div>
         </div>
     </div>
     <div class="zona-botones">

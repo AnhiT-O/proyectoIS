@@ -120,7 +120,7 @@
                     </div>
                 </td>
                 <td>
-                    {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
+                    {{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
                 </td>
                 <td>
                     <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">

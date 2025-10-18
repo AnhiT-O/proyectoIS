@@ -1,6 +1,6 @@
 {% extends 'llave_billetes.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}Ingresar Billetes{% endblock %}
 
@@ -20,18 +20,18 @@
                 <div class="info-valor">Venta de {{ transaccion.moneda.nombre }}</div>
                 <div style="margin-top: 0.5rem;"></div>
                 <div class="info-titulo">Monto a Ingresar:</div>
-                <div class="info-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                <div class="info-valor">{{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
                 <div style="margin-top: 0.5rem;"></div>
                 <div class="info-titulo">Monto a Recibir:</div>
-                <div class="info-valor">Gs. {{ transaccion.precio_final|intcomma }}</div>
+                <div class="info-valor">Gs. {{ transaccion.precio_final|formateado }}</div>
             {% else %}
                 <div class="info-valor">Compra de {{ transaccion.moneda.nombre }}</div>
                 <div style="margin-top: 0.5rem;"></div>
                 <div class="info-titulo">Monto a Ingresar:</div>
-                <div class="info-valor">Gs. {{ transaccion.precio_final|intcomma }}</div>
+                <div class="info-valor">Gs. {{ transaccion.precio_final|formateado }}</div>
                 <div style="margin-top: 0.5rem;"></div>
                 <div class="info-titulo">Monto a Comprar:</div>
-                <div class="info-valor">{{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
+                <div class="info-valor">{{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}</div>
             {% endif %}
         </div>
     </div>

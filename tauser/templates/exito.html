@@ -1,6 +1,6 @@
 {% extends 'llave_billetes.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}
     {% if transaccion.tipo == 'compra' %}
@@ -20,10 +20,10 @@
     {% if transaccion.estado == 'Completa' %}
         <div class="logo">¡Transacción Completa!</div>
         {% if transaccion.tipo == 'compra' %}
-            <p class="subtitulo">La compra de monedas se ha realizado exitosamente, se han extraído {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}.<br>¡Gracias por confiar en Global Exchange!.</p>
+            <p class="subtitulo">La compra de monedas se ha realizado exitosamente, se han extraído {{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}.<br>¡Gracias por confiar en Global Exchange!.</p>
         {% else %}
             {% if transaccion.medio_cobro == 'Efectivo' %}
-                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, se han extraído Gs. {{ transaccion.precio_final|intcomma }}.<br>¡Gracias por confiar en Global Exchange!.</p>
+                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, se han extraído Gs. {{ transaccion.precio_final|formateado }}.<br>¡Gracias por confiar en Global Exchange!.</p>
             {% else %}
                 <p class="subtitulo">La venta de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente.<br>¡Gracias por confiar en Global Exchange!.</p>
             {% endif %}

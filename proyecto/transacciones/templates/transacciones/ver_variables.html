@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}Gestionar Transacciones - Global Exchange{% endblock %}
 
@@ -35,10 +35,10 @@
             <tbody>
                 <tr>
                     <td>
-                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_diario|intcomma }}</span>
+                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_diario|formateado }}</span>
                     </td>
                     <td>
-                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_mensual|intcomma }}</span>
+                        <span style="font-size:1rem; font-weight:700;">Gs. {{ limites.limite_mensual|formateado }}</span>
                     </td>
                 </tr>
             </tbody>
@@ -66,7 +66,7 @@
                 <tr>
                     {% for r in recargos %}
                     <td style="text-align: center; padding: 15px 12px;">
-                        <span style="font-size:1rem; font-weight:700;">{{ r.recargo|intcomma }}%</span>
+                        <span style="font-size:1rem; font-weight:700;">{{ r.recargo|formateado }}%</span>
                     </td>
                     {% endfor %}
                 </tr>

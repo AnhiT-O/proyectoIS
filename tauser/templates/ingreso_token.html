@@ -1,6 +1,6 @@
 {% extends 'llave_billetes.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
@@ -43,9 +43,9 @@
             </div>
             <div class="popup-cuerpo">
                 {% if transaccion.tipo == 'compra' %}
-                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|intcomma }} a Gs. {{ cambios.valores_actuales.precio_venta|intcomma }}</p>
+                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|formateado }} a Gs. {{ cambios.valores_actuales.precio_venta|formateado }}</p>
                 {% else %}
-                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|intcomma }} a Gs. {{ cambios.valores_actuales.precio_compra|intcomma }}</p>
+                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|formateado }} a Gs. {{ cambios.valores_actuales.precio_compra|formateado }}</p>
                 {% endif %}
                 <form method="post">
                 {% csrf_token %}

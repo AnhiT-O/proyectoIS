@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load formato_numeros %}
 
 {% block title %}Historial de Transacciones - Global Exchange{% endblock %}
 
@@ -20,6 +21,12 @@
                 Historial de Transacciones
             {% endif %}
         </h2>
+        <button type="button" class="btn-primario" onclick="abrirModalDescarga()" 
+                {% if cliente_filtrado %}data-cliente-id="{{ cliente_filtrado.id }}"{% endif %}
+                data-tiene-transacciones="{{ transacciones|length|yesno:'true,false' }}"
+                data-cliente-nombre="{% if cliente_filtrado %}{{ cliente_filtrado.nombre }}{% endif %}">
+            Descargar Historial
+        </button>
     </div>
     <!-- Formulario de búsqueda -->
     <div class="zona-busqueda">
@@ -73,10 +80,6 @@
             <div class="botones-busqueda">
                 <button type="submit" class="btn-buscar">
                     Buscar
-                </button>
-                <button type="button" class="btn-buscar" onclick="abrirModalDescarga()" 
-                        {% if cliente_filtrado %}data-cliente-id="{{ cliente_filtrado.id }}"{% endif %}>
-                    Descargar Historial
                 </button>
                 {% if busqueda or tipo_operacion or estado_filtro or usuario_filtro %}
                     <a href="{% url 'transacciones:historial_cliente' cliente_filtrado.id %}" class="btn-limpiar">
@@ -132,7 +135,7 @@
                     </div>
                 </td>
                 <td>
-                    {{ transaccion.monto|floatformat:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
+                    {{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}
                 </td>
                 <td>
                     <div class="estado-transaccion estado-{{ transaccion.estado|lower }}">
@@ -193,6 +196,22 @@
 
 <script>
 function abrirModalDescarga() {
+    // Obtener el botón para acceder a sus datos
+    const botonDescarga = document.querySelector('[data-tiene-transacciones]');
+    const tieneTransacciones = botonDescarga.dataset.tieneTransacciones === 'true';
+    const clienteNombre = botonDescarga.dataset.clienteNombre;
+    
+    // Verificar si hay transacciones
+    if (!tieneTransacciones) {
+        // Mostrar mensaje de error
+        const mensaje = clienteNombre 
+            ? `El cliente ${clienteNombre} no tiene historial de transacciones.`
+            : 'No hay transacciones disponibles para descargar.';
+        mostrarAlerta('error', mensaje);
+        return;
+    }
+    
+    // Si hay transacciones, abrir el modal
     const modal = document.getElementById('modalDescarga');
     modal.style.display = 'flex';
     // Prevenir scroll del body cuando el modal está abierto

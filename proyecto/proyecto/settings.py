@@ -28,15 +28,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',
     'usuarios',
     'clientes',
     'roles',
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion',
-    'auditlog'
+    'medios_acreditacion'
 ]
 
 MIDDLEWARE = [
@@ -48,8 +46,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
 
 # Configuración de internacionalización
@@ -99,18 +96,6 @@ DATABASES = {
 
 # Validaciones de contraseña deshabilitadas - se manejan en forms.py
 AUTH_PASSWORD_VALIDATORS = []
-
-AUDITLOG_INCLUDE_ALL_MODELS = True
-
-AUDITLOG_EXCLUDE_TRACKING_MODELS = (
-    'sessions.Session',      
-    'contenttypes.ContentType',
-    'auditlog.LogEntry',     
-    'permissions.Permission',
-    'migrations.Migration',
-    'medios_acreditacion.Billetera',
-    'medios_acreditacion.CuentaBancaria'
-)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -185,16 +170,6 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-
-# Configuración de monedas del sistema
-# Moneda base del sistema (Guaraní paraguayo)
-MONEDA_BASE_GUARANIES = {
-    'nombre': 'Guaraní',
-    'simbolo': 'PYG',
-    'codigo_iso': 'PYG',
-    'decimales': 0,  # El guaraní no utiliza decimales
-    'descripcion': 'Guaraní paraguayo - Moneda base del sistema'
-}
 
 # Configuración de 2FA para transacciones
 ENABLE_2FA_TRANSACTIONS = True # Cambiar a False para deshabilitar completamente el 2FA

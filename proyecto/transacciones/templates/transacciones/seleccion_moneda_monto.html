@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}
     {% if tipo_transaccion == 'venta' %}
@@ -46,10 +46,10 @@
         <div class="info-cliente">
             <div>
                 <div class="info-titulo">Monto para transacciones disponible este día:</div>
-                <div class="info-valor">Gs. {{ disponible_diario|intcomma }}</div>
+                <div class="info-valor">Gs. {{ disponible_diario|formateado }}</div>
                 <div style="margin-top: 0.5rem;"></div>
                 <div class="info-titulo">Monto para transacciones disponible este mes:</div>
-                <div class="info-valor">Gs. {{ disponible_mensual|intcomma }}</div>
+                <div class="info-valor">Gs. {{ disponible_mensual|formateado }}</div>
             </div>
         </div>
         <p class="subtitulo">
