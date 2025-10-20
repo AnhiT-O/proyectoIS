@@ -86,3 +86,7 @@ python manage.py runserver 8004 > /tmp/server8004.log 2>&1 &
 python manage.py runserver 8005 > /tmp/server8005.log 2>&1 &
 
 echo "Tausers iniciados en los puertos: 8001, 8002, 8003, 8004, 8005"
+
+cd ../../Pasarela/
+python manage.py runserver 5500 > /tmp/server8006.log 2>&1 &
+echo "Pasarela de pago por transferencia y billetera iniciada en el puerto 5500"
