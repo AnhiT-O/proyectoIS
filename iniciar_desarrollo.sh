@@ -10,13 +10,14 @@
 
 
 # --- Parámetros ---
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-	echo "Uso: $0 <DB_NAME> [SQL_FILE]"
+DB_NAME="bd_desarrollo"
+
+if [ "$#" -gt 1 ]; then
+	echo "Uso: $0 [SQL_FILE]"
 	exit 1
 fi
 
-DB_NAME="$1"
-SQL_FILE="$2"
+SQL_FILE="$1"
 
 # --- Proceso de reseteo ---
 
@@ -68,3 +69,20 @@ else
 fi
 
 echo "Proceso de reseteo completado para la base de datos '$DB_NAME'."
+echo "Iniciando el servidor de desarrollo de Django..."
+
+cd proyecto/
+python manage.py runserver 8000 > /tmp/server8000.log 2>&1 &
+echo "Servidor de desarrollo iniciado en el puerto 8000"
+
+# Iniciando servidores en diferentes terminales
+echo "Iniciando 5 tausers..."
+
+cd ../tauser/
+python manage.py runserver 8001 > /tmp/server8001.log 2>&1 &
+python manage.py runserver 8002 > /tmp/server8002.log 2>&1 &
+python manage.py runserver 8003 > /tmp/server8003.log 2>&1 &
+python manage.py runserver 8004 > /tmp/server8004.log 2>&1 &
+python manage.py runserver 8005 > /tmp/server8005.log 2>&1 &
+
+echo "Tausers iniciados en los puertos: 8001, 8002, 8003, 8004, 8005"

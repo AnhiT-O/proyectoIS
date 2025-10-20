@@ -5,14 +5,15 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno desde el archivo .env en el directorio del proyecto Django
-load_dotenv(BASE_DIR / '.env')
+# Cargar variables de entorno desde el archivo .env en el directorio raíz del proyecto
+# El .env está un nivel arriba del directorio 'proyecto'
+load_dotenv(BASE_DIR.parent / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h7ll7v=(-+-galb%dh7_ev1ig+3is*a30q2wv%moa@1f3-cv9y'
+SECRET_KEY = os.environ.get('SECRET_KEY_PROYECTO')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -146,8 +147,8 @@ HANDLER403 = 'proyecto.views.custom_permission_denied_view'
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
 
-STRIPE_SECRET_KEY = 'sk_test_51S42lzQPV8qMpvzT0jHBo5M7K7HH6SqzHGexcdkNKNEUP0KM2GvbbBBNVzYHjiA6YaF4KAXeSnvjsO2LY7d0VwJm00WsPp8Oxu'
-STRIPE_PUBLIC_KEY = 'pk_test_51S42lzQPV8qMpvzTNIzZ4Cx928krD7S7oPlMSTQlIFI8SfQuq4wzr0WkXXDpbBdcb8xUQyxU7I6Rd7uLXTHazhOE00y53w7ECD'
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5500",  # URL donde se sirve la pasarela
