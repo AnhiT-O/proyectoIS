@@ -16,13 +16,16 @@ Date: 2024
 import ast
 from datetime import date
 from decimal import Decimal
+import os
 import random
 import secrets
 import string
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
+import requests
 import stripe
 from monedas.models import Moneda, StockGuaranies, Denominacion
 from django.db import transaction
@@ -299,7 +302,9 @@ class Transaccion(models.Model):
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
     razon = models.CharField(max_length=100, blank=True, null=True) 
-    token = models.CharField(max_length=255, blank=True, null=True)  
+    token = models.CharField(max_length=255, blank=True, null=True)
+    factura = models.CharField(max_length=100, blank=True, null=True)
+    numero_factura = models.SmallIntegerField(blank=True, null=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
@@ -655,6 +660,7 @@ def verificar_cambio_cotizacion(transaccion):
 def procesar_transaccion(transaccion, tauser):
     if transaccion.estado == 'Pendiente':
         transaccion.estado = 'Confirmada'
+        generar_factura_electronica(transaccion)
         transaccion.fecha_hora = timezone.now()
         transaccion.save()
         transaccion.cliente.consumo_diario += transaccion.precio_final
@@ -719,6 +725,161 @@ def redondear_efectivo(monto, denominaciones):
         elif i - (monto % i) < redondeo:
             redondeo = i - (monto % i)
     return redondeo
+
+def generar_factura_electronica(transaccion):
+    """
+    Genera una factura electrónica para una transacción completada.
+    
+    Args:
+        transaccion (Transaccion): Instancia de transacción para la cual generar factura
+        
+    Returns:
+        dict: Diccionario con información de la factura generada
+            - 'success': bool indicando si se generó correctamente
+            - 'numero_factura': str con el número de factura
+            - 'cdc': str con el Código de Control (CDC)
+            - 'xml': str con el XML de la factura
+            - 'pdf_url': str con la URL del PDF
+            - 'error': str con mensaje de error (si aplica)
+    """
+    for numero in range(settings.NUMERO_FACTURACION, 400):
+        if not Transaccion.objects.filter(numero_factura=numero).exists():
+            transaccion.numero_factura = numero
+            transaccion.save()
+            break
+    # Preparar datos de la factura
+    url = f"{settings.FACTURA_SEGURA_API_URL}/misife00/v1/esi"
+    
+    headers = {
+        'accept': 'application/json',
+        'Authentication-Token': os.environ.get('AUTHENTICATION_TOKEN'),
+        'Content-Type': 'application/json'
+    }
+    
+    # Construir params según especificación de la API
+    params = {
+        'iTipEmi': '1', #Tipo de emisión
+        'iTiDE': '1',
+        'dNumTim': '02595733',
+        'dFeIniT': '2025-03-27',
+        'dEst': '001',
+        'dPunExp': '003',
+        'dNumDoc': f'0000{transaccion.numero_factura}',
+        'dFeEmiDE': timezone.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        'iTipTra': '5' if transaccion.tipo == 'venta' else '6',
+        'iTImp': '1',
+        'cMoneOpe': 'PYG',
+        'dCondTiCam': '1',
+        'dRucEm': '2595733',
+        'dDVEmi': '3',
+        'iTipCont': '2',
+        'dNomEmi': 'Global Exchange',
+        'dDirEmi': 'Asunción, Paraguay',
+        'dNumCas': '123',
+        'cDepEmi': '1',
+        'dDesDepEmi': 'CAPITAL',
+        'cCiuEmi': '1',
+        'dDesCiuEmi': 'ASUNCION (DISTRITO)',
+        'dTelEmi': '0981000001',
+        'dEmailE': os.environ.get('EMAIL_HOST_USER'),
+        'iIndPres': '1',
+        'gActEco': [
+            {
+                "cActEco": "62010",
+                "dDesActEco": "Actividades de programación informática"
+            }
+        ],
+        'cPaisRec': 'PRY',
+        'iTiContRec': '1',
+        'dRucRec': transaccion.cliente.numero_documento[:-1],
+        'dDVRec': transaccion.cliente.numero_documento[-1],
+        'dNomRec': transaccion.cliente.nombre,
+        'dEmailRec': transaccion.cliente.correo_electronico,
+        'iNatRec': '1',
+        'iTiOpe': '1',
+        'iCondOpe': '1',
+        'gPaConEIni': [
+            {
+                'iTiPago': '1',
+                'dMonTiPag': str(transaccion.precio_final),
+                'cMoneTiPag': 'PYG'
+            }
+        ],
+        'gCamItem': [
+            {
+                'dCodInt': '1',
+                'dDesProSer': f'Operación de {transaccion.tipo} de divisa: {transaccion.moneda.nombre}',
+                'cUniMed': '77',
+                'dCantProSer': '1',
+                'dPUniProSer': str(transaccion.precio_final),
+                'dTotBruOpeItem': str(transaccion.precio_final),
+                'dDescItem': '0',
+                'dDescGloItem': '0',
+                "iAfecIVA": "3",
+                'dAntPreUniIt': '0',
+                'dAntGloPreUniIt': '0',
+                'dPropIVA': "0",
+                'dTasaIVA': "0"
+            }
+        ],
+        'dTotGralOpe': str(transaccion.precio_final),
+        'CDC': '0',
+        'dCodSeg': '0',
+        'dDVId': '0',
+        'dSisFact': '1'
+    }
+    # Payload completo con estructura operation y params
+    payload = {
+        "operation": "calcular_de",
+        "params": {
+            "DE": params
+        }
+    }
+    # Realizar petición a la API
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+    # Convertir la respuesta a diccionario
+    response_data = response.json()
+    print("Respuesta de calcular_de:")
+    print(response_data)
+
+    # Extraer el campo 'results'
+    results = response_data.get('results')
+
+    # Si 'results' es una lista, tomar el primer elemento
+    if isinstance(results, list) and len(results) > 0:
+        de_data = results[0].get('DE', {})
+    elif isinstance(results, dict):
+        de_data = results.get('DE', {})
+    else:
+        de_data = {}
+    
+    payload = {
+        "operation": "generar_de",
+        "params": {
+            "DE": de_data
+        }
+    }
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+    response_data = response.json()
+    print("Respuesta de generar_de:")
+    print(response_data)
+    if response_data.get('description') == 'OK':
+        # Extraer el campo 'results'
+        results = response_data.get('results')
+
+        # Si 'results' es una lista, tomar el primer elemento
+        if isinstance(results, list) and len(results) > 0:
+            cdc_data = results[0].get('CDC', {})
+        elif isinstance(results, dict):
+            cdc_data = results.get('CDC', {})
+        else:
+            cdc_data = {}
+        transaccion.factura = cdc_data
+        transaccion.save()
+        print(f"Factura electrónica generada exitosamente")
+    return response_data
 
 def billetes_necesarios(monto, denominaciones, disponible):
     """
