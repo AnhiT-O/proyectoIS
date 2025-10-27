@@ -61,6 +61,9 @@ urlpatterns = [
     path('tausers/<int:pk>/', views.tauser_detalle, name='tauser_detalle'),
     path('tausers/<int:tauser_id>/verificar-estado/', views.verificar_estado_tauser, name='verificar_estado_tauser'),
     
+    # URL para descargar factura electrónica
+    path('factura/descargar/<str:cdc>/', views.vista_descargar_factura, name='descargar_factura'),
+    
     # URLs para autenticación de dos factores (2FA)
     path('2fa/send-token/', views_2fa.send_2fa_token, name='send_2fa_token'),
     path('2fa/verify-token/', views_2fa.verify_2fa_token, name='verify_2fa_token'),

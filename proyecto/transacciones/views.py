@@ -27,7 +27,7 @@ from django.http import HttpResponse, JsonResponse
 from monedas.models import Moneda, StockGuaranies
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion, generar_factura_electronica
+from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion, generar_factura_electronica, verificar_factura, descargar_factura
 from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
@@ -54,6 +54,28 @@ import stripe
 # Configurar Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
+
+def vista_descargar_factura(request, cdc):
+    """
+    Vista para descargar la factura electrónica asociada a una transacción.
+    Args:
+        request (HttpRequest): Petición HTTP
+        cdc (str): Código de autorización de la factura electrónica
+    """
+    estado = verificar_factura(cdc)
+    if estado.get('description') != 'OK':
+        messages.error(request, f'Error al generar la factura electrónica. {estado.get("description")}')
+        return redirect('inicio')  # O la vista que prefieras
+    else:
+        descarga = descargar_factura(cdc)
+        if descarga.get('success'):
+            # Crear respuesta HTTP con el archivo PDF
+            response = HttpResponse(descarga['content'], content_type=descarga['content_type'])
+            response['Content-Disposition'] = f'attachment; filename="{descarga["filename"]}"'
+            return response
+        else:
+            messages.error(request, f'Error al descargar la factura: {descarga.get("error")}')
+            return redirect('inicio')  # O la vista que prefieras
 
 # ============================================================================
 # PROCESO DE COMPRA DE MONEDAS
@@ -90,7 +112,6 @@ def compra_monto_moneda(request):
         - tipo_transaccion: Tipo de operación ('compra')
         - limites_disponibles: Información de límites del cliente
     """
-    generar_factura_electronica(Transaccion.objects.first())
     transacciones_pasadas = Transaccion.objects.filter(usuario=request.user, estado='Pendiente')
     if transacciones_pasadas:
         for t in transacciones_pasadas:
@@ -662,6 +683,7 @@ def compra_exito(request, token=None):
                 
                     if monto_valido and cuenta_valida:
                         transaccion.estado = 'Confirmada'
+                        generar_factura_electronica(transaccion)
                         transaccion.fecha_hora = timezone.now()
                         transaccion.pagado = transaccion.precio_final
                         transaccion.save()
