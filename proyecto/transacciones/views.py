@@ -27,7 +27,7 @@ from django.http import HttpResponse, JsonResponse
 from monedas.models import Moneda, StockGuaranies
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion
+from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion, generar_factura_electronica, verificar_factura, descargar_factura
 from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
@@ -661,6 +661,7 @@ def compra_exito(request, token=None):
                 
                     if monto_valido and cuenta_valida:
                         transaccion.estado = 'Confirmada'
+                        generar_factura_electronica(transaccion)
                         transaccion.fecha_hora = timezone.now()
                         transaccion.pagado = transaccion.precio_final
                         transaccion.save()
