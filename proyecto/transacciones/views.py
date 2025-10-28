@@ -55,28 +55,6 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 
-def vista_descargar_factura(request, cdc):
-    """
-    Vista para descargar la factura electrónica asociada a una transacción.
-    Args:
-        request (HttpRequest): Petición HTTP
-        cdc (str): Código de autorización de la factura electrónica
-    """
-    estado = verificar_factura(cdc)
-    if estado.get('description') != 'OK':
-        messages.error(request, f'Error al generar la factura electrónica. {estado.get("description")}')
-        return redirect('inicio')  # O la vista que prefieras
-    else:
-        descarga = descargar_factura(cdc)
-        if descarga.get('success'):
-            # Crear respuesta HTTP con el archivo PDF
-            response = HttpResponse(descarga['content'], content_type=descarga['content_type'])
-            response['Content-Disposition'] = f'attachment; filename="{descarga["filename"]}"'
-            return response
-        else:
-            messages.error(request, f'Error al descargar la factura: {descarga.get("error")}')
-            return redirect('inicio')  # O la vista que prefieras
-
 # ============================================================================
 # PROCESO DE COMPRA DE MONEDAS
 # ============================================================================

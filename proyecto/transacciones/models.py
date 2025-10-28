@@ -29,6 +29,7 @@ from monedas.models import Moneda, StockGuaranies, Denominacion
 from django.db import transaction
 import random
 import string
+from django.core.mail import EmailMessage
 
 class Recargos(models.Model):
     """
@@ -853,6 +854,8 @@ def generar_factura_electronica(transaccion):
         'Authentication-Token': os.environ.get('AUTHENTICATION_TOKEN'),
         'Content-Type': 'application/json'
     }
+
+    monto_formateado = f"{transaccion.monto:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
     
     # Construir params según especificación de la API
     params = {
@@ -888,12 +891,21 @@ def generar_factura_electronica(transaccion):
             }
         ],
         'cPaisRec': 'PRY',
-        'iTiContRec': '1',
-        'dRucRec': transaccion.cliente.numero_documento[:-1],
-        'dDVRec': transaccion.cliente.numero_documento[-1],
+        **(
+            {
+                'dRucRec': transaccion.cliente.numero_documento[:-1],
+                'dDVRec': transaccion.cliente.numero_documento[-1],
+                'iTiContRec': '1' if transaccion.cliente.tipo == 'F' else '2'
+            } if transaccion.cliente.tipo_documento == 'RUC' else {
+                'iTipIDRec': '1',
+                'dDTipIDRec': 'Cédula paraguaya',
+                'dNumIDRec': transaccion.cliente.numero_documento
+            }
+        ),
         'dNomRec': transaccion.cliente.nombre,
+        'dCelRec': transaccion.cliente.telefono,
         'dEmailRec': transaccion.cliente.correo_electronico,
-        'iNatRec': '1',
+        'iNatRec': '1' if transaccion.cliente.tipo_documento == 'RUC' else '2',
         'iTiOpe': '1',
         'iCondOpe': '1',
         'gPaConEIni': [
@@ -906,7 +918,7 @@ def generar_factura_electronica(transaccion):
         'gCamItem': [
             {
                 'dCodInt': '1',
-                'dDesProSer': f'Operación de {transaccion.tipo} de divisa: {transaccion.moneda.nombre}',
+                'dDesProSer': f'Operación de {transaccion.tipo} de {monto_formateado} {transaccion.moneda.simbolo} ({transaccion.moneda.nombre})',
                 'cUniMed': '77',
                 'dCantProSer': '1',
                 'dPUniProSer': str(transaccion.precio_final),
@@ -977,6 +989,58 @@ def generar_factura_electronica(transaccion):
         transaccion.factura = cdc_data
         transaccion.save()
         print(f"Factura electrónica generada exitosamente")
+        
+        # Enviar factura por correo electrónico
+        try:
+            # Descargar el PDF de la factura
+            resultado_descarga = descargar_factura(cdc_data)
+            
+            if resultado_descarga.get('success'):
+                # Preparar el correo electrónico
+                asunto = f'Factura Electrónica - Global Exchange'
+                mensaje = f"""
+Estimado/a {transaccion.cliente.nombre},
+
+Adjuntamos la factura electrónica correspondiente a su transacción de {transaccion.tipo} realizada el {transaccion.fecha_hora.strftime('%d/%m/%Y %H:%M')}.
+
+Detalles de la transacción:
+- Tipo: {transaccion.tipo.title()}
+- Moneda: {transaccion.moneda.nombre} ({transaccion.moneda.simbolo})
+- Monto: {monto_formateado} {transaccion.moneda.simbolo}
+- Total: {transaccion.precio_final} Gs.
+- Número de Factura: {transaccion.numero_factura}
+- CDC: {cdc_data}
+
+Gracias por confiar en Global Exchange.
+
+Saludos cordiales,
+Global Exchange
+"""
+                
+                # Crear el correo electrónico
+                email = EmailMessage(
+                    subject=asunto,
+                    body=mensaje,
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[transaccion.usuario.email]
+                )
+                
+                # Adjuntar el PDF
+                email.attach(
+                    resultado_descarga['filename'],
+                    resultado_descarga['content'],
+                    resultado_descarga['content_type']
+                )
+                
+                # Enviar el correo
+                email.send(fail_silently=False)
+                print(f"Factura enviada por correo a {transaccion.usuario.email}")
+            else:
+                print(f"Error al descargar la factura: {resultado_descarga.get('error')}")
+                
+        except Exception as e:
+            print(f"Error al enviar factura por correo: {str(e)}")
+    
     return response_data
 
 def verificar_factura(CDC):

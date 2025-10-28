@@ -186,11 +186,6 @@
     </div>
     <div class="zona-acciones">
         <div class="acciones-contenido">
-            {% if transaccion.factura %}
-            <a href="{% url 'transacciones:descargar_factura' transaccion.factura %}" class="btn-primario">
-                Descargar Factura
-            </a>
-            {% endif %}
             <a href="{% url 'transacciones:historial_cliente' transaccion.cliente_id %}" class="btn-secundario">
                 Volver al Historial
             </a>
