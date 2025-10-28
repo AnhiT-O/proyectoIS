@@ -16,12 +16,12 @@ Date: 2024
 import ast
 from datetime import date
 from decimal import Decimal
-from email.message import EmailMessage
 import os
 import random
 import secrets
 import string
 from django.conf import settings
+from django.core.mail import EmailMessage
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
