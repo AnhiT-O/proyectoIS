@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de verificación - Global Exchange</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .content p {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .token-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .token {
+            font-size: 36px;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 5px;
+        }
+        .expiry-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 20px 0;
+        }
+        .expiry-notice p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Global Exchange - Tauser</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong>{{ usuario.first_name }} {{ usuario.last_name }}</strong>,</p>
+            <p>Has iniciado una transacción en un terminal Tauser que requiere verificación.</p>
+            <p>Tu código de verificación es:</p>
+            
+            <div class="token-box">
+                <div class="token">{{ token }}</div>
+            </div>
+            
+            <div class="expiry-notice">
+                <p><strong>⚠️ Importante:</strong> Este código expirará en <strong>{{ expiry_minutes }} minuto{% if expiry_minutes != 1 %}s{% endif %}</strong>.</p>
+            </div>
+            
+            <p>Por favor, ingresa este código en la terminal Tauser para completar tu transacción.</p>
+            <p>Si no has solicitado esta transacción, puedes ignorar este correo de forma segura.</p>
+            <p>Gracias por confiar en Global Exchange.</p>
+        </div>
+        <div class="footer">
+            <p><strong>Global Exchange</strong></p>
+            <p>Sistema de Cambio de Divisas</p>
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+        </div>
+    </div>
+</body>
+</html>

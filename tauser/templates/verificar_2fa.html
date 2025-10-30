@@ -1,0 +1,151 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+{% load formato_numeros %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+    <style>
+        .info-transaccion {
+            background-color: var(--color-fondo-secundario, #f8f9fa);
+            border: 1px solid var(--color-borde, #dee2e6);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-transaccion h3 {
+            margin-top: 0;
+            color: var(--color-texto-principal, #333);
+        }
+        
+        .info-transaccion p {
+            margin: 10px 0;
+            color: var(--color-texto-secundario, #666);
+        }
+        
+        .info-transaccion strong {
+            color: var(--color-texto-principal, #333);
+        }
+        
+        .alerta-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #0c5460;
+        }
+        
+        .alerta-info .icono {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        
+        .codigo-enviado {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .info-transaccion {
+                background-color: #2d3748;
+                border-color: #4a5568;
+            }
+            
+            .info-transaccion h3, 
+            .info-transaccion strong {
+                color: #e2e8f0;
+            }
+            
+            .info-transaccion p {
+                color: #cbd5e0;
+            }
+            
+            .alerta-info {
+                background-color: #1a202c;
+                border-color: #2d3748;
+                color: #90cdf4;
+            }
+            
+            .codigo-enviado {
+                background-color: #1a202c;
+                border-color: #2d3748;
+                color: #9ae6b4;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <div class="logo">Tauser - Global Exchange</div>
+        <p class="subtitulo">Verificación de Seguridad (2FA)</p>
+    </div>
+    
+    <div class="info-transaccion">
+        <h3>Información de la Transacción</h3>
+        <p><strong>Tipo:</strong> {{ transaccion.get_tipo_display|title }}</p>
+        <p><strong>Moneda:</strong> {{ transaccion.moneda.nombre }} ({{ transaccion.moneda.simbolo }})</p>
+        <p><strong>Monto:</strong> {{ transaccion.monto|floatformat:2 }} {{ transaccion.moneda.simbolo }}</p>
+        <p><strong>Total:</strong> Gs. {{ transaccion.precio_final|formateado }}</p>
+        <p><strong>Usuario:</strong> {{ transaccion.usuario.get_full_name }}</p>
+    </div>
+    
+    {% if not codigo_enviado %}
+    <div class="alerta-info">
+        <span class="icono">ℹ️</span>
+        <strong>Verificación requerida:</strong> Para continuar con esta transacción, necesitamos enviar un código de verificación al correo electrónico del usuario asociado: <strong>{{ usuario_email }}</strong>
+    </div>
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="zona-botones">
+            <button type="submit" name="accion" value="enviar_codigo" class="btn-enviar">
+                Enviar Código de Verificación
+            </button>
+            <button type="submit" name="accion" value="cancelar" class="btn-atras">
+                Cancelar Transacción
+            </button>
+        </div>
+    </form>
+    
+    {% else %}
+    
+    <div class="alerta-info codigo-enviado">
+        <span class="icono">✓</span>
+        <strong>Código enviado:</strong> Se ha enviado un código de 6 dígitos a <strong>{{ usuario_email }}</strong>. El código expirará en 1 minuto.
+    </div>
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-campo">
+            <label for="{{ form.codigo_2fa.id_for_label }}">Ingrese el código de verificación:</label>
+            {{ form.codigo_2fa }}
+            {% if form.codigo_2fa.errors %}
+                <div class="form-errores">
+                    {% for error in form.codigo_2fa.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="zona-botones">
+            <button type="submit" name="accion" value="verificar" class="btn-enviar">
+                Verificar Código
+            </button>
+            <button type="submit" name="accion" value="enviar_codigo" class="btn-secundario" style="background-color: #6c757d;">
+                Reenviar Código
+            </button>
+            <button type="submit" name="accion" value="cancelar" class="btn-atras">
+                Cancelar
+            </button>
+        </div>
+    </form>
+    
+    {% endif %}
+</div>
+{% endblock %}
