@@ -236,6 +236,21 @@
                 {% else %}
                     <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|formateado }} a Gs. {{ cambios.valores_actuales.precio_compra|formateado }}</p>
                 {% endif %}
+                
+                {% if cambios.email_enviado %}
+                    <div class="mensaje-info" style="margin: 1rem 0; padding: 1rem; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 5px; color: #0c5460;">
+                        <strong>📧 Notificación enviada:</strong> Se ha enviado un correo electrónico a <strong>{{ user.email }}</strong> con los detalles del cambio de cotización para tu referencia.
+                    </div>
+                {% elif user.email %}
+                    <div class="mensaje-advertencia" style="margin: 1rem 0; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;">
+                        <strong>⚠️ Notificación no enviada:</strong> Hubo un problema al enviar la notificación por correo electrónico, pero puedes continuar con la transacción.
+                    </div>
+                {% else %}
+                    <div class="mensaje-advertencia" style="margin: 1rem 0; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;">
+                        <strong>📧 Sin email:</strong> No tienes un email registrado en tu cuenta. Contacta al administrador para recibir notificaciones de cambios de cotización.
+                    </div>
+                {% endif %}
+                
                 <form method="post">
                 {% csrf_token %}
                     <div class="zona-botones">
