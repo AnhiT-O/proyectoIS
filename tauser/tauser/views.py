@@ -128,7 +128,9 @@ def ingreso_token(request):
                         return redirect('ingreso_token')
                     
                     if transaccion.medio_pago == 'Efectivo':
-                        cambios = verificar_cambio_cotizacion(transaccion)
+                        # Obtener email del usuario que procesó la transacción para notificaciones
+                        email_usuario = getattr(transaccion.usuario, 'email', None)
+                        cambios = verificar_cambio_cotizacion(transaccion, email_usuario)
                         if cambios and cambios.get('hay_cambios'):
                             datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
                             transaccion.precio_base = datos_transaccion['precio_base']
@@ -148,7 +150,8 @@ def ingreso_token(request):
                             request.session['transaccion'] = transaccion.id
                             context = {
                                 'cambios': cambios,
-                                'transaccion': transaccion
+                                'transaccion': transaccion,
+                                'email_usuario': email_usuario
                             }
                             return render(request, 'ingreso_token.html', context)
                         return redirect('ingreso_billetes', codigo=codigo)

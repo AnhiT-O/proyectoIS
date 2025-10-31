@@ -469,7 +469,10 @@ def compra_confirmacion(request):
                     'cambios': cambios,
                     'transaccion': transaccion,
                     'paso_actual': 4,
-                    'titulo_paso': 'Confirmación de Compra'
+                    'titulo_paso': 'Confirmación de Compra',
+                    'enable_2fa': is_2fa_enabled(),
+                    'user_email': request.user.email,
+                    'has_email': bool(request.user.email)
                 }
                 
                 return render(request, 'transacciones/confirmacion.html', context)

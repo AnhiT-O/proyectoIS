@@ -671,11 +671,142 @@ def generar_token_transaccion(transaccion):
         'datos': datos_token
     }
 
+def enviar_notificacion_cambio_cotizacion(usuario, transaccion, cambios_cotizacion):
+    """
+    Envía un correo electrónico de notificación cuando se detectan cambios en la cotización
+    durante el proceso de confirmación de una transacción.
+    
+    Args:
+        usuario: Usuario que realiza la transacción
+        transaccion: Instancia de la transacción afectada
+        cambios_cotizacion (dict): Diccionario con información de cambios de cotización
+            - 'hay_cambios': boolean indicando si hubo cambios
+            - 'valores_anteriores': dict con precios originales
+            - 'valores_actuales': dict con precios actuales
+            - 'moneda': instancia de la moneda
+    
+    Returns:
+        bool: True si el correo se envió exitosamente, False en caso contrario
+    """
+    try:
+        from django.utils import timezone
+        from django.template.loader import render_to_string
+        import os
+        
+        # Verificar que el usuario tenga email
+        if not usuario.email:
+            print(f"Usuario {usuario.username} no tiene email configurado para notificación de cambio de cotización")
+            return False
+            
+        # Preparar datos para el template del email
+        fecha_actual = timezone.now()
+        moneda = cambios_cotizacion['moneda']
+        valores_anteriores = cambios_cotizacion['valores_anteriores']
+        valores_actuales = cambios_cotizacion['valores_actuales']
+        
+        # Determinar qué precio cambió según el tipo de operación
+        if transaccion.tipo == 'compra':
+            precio_anterior = valores_anteriores['precio_venta']
+            precio_actual = valores_actuales['precio_venta']
+            precio_tipo = 'venta'
+        else:  # venta
+            precio_anterior = valores_anteriores['precio_compra'] 
+            precio_actual = valores_actuales['precio_compra']
+            precio_tipo = 'compra'
+        
+        # Calcular la diferencia y porcentaje de cambio
+        diferencia = precio_actual - precio_anterior
+        porcentaje_cambio = (diferencia / precio_anterior) * 100 if precio_anterior != 0 else 0
+        
+        # Determinar si el cambio es favorable o desfavorable para el cliente
+        if transaccion.tipo == 'compra':
+            # Para compras, precio menor es mejor
+            cambio_favorable = diferencia < 0
+        else:
+            # Para ventas, precio mayor es mejor
+            cambio_favorable = diferencia > 0
+            
+        contexto_email = {
+            'usuario_nombre': usuario.first_name or usuario.username,
+            'cliente_nombre': transaccion.cliente.nombre,
+            'transaccion_id': transaccion.id,
+            'tipo_operacion': transaccion.tipo,
+            'moneda_nombre': moneda.nombre,
+            'moneda_simbolo': moneda.simbolo,
+            'monto_transaccion': transaccion.monto,
+            'precio_anterior': precio_anterior,
+            'precio_actual': precio_actual,
+            'precio_tipo': precio_tipo,
+            'diferencia': abs(diferencia),
+            'porcentaje_cambio': abs(porcentaje_cambio),
+            'fecha_hora': fecha_actual,
+            'medio_pago': transaccion.medio_pago,
+            'medio_cobro': transaccion.medio_cobro,
+            'precio_final': transaccion.precio_final,
+            'empresa': 'Global Exchange'
+        }
+        
+        # Preparar asunto del correo
+        direccion_cambio = "bajó" if diferencia < 0 else "subió"
+        asunto = f"Cambio de Cotización Detectado - {moneda.nombre} {direccion_cambio} - Transacción #{transaccion.id}"
+        
+        # Crear contenido del email en texto plano
+        mensaje_texto = f"""
+Estimado/a {contexto_email['usuario_nombre']},
+
+Se ha detectado un cambio en la cotización durante su proceso de transacción.
+
+DETALLES DE LA TRANSACCIÓN:
+================================
+Cliente: {contexto_email['cliente_nombre']}
+Transacción ID: #{contexto_email['transaccion_id']}
+Tipo de Operación: {contexto_email['tipo_operacion'].title()}
+Moneda: {contexto_email['moneda_nombre']} ({contexto_email['moneda_simbolo']})
+Monto: {contexto_email['monto_transaccion']:,.{moneda.decimales}f} {contexto_email['moneda_simbolo']}
+
+CAMBIO DE COTIZACIÓN:
+=====================
+Precio de {contexto_email['precio_tipo']} anterior: Gs. {contexto_email['precio_anterior']:,.0f}
+Precio de {contexto_email['precio_tipo']} actual: Gs. {contexto_email['precio_actual']:,.0f}
+Diferencia: {"+" if diferencia > 0 else ""}{diferencia:,.0f} Gs. ({porcentaje_cambio:+.2f}%)
+
+INFORMACIÓN ADICIONAL:
+======================
+Medio de Pago: {contexto_email['medio_pago']}
+Medio de Cobro: {contexto_email['medio_cobro']}
+Monto Final: Gs. {contexto_email['precio_final']:,.0f}
+Fecha y Hora: {contexto_email['fecha_hora'].strftime('%d/%m/%Y %H:%M:%S')}
+
+Este cambio se detectó mientras usted se encontraba en la página de confirmación de la transacción.
+Puede continuar con la transacción aceptando el nuevo precio o cancelar la operación.
+
+---
+{contexto_email['empresa']}
+Sistema Automatizado de Notificaciones
+"""
+
+        # Crear y enviar el email
+        email = EmailMessage(
+            subject=asunto,
+            body=mensaje_texto,
+            from_email=os.environ.get('EMAIL_HOST_USER'),
+            to=[usuario.email],
+        )
+        
+        email.send()
+        print(f"Notificación de cambio de cotización enviada exitosamente a {usuario.email} para transacción #{transaccion.id}")
+        return True
+        
+    except Exception as e:
+        print(f"Error al enviar notificación de cambio de cotización: {str(e)}")
+        return False
+
 def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
     Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
+    Si detecta cambios, también envía una notificación por correo electrónico al usuario.
     
     Args:
         request (HttpRequest): Petición HTTP con datos de sesión
@@ -687,6 +818,7 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
             - 'valores_anteriores': dict con precio_compra y precio_venta originales
             - 'valores_actuales': dict con precio_compra y precio_venta actuales
             - 'moneda': instancia de la moneda
+            - 'email_enviado': boolean indicando si se envió notificación por email
     """
     try:
         # Obtener datos de la sesión
@@ -715,7 +847,7 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
             precio_venta_actual != precio_venta_inicial
         )
         if hay_cambios:
-            return {
+            cambios_info = {
                 'hay_cambios': True,
                 'valores_anteriores': {
                     'precio_compra': precio_compra_inicial,
@@ -725,8 +857,25 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
                     'precio_compra': precio_compra_actual,
                     'precio_venta': precio_venta_actual
                 },
-                'moneda': moneda
+                'moneda': moneda,
+                'email_enviado': False
             }
+            
+            # Enviar notificación por email si hay transacción en la sesión
+            transaccion_id = request.session.get('transaccion_id')
+            if transaccion_id:
+                try:
+                    transaccion = Transaccion.objects.get(id=transaccion_id)
+                    email_enviado = enviar_notificacion_cambio_cotizacion(
+                        request.user, 
+                        transaccion, 
+                        cambios_info
+                    )
+                    cambios_info['email_enviado'] = email_enviado
+                except Transaccion.DoesNotExist:
+                    print(f"Transacción {transaccion_id} no encontrada para envío de notificación")
+            
+            return cambios_info
         
         return {'hay_cambios': False}
         
