@@ -79,6 +79,7 @@ def caja_fuerte(request):
     return render(request, 'caja_fuerte.html', {'form': form})
 
 def ingreso_token(request):
+    form = TokenForm()
     if request.method == 'POST':
         accion = request.POST.get('accion')
         if accion == 'aceptar':

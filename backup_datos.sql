@@ -139,7 +139,6 @@ COPY public.tausers (puerto, sucursal) FROM stdin;
 COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
 1	1	100
 1	2	100
-1	2	100
 1	3	100
 1	4	100
 1	5	100
