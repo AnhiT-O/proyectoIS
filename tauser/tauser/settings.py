@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'tauser.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bd_desarrollo',
+        'NAME': 'bd_produccion',
         'USER': 'postgres',
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': 'localhost',
@@ -173,4 +173,4 @@ STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 FACTURA_SEGURA_API_URL = 'https://apitest.facturasegura.com.py'
-NUMERO_FACTURACION = 375
+NUMERO_FACTURACION = 376
