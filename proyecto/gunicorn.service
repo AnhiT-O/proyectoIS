@@ -3,10 +3,10 @@ Description=Gunicorn instance to serve myproject
 After=network.target
 
 [Service]
-User=brandon-rivarola
-Group=brandon-rivarola
-WorkingDirectory=/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/proyecto
-ExecStart=/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/pvenv/bin/gunicorn --workers 3 --bind unix:/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/proyecto/proyecto.sock proyecto.wsgi:application
+User=aylen
+Group=aylen
+WorkingDirectory=/home/aylen/Documentos/IS2/proyectoIS/proyecto
+ExecStart=/home/aylen/Documentos/IS2/proyectoIS/pvenv/bin/gunicorn --workers 3 --bind unix:/home/aylen/Documentos/IS2/proyectoIS/proyecto/proyecto.sock proyecto.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
