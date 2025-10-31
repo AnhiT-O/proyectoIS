@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>usuarios.models &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">tauser</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">usuarios.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para usuarios.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractBaseUser</span><span class="p">,</span> <span class="n">PermissionsMixin</span><span class="p">,</span> <span class="n">UserManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.validators</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnicodeUsernameValidator</span>
+
+<div class="viewcode-block" id="Usuario">
+<a class="viewcode-back" href="../../usuarios.html#usuarios.models.Usuario">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Usuario</span><span class="p">(</span><span class="n">AbstractBaseUser</span><span class="p">,</span> <span class="n">PermissionsMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modelo personalizado de usuario que extiende AbstractBaseUser y PermissionsMixin.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        username (CharField): Nombre de usuario. Debe ser único. Máximo 30 caracteres. Utiliza UnicodeUsernameValidator para validación.</span>
+<span class="sd">        first_name (CharField): Nombre del usuario. Máximo 40 caracteres.</span>
+<span class="sd">        last_name (CharField): Apellido del usuario. Máximo 40 caracteres.</span>
+<span class="sd">        email (EmailField): Correo electrónico del usuario. Debe ser único.</span>
+<span class="sd">        tipo_documento (CharField): Tipo de cédula del usuario. Opciones: &#39;CI&#39; (Cédula de Identidad), &#39;RUC&#39; (Registro Único de Contribuyente).</span>
+<span class="sd">        numero_documento (CharField): Número de cédula de identidad del usuario. Debe ser único. Máximo 13 caracteres.</span>
+<span class="sd">        cliente_activo (ForeignKey): Referencia a un cliente seleccionado para operar con él. Puede ser nulo.</span>
+<span class="sd">        bloqueado (BooleanField): Indica si el usuario está bloqueado en el sistema. Por defecto es False.</span>
+<span class="sd">        is_active (BooleanField): Indica si el usuario activó su cuenta. Por defecto es False.</span>
+<span class="sd">        date_joined (DateTimeField): Fecha y hora en que el usuario se creó. Por defecto es la fecha y hora en que lo hizo.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        -   El modelo utiliza UserManager como su gestor de objetos.</span>
+<span class="sd">        -   Se deshabilitan los permisos predeterminados de Django.</span>
+<span class="sd">        -   Se definen permisos personalizados para bloquear/desbloquear usuarios, asignar/desasignar clientes y roles a usuarios.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tipo_documento_CHOICES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;CI&#39;</span><span class="p">,</span> <span class="s1">&#39;Cédula de Identidad&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;RUC&#39;</span><span class="p">,</span> <span class="s1">&#39;Registro Único de Contribuyente&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+    
+    <span class="n">username_validator</span> <span class="o">=</span> <span class="n">UnicodeUsernameValidator</span><span class="p">()</span>
+
+    <span class="n">username</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">username_validator</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">first_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">last_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">EmailField</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">numero_documento</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">telefono</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">cliente_activo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="s1">&#39;clientes.Cliente&#39;</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">SET_NULL</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;usuarios_activos&#39;</span>
+    <span class="p">)</span>
+    <span class="n">bloqueado</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Indica si el usuario está bloqueado en el sistema&#39;</span>
+    <span class="p">)</span>
+
+    <span class="n">is_active</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">date_joined</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">UserManager</span><span class="p">()</span>
+
+    <span class="n">USERNAME_FIELD</span> <span class="o">=</span> <span class="s1">&#39;username&#39;</span>
+    
+<div class="viewcode-block" id="Usuario.es_admin">
+<a class="viewcode-back" href="../../usuarios.html#usuarios.models.Usuario.es_admin">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">es_admin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Verifica si el usuario tiene el rol de &#39;Administrador&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True si el usuario es administrador, False en caso contrario.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Administrador&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="Usuario.nombre_completo">
+<a class="viewcode-back" href="../../usuarios.html#usuarios.models.Usuario.nombre_completo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nombre_completo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtiene el nombre completo del usuario.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Cadena de texto: Nombre completo en el formato &quot;Nombre Apellido&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_name</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retorna una representación legible del usuario.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Cadena de texto: Representación del usuario en el formato &quot;Nombre Apellido (username)&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">)&quot;</span>
+    
+    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Metadatos del modelo Usuario.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            db_table (str): Nombre de la tabla en la base de datos.</span>
+<span class="sd">            default_permissions (list): Lista de permisos predeterminados deshabilitados.</span>
+<span class="sd">            permissions (list): Lista de permisos personalizados para el modelo.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;usuarios&#39;</span>
+        <span class="n">default_permissions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Deshabilita permisos predeterminados</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;bloqueo&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede bloquear o desbloquear usuarios&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;asignacion_clientes&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede asignar clientes a usuarios&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;asignacion_roles&quot;</span><span class="p">,</span> <span class="s2">&quot;Puede asignar roles a usuarios&quot;</span><span class="p">)</span>
+        <span class="p">]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

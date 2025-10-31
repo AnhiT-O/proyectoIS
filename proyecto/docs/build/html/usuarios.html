@@ -1,0 +1,1247 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="tauser" href="tauser.html" />
+    <link rel="prev" title="Transacciones" href="transacciones.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usuarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.models.Usuario"><code class="docutils literal notranslate"><span class="pre">Usuario</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.username"><code class="docutils literal notranslate"><span class="pre">Usuario.username</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.first_name"><code class="docutils literal notranslate"><span class="pre">Usuario.first_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.last_name"><code class="docutils literal notranslate"><span class="pre">Usuario.last_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.email"><code class="docutils literal notranslate"><span class="pre">Usuario.email</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.tipo_documento"><code class="docutils literal notranslate"><span class="pre">Usuario.tipo_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.numero_documento"><code class="docutils literal notranslate"><span class="pre">Usuario.numero_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.cliente_activo"><code class="docutils literal notranslate"><span class="pre">Usuario.cliente_activo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.bloqueado"><code class="docutils literal notranslate"><span class="pre">Usuario.bloqueado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.is_active"><code class="docutils literal notranslate"><span class="pre">Usuario.is_active</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.date_joined"><code class="docutils literal notranslate"><span class="pre">Usuario.date_joined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.es_admin"><code class="docutils literal notranslate"><span class="pre">Usuario.es_admin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.models.Usuario.nombre_completo"><code class="docutils literal notranslate"><span class="pre">Usuario.nombre_completo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.activar_cuenta"><code class="docutils literal notranslate"><span class="pre">activar_cuenta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.administrar_usuarios"><code class="docutils literal notranslate"><span class="pre">administrar_usuarios()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.agregar_tarjeta_cliente"><code class="docutils literal notranslate"><span class="pre">agregar_tarjeta_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.agregar_tarjeta_local_cliente"><code class="docutils literal notranslate"><span class="pre">agregar_tarjeta_local_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.agregar_tarjeta_stripe_cliente"><code class="docutils literal notranslate"><span class="pre">agregar_tarjeta_stripe_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.asignar_clientes"><code class="docutils literal notranslate"><span class="pre">asignar_clientes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.asignar_rol"><code class="docutils literal notranslate"><span class="pre">asignar_rol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.bloquear_usuario"><code class="docutils literal notranslate"><span class="pre">bloquear_usuario()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.detalle_cliente"><code class="docutils literal notranslate"><span class="pre">detalle_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.editar_perfil"><code class="docutils literal notranslate"><span class="pre">editar_perfil()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.eliminar_tarjeta_cliente"><code class="docutils literal notranslate"><span class="pre">eliminar_tarjeta_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.eliminar_tarjeta_local_cliente"><code class="docutils literal notranslate"><span class="pre">eliminar_tarjeta_local_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.enviar_email_confirmacion"><code class="docutils literal notranslate"><span class="pre">enviar_email_confirmacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.enviar_email_recuperacion"><code class="docutils literal notranslate"><span class="pre">enviar_email_recuperacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.perfil"><code class="docutils literal notranslate"><span class="pre">perfil()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.recuperar_password"><code class="docutils literal notranslate"><span class="pre">recuperar_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.registro_usuario"><code class="docutils literal notranslate"><span class="pre">registro_usuario()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.remover_cliente"><code class="docutils literal notranslate"><span class="pre">remover_cliente()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.remover_rol"><code class="docutils literal notranslate"><span class="pre">remover_rol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.reset_password_confirm"><code class="docutils literal notranslate"><span class="pre">reset_password_confirm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.seleccionar_cliente_activo"><code class="docutils literal notranslate"><span class="pre">seleccionar_cliente_activo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.tiene_algun_permiso"><code class="docutils literal notranslate"><span class="pre">tiene_algun_permiso()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.usuario_detalle"><code class="docutils literal notranslate"><span class="pre">usuario_detalle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.views.ver_clientes_asociados"><code class="docutils literal notranslate"><span class="pre">ver_clientes_asociados()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.AsignarClienteForm"><code class="docutils literal notranslate"><span class="pre">AsignarClienteForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.AsignarClienteForm.clientes"><code class="docutils literal notranslate"><span class="pre">AsignarClienteForm.clientes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.AsignarClienteForm.media"><code class="docutils literal notranslate"><span class="pre">AsignarClienteForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.AsignarRolForm"><code class="docutils literal notranslate"><span class="pre">AsignarRolForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.AsignarRolForm.rol"><code class="docutils literal notranslate"><span class="pre">AsignarRolForm.rol</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.AsignarRolForm.media"><code class="docutils literal notranslate"><span class="pre">AsignarRolForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.first_name"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.first_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.last_name"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.last_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.username"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.username</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.email"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.email</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.telefono"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.telefono</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.current_password"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.current_password</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.new_password1"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.new_password1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.new_password2"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.new_password2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_current_password"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_current_password()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_email"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_email()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_new_password1"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_new_password1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_new_password2"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_new_password2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_telefono"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_telefono()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.clean_username"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.clean_username()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.has_password_changed"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.has_password_changed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.media"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EditarPerfilForm.save"><code class="docutils literal notranslate"><span class="pre">EditarPerfilForm.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.EstablecerPasswordForm"><code class="docutils literal notranslate"><span class="pre">EstablecerPasswordForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EstablecerPasswordForm.new_password1"><code class="docutils literal notranslate"><span class="pre">EstablecerPasswordForm.new_password1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EstablecerPasswordForm.new_password2"><code class="docutils literal notranslate"><span class="pre">EstablecerPasswordForm.new_password2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EstablecerPasswordForm.clean_new_password1"><code class="docutils literal notranslate"><span class="pre">EstablecerPasswordForm.clean_new_password1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.EstablecerPasswordForm.media"><code class="docutils literal notranslate"><span class="pre">EstablecerPasswordForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.RecuperarPasswordForm"><code class="docutils literal notranslate"><span class="pre">RecuperarPasswordForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RecuperarPasswordForm.email"><code class="docutils literal notranslate"><span class="pre">RecuperarPasswordForm.email</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RecuperarPasswordForm.clean_email"><code class="docutils literal notranslate"><span class="pre">RecuperarPasswordForm.clean_email()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RecuperarPasswordForm.media"><code class="docutils literal notranslate"><span class="pre">RecuperarPasswordForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.username"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.username</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.email"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.email</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.telefono"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.telefono</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.first_name"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.first_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.last_name"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.last_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.numero_documento"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.numero_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.Meta"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.Meta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.Meta.model"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.Meta.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.Meta.fields"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.Meta.fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.Meta.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.clean_numero_documento"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.clean_numero_documento()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.clean_password1"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.clean_password1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.clean_password2"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.clean_password2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.clean_telefono"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.clean_telefono()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.media"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usuarios.forms.RegistroUsuarioForm.save"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm.save()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usuarios</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usuarios">
+<h1>Usuarios<a class="headerlink" href="#usuarios" title="Link to this heading"></a></h1>
+<p>Documentación del módulo Usuario.
+Usuario es aquel que puede iniciar sesión y operar en el sistema.</p>
+<dl class="py class" id="module-usuarios.models">
+<dt class="sig sig-object py" id="usuarios.models.Usuario">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.models.</span></span><span class="sig-name descname"><span class="pre">Usuario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractBaseUser</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsMixin</span></code></p>
+<p>Modelo personalizado de usuario que extiende AbstractBaseUser y PermissionsMixin.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#usuarios.models.Usuario.username" title="Link to this definition"></a></dt>
+<dd><p>Nombre de usuario. Debe ser único. Máximo 30 caracteres. Utiliza UnicodeUsernameValidator para validación.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.first_name">
+<span class="sig-name descname"><span class="pre">first_name</span></span><a class="headerlink" href="#usuarios.models.Usuario.first_name" title="Link to this definition"></a></dt>
+<dd><p>Nombre del usuario. Máximo 40 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.last_name">
+<span class="sig-name descname"><span class="pre">last_name</span></span><a class="headerlink" href="#usuarios.models.Usuario.last_name" title="Link to this definition"></a></dt>
+<dd><p>Apellido del usuario. Máximo 40 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#usuarios.models.Usuario.email" title="Link to this definition"></a></dt>
+<dd><p>Correo electrónico del usuario. Debe ser único.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmailField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.tipo_documento">
+<span class="sig-name descname"><span class="pre">tipo_documento</span></span><a class="headerlink" href="#usuarios.models.Usuario.tipo_documento" title="Link to this definition"></a></dt>
+<dd><p>Tipo de cédula del usuario. Opciones: “CI” (Cédula de Identidad), “RUC” (Registro Único de Contribuyente).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.numero_documento">
+<span class="sig-name descname"><span class="pre">numero_documento</span></span><a class="headerlink" href="#usuarios.models.Usuario.numero_documento" title="Link to this definition"></a></dt>
+<dd><p>Número de cédula de identidad del usuario. Debe ser único. Máximo 13 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.cliente_activo">
+<span class="sig-name descname"><span class="pre">cliente_activo</span></span><a class="headerlink" href="#usuarios.models.Usuario.cliente_activo" title="Link to this definition"></a></dt>
+<dd><p>Referencia a un cliente seleccionado para operar con él. Puede ser nulo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.bloqueado">
+<span class="sig-name descname"><span class="pre">bloqueado</span></span><a class="headerlink" href="#usuarios.models.Usuario.bloqueado" title="Link to this definition"></a></dt>
+<dd><p>Indica si el usuario está bloqueado en el sistema. Por defecto es False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><a class="headerlink" href="#usuarios.models.Usuario.is_active" title="Link to this definition"></a></dt>
+<dd><p>Indica si el usuario activó su cuenta. Por defecto es False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.date_joined">
+<span class="sig-name descname"><span class="pre">date_joined</span></span><a class="headerlink" href="#usuarios.models.Usuario.date_joined" title="Link to this definition"></a></dt>
+<dd><p>Fecha y hora en que el usuario se creó. Por defecto es la fecha y hora en que lo hizo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>El modelo utiliza UserManager como su gestor de objetos.</p></li>
+<li><p>Se deshabilitan los permisos predeterminados de Django.</p></li>
+<li><p>Se definen permisos personalizados para bloquear/desbloquear usuarios, asignar/desasignar clientes y roles a usuarios.</p></li>
+</ul>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.es_admin">
+<span class="sig-name descname"><span class="pre">es_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario.es_admin"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario.es_admin" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el usuario tiene el rol de “Administrador”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si el usuario es administrador, False en caso contrario.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.nombre_completo">
+<span class="sig-name descname"><span class="pre">nombre_completo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario.nombre_completo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario.nombre_completo" title="Link to this definition"></a></dt>
+<dd><p>Obtiene el nombre completo del usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre completo en el formato «Nombre Apellido».</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function" id="module-usuarios.views">
+<dt class="sig sig-object py" id="usuarios.views.activar_cuenta">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">activar_cuenta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uidb64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#activar_cuenta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.activar_cuenta" title="Link to this definition"></a></dt>
+<dd><p>Vista para activar la cuenta de un usuario a través del enlace enviado por email. Verifica
+el token y activa la cuenta si es válido. Si el token ha expirado y el usuario no ha activado su cuenta,
+elimina el usuario de la base de datos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uidb64</strong> (<em>str</em>) – Identificador único del usuario codificado en base64.</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – Token de activación.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.administrar_usuarios">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">administrar_usuarios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#administrar_usuarios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.administrar_usuarios" title="Link to this definition"></a></dt>
+<dd><p>Vista para gestionar usuarios. Solo accesible para usuarios con permisos necesarios.
+Posee filtros de búsqueda por nombre, apellido, nombre de usuario y por roles.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.agregar_tarjeta_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">agregar_tarjeta_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#agregar_tarjeta_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.agregar_tarjeta_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar opciones de tipos de tarjetas disponibles.
+Permite seleccionar entre tarjetas locales (Panal, Cabal) o internacional (Stripe).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del cliente al que se le agregará la tarjeta.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.agregar_tarjeta_local_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">agregar_tarjeta_local_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#agregar_tarjeta_local_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.agregar_tarjeta_local_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para agregar tarjeta de crédito local (Panal o Cabal) a un cliente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del cliente al que se le agregará la tarjeta.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.agregar_tarjeta_stripe_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">agregar_tarjeta_stripe_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#agregar_tarjeta_stripe_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.agregar_tarjeta_stripe_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para agregar tarjeta de crédito internacional (Stripe) a un cliente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del cliente al que se le agregará la tarjeta.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.asignar_clientes">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">asignar_clientes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#asignar_clientes"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.asignar_clientes" title="Link to this definition"></a></dt>
+<dd><p>Vista para asignar clientes a usuarios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del usuario al que se le asignarán clientes.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar clientes.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Cliente.DoesNotExist</strong> – Si no existen clientes creados en el sistema.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Solo se permite asignar clientes a usuarios con rol “Operador”.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.asignar_rol">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">asignar_rol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#asignar_rol"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.asignar_rol" title="Link to this definition"></a></dt>
+<dd><p>Vista para asignar roles a usuarios. Solo accesible para usuarios con permiso de asignación de roles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del usuario al que se le asignarán roles.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar roles.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>No se permite asignar roles a otros administradores.</p></li>
+<li><p>No se permite asignar el rol de “Administrador” a través de esta vista.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.bloquear_usuario">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">bloquear_usuario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#bloquear_usuario"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.bloquear_usuario" title="Link to this definition"></a></dt>
+<dd><p>Vista para bloquear/desbloquear usuarios. Solo accesible para usuarios con permiso de bloqueo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del usuario a bloquear/desbloquear.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para bloquear usuarios.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>No se permite bloquear otros administradores.</p></li>
+<li><p>Si un usuario es bloqueado mientras está autenticado, se cierran todas sus sesiones activas.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.detalle_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">detalle_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#detalle_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.detalle_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para que el usuario vea los detalles de un cliente específico asociado.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cliente_id</strong> (<em>int</em>) – ID del cliente a ver.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.editar_perfil">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">editar_perfil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#editar_perfil"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.editar_perfil" title="Link to this definition"></a></dt>
+<dd><p>Vista para editar el perfil del usuario. Todos los campos se actualizan inmediatamente.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.eliminar_tarjeta_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">eliminar_tarjeta_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_method_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#eliminar_tarjeta_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.eliminar_tarjeta_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para que un operador elimine tarjeta de crédito de su cliente asignado. Utiliza la API de Stripe
+para desadjuntar el método de pago del cliente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pk</strong> (<em>int</em>) – ID del cliente al que se le eliminará la tarjeta.</p></li>
+<li><p><strong>payment_method_id</strong> (<em>str</em>) – ID del método de pago (tarjeta) a eliminar.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p></li>
+<li><p><strong>Exception</strong> – Si ocurre un error al eliminar la tarjeta.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.eliminar_tarjeta_local_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">eliminar_tarjeta_local_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tarjeta_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#eliminar_tarjeta_local_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.eliminar_tarjeta_local_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para que un operador elimine una tarjeta local de su cliente asignado.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pk</strong> (<em>int</em>) – ID del cliente al que se le eliminará la tarjeta.</p></li>
+<li><p><strong>tarjeta_id</strong> (<em>int</em>) – ID de la tarjeta local a eliminar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.enviar_email_confirmacion">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">enviar_email_confirmacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#enviar_email_confirmacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.enviar_email_confirmacion" title="Link to this definition"></a></dt>
+<dd><p>Envía email de confirmación de registro con enlace de activación. Genera un token seguro
+y un identificador único para el usuario, y construye un enlace de activación que
+se incluye en el email.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – Si ocurre un error al enviar el email.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.enviar_email_recuperacion">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">enviar_email_recuperacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#enviar_email_recuperacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.enviar_email_recuperacion" title="Link to this definition"></a></dt>
+<dd><p>Envía email con enlace para recuperar contraseña. Genera un token seguro
+y un identificador único para el usuario, y construye un enlace de restablecimiento
+que se incluye en el email.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – Si ocurre un error al enviar el email.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.perfil">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">perfil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#perfil"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.perfil" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar el perfil del usuario.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.recuperar_password">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">recuperar_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#recuperar_password"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.recuperar_password" title="Link to this definition"></a></dt>
+<dd><p>Vista para solicitar recuperación de contraseña.</p>
+<ul class="simple">
+<li><p>Si el método es POST, procesa el formulario de recuperación y envía un email con enlace para restablecer la contraseña.</p></li>
+<li><p>Si el método es GET, muestra el formulario para ingresar el email asociado a la cuenta.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.registro_usuario">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">registro_usuario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#registro_usuario"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.registro_usuario" title="Link to this definition"></a></dt>
+<dd><p>Vista para registrar un nuevo usuario.</p>
+<ul class="simple">
+<li><p>Si el método es POST, procesa el formulario de registro y envía un email de confirmación de registro.</p></li>
+<li><p>Si el método es GET, muestra el formulario de registro para completarse.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – Si ocurre un error al guardar el usuario o enviar el email.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.remover_cliente">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">remover_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#remover_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.remover_cliente" title="Link to this definition"></a></dt>
+<dd><p>Vista para remover la asignación de un cliente a un usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pk</strong> (<em>int</em>) – ID del usuario al que se le removerá el cliente.</p></li>
+<li><p><strong>cliente_id</strong> (<em>int</em>) – ID del cliente a remover.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar clientes.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.remover_rol">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">remover_rol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rol_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#remover_rol"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.remover_rol" title="Link to this definition"></a></dt>
+<dd><p>Vista para remover roles de usuarios. Solo accesible para usuarios con permiso de asignación de roles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pk</strong> (<em>int</em>) – ID del usuario al que se le removerá el rol.</p></li>
+<li><p><strong>rol_id</strong> (<em>int</em>) – ID del rol a remover.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permiso para asignar roles.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+<li><p><strong>Group.DoesNotExist</strong> – Si el rol con el ID proporcionado no existe.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>No se permite modificar roles de otros administradores.</p></li>
+<li><p>Si el rol a remover es “Operador”, se desasocian todos los clientes del usuario, si hubiere.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.reset_password_confirm">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">reset_password_confirm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uidb64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#reset_password_confirm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.reset_password_confirm" title="Link to this definition"></a></dt>
+<dd><p>Vista para confirmar y establecer nueva contraseña. Verifica el token y permite al usuario
+establecer una nueva contraseña si el token es válido.</p>
+<ul class="simple">
+<li><p>Si el método es POST, procesa el formulario para establecer la nueva contraseña.</p></li>
+<li><p>Si el método es GET, muestra el formulario para ingresar la nueva contraseña.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.seleccionar_cliente_activo">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">seleccionar_cliente_activo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cliente_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#seleccionar_cliente_activo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.seleccionar_cliente_activo" title="Link to this definition"></a></dt>
+<dd><p>Vista para seleccionar un cliente como activo. El cliente activo se usa para operaciones
+que el usuario realiza en el sistema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cliente_id</strong> (<em>int</em>) – ID del cliente a seleccionar como activo.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Cliente.DoesNotExist</strong> – Si el cliente con el ID proporcionado no existe o no está asociado al usuario.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.tiene_algun_permiso">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">tiene_algun_permiso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#tiene_algun_permiso"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.tiene_algun_permiso" title="Link to this definition"></a></dt>
+<dd><p>Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+para administrar usuarios: bloqueo, asignación de roles o asignación de clientes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>view_func</strong> (<em>callable</em>) – La vista a envolver.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>PermissionDenied</strong> – Si el usuario no tiene ninguno de los permisos requeridos.</p>
+</dd>
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>La vista envuelta que verifica los permisos.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.usuario_detalle">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">usuario_detalle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#usuario_detalle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.usuario_detalle" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar detalles de un usuario. Solo accesible para usuarios con permisos necesarios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pk</strong> (<em>int</em>) – ID del usuario a mostrar.</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PermissionDenied</strong> – Si el usuario no tiene permisos para ver detalles de usuarios.</p></li>
+<li><p><strong>Usuario.DoesNotExist</strong> – Si el usuario con el ID proporcionado no existe.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="usuarios.views.ver_clientes_asociados">
+<span class="sig-prename descclassname"><span class="pre">usuarios.views.</span></span><span class="sig-name descname"><span class="pre">ver_clientes_asociados</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/views.html#ver_clientes_asociados"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.views.ver_clientes_asociados" title="Link to this definition"></a></dt>
+<dd><p>Vista para que un usuario vea los clientes con los que está asociado.</p>
+</dd></dl>
+
+<dl class="py class" id="module-usuarios.forms">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarClienteForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">AsignarClienteForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#AsignarClienteForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.AsignarClienteForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></p>
+<p>Formulario para asignar clientes a usuarios.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarClienteForm.clientes">
+<span class="sig-name descname"><span class="pre">clientes</span></span><a class="headerlink" href="#usuarios.forms.AsignarClienteForm.clientes" title="Link to this definition"></a></dt>
+<dd><p>Campo para seleccionar múltiples clientes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ModelMultipleChoiceField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarClienteForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.AsignarClienteForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarRolForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">AsignarRolForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#AsignarRolForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.AsignarRolForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></p>
+<p>Formulario para asignar roles a usuarios.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarRolForm.rol">
+<span class="sig-name descname"><span class="pre">rol</span></span><a class="headerlink" href="#usuarios.forms.AsignarRolForm.rol" title="Link to this definition"></a></dt>
+<dd><p>Campo para seleccionar múltiples roles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ModelMultipleChoiceField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>El rol “Administrador” está excluido de las opciones disponibles.</p>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.AsignarRolForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.AsignarRolForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">EditarPerfilForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<p>Formulario para editar el perfil del usuario autenticado.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.first_name">
+<span class="sig-name descname"><span class="pre">first_name</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.first_name" title="Link to this definition"></a></dt>
+<dd><p>Campo para el nombre.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.last_name">
+<span class="sig-name descname"><span class="pre">last_name</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.last_name" title="Link to this definition"></a></dt>
+<dd><p>Campo para el apellido.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.username" title="Link to this definition"></a></dt>
+<dd><p>Campo para el nombre de usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.email" title="Link to this definition"></a></dt>
+<dd><p>Campo para el correo electrónico.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmailField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.telefono">
+<span class="sig-name descname"><span class="pre">telefono</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.telefono" title="Link to this definition"></a></dt>
+<dd><p>Campo para el número de teléfono.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.current_password">
+<span class="sig-name descname"><span class="pre">current_password</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.current_password" title="Link to this definition"></a></dt>
+<dd><p>Campo para la contraseña actual (requerido para cambios).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.new_password1">
+<span class="sig-name descname"><span class="pre">new_password1</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.new_password1" title="Link to this definition"></a></dt>
+<dd><p>Campo para la nueva contraseña (opcional).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.new_password2">
+<span class="sig-name descname"><span class="pre">new_password2</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.new_password2" title="Link to this definition"></a></dt>
+<dd><p>Campo para confirmar la nueva contraseña (opcional).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean" title="Link to this definition"></a></dt>
+<dd><p>Validación adicional para asegurar coherencia entre campos.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_current_password">
+<span class="sig-name descname"><span class="pre">clean_current_password</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_current_password"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_current_password" title="Link to this definition"></a></dt>
+<dd><p>Valida que la contraseña actual sea correcta.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_email">
+<span class="sig-name descname"><span class="pre">clean_email</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_email"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_email" title="Link to this definition"></a></dt>
+<dd><p>Valida el correo electrónico y verifica que no esté en uso por otro usuario.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_new_password1">
+<span class="sig-name descname"><span class="pre">clean_new_password1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_new_password1"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_new_password1" title="Link to this definition"></a></dt>
+<dd><p>Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga al menos 8 caracteres,
+contenga al menos un caracter especial y al menos un número.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_new_password2">
+<span class="sig-name descname"><span class="pre">clean_new_password2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_new_password2"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_new_password2" title="Link to this definition"></a></dt>
+<dd><p>Verifica que las contraseñas nuevas coincidan, pero solo si ambos campos están llenos
+y no hay errores de formato en el primer campo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_telefono">
+<span class="sig-name descname"><span class="pre">clean_telefono</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_telefono"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_telefono" title="Link to this definition"></a></dt>
+<dd><p>Valida que el número de teléfono sea numérico y tenga entre 6 y 15 dígitos.
+También verifica que no esté en uso por otro usuario.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.clean_username">
+<span class="sig-name descname"><span class="pre">clean_username</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.clean_username"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.clean_username" title="Link to this definition"></a></dt>
+<dd><p>Valida el nombre de usuario y verifica que no esté en uso por otro usuario.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.has_password_changed">
+<span class="sig-name descname"><span class="pre">has_password_changed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.has_password_changed"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.has_password_changed" title="Link to this definition"></a></dt>
+<dd><p>Verifica si la contraseña ha cambiado.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si se proporcionó una nueva contraseña, False en caso contrario.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EditarPerfilForm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EditarPerfilForm.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EditarPerfilForm.save" title="Link to this definition"></a></dt>
+<dd><p>Guarda el usuario con los datos del formulario y actualiza la contraseña si se proporciona.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.EstablecerPasswordForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">EstablecerPasswordForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EstablecerPasswordForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EstablecerPasswordForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SetPasswordForm</span></code></p>
+<p>Formulario personalizado para establecer nueva contraseña.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EstablecerPasswordForm.new_password1">
+<span class="sig-name descname"><span class="pre">new_password1</span></span><a class="headerlink" href="#usuarios.forms.EstablecerPasswordForm.new_password1" title="Link to this definition"></a></dt>
+<dd><p>Campo para la nueva contraseña.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.EstablecerPasswordForm.new_password2">
+<span class="sig-name descname"><span class="pre">new_password2</span></span><a class="headerlink" href="#usuarios.forms.EstablecerPasswordForm.new_password2" title="Link to this definition"></a></dt>
+<dd><p>Campo para confirmar la nueva contraseña.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.EstablecerPasswordForm.clean_new_password1">
+<span class="sig-name descname"><span class="pre">clean_new_password1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#EstablecerPasswordForm.clean_new_password1"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.EstablecerPasswordForm.clean_new_password1" title="Link to this definition"></a></dt>
+<dd><p>Validación personalizada para el campo de nueva contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+contenga al menos un caracter especial y al menos un número.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si la contraseña no cumple con los requisitos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>La nueva contraseña validada.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.EstablecerPasswordForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.EstablecerPasswordForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.RecuperarPasswordForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">RecuperarPasswordForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_order=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_field_class=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RecuperarPasswordForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RecuperarPasswordForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PasswordResetForm</span></code></p>
+<p>Formulario personalizado para recuperación de contraseña.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RecuperarPasswordForm.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#usuarios.forms.RecuperarPasswordForm.email" title="Link to this definition"></a></dt>
+<dd><p>Campo para el correo electrónico desde el cual se solicita la recuperación.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmailField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RecuperarPasswordForm.clean_email">
+<span class="sig-name descname"><span class="pre">clean_email</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RecuperarPasswordForm.clean_email"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RecuperarPasswordForm.clean_email" title="Link to this definition"></a></dt>
+<dd><p>Valida que el correo electrónico exista en la base de datos y que el usuario esté activo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si no existe una cuenta activa asociada al correo electrónico.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>El correo electrónico validado.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.RecuperarPasswordForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.RecuperarPasswordForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.forms.</span></span><span class="sig-name descname"><span class="pre">RegistroUsuarioForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserCreationForm</span></code></p>
+<p>Formulario personalizado para el registro de usuarios.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.username" title="Link to this definition"></a></dt>
+<dd><p>Campo para el nombre de usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.email" title="Link to this definition"></a></dt>
+<dd><p>Campo para el correo electrónico.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmailField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.telefono">
+<span class="sig-name descname"><span class="pre">telefono</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.telefono" title="Link to this definition"></a></dt>
+<dd><p>Campo para el número de teléfono.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.first_name">
+<span class="sig-name descname"><span class="pre">first_name</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.first_name" title="Link to this definition"></a></dt>
+<dd><p>Campo para el nombre.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.last_name">
+<span class="sig-name descname"><span class="pre">last_name</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.last_name" title="Link to this definition"></a></dt>
+<dd><p>Campo para el apellido.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.numero_documento">
+<span class="sig-name descname"><span class="pre">numero_documento</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.numero_documento" title="Link to this definition"></a></dt>
+<dd><p>Campo para la cédula de identidad.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.Meta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Meta información para el formulario.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.Meta.model" title="Link to this definition"></a></dt>
+<dd><p>El modelo asociado al formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.Meta.fields" title="Link to this definition"></a></dt>
+<dd><p>Campos incluidos en el formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>alias de <a class="reference internal" href="#usuarios.models.Usuario" title="usuarios.models.Usuario"><code class="xref py py-class docutils literal notranslate"><span class="pre">Usuario</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.clean_numero_documento">
+<span class="sig-name descname"><span class="pre">clean_numero_documento</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.clean_numero_documento"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.clean_numero_documento" title="Link to this definition"></a></dt>
+<dd><p>Valida que el número de documento sea numérico y tenga al menos 4 dígitos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si el número de documento no es numérico o tiene menos de 4 dígitos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>El número de documento validado.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.clean_password1">
+<span class="sig-name descname"><span class="pre">clean_password1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.clean_password1"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.clean_password1" title="Link to this definition"></a></dt>
+<dd><p>Validación personalizada para el campo de contraseña. Verifica que la contraseña tenga más de 8 caracteres,
+contenga al menos un caracter especial y al menos un número.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si la contraseña no cumple con los requisitos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>La contraseña validada.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.clean_password2">
+<span class="sig-name descname"><span class="pre">clean_password2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.clean_password2"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.clean_password2" title="Link to this definition"></a></dt>
+<dd><p>Verifica que las contraseñas ingresadas en los campos password1 y password2 coincidan.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si las contraseñas no coinciden.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>La contraseña confirmada.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.clean_telefono">
+<span class="sig-name descname"><span class="pre">clean_telefono</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.clean_telefono"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.clean_telefono" title="Link to this definition"></a></dt>
+<dd><p>Valida que el número de teléfono sea numérico y tenga entre 6 y 15 dígitos.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si el número de teléfono no es numérico o no tiene entre 6 y 15 dígitos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>El número de teléfono validado.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.forms.RegistroUsuarioForm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/forms.html#RegistroUsuarioForm.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.forms.RegistroUsuarioForm.save" title="Link to this definition"></a></dt>
+<dd><p>Guarda el usuario con los datos del formulario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>commit</strong> (<em>bool</em>) – Si es True, guarda el usuario en la base de datos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>La instancia del usuario guardado.</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#usuarios.models.Usuario" title="usuarios.models.Usuario">Usuario</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="transacciones.html" class="btn btn-neutral float-left" title="Transacciones" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="tauser.html" class="btn btn-neutral float-right" title="tauser" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

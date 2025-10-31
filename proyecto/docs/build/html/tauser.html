@@ -1,0 +1,1460 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tauser &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="prev" title="Usuarios" href="usuarios.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">tauser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-tauser">Paquete principal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#aplicaciones">Aplicaciones</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-clientes.models">Clientes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clientes.models.Cliente"><code class="docutils literal notranslate"><span class="pre">Cliente</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-medios_acreditacion.models">Medios de acreditación</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#medios_acreditacion.models.Billetera"><code class="docutils literal notranslate"><span class="pre">Billetera</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#medios_acreditacion.models.CuentaBancaria"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#medios_acreditacion.models.TarjetaLocal"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-monedas.models">Monedas</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.Denominacion"><code class="docutils literal notranslate"><span class="pre">Denominacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.HistorialCotizacion"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.Moneda"><code class="docutils literal notranslate"><span class="pre">Moneda</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.StockGuaranies"><code class="docutils literal notranslate"><span class="pre">StockGuaranies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.crear_denominaciones_iniciales"><code class="docutils literal notranslate"><span class="pre">crear_denominaciones_iniciales()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.crear_historial_cotizacion"><code class="docutils literal notranslate"><span class="pre">crear_historial_cotizacion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.crear_moneda_usd"><code class="docutils literal notranslate"><span class="pre">crear_moneda_usd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.crear_stock_guaranies_inicial"><code class="docutils literal notranslate"><span class="pre">crear_stock_guaranies_inicial()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.models.guardar_valores_anteriores"><code class="docutils literal notranslate"><span class="pre">guardar_valores_anteriores()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-roles.models">Roles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roles.models.Roles"><code class="docutils literal notranslate"><span class="pre">Roles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roles.models.crear_roles_predefinidos"><code class="docutils literal notranslate"><span class="pre">crear_roles_predefinidos()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-transacciones.models">Transacciones</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.descargar_factura"><code class="docutils literal notranslate"><span class="pre">descargar_factura()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.generar_factura_electronica"><code class="docutils literal notranslate"><span class="pre">generar_factura_electronica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transacciones.models.verificar_factura"><code class="docutils literal notranslate"><span class="pre">verificar_factura()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-usuarios.models">Usuarios</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usuarios.models.Usuario"><code class="docutils literal notranslate"><span class="pre">Usuario</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#modulos-de-proyecto-tauser">Módulos de proyecto tauser</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tauser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tauser">
+<h1>tauser<a class="headerlink" href="#tauser" title="Link to this heading"></a></h1>
+<p>Documentación generada para el paquete tauser y las aplicaciones del proyecto.</p>
+<div class="toctree-wrapper compound">
+</div>
+<section id="module-tauser">
+<span id="paquete-principal"></span><h2>Paquete principal<a class="headerlink" href="#module-tauser" title="Link to this heading"></a></h2>
+</section>
+<section id="aplicaciones">
+<h2>Aplicaciones<a class="headerlink" href="#aplicaciones" title="Link to this heading"></a></h2>
+<section id="module-clientes.models">
+<span id="clientes"></span><h3>Clientes<a class="headerlink" href="#module-clientes.models" title="Link to this heading"></a></h3>
+<p>Módulo de modelos para la gestión de clientes.</p>
+<p>Este módulo contiene los modelos de datos relacionados con la gestión de clientes
+del sistema, incluyendo la información personal, segmentación, integración con Stripe
+para métodos de pago y relaciones con usuarios operadores.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="clientes.models.Cliente">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">clientes.models.</span></span><span class="sig-name descname"><span class="pre">Cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/models.html#Cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.models.Cliente" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo que representa un cliente del sistema.</p>
+<p>Este modelo almacena toda la información relevante de los clientes,
+incluyendo datos personales, de contacto, segmentación comercial e
+integración con servicios de pago externos como Stripe.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clientes.models.Cliente.TIPO_CLIENTE_CHOICES">
+<span class="sig-name descname"><span class="pre">TIPO_CLIENTE_CHOICES</span></span><a class="headerlink" href="#clientes.models.Cliente.TIPO_CLIENTE_CHOICES" title="Link to this definition"></a></dt>
+<dd><p>Opciones para el tipo de cliente (Física/Jurídica)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES">
+<span class="sig-name descname"><span class="pre">TIPO_DOCUMENTO_CHOICES</span></span><a class="headerlink" href="#clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES" title="Link to this definition"></a></dt>
+<dd><p>Opciones para el tipo de documento (CI/RUC)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clientes.models.Cliente.SEGMENTO_CHOICES">
+<span class="sig-name descname"><span class="pre">SEGMENTO_CHOICES</span></span><a class="headerlink" href="#clientes.models.Cliente.SEGMENTO_CHOICES" title="Link to this definition"></a></dt>
+<dd><p>Opciones para la segmentación de clientes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clientes.models.Cliente.BENEFICIOS_SEGMENTO">
+<span class="sig-name descname"><span class="pre">BENEFICIOS_SEGMENTO</span></span><a class="headerlink" href="#clientes.models.Cliente.BENEFICIOS_SEGMENTO" title="Link to this definition"></a></dt>
+<dd><p>Mapeo de beneficios por segmento de cliente</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Ejemplos</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cliente</span> <span class="o">=</span> <span class="n">Cliente</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">nombre</span><span class="o">=</span><span class="s2">&quot;Juan Pérez&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">tipo_documento</span><span class="o">=</span><span class="s2">&quot;CI&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">numero_documento</span><span class="o">=</span><span class="s2">&quot;12345678&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">correo_electronico</span><span class="o">=</span><span class="s2">&quot;juan@email.com&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">SEGMENTO_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('minorista',</span> <span class="pre">'Minorista'),</span> <span class="pre">('corporativo',</span> <span class="pre">'Corporativo'),</span> <span class="pre">('vip',</span> <span class="pre">'VIP')]</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">TIPO_CLIENTE_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('F',</span> <span class="pre">'Persona</span> <span class="pre">Física'),</span> <span class="pre">('J',</span> <span class="pre">'Persona</span> <span class="pre">Jurídica')]</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">TIPO_DOCUMENTO_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('CI',</span> <span class="pre">'Cédula</span> <span class="pre">de</span> <span class="pre">Identidad'),</span> <span class="pre">('RUC',</span> <span class="pre">'Registro</span> <span class="pre">Único</span> <span class="pre">de</span> <span class="pre">Contribuyente')]</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clientes.models.Cliente.get_segmento_display">
+<span class="sig-name descname"><span class="pre">get_segmento_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">segmento&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clientes.models.Cliente.get_segmento_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clientes.models.Cliente.get_tipo_display">
+<span class="sig-name descname"><span class="pre">get_tipo_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">tipo&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clientes.models.Cliente.get_tipo_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clientes.models.Cliente.get_tipo_documento_display">
+<span class="sig-name descname"><span class="pre">get_tipo_documento_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">tipo_documento&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clientes.models.Cliente.get_tipo_documento_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clientes.models.Cliente.obtener_tarjetas_stripe">
+<span class="sig-name descname"><span class="pre">obtener_tarjetas_stripe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/models.html#Cliente.obtener_tarjetas_stripe"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.models.Cliente.obtener_tarjetas_stripe" title="Link to this definition"></a></dt>
+<dd><p>Obtiene la información detallada de las tarjetas de crédito del cliente desde Stripe.</p>
+<p>Consulta la API de Stripe para obtener todos los métodos de pago tipo tarjeta
+asociados al cliente y formatea la información en una estructura de datos útil.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Lista de diccionarios, cada uno conteniendo la información de una tarjeta:</dt><dd><ul class="simple">
+<li><p>id (str): ID del método de pago en Stripe</p></li>
+<li><p>brand (str): Marca de la tarjeta (VISA, MASTERCARD, etc.)</p></li>
+<li><p>last4 (str): Últimos 4 dígitos de la tarjeta</p></li>
+<li><p>exp_month (int): Mes de expiración</p></li>
+<li><p>exp_year (int): Año de expiración</p></li>
+<li><p>funding (str): Tipo de financiamiento (credit, debit, etc.)</p></li>
+<li><p>created (int): Timestamp de creación en Stripe</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Requiere que el cliente tenga un id_stripe válido. Si ocurre algún error,
+se registra en el log y retorna una lista vacía.</p>
+</div>
+<p class="rubric">Ejemplos</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cliente</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tarjetas</span> <span class="o">=</span> <span class="n">cliente</span><span class="o">.</span><span class="n">obtener_tarjetas_stripe</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">tarjeta</span> <span class="ow">in</span> <span class="n">tarjetas</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tarjeta </span><span class="si">{</span><span class="n">tarjeta</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> ****</span><span class="si">{</span><span class="n">tarjeta</span><span class="p">[</span><span class="s1">&#39;last4&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clientes.models.Cliente.tiene_tarjetas_activas">
+<span class="sig-name descname"><span class="pre">tiene_tarjetas_activas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/clientes/models.html#Cliente.tiene_tarjetas_activas"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#clientes.models.Cliente.tiene_tarjetas_activas" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el cliente tiene tarjetas de crédito activas en Stripe.</p>
+<p>Consulta la API de Stripe para determinar si el cliente tiene al menos
+una tarjeta de crédito registrada y activa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si el cliente tiene al menos una tarjeta activa, False en caso contrario</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Requiere que el cliente tenga un id_stripe válido. Si ocurre algún error
+en la consulta a Stripe, se registra en el log y retorna False.</p>
+</div>
+<p class="rubric">Ejemplos</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cliente</span> <span class="o">=</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">cliente</span><span class="o">.</span><span class="n">tiene_tarjetas_activas</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cliente puede realizar pagos con tarjeta&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-medios_acreditacion.models">
+<span id="medios-de-acreditacion"></span><h3>Medios de acreditación<a class="headerlink" href="#module-medios_acreditacion.models" title="Link to this heading"></a></h3>
+<p>Modelos para los medios de acreditación del sistema.</p>
+<p>Este módulo contiene los modelos que representan los diferentes medios de acreditación
+que pueden tener asociados los clientes del sistema, como cuentas bancarias y billeteras
+electrónicas.</p>
+<dl class="simple">
+<dt>Clases:</dt><dd><p>MedioAcreditacion: Modelo abstracto base con campos comunes.
+CuentaBancaria: Modelo que representa una cuenta bancaria de un cliente.
+Billetera: Modelo que representa una billetera electrónica de un cliente.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">Billetera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#Billetera"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.Billetera" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<p>Modelo que representa una billetera electrónica asociada a un cliente.</p>
+<p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
+nro_documento, cliente, fecha_creacion, activo.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES">
+<span class="sig-name descname"><span class="pre">TIPO_BILLETERA_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('-------',</span> <span class="pre">'Seleccione</span> <span class="pre">un</span> <span class="pre">tipo</span> <span class="pre">de</span> <span class="pre">billetera'),</span> <span class="pre">('tigo',</span> <span class="pre">'Tigo</span> <span class="pre">Money'),</span> <span class="pre">('personal',</span> <span class="pre">'Billetera</span> <span class="pre">Personal'),</span> <span class="pre">('zimple',</span> <span class="pre">'Zimple')]</span></em><a class="headerlink" href="#medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.Billetera.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.Billetera.get_tipo_billetera_display">
+<span class="sig-name descname"><span class="pre">get_tipo_billetera_display</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#Billetera.get_tipo_billetera_display"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.Billetera.get_tipo_billetera_display" title="Link to this definition"></a></dt>
+<dd><p>Método personalizado para mostrar el tipo de billetera correctamente.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">CuentaBancaria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#CuentaBancaria"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<p>Modelo que representa una cuenta bancaria asociada a un cliente.</p>
+<p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
+nro_documento, cliente, fecha_creacion, activo.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.BANCO_CHOICES">
+<span class="sig-name descname"><span class="pre">BANCO_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('-------',</span> <span class="pre">'Seleccione</span> <span class="pre">un</span> <span class="pre">banco'),</span> <span class="pre">('ATLAS',</span> <span class="pre">'Banco</span> <span class="pre">Atlas'),</span> <span class="pre">('BANCOP',</span> <span class="pre">'BANCOP'),</span> <span class="pre">('BASA',</span> <span class="pre">'Banco</span> <span class="pre">Basa'),</span> <span class="pre">('BNF',</span> <span class="pre">'Banco</span> <span class="pre">Nacional</span> <span class="pre">de</span> <span class="pre">Fomento</span> <span class="pre">(BNF)'),</span> <span class="pre">('CITIBANK',</span> <span class="pre">'Citibank'),</span> <span class="pre">('CONTINENTAL',</span> <span class="pre">'Banco</span> <span class="pre">Continental'),</span> <span class="pre">('FAMILIAR',</span> <span class="pre">'Banco</span> <span class="pre">Familiar'),</span> <span class="pre">('GNB',</span> <span class="pre">'Banco</span> <span class="pre">GNB'),</span> <span class="pre">('INTERFISA',</span> <span class="pre">'Interfisa</span> <span class="pre">Banco'),</span> <span class="pre">('ITAU',</span> <span class="pre">'Banco</span> <span class="pre">Itaú'),</span> <span class="pre">('SUDAMERIS',</span> <span class="pre">'Banco</span> <span class="pre">Sudameris'),</span> <span class="pre">('UENO',</span> <span class="pre">'ueno</span> <span class="pre">bank'),</span> <span class="pre">('ZETA',</span> <span class="pre">'Zeta</span> <span class="pre">Banco'),</span> <span class="pre">('FINLATINA',</span> <span class="pre">'Financiera</span> <span class="pre">Finlatina'),</span> <span class="pre">('TU_FINANCIERA',</span> <span class="pre">'Tu</span> <span class="pre">Financiera'),</span> <span class="pre">('PARAGUAYO_JAPONESA',</span> <span class="pre">'Financiera</span> <span class="pre">Paraguayo</span> <span class="pre">Japonesa'),</span> <span class="pre">('FIC',</span> <span class="pre">'FIC</span> <span class="pre">-</span> <span class="pre">Financiera'),</span> <span class="pre">('COOP_UNIVERSITARIA',</span> <span class="pre">'Cooperativa</span> <span class="pre">Universitaria'),</span> <span class="pre">('COOP_SAGRADOS_CORAZONES',</span> <span class="pre">'Cooperativa</span> <span class="pre">Sagrados</span> <span class="pre">Corazones'),</span> <span class="pre">('COOP_CHORTITZER',</span> <span class="pre">'Cooperativa</span> <span class="pre">Chortitzer')]</span></em><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.BANCO_CHOICES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria.get_banco_display">
+<span class="sig-name descname"><span class="pre">get_banco_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">banco&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria.get_banco_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">MedioAcreditacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#MedioAcreditacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo abstracto base para medios de acreditación.</p>
+<p>Esta clase define los campos comunes que comparten todos los medios
+de acreditación como cuentas bancarias y billeteras electrónicas.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.nombre_titular">
+<span class="sig-name descname"><span class="pre">nombre_titular</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.nombre_titular" title="Link to this definition"></a></dt>
+<dd><p>Nombre completo del titular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.nro_documento">
+<span class="sig-name descname"><span class="pre">nro_documento</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.nro_documento" title="Link to this definition"></a></dt>
+<dd><p>Número de documento del titular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.cliente" title="Link to this definition"></a></dt>
+<dd><p>Referencia al cliente propietario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.fecha_creacion">
+<span class="sig-name descname"><span class="pre">fecha_creacion</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.fecha_creacion" title="Link to this definition"></a></dt>
+<dd><p>Fecha y hora de creación del registro.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.activo">
+<span class="sig-name descname"><span class="pre">activo</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.activo" title="Link to this definition"></a></dt>
+<dd><p>Estado activo/inactivo del medio de acreditación.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/medios_acreditacion/models.html#MedioAcreditacion.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.Meta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Metadatos del modelo base.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.Meta.abstract">
+<span class="sig-name descname"><span class="pre">abstract</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.Meta.abstract" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.MedioAcreditacion.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.MedioAcreditacion.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">TarjetaLocal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#TarjetaLocal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<p>Modelo que representa una tarjeta de crédito local (Panal o Cabal) asociada a un cliente.</p>
+<p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
+nro_documento, cliente.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.TIPO_TARJETA_CHOICES">
+<span class="sig-name descname"><span class="pre">TIPO_TARJETA_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('PANAL',</span> <span class="pre">'Panal'),</span> <span class="pre">('CABAL',</span> <span class="pre">'Cabal')]</span></em><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.TIPO_TARJETA_CHOICES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.get_brand_display">
+<span class="sig-name descname"><span class="pre">get_brand_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.CharField:</span> <span class="pre">brand&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.get_brand_display" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.get_last4">
+<span class="sig-name descname"><span class="pre">get_last4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#TarjetaLocal.get_last4"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.get_last4" title="Link to this definition"></a></dt>
+<dd><p>Obtiene los últimos 4 dígitos de la tarjeta.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.get_next_by_fecha_creacion">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_creacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_creacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.get_next_by_fecha_creacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado">
+<span class="sig-name descname"><span class="pre">get_numero_enmascarado</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#TarjetaLocal.get_numero_enmascarado"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado" title="Link to this definition"></a></dt>
+<dd><p>Retorna el número de tarjeta enmascarado.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.get_previous_by_fecha_creacion">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_creacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_creacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.get_previous_by_fecha_creacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#TarjetaLocal.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal.save" title="Link to this definition"></a></dt>
+<dd><p>Sobrescribe el método save para actualizar last4 automáticamente.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-monedas.models">
+<span id="monedas"></span><h3>Monedas<a class="headerlink" href="#module-monedas.models" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.Denominacion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Denominacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Denominacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Denominacion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para representar las denominaciones de una moneda específica</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.Denominacion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#monedas.models.Denominacion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">HistorialCotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#HistorialCotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.HistorialCotizacion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar el historial de cotizaciones de las monedas</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_next_by_fecha">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_next_by_fecha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_next_by_fecha_registro">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_registro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_registro&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_next_by_fecha_registro" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_previous_by_fecha">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_previous_by_fecha_registro">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_registro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_registro&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha_registro" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#monedas.models.HistorialCotizacion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#HistorialCotizacion.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.HistorialCotizacion.save" title="Link to this definition"></a></dt>
+<dd><p>Save the current instance. Override this in a subclass if you want to
+control the saving process.</p>
+<p>The “force_insert” and “force_update” parameters can be used to insist
+that the «save» must be an SQL insert or update (or equivalent for
+non-SQL backends), respectively. Normally, they should not be set.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.Moneda">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nombre</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simbolo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasa_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_compra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_venta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fecha_cotizacion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.calcular_precio_compra">
+<span class="sig-name descname"><span class="pre">calcular_precio_compra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmento</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.calcular_precio_compra"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.calcular_precio_compra" title="Link to this definition"></a></dt>
+<dd><p>Calcula el precio de compra aplicando el beneficio del cliente.
+precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.calcular_precio_venta">
+<span class="sig-name descname"><span class="pre">calcular_precio_venta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmento</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.calcular_precio_venta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.calcular_precio_venta" title="Link to this definition"></a></dt>
+<dd><p>Calcula el precio de venta aplicando el beneficio del cliente.
+precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.clean" title="Link to this definition"></a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_next_by_fecha_cotizacion">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_cotizacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.Moneda.get_next_by_fecha_cotizacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_precios_cliente">
+<span class="sig-name descname"><span class="pre">get_precios_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cliente</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.get_precios_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.get_precios_cliente" title="Link to this definition"></a></dt>
+<dd><p>Obtiene los precios finales para un cliente específico</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_previous_by_fecha_cotizacion">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_cotizacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.Moneda.get_previous_by_fecha_cotizacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.save" title="Link to this definition"></a></dt>
+<dd><p>Save the current instance. Override this in a subclass if you want to
+control the saving process.</p>
+<p>The “force_insert” and “force_update” parameters can be used to insist
+that the «save» must be an SQL insert or update (or equivalent for
+non-SQL backends), respectively. Normally, they should not be set.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.StockGuaranies">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">StockGuaranies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#StockGuaranies"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.StockGuaranies" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar el stock de guaraníes disponible en la casa de cambio</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_denominaciones_iniciales">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_denominaciones_iniciales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_denominaciones_iniciales"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_denominaciones_iniciales" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente algunas denominaciones iniciales para USD y el stock de guaraníes
+después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_historial_cotizacion">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_historial_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_historial_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_historial_cotizacion" title="Link to this definition"></a></dt>
+<dd><p>Crea un registro en el historial cuando se crea una moneda o se actualizan
+sus campos de cotización (tasa_base, comision_compra, comision_venta)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_moneda_usd">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_moneda_usd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_moneda_usd"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_moneda_usd" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente la moneda USD después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_stock_guaranies_inicial">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_stock_guaranies_inicial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_stock_guaranies_inicial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_stock_guaranies_inicial" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente el stock inicial de guaraníes después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.guardar_valores_anteriores">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">guardar_valores_anteriores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#guardar_valores_anteriores"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.guardar_valores_anteriores" title="Link to this definition"></a></dt>
+<dd><p>Guarda los valores anteriores de la moneda antes de actualizar</p>
+</dd></dl>
+
+</section>
+<section id="module-roles.models">
+<span id="roles"></span><h3>Roles<a class="headerlink" href="#module-roles.models" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roles.models.Roles">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roles.models.</span></span><span class="sig-name descname"><span class="pre">Roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/models.html#Roles"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.models.Roles" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Group</span></code></p>
+<p>Modelo que extiende auth.Group para agregar una descripción a cada rol.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.models.Roles.descripcion">
+<span class="sig-name descname"><span class="pre">descripcion</span></span><a class="headerlink" href="#roles.models.Roles.descripcion" title="Link to this definition"></a></dt>
+<dd><p>Descripción del rol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TextField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>Se deshabilitan los permisos predeterminados de Django.</p></li>
+<li><p>Se define un permiso personalizado «gestion» para la gestión de roles.</p></li>
+</ul>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roles.models.Roles.group_ptr_id">
+<span class="sig-name descname"><span class="pre">group_ptr_id</span></span><a class="headerlink" href="#roles.models.Roles.group_ptr_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roles.models.Roles.nombre">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nombre</span></span><a class="headerlink" href="#roles.models.Roles.nombre" title="Link to this definition"></a></dt>
+<dd><p>Alias para mantener compatibilidad con código existente.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre del rol.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cadena de texto</p>
+</dd>
+</dl>
+<p class="rubric">Ejemplo</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rol</span> <span class="o">=</span> <span class="n">Roles</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Controlador&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rol</span><span class="o">.</span><span class="n">nombre</span><span class="p">)</span>  <span class="c1"># Salida: Controlador</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roles.models.crear_roles_predefinidos">
+<span class="sig-prename descclassname"><span class="pre">roles.models.</span></span><span class="sig-name descname"><span class="pre">crear_roles_predefinidos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roles/models.html#crear_roles_predefinidos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#roles.models.crear_roles_predefinidos" title="Link to this definition"></a></dt>
+<dd><p>Crea los roles predefinidos después de ejecutar las migraciones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – El remitente de la señal (AppConfig).</p></li>
+<li><p><strong>**kwargs</strong> – Argumentos adicionales.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-transacciones.models">
+<span id="transacciones"></span><h3>Transacciones<a class="headerlink" href="#module-transacciones.models" title="Link to this heading"></a></h3>
+<p>Modelos para el sistema de transacciones de Global Exchange.</p>
+<p>Este módulo contiene los modelos de datos relacionados con las transacciones
+financieras, incluyendo la gestión de recargos y el procesamiento de
+transacciones de compra y venta de monedas extranjeras.</p>
+<dl class="simple">
+<dt>Clases principales:</dt><dd><ul class="simple">
+<li><p>Recargos: Gestiona los recargos aplicables por tipo de medio de pago</p></li>
+<li><p>Transaccion: Representa una transacción de compra o venta de monedas</p></li>
+</ul>
+</dd>
+</dl>
+<p>Author: Equipo de desarrollo Global Exchange
+Date: 2024</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">BilletesTauser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tauser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cantidad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#BilletesTauser"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.BilletesTauser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.denominacion_id">
+<span class="sig-name descname"><span class="pre">denominacion_id</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.denominacion_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.BilletesTauser.tauser_id">
+<span class="sig-name descname"><span class="pre">tauser_id</span></span><a class="headerlink" href="#transacciones.models.BilletesTauser.tauser_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.LimiteGlobal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">LimiteGlobal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#LimiteGlobal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.LimiteGlobal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar los límites globales de transacciones
+que aplican a todos los clientes según la ley de casas de cambio</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Recargos">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Recargos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Recargos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Recargos" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar recargos aplicables según el medio de pago.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Tauser">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Tauser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">puerto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sucursal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Tauser"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Tauser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Tauser.esta_activo">
+<span class="sig-name descname"><span class="pre">esta_activo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Tauser.esta_activo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Tauser.esta_activo" title="Link to this definition"></a></dt>
+<dd><p>Verifica si hay un servidor Django corriendo en el puerto del TAUser.</p>
+<p>Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP
+para confirmar que es un servidor Django.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si hay un servidor Django corriendo, False en caso contrario</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">Transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#Transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.Transaccion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo principal para representar transacciones de compra y venta de monedas.</p>
+<p>Una transacción registra todos los detalles de una operación de cambio de moneda,
+incluyendo el cliente, tipo de operación, medios de pago/cobro, montos y estado.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.cliente">
+<span class="sig-name descname"><span class="pre">cliente</span></span><a class="headerlink" href="#transacciones.models.Transaccion.cliente" title="Link to this definition"></a></dt>
+<dd><p>Cliente que realiza la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.tipo">
+<span class="sig-name descname"><span class="pre">tipo</span></span><a class="headerlink" href="#transacciones.models.Transaccion.tipo" title="Link to this definition"></a></dt>
+<dd><p>Tipo de operación (“compra” o “venta”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.moneda">
+<span class="sig-name descname"><span class="pre">moneda</span></span><a class="headerlink" href="#transacciones.models.Transaccion.moneda" title="Link to this definition"></a></dt>
+<dd><p>Moneda extranjera involucrada en la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.monto">
+<span class="sig-name descname"><span class="pre">monto</span></span><a class="headerlink" href="#transacciones.models.Transaccion.monto" title="Link to this definition"></a></dt>
+<dd><p>Cantidad de la moneda extranjera</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DecimalField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.medio_pago">
+<span class="sig-name descname"><span class="pre">medio_pago</span></span><a class="headerlink" href="#transacciones.models.Transaccion.medio_pago" title="Link to this definition"></a></dt>
+<dd><p>Forma de pago del cliente (efectivo, tarjeta, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.medio_cobro">
+<span class="sig-name descname"><span class="pre">medio_cobro</span></span><a class="headerlink" href="#transacciones.models.Transaccion.medio_cobro" title="Link to this definition"></a></dt>
+<dd><p>Forma de cobro para entregar el dinero al cliente</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.fecha_hora">
+<span class="sig-name descname"><span class="pre">fecha_hora</span></span><a class="headerlink" href="#transacciones.models.Transaccion.fecha_hora" title="Link to this definition"></a></dt>
+<dd><p>Timestamp de creación/actualización de la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.estado">
+<span class="sig-name descname"><span class="pre">estado</span></span><a class="headerlink" href="#transacciones.models.Transaccion.estado" title="Link to this definition"></a></dt>
+<dd><p>Estado actual de la transacción (Pendiente, Completada, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.token">
+<span class="sig-name descname"><span class="pre">token</span></span><a class="headerlink" href="#transacciones.models.Transaccion.token" title="Link to this definition"></a></dt>
+<dd><p>Token único para transacciones que lo requieren</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.token_expiracion">
+<span class="sig-name descname"><span class="pre">token_expiracion</span></span><a class="headerlink" href="#transacciones.models.Transaccion.token_expiracion" title="Link to this definition"></a></dt>
+<dd><p>Fecha y hora de expiración del token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.usuario">
+<span class="sig-name descname"><span class="pre">usuario</span></span><a class="headerlink" href="#transacciones.models.Transaccion.usuario" title="Link to this definition"></a></dt>
+<dd><p>Usuario del sistema que procesó la transacción</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="simple">
+<dt>Meta:</dt><dd><p>verbose_name: «Transacción»
+verbose_name_plural: «Transacciones»
+db_table: «transacciones»</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.cliente_id">
+<span class="sig-name descname"><span class="pre">cliente_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.cliente_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.get_next_by_fecha_hora">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_hora</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_hora&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.Transaccion.get_next_by_fecha_hora" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.get_previous_by_fecha_hora">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_hora</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_hora&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.Transaccion.get_previous_by_fecha_hora" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.Transaccion.usuario_id">
+<span class="sig-name descname"><span class="pre">usuario_id</span></span><a class="headerlink" href="#transacciones.models.Transaccion.usuario_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">TransactionToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar tokens temporales de autenticación de dos factores
+para transacciones que requieren verificación adicional.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.generate_token">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.generate_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.generate_token" title="Link to this definition"></a></dt>
+<dd><p>Genera un nuevo token para un usuario y datos de transacción específicos.
+Elimina tokens previos no usados del mismo usuario.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_next_by_created_at">
+<span class="sig-name descname"><span class="pre">get_next_by_created_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">created_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_next_by_created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_next_by_expires_at">
+<span class="sig-name descname"><span class="pre">get_next_by_expires_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">expires_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_next_by_expires_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_previous_by_created_at">
+<span class="sig-name descname"><span class="pre">get_previous_by_created_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">created_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_previous_by_created_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.get_previous_by_expires_at">
+<span class="sig-name descname"><span class="pre">get_previous_by_expires_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">expires_at&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#transacciones.models.TransactionToken.get_previous_by_expires_at" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.is_valid"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.is_valid" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el token es válido (no usado y no expirado)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.mark_as_used">
+<span class="sig-name descname"><span class="pre">mark_as_used</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#TransactionToken.mark_as_used"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.TransactionToken.mark_as_used" title="Link to this definition"></a></dt>
+<dd><p>Marca el token como usado</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transacciones.models.TransactionToken.usuario_id">
+<span class="sig-name descname"><span class="pre">usuario_id</span></span><a class="headerlink" href="#transacciones.models.TransactionToken.usuario_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.calcular_conversion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">calcular_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moneda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pago</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cobro</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentacion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#calcular_conversion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.calcular_conversion" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
+redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
+redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
+cotizacion (int): Cotización de la moneda según el tipo de operación
+precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
+porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
+beneficio_segmento (int): Beneficio aplicado en la operación según el segmento del cliente
+monto_recargo_pago (int): Monto del recargo aplicado según el medio de pago
+porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
+monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
+porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
+monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+precio_final (int): Monto en guaraníes final a pagar o cobrar</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>monto_original (Decimal)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.crear_limite_global_inicial">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">crear_limite_global_inicial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#crear_limite_global_inicial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.crear_limite_global_inicial" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente el límite global inicial después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.crear_recargos">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">crear_recargos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#crear_recargos"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.crear_recargos" title="Link to this definition"></a></dt>
+<dd><p>Signal handler que crea automáticamente los recargos predeterminados.</p>
+<p>Se ejecuta después de aplicar las migraciones de la aplicación transacciones.
+Crea los recargos estándar para diferentes medios de pago si no existen.</p>
+<dl class="simple">
+<dt>Recargos creados:</dt><dd><ul class="simple">
+<li><p>VISA: 1%</p></li>
+<li><p>MASTERCARD: 1,5%</p></li>
+<li><p>Tigo Money: 2%</p></li>
+<li><p>Billetera Personal: 2%</p></li>
+<li><p>Zimple: 3%</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – La aplicación que envía la señal</p></li>
+<li><p><strong>**kwargs</strong> – Argumentos adicionales de la señal post_migrate</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.descargar_factura">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">descargar_factura</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CDC</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#descargar_factura"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.descargar_factura" title="Link to this definition"></a></dt>
+<dd><p>Descarga el XML y PDF de una factura electrónica mediante su CDC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>CDC</strong> (<em>str</em>) – Código de Control de la factura</p></li>
+<li><p><strong>dRucEm</strong> (<em>str</em>) – RUC del emisor de la factura</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con el contenido del PDF para descarga</dt><dd><ul class="simple">
+<li><p>’success”: bool indicando si la descarga fue exitosa</p></li>
+<li><p>’content”: bytes con el contenido del PDF</p></li>
+<li><p>’filename”: str con el nombre sugerido para el archivo</p></li>
+<li><p>’content_type”: str con el tipo MIME del archivo</p></li>
+<li><p>’error”: str con mensaje de error (si aplica)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.generar_factura_electronica">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">generar_factura_electronica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#generar_factura_electronica"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.generar_factura_electronica" title="Link to this definition"></a></dt>
+<dd><p>Genera una factura electrónica para una transacción completada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transaccion</strong> (<a class="reference internal" href="transacciones.html#transacciones.models.Transaccion" title="transacciones.models.Transaccion"><em>Transaccion</em></a>) – Instancia de transacción para la cual generar factura</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con información de la factura generada</dt><dd><ul class="simple">
+<li><p>’success”: bool indicando si se generó correctamente</p></li>
+<li><p>’numero_factura”: str con el número de factura</p></li>
+<li><p>’cdc”: str con el Código de Control (CDC)</p></li>
+<li><p>”xml”: str con el XML de la factura</p></li>
+<li><p>’pdf_url”: str con la URL del PDF</p></li>
+<li><p>’error”: str con mensaje de error (si aplica)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.generar_token_transaccion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">generar_token_transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#generar_token_transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.generar_token_transaccion" title="Link to this definition"></a></dt>
+<dd><p>Genera un token único de seguridad para transacciones específicas.</p>
+<p>Se utiliza para transacciones con medios de pago que requieren verificación
+adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.procesar_pago_stripe">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">procesar_pago_stripe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payment_method_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#procesar_pago_stripe"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.procesar_pago_stripe" title="Link to this definition"></a></dt>
+<dd><p>Procesa un pago con Stripe para una transacción dada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transaccion</strong> (<a class="reference internal" href="transacciones.html#transacciones.models.Transaccion" title="transacciones.models.Transaccion"><em>Transaccion</em></a>) – La transacción a procesar</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Diccionario con “token” (str) y “datos” (dict) de la transacción</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Si la transacción no existe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.procesar_transaccion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">procesar_transaccion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recibido</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#procesar_transaccion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.procesar_transaccion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.redondear_efectivo">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">redondear_efectivo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominaciones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#redondear_efectivo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.redondear_efectivo" title="Link to this definition"></a></dt>
+<dd><p>Redondea un monto al múltiplo más cercano según las denominaciones disponibles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monto</strong> (<em>Decimal</em>) – Monto a redondear</p></li>
+<li><p><strong>denominaciones</strong> (<em>list</em>) – Lista de denominaciones disponibles (enteros)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Monto redondeado</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Decimal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.verificar_cambio_cotizacion_sesion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">verificar_cambio_cotizacion_sesion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tipo_transaccion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'compra'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#verificar_cambio_cotizacion_sesion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.verificar_cambio_cotizacion_sesion" title="Link to this definition"></a></dt>
+<dd><p>Verifica si ha habido cambios en la cotización durante el proceso de transacción.</p>
+<p>Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP con datos de sesión</p></li>
+<li><p><strong>tipo_transaccion</strong> (<em>str</em>) – “compra” o “venta”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con información de cambios o None si no hay cambios</dt><dd><ul class="simple">
+<li><p>’hay_cambios”: boolean indicando si hubo cambios</p></li>
+<li><p>’valores_anteriores”: dict con precio_compra y precio_venta originales</p></li>
+<li><p>’valores_actuales”: dict con precio_compra y precio_venta actuales</p></li>
+<li><p>’moneda”: instancia de la moneda</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.verificar_factura">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">verificar_factura</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CDC</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#verificar_factura"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.verificar_factura" title="Link to this definition"></a></dt>
+<dd><p>Verifica el estado de una factura electrónica mediante su CDC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>CDC</strong> (<em>str</em>) – Código de Control de la factura</p></li>
+<li><p><strong>dRucEm</strong> (<em>str</em>) – RUC del emisor de la factura</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Diccionario con información de la factura verificada</dt><dd><ul class="simple">
+<li><p>’success”: bool indicando si la verificación fue exitosa</p></li>
+<li><p>’factura”: dict con detalles de la factura</p></li>
+<li><p>’error”: str con mensaje de error (si aplica)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-usuarios.models">
+<span id="usuarios"></span><h3>Usuarios<a class="headerlink" href="#module-usuarios.models" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="usuarios.models.Usuario">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">usuarios.models.</span></span><span class="sig-name descname"><span class="pre">Usuario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractBaseUser</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsMixin</span></code></p>
+<p>Modelo personalizado de usuario que extiende AbstractBaseUser y PermissionsMixin.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.username">
+<span class="sig-name descname"><span class="pre">username</span></span><a class="headerlink" href="#usuarios.models.Usuario.username" title="Link to this definition"></a></dt>
+<dd><p>Nombre de usuario. Debe ser único. Máximo 30 caracteres. Utiliza UnicodeUsernameValidator para validación.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.first_name">
+<span class="sig-name descname"><span class="pre">first_name</span></span><a class="headerlink" href="#usuarios.models.Usuario.first_name" title="Link to this definition"></a></dt>
+<dd><p>Nombre del usuario. Máximo 40 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.last_name">
+<span class="sig-name descname"><span class="pre">last_name</span></span><a class="headerlink" href="#usuarios.models.Usuario.last_name" title="Link to this definition"></a></dt>
+<dd><p>Apellido del usuario. Máximo 40 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.email">
+<span class="sig-name descname"><span class="pre">email</span></span><a class="headerlink" href="#usuarios.models.Usuario.email" title="Link to this definition"></a></dt>
+<dd><p>Correo electrónico del usuario. Debe ser único.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>EmailField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.tipo_documento">
+<span class="sig-name descname"><span class="pre">tipo_documento</span></span><a class="headerlink" href="#usuarios.models.Usuario.tipo_documento" title="Link to this definition"></a></dt>
+<dd><p>Tipo de cédula del usuario. Opciones: “CI” (Cédula de Identidad), “RUC” (Registro Único de Contribuyente).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.numero_documento">
+<span class="sig-name descname"><span class="pre">numero_documento</span></span><a class="headerlink" href="#usuarios.models.Usuario.numero_documento" title="Link to this definition"></a></dt>
+<dd><p>Número de cédula de identidad del usuario. Debe ser único. Máximo 13 caracteres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.cliente_activo">
+<span class="sig-name descname"><span class="pre">cliente_activo</span></span><a class="headerlink" href="#usuarios.models.Usuario.cliente_activo" title="Link to this definition"></a></dt>
+<dd><p>Referencia a un cliente seleccionado para operar con él. Puede ser nulo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ForeignKey</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.bloqueado">
+<span class="sig-name descname"><span class="pre">bloqueado</span></span><a class="headerlink" href="#usuarios.models.Usuario.bloqueado" title="Link to this definition"></a></dt>
+<dd><p>Indica si el usuario está bloqueado en el sistema. Por defecto es False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><a class="headerlink" href="#usuarios.models.Usuario.is_active" title="Link to this definition"></a></dt>
+<dd><p>Indica si el usuario activó su cuenta. Por defecto es False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BooleanField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.date_joined">
+<span class="sig-name descname"><span class="pre">date_joined</span></span><a class="headerlink" href="#usuarios.models.Usuario.date_joined" title="Link to this definition"></a></dt>
+<dd><p>Fecha y hora en que el usuario se creó. Por defecto es la fecha y hora en que lo hizo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DateTimeField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>El modelo utiliza UserManager como su gestor de objetos.</p></li>
+<li><p>Se deshabilitan los permisos predeterminados de Django.</p></li>
+<li><p>Se definen permisos personalizados para bloquear/desbloquear usuarios, asignar/desasignar clientes y roles a usuarios.</p></li>
+</ul>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.USERNAME_FIELD">
+<span class="sig-name descname"><span class="pre">USERNAME_FIELD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'username'</span></em><a class="headerlink" href="#usuarios.models.Usuario.USERNAME_FIELD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.cliente_activo_id">
+<span class="sig-name descname"><span class="pre">cliente_activo_id</span></span><a class="headerlink" href="#usuarios.models.Usuario.cliente_activo_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.es_admin">
+<span class="sig-name descname"><span class="pre">es_admin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario.es_admin"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario.es_admin" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el usuario tiene el rol de “Administrador”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True si el usuario es administrador, False en caso contrario.</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.get_next_by_date_joined">
+<span class="sig-name descname"><span class="pre">get_next_by_date_joined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">date_joined&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#usuarios.models.Usuario.get_next_by_date_joined" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.get_previous_by_date_joined">
+<span class="sig-name descname"><span class="pre">get_previous_by_date_joined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">date_joined&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#usuarios.models.Usuario.get_previous_by_date_joined" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.nombre_completo">
+<span class="sig-name descname"><span class="pre">nombre_completo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/usuarios/models.html#Usuario.nombre_completo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#usuarios.models.Usuario.nombre_completo" title="Link to this definition"></a></dt>
+<dd><p>Obtiene el nombre completo del usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nombre completo en el formato «Nombre Apellido».</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cadena de texto</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.tipo_documento_CHOICES">
+<span class="sig-name descname"><span class="pre">tipo_documento_CHOICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('CI',</span> <span class="pre">'Cédula</span> <span class="pre">de</span> <span class="pre">Identidad'),</span> <span class="pre">('RUC',</span> <span class="pre">'Registro</span> <span class="pre">Único</span> <span class="pre">de</span> <span class="pre">Contribuyente')]</span></em><a class="headerlink" href="#usuarios.models.Usuario.tipo_documento_CHOICES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="usuarios.models.Usuario.username_validator">
+<span class="sig-name descname"><span class="pre">username_validator</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;django.contrib.auth.validators.UnicodeUsernameValidator</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#usuarios.models.Usuario.username_validator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="modulos-de-proyecto-tauser">
+<h2>Módulos de proyecto tauser<a class="headerlink" href="#modulos-de-proyecto-tauser" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="usuarios.html" class="btn btn-neutral float-left" title="Usuarios" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
