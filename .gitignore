@@ -6,6 +6,8 @@ __pycache__/
 staticfiles/
 mediafiles/
 proyecto.sock
+tauser.sock
 .pytest_cache/
 .vscode/
 proyecto/*/migrations/[0-9]*.py
+tauser/*/migrations/[0-9]*.py
