@@ -39,11 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'usuarios',
     'transacciones',
     'clientes',
     'monedas',
-    'usuarios',
     'roles',
+    'corsheaders',
     'medios_acreditacion'
 ]
 
@@ -165,6 +166,9 @@ PASSWORD_RESET_TIMEOUT = 3600
 
 SESSION_COOKIE_AGE = 10 * 60  # 10 minutos de inactividad y se cierra la sesión
 SESSION_SAVE_EVERY_REQUEST = True
+
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 

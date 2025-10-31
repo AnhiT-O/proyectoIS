@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve myproject
+After=network.target
+
+[Service]
+User=brandon-rivarola
+Group=brandon-rivarola
+WorkingDirectory=/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/tauser
+ExecStart=/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/pvenv/bin/gunicorn --workers 3 --bind unix:/home/brandon-rivarola/Escritorio/Casa de cambios/proyectoIS/tauser/tauser.sock tauser.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
