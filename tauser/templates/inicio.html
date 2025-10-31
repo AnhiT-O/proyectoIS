@@ -1,0 +1,15 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="logo">Tauser - Global Exchange</div>
+    <p class="subtitulo">Realiza depósitos y retiros seguros y rápidos.</p>
+    <a href="{% url 'ingreso_token' %}" class="btn-enviar">Ingresar Token de Transacción</a>
+</div>
+{% endblock %}

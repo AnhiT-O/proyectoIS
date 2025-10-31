@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tauser - Global Exchange</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'claro/global.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/global.css' %}" media="(prefers-color-scheme: dark)">
+    {% block extra_css %}{% endblock %}
+    <style>
+        .llave-billetes-container {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--color-fondo-secundario, rgba(255, 255, 255, 0.95));
+            border: 2px solid var(--color-borde, #ddd);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .llave-icono {
+            font-size: 3rem;
+            color: var(--color-primario, #007bff);
+            margin-bottom: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .llave-icono:hover {
+            transform: scale(1.1);
+        }
+        
+    </style>
+</head>
+<body>
+    {% if messages %}
+    <div class="zona-alertas">
+        {% for message in messages %}
+            <div class="alerta-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <main class="cuerpo">
+        <!-- El contenido principal de otras plantillas va aquí -->
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <!-- Ícono de cerradura siempre visible -->
+    <div class="llave-billetes-container">
+        <a href="{% url 'caja_fuerte' %}" class="llave-icono">🔒</a>
+    </div>
+</body>
+</html>

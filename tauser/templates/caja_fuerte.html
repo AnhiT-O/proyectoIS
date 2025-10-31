@@ -1,0 +1,29 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido extendido">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-campo">
+            {{ form.archivo }}
+            {% if form.archivo.errors %}
+                <div class="form-errores">
+                    {% for error in form.archivo.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <button type="submit" class="btn-enviar">Cargar Acción</button>
+            <a href="{% url 'inicio' %}" class="btn-atras">Atras</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
