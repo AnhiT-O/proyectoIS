@@ -74,3 +74,7 @@ sudo systemctl restart gunicorn
 sudo systemctl restart gunicorn_tauser
 sudo systemctl restart nginx
 echo "Servicios iniciados: gunicorn, gunicorn_tauser, nginx."
+cd ..
+cd Pasarela/
+python manage.py runserver 5500
+
