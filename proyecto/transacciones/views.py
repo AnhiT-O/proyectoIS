@@ -90,7 +90,7 @@ def compra_monto_moneda(request):
         - tipo_transaccion: Tipo de operación ('compra')
         - limites_disponibles: Información de límites del cliente
     """
-    #verificar_factura(01025957333001003000036722025103119120322603)
+    #verificar_factura('01025957333001003000037422025103118649440309')
     transacciones_pasadas = Transaccion.objects.filter(usuario=request.user, estado='Pendiente')
     if transacciones_pasadas:
         for t in transacciones_pasadas:

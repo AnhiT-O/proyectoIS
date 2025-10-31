@@ -169,4 +169,4 @@ SESSION_SAVE_EVERY_REQUEST = True
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 FACTURA_SEGURA_API_URL = 'https://apitest.facturasegura.com.py'
-NUMERO_FACTURACION = 351
+NUMERO_FACTURACION = 375
