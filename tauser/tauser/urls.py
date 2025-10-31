@@ -16,11 +16,17 @@ Including another URLconf
 """
 from django.urls import path
 from . import views
+from . import views_2fa
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
     path('ingreso/', views.ingreso_token, name='ingreso_token'),
+    path('verificar-2fa/', views.verificar_2fa, name='verificar_2fa'),
     path('caja-fuerte/', views.caja_fuerte, name='caja_fuerte'),
     path('ingreso-billetes/<str:codigo>/', views.ingreso_billetes, name='ingreso_billetes'),
-    path('exito/<str:codigo>/', views.exito, name='exito')
+    path('exito/<str:codigo>/', views.exito, name='exito'),
+    
+    # URLs AJAX para 2FA
+    path('2fa/send-token/', views_2fa.send_2fa_token, name='send_2fa_token'),
+    path('2fa/verify-token/', views_2fa.verify_2fa_token, name='verify_2fa_token'),
 ]

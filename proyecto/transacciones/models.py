@@ -1008,7 +1008,6 @@ Detalles de la transacción:
 - Moneda: {transaccion.moneda.nombre} ({transaccion.moneda.simbolo})
 - Monto: {monto_formateado} {transaccion.moneda.simbolo}
 - Total: {transaccion.precio_final} Gs.
-- Número de Factura: {transaccion.numero_factura}
 - CDC: {cdc_data}
 
 Gracias por confiar en Global Exchange.

@@ -3,7 +3,8 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
 from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion, calcular_conversion, verificar_cambio_cotizacion
-from .forms import TokenForm, IngresoForm
+from transacciones.utils_2fa import is_2fa_enabled, create_transaction_token, validate_2fa_token
+from .forms import TokenForm, IngresoForm, Token2FAForm
 from monedas.models import Denominacion
 
 def inicio(request):
@@ -86,6 +87,14 @@ def ingreso_token(request):
             except Transaccion.DoesNotExist:
                 messages.error(request, 'Transacción no encontrada.')
                 return redirect('ingreso_token')
+            # Si el 2FA está habilitado, devolver respuesta JSON para mostrar modal
+            if is_2fa_enabled():
+                from django.http import JsonResponse
+                return JsonResponse({
+                    'success': True,
+                    'show_2fa': True,
+                    'user_email': transaccion.usuario.email
+                })
             return redirect('ingreso_billetes', codigo=transaccion.token)
         elif accion == 'cancelar':
             try:
@@ -127,40 +136,77 @@ def ingreso_token(request):
                             messages.error(request, 'El token ha expirado.')
                         return redirect('ingreso_token')
                     
-                    if transaccion.medio_pago == 'Efectivo':
-                        cambios = verificar_cambio_cotizacion(transaccion)
-                        if cambios and cambios.get('hay_cambios'):
-                            datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
-                            transaccion.precio_base = datos_transaccion['precio_base']
-                            transaccion.cotizacion = datos_transaccion['cotizacion']
-                            transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
-                            transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
-                            transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
-                            transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
-                            transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
-                            transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                            transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
-                            transaccion.monto_original = datos_transaccion['monto_original']
-                            transaccion.monto = datos_transaccion['monto']
-                            transaccion.precio_final = datos_transaccion['precio_final']
-                            transaccion.save()
-                            request.session['transaccion'] = transaccion.id
-                            context = {
-                                'cambios': cambios,
-                                'transaccion': transaccion
-                            }
-                            return render(request, 'ingreso_token.html', context)
-                        return redirect('ingreso_billetes', codigo=codigo)
-                    else:
+                    # Verificar si es operación de Tauser
+                    if transaccion.medio_pago != 'Efectivo':
                         messages.error(request, 'El token no corresponde a una operación de Tauser.')
                         return redirect('ingreso_token')
+                    
+                    # Verificar cambios de cotización para pagos en efectivo
+                    cambios = verificar_cambio_cotizacion(transaccion)
+                    if cambios and cambios.get('hay_cambios'):
+                        datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
+                        transaccion.precio_base = datos_transaccion['precio_base']
+                        transaccion.cotizacion = datos_transaccion['cotizacion']
+                        transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
+                        transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
+                        transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
+                        transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
+                        transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
+                        transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
+                        transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
+                        transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
+                        transaccion.monto_original = datos_transaccion['monto_original']
+                        transaccion.monto = datos_transaccion['monto']
+                        transaccion.precio_final = datos_transaccion['precio_final']
+                        transaccion.save()
+                        request.session['transaccion'] = transaccion.id
+                        context = {
+                            'cambios': cambios,
+                            'transaccion': transaccion,
+                            'enable_2fa': is_2fa_enabled(),
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else ''
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
+                    # Guardar la transacción en sesión para el 2FA
+                    request.session['transaccion'] = transaccion.id
+                    
+                    # Si el 2FA está habilitado, renderizar template con flag para mostrar modal
+                    if is_2fa_enabled():
+                        context = {
+                            'form': TokenForm(),
+                            'enable_2fa': True,
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else '',
+                            'show_2fa_modal': True
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
+                    return redirect('ingreso_billetes', codigo=codigo)
                 else:
+                    # Transacción ya procesada - aplicar 2FA si está habilitado
+                    request.session['transaccion'] = transaccion.id
+                    
+                    if is_2fa_enabled():
+                        context = {
+                            'form': TokenForm(),
+                            'enable_2fa': True,
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else '',
+                            'show_2fa_modal': True,
+                            'transaccion_procesada': True  # Flag para indicar que ya está procesada
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
                     procesar_transaccion(transaccion, Tauser.objects.get(puerto=int(request.get_port())))
                     return redirect('exito', codigo=codigo)
     else:
         form = TokenForm()
-    return render(request, 'ingreso_token.html', {'form': form})
+    
+    context = {
+        'form': form,
+        'enable_2fa': is_2fa_enabled(),
+        'user_email': ''
+    }
+    return render(request, 'ingreso_token.html', context)
 
 def ingreso_billetes(request, codigo):
     try:
@@ -290,3 +336,100 @@ def ingreso_billetes(request, codigo):
 def exito(request, codigo):
     transaccion = Transaccion.objects.get(token=codigo)
     return render(request, 'exito.html', {'transaccion': transaccion})
+
+def verificar_2fa(request):
+    """
+    Vista para verificar el código 2FA antes de continuar con el ingreso de billetes.
+    """
+    # Verificar que el 2FA esté habilitado
+    if not is_2fa_enabled():
+        messages.error(request, 'El sistema de verificación 2FA no está habilitado.')
+        return redirect('inicio')
+    
+    # Verificar que exista una transacción en sesión
+    transaccion_id = request.session.get('transaccion')
+    if not transaccion_id:
+        messages.error(request, 'No hay transacción pendiente.')
+        return redirect('ingreso_token')
+    
+    try:
+        transaccion = Transaccion.objects.get(id=transaccion_id)
+    except Transaccion.DoesNotExist:
+        messages.error(request, 'Transacción no encontrada.')
+        return redirect('ingreso_token')
+    
+    # Verificar que el usuario asociado a la transacción tenga email
+    if not transaccion.usuario.email:
+        messages.error(request, 'El usuario asociado a esta transacción no tiene email configurado.')
+        return redirect('ingreso_token')
+    
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+        
+        if accion == 'enviar_codigo':
+            # Enviar el código 2FA al usuario
+            transaccion_data = {
+                'transaccion_id': transaccion.id,
+                'cliente_id': transaccion.cliente.id,
+                'tipo': transaccion.tipo,
+                'monto': str(transaccion.monto),
+                'moneda_id': transaccion.moneda.id,
+                'precio_final': transaccion.precio_final,
+                'medio_pago': transaccion.medio_pago,
+                'medio_cobro': transaccion.medio_cobro
+            }
+            
+            result = create_transaction_token(transaccion.usuario, transaccion_data)
+            
+            if result['success']:
+                request.session['2fa_sent'] = True
+                messages.success(request, f'Código de verificación enviado a {transaccion.usuario.email}')
+            else:
+                messages.error(request, result['message'])
+            
+            return redirect('verificar_2fa')
+        
+        elif accion == 'verificar':
+            form = Token2FAForm(request.POST)
+            if form.is_valid():
+                codigo_2fa = form.cleaned_data['codigo_2fa']
+                
+                # Validar el código 2FA
+                result = validate_2fa_token(transaccion.usuario, codigo_2fa)
+                
+                if result['success']:
+                    messages.success(request, 'Código verificado correctamente.')
+                    # Limpiar la flag de 2FA enviado
+                    if '2fa_sent' in request.session:
+                        del request.session['2fa_sent']
+                    # Redirigir al ingreso de billetes
+                    return redirect('ingreso_billetes', codigo=transaccion.token)
+                else:
+                    messages.error(request, result['message'])
+                    return redirect('verificar_2fa')
+        
+        elif accion == 'cancelar':
+            transaccion.estado = 'Cancelada'
+            transaccion.razon = 'Usuario cancela la verificación 2FA'
+            transaccion.save()
+            # Limpiar la sesión
+            if 'transaccion' in request.session:
+                del request.session['transaccion']
+            if '2fa_sent' in request.session:
+                del request.session['2fa_sent']
+            messages.info(request, 'Transacción cancelada.')
+            return redirect('inicio')
+    else:
+        form = Token2FAForm()
+    
+    # Verificar si ya se envió el código
+    codigo_enviado = request.session.get('2fa_sent', False)
+    
+    context = {
+        'form': form,
+        'transaccion': transaccion,
+        'codigo_enviado': codigo_enviado,
+        'usuario_email': transaccion.usuario.email
+    }
+    
+    return render(request, 'verificar_2fa.html', context)

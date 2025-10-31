@@ -148,7 +148,17 @@ MESSAGE_TAGS = {
 }
 
 # Configuración de login/logout
-LOGIN_URL = '/ingresar/'
+LOGIN_URL = '/login/'
+
+# Configuración de 2FA para transacciones
+ENABLE_2FA_TRANSACTIONS = True  # Habilitar o deshabilitar el sistema 2FA
+TWO_FACTOR_AUTH = {
+    'TOKEN_LENGTH': 6,  # Longitud del token (6 dígitos)
+    'TOKEN_EXPIRY_MINUTES': 1,  # Minutos de validez del token
+    'EMAIL_SUBJECT': 'Código de verificación - Global Exchange Tauser',
+    'EMAIL_FROM': EMAIL_HOST_USER,  # Email desde el que se enviarán los códigos
+}
+
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 PASSWORD_RESET_TIMEOUT = 3600

@@ -420,3 +420,23 @@
     border-color: #8b5cf6;
     box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
 }
+
+/* Mensaje informativo 2FA */
+.mensaje-info-2fa {
+    background: #2d3748;
+    border-left: 4px solid #8b5cf6;
+    padding: 1rem;
+    margin: 1.5rem 0 0 0;
+    border-radius: 0 8px 8px 0;
+    border: 1px solid #4b5563;
+}
+
+.mensaje-info-2fa strong {
+    color: #f3f4f6;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.mensaje-info-2fa p {
+    color: #d1d5db;
+}

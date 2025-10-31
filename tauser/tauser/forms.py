@@ -47,4 +47,22 @@ class IngresoForm(forms.Form):
                 raise forms.ValidationError('El archivo debe contener texto válido en UTF-8.')
         
         return archivo
+
+class Token2FAForm(forms.Form):
+    codigo_2fa = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'autofocus': True,
+            'maxlength': 6,
+            'placeholder': 'Ingrese el código de 6 dígitos'
+        }),
+        required=True,
+        error_messages={'required': 'Debes ingresar el código de verificación 2FA.'}
+    )
+
+    def clean_codigo_2fa(self):
+        codigo = self.cleaned_data.get('codigo_2fa')
+        if not codigo.isdigit() or len(codigo) != 6:
+            raise forms.ValidationError('El código debe contener exactamente 6 dígitos numéricos.')
+        return codigo
     
