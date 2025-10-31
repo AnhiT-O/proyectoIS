@@ -11,12 +11,12 @@
 
 # --- Parámetros ---
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-	echo "Uso: $0 <DB_NAME> [SQL_FILE]"
+	echo "Uso: $0 [SQL_FILE]"
 	exit 1
 fi
 
-DB_NAME="$1"
-SQL_FILE="$2"
+DB_NAME="bd_produccion"
+SQL_FILE="$1"
 
 # --- Proceso de reseteo ---
 
@@ -68,3 +68,9 @@ else
 fi
 
 echo "Proceso de reseteo completado para la base de datos '$DB_NAME'."
+
+sudo systemctl daemon-reload
+sudo systemctl restart gunicorn
+sudo systemctl restart gunicorn_tauser
+sudo systemctl restart nginx
+echo "Servicios iniciados: gunicorn, gunicorn_tauser, nginx."

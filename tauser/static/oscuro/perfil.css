@@ -1,0 +1,166 @@
+.cuerpo {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 1rem;
+}  
+
+.contenido {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.cabecera-perfil {
+    background: #1f2937;
+    padding: 2rem;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    border-bottom: 1px solid #4b5563;
+    border: 1px solid #374151;
+    border-bottom: 1px solid #4b5563;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #8b5cf6;
+    margin-bottom: 0.5rem;
+}
+
+.titulo {
+    font-size: 1.5rem;
+    color: #f3f4f6;
+    margin-bottom: 0.5rem;
+}
+
+.subtitulo {
+    color: #9ca3af;
+    font-size: 1rem;
+}
+
+.zona-perfil {
+    background: #1f2937;
+    padding: 2rem;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border: 1px solid #374151;
+    border-top: none;
+}
+
+.perfil-info {
+    background: #2d3748;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border: 1px solid #4b5563;
+    transition: all 0.2s;
+}
+
+.perfil-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.perfil-titulo{
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    margin: 0;  
+    padding-bottom: 0;
+}
+
+.info-cabecera {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-end; 
+    border-bottom: 2px solid #8b5cf6; 
+    padding-bottom: 10px; 
+    margin-bottom: 20px;
+}
+
+.info-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.info-campo {
+    background: #374151;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #8b5cf6;
+    border: 1px solid #4b5563;
+}
+
+.info-titulo {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-valor {
+    color: #f3f4f6;
+    font-size: 1rem;
+}
+
+.zona-acciones {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cliente-activo {
+    background-color: #064e3b;
+    border: 1px solid #10b981;
+}
+
+/* Estilos para la página de confirmación de transacciones - Modo Oscuro */
+.info-transaccion {
+    background: #1f2937;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 3px solid #22c55e;
+    background-color: #111827;
+    border: 1px solid #374151;
+}
+
+.info-transaccion h3 {
+    margin: 0 0 0.5rem 0;
+    color: #f3f4f6;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.detalles-transaccion {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.detalle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #374151;
+}
+
+.detalle-item:last-child {
+    border-bottom: none;
+}
+
+.detalle-titulo {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.detalle-valor {
+    color: #f3f4f6;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
