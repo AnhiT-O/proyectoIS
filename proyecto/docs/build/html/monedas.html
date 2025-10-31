@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monedas &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Directorio principal del Proyecto" href="proyecto.html" />
+    <link rel="prev" title="Clientes" href="clientes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Monedas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.Denominacion"><code class="docutils literal notranslate"><span class="pre">Denominacion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Denominacion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Denominacion.moneda_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.HistorialCotizacion"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.get_next_by_fecha"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.get_next_by_fecha()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.get_next_by_fecha_registro"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.get_next_by_fecha_registro()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.get_previous_by_fecha()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha_registro"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.get_previous_by_fecha_registro()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.moneda_id"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.moneda_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.HistorialCotizacion.save"><code class="docutils literal notranslate"><span class="pre">HistorialCotizacion.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.Moneda"><code class="docutils literal notranslate"><span class="pre">Moneda</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.calcular_precio_compra"><code class="docutils literal notranslate"><span class="pre">Moneda.calcular_precio_compra()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.calcular_precio_venta"><code class="docutils literal notranslate"><span class="pre">Moneda.calcular_precio_venta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.clean"><code class="docutils literal notranslate"><span class="pre">Moneda.clean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.get_next_by_fecha_cotizacion"><code class="docutils literal notranslate"><span class="pre">Moneda.get_next_by_fecha_cotizacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.get_precios_cliente"><code class="docutils literal notranslate"><span class="pre">Moneda.get_precios_cliente()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.get_previous_by_fecha_cotizacion"><code class="docutils literal notranslate"><span class="pre">Moneda.get_previous_by_fecha_cotizacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.models.Moneda.save"><code class="docutils literal notranslate"><span class="pre">Moneda.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.StockGuaranies"><code class="docutils literal notranslate"><span class="pre">StockGuaranies</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_denominaciones_iniciales"><code class="docutils literal notranslate"><span class="pre">crear_denominaciones_iniciales()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_historial_cotizacion"><code class="docutils literal notranslate"><span class="pre">crear_historial_cotizacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_moneda_usd"><code class="docutils literal notranslate"><span class="pre">crear_moneda_usd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.crear_stock_guaranies_inicial"><code class="docutils literal notranslate"><span class="pre">crear_stock_guaranies_inicial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.models.guardar_valores_anteriores"><code class="docutils literal notranslate"><span class="pre">guardar_valores_anteriores()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.api_evolucion_cotizacion"><code class="docutils literal notranslate"><span class="pre">api_evolucion_cotizacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.evolucion_cotizacion"><code class="docutils literal notranslate"><span class="pre">evolucion_cotizacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_crear"><code class="docutils literal notranslate"><span class="pre">moneda_crear()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_detalle"><code class="docutils literal notranslate"><span class="pre">moneda_detalle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_editar"><code class="docutils literal notranslate"><span class="pre">moneda_editar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.moneda_lista"><code class="docutils literal notranslate"><span class="pre">moneda_lista()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.puede_editar"><code class="docutils literal notranslate"><span class="pre">puede_editar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.tiene_algun_permiso"><code class="docutils literal notranslate"><span class="pre">tiene_algun_permiso()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.views.verificar_cambios_precios"><code class="docutils literal notranslate"><span class="pre">verificar_cambios_precios()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.forms.MonedaForm"><code class="docutils literal notranslate"><span class="pre">MonedaForm</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.Meta"><code class="docutils literal notranslate"><span class="pre">MonedaForm.Meta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.forms.MonedaForm.Meta.fields"><code class="docutils literal notranslate"><span class="pre">MonedaForm.Meta.fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monedas.forms.MonedaForm.Meta.model"><code class="docutils literal notranslate"><span class="pre">MonedaForm.Meta.model</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.base_fields"><code class="docutils literal notranslate"><span class="pre">MonedaForm.base_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_comision_compra"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_comision_compra()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_comision_venta"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_comision_venta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_decimales"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_decimales()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_denominaciones"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_denominaciones()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_simbolo"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_simbolo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.clean_tasa_base"><code class="docutils literal notranslate"><span class="pre">MonedaForm.clean_tasa_base()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.declared_fields"><code class="docutils literal notranslate"><span class="pre">MonedaForm.declared_fields</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.media"><code class="docutils literal notranslate"><span class="pre">MonedaForm.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.MonedaForm.save"><code class="docutils literal notranslate"><span class="pre">MonedaForm.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monedas.forms.NoBracketsArrayWidget"><code class="docutils literal notranslate"><span class="pre">NoBracketsArrayWidget</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.NoBracketsArrayWidget.media"><code class="docutils literal notranslate"><span class="pre">NoBracketsArrayWidget.media</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monedas.forms.NoBracketsArrayWidget.render"><code class="docutils literal notranslate"><span class="pre">NoBracketsArrayWidget.render()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Monedas</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="monedas">
+<h1>Monedas<a class="headerlink" href="#monedas" title="Link to this heading"></a></h1>
+<p>Documentación de las monedas utilizadas en el sistema.</p>
+<dl class="py class" id="module-monedas.models">
+<dt class="sig sig-object py" id="monedas.models.Denominacion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Denominacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Denominacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Denominacion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para representar las denominaciones de una moneda específica</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.Denominacion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#monedas.models.Denominacion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">HistorialCotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#HistorialCotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.HistorialCotizacion" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar el historial de cotizaciones de las monedas</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_next_by_fecha">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_next_by_fecha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_next_by_fecha_registro">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_registro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_registro&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_next_by_fecha_registro" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_previous_by_fecha">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateField:</span> <span class="pre">fecha&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.get_previous_by_fecha_registro">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_registro</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_registro&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.HistorialCotizacion.get_previous_by_fecha_registro" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.moneda_id">
+<span class="sig-name descname"><span class="pre">moneda_id</span></span><a class="headerlink" href="#monedas.models.HistorialCotizacion.moneda_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.HistorialCotizacion.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#HistorialCotizacion.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.HistorialCotizacion.save" title="Link to this definition"></a></dt>
+<dd><p>Save the current instance. Override this in a subclass if you want to
+control the saving process.</p>
+<p>The “force_insert” and “force_update” parameters can be used to insist
+that the «save» must be an SQL insert or update (or equivalent for
+non-SQL backends), respectively. Normally, they should not be set.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.Moneda">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">Moneda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nombre</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simbolo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasa_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_compra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comision_venta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fecha_cotizacion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.calcular_precio_compra">
+<span class="sig-name descname"><span class="pre">calcular_precio_compra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmento</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.calcular_precio_compra"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.calcular_precio_compra" title="Link to this definition"></a></dt>
+<dd><p>Calcula el precio de compra aplicando el beneficio del cliente.
+precio_compra = tasa_base - comision_compra - (comision_compra * porcentaje_beneficio)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.calcular_precio_venta">
+<span class="sig-name descname"><span class="pre">calcular_precio_venta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmento</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.calcular_precio_venta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.calcular_precio_venta" title="Link to this definition"></a></dt>
+<dd><p>Calcula el precio de venta aplicando el beneficio del cliente.
+precio_venta = tasa_base + comision_venta - (comision_venta * porcentaje_beneficio)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.clean"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.clean" title="Link to this definition"></a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_next_by_fecha_cotizacion">
+<span class="sig-name descname"><span class="pre">get_next_by_fecha_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_cotizacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.Moneda.get_next_by_fecha_cotizacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_precios_cliente">
+<span class="sig-name descname"><span class="pre">get_precios_cliente</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cliente</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.get_precios_cliente"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.get_precios_cliente" title="Link to this definition"></a></dt>
+<dd><p>Obtiene los precios finales para un cliente específico</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.get_previous_by_fecha_cotizacion">
+<span class="sig-name descname"><span class="pre">get_previous_by_fecha_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field=&lt;django.db.models.fields.DateTimeField:</span> <span class="pre">fecha_cotizacion&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_next=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#monedas.models.Moneda.get_previous_by_fecha_cotizacion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.models.Moneda.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#Moneda.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.Moneda.save" title="Link to this definition"></a></dt>
+<dd><p>Save the current instance. Override this in a subclass if you want to
+control the saving process.</p>
+<p>The “force_insert” and “force_update” parameters can be used to insist
+that the «save» must be an SQL insert or update (or equivalent for
+non-SQL backends), respectively. Normally, they should not be set.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.models.StockGuaranies">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">StockGuaranies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#StockGuaranies"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.StockGuaranies" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Modelo para almacenar el stock de guaraníes disponible en la casa de cambio</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_denominaciones_iniciales">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_denominaciones_iniciales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_denominaciones_iniciales"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_denominaciones_iniciales" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente algunas denominaciones iniciales para USD y el stock de guaraníes
+después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_historial_cotizacion">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_historial_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_historial_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_historial_cotizacion" title="Link to this definition"></a></dt>
+<dd><p>Crea un registro en el historial cuando se crea una moneda o se actualizan
+sus campos de cotización (tasa_base, comision_compra, comision_venta)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_moneda_usd">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_moneda_usd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_moneda_usd"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_moneda_usd" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente la moneda USD después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.crear_stock_guaranies_inicial">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_stock_guaranies_inicial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_stock_guaranies_inicial"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_stock_guaranies_inicial" title="Link to this definition"></a></dt>
+<dd><p>Crea automáticamente el stock inicial de guaraníes después de ejecutar las migraciones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.models.guardar_valores_anteriores">
+<span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">guardar_valores_anteriores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#guardar_valores_anteriores"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.guardar_valores_anteriores" title="Link to this definition"></a></dt>
+<dd><p>Guarda los valores anteriores de la moneda antes de actualizar</p>
+</dd></dl>
+
+<dl class="py function" id="module-monedas.views">
+<dt class="sig sig-object py" id="monedas.views.api_evolucion_cotizacion">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">api_evolucion_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#api_evolucion_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.api_evolucion_cotizacion" title="Link to this definition"></a></dt>
+<dd><p>API para obtener datos de evolución en formato JSON para gráficos</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.evolucion_cotizacion">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">evolucion_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#evolucion_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.evolucion_cotizacion" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar la evolución de las cotizaciones de una moneda específica</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.moneda_crear">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_crear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_crear"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_crear" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.moneda_detalle">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_detalle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_detalle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_detalle" title="Link to this definition"></a></dt>
+<dd><p>Vista para mostrar los detalles completos de una moneda</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.moneda_editar">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_editar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_editar"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_editar" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.moneda_lista">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">moneda_lista</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#moneda_lista"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.moneda_lista" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.puede_editar">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">puede_editar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#puede_editar"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.puede_editar" title="Link to this definition"></a></dt>
+<dd><p>Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+para administrar monedas: creación, edición o activación.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.tiene_algun_permiso">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">tiene_algun_permiso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#tiene_algun_permiso"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.tiene_algun_permiso" title="Link to this definition"></a></dt>
+<dd><p>Decorador que verifica si el usuario tiene al menos uno de los permisos necesarios
+para administrar monedas: creación, edición o activación.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="monedas.views.verificar_cambios_precios">
+<span class="sig-prename descclassname"><span class="pre">monedas.views.</span></span><span class="sig-name descname"><span class="pre">verificar_cambios_precios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moneda_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/views.html#verificar_cambios_precios"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.views.verificar_cambios_precios" title="Link to this definition"></a></dt>
+<dd><p>API para verificar cambios en los precios de una moneda</p>
+</dd></dl>
+
+<dl class="py class" id="module-monedas.forms">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.forms.</span></span><span class="sig-name descname"><span class="pre">MonedaForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.Meta">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.Meta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.Meta" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.Meta.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['nombre',</span> <span class="pre">'simbolo',</span> <span class="pre">'tasa_base',</span> <span class="pre">'decimales',</span> <span class="pre">'comision_compra',</span> <span class="pre">'comision_venta',</span> <span class="pre">'denominaciones']</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.Meta.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#monedas.forms.MonedaForm.Meta.model" title="Link to this definition"></a></dt>
+<dd><p>alias de <a class="reference internal" href="tauser.html#monedas.models.Moneda" title="monedas.models.Moneda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Moneda</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.base_fields">
+<span class="sig-name descname"><span class="pre">base_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'denominaciones':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.base_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_comision_compra">
+<span class="sig-name descname"><span class="pre">clean_comision_compra</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_comision_compra"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_comision_compra" title="Link to this definition"></a></dt>
+<dd><p>Valida que la comisión de compra sea un número positivo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_comision_venta">
+<span class="sig-name descname"><span class="pre">clean_comision_venta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_comision_venta"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_comision_venta" title="Link to this definition"></a></dt>
+<dd><p>Valida que la comisión de venta sea un número positivo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_decimales">
+<span class="sig-name descname"><span class="pre">clean_decimales</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_decimales"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_decimales" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_denominaciones">
+<span class="sig-name descname"><span class="pre">clean_denominaciones</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_denominaciones"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_denominaciones" title="Link to this definition"></a></dt>
+<dd><p>Convierte el string de denominaciones a una lista de enteros.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_simbolo">
+<span class="sig-name descname"><span class="pre">clean_simbolo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_simbolo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_simbolo" title="Link to this definition"></a></dt>
+<dd><p>Convierte el símbolo a mayúsculas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.clean_tasa_base">
+<span class="sig-name descname"><span class="pre">clean_tasa_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.clean_tasa_base"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.clean_tasa_base" title="Link to this definition"></a></dt>
+<dd><p>Valida que la tasa base sea un número positivo.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.declared_fields">
+<span class="sig-name descname"><span class="pre">declared_fields</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'comision_compra':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'comision_venta':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'decimales':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;,</span> <span class="pre">'denominaciones':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'nombre':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'simbolo':</span> <span class="pre">&lt;django.forms.fields.CharField</span> <span class="pre">object&gt;,</span> <span class="pre">'tasa_base':</span> <span class="pre">&lt;django.forms.fields.IntegerField</span> <span class="pre">object&gt;}</span></em><a class="headerlink" href="#monedas.forms.MonedaForm.declared_fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#monedas.forms.MonedaForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.MonedaForm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#MonedaForm.save"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.MonedaForm.save" title="Link to this definition"></a></dt>
+<dd><p>Guarda el formulario y maneja las denominaciones como objetos relacionados.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="monedas.forms.NoBracketsArrayWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">monedas.forms.</span></span><span class="sig-name descname"><span class="pre">NoBracketsArrayWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#NoBracketsArrayWidget"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.NoBracketsArrayWidget" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TextInput</span></code></p>
+<p>Widget personalizado para renderizar ArrayField como una cadena separada por comas.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="monedas.forms.NoBracketsArrayWidget.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#monedas.forms.NoBracketsArrayWidget.media" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="monedas.forms.NoBracketsArrayWidget.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/forms.html#NoBracketsArrayWidget.render"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.forms.NoBracketsArrayWidget.render" title="Link to this definition"></a></dt>
+<dd><p>Render the widget as an HTML string.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pie de página">
+        <a href="clientes.html" class="btn btn-neutral float-left" title="Clientes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+        <a href="proyecto.html" class="btn btn-neutral float-right" title="Directorio principal del Proyecto" accesskey="n" rel="next">Siguiente <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
