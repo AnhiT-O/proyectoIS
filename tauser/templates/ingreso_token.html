@@ -42,7 +42,11 @@
                 <div>
                     <strong>Verificación de Seguridad</strong>
                     <p style="margin: 5px 0 0 0; font-size: 0.9em;">
-                        Por tu seguridad, se enviará un código de verificación a tu correo electrónico para validar tu identidad antes de continuar con la transacción.
+                        {% if transaccion_procesada %}
+                            Por tu seguridad, necesitas verificar tu identidad antes de acceder a los detalles de esta transacción ya procesada.
+                        {% else %}
+                            Por tu seguridad, se enviará un código de verificación a tu correo electrónico para validar tu identidad antes de continuar con la transacción.
+                        {% endif %}
                     </p>
                 </div>
             </div>
@@ -94,7 +98,7 @@
                 </div>
                 
                 <div id="step-verify" class="verification-step" style="display: none;">
-                    <p>Se ha enviado un código de verificación de 6 dígitos al email <strong id="userEmailVerify"></strong></p>
+                    <p id="verifyMessage">Se ha enviado un código de verificación de 6 dígitos al email <strong id="userEmailVerify"></strong></p>
                     <div class="input-group" style="margin: 20px 0;">
                         <label for="tokenInput">Código de verificación:</label>
                         <input type="text" id="tokenInput" maxlength="6" placeholder="123456" 
@@ -187,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let timeRemaining = 60; // 1 minuto
     let shouldShow2FA = {% if enable_2fa %}true{% else %}false{% endif %};
     let autoShow2FA = {% if show_2fa_modal %}true{% else %}false{% endif %};
+    let transaccionProcesada = {% if transaccion_procesada %}true{% else %}false{% endif %};
     
     // Función para actualizar email en el modal
     function updateEmailDisplay(email) {
@@ -220,6 +225,14 @@ document.addEventListener('DOMContentLoaded', function() {
             step.style.display = 'none';
         });
         document.getElementById(stepId).style.display = 'block';
+        
+        // Actualizar mensaje según el tipo de transacción
+        if (stepId === 'step-verify' && transaccionProcesada) {
+            const verifyMessage = document.getElementById('verifyMessage');
+            if (verifyMessage) {
+                verifyMessage.innerHTML = 'Se ha enviado un código de verificación de 6 dígitos al email <strong id="userEmailVerify">' + userEmailGlobal + '</strong> para acceder a los detalles de tu transacción.';
+            }
+        }
     }
     
     // Función para iniciar countdown

@@ -151,8 +151,29 @@ def verify_2fa_token(request):
         if result['success']:
             logger.info(f"Token 2FA validado exitosamente para transacción {transaccion.id}")
             
-            # Construir URL de redirección
-            redirect_url = f'/ingreso-billetes/{transaccion.token}/'
+            # Determinar URL de redirección según el estado de la transacción
+            if transaccion.estado == 'Pendiente':
+                # Transacción pendiente - ir al ingreso de billetes
+                redirect_url = f'/ingreso-billetes/{transaccion.token}/'
+            else:
+                # Transacción ya procesada - procesar y ir al éxito
+                from transacciones.models import Tauser, procesar_transaccion
+                from django.http import HttpRequest
+                
+                # Crear un request mock para obtener el puerto
+                mock_request = HttpRequest()
+                mock_request.META['SERVER_PORT'] = request.META.get('SERVER_PORT', '8001')
+                
+                try:
+                    puerto = int(mock_request.META['SERVER_PORT'])
+                    tauser = Tauser.objects.get(puerto=puerto)
+                    procesar_transaccion(transaccion, tauser)
+                except (Tauser.DoesNotExist, ValueError) as e:
+                    logger.error(f"Error al procesar transacción {transaccion.id}: {str(e)}")
+                    # En caso de error, redirigir al ingreso de billetes como fallback
+                    redirect_url = f'/ingreso-billetes/{transaccion.token}/'
+                else:
+                    redirect_url = f'/exito/{transaccion.token}/'
             
             return JsonResponse({
                 'success': True,

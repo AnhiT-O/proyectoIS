@@ -136,51 +136,66 @@ def ingreso_token(request):
                             messages.error(request, 'El token ha expirado.')
                         return redirect('ingreso_token')
                     
-                    if transaccion.medio_pago == 'Efectivo':
-                        cambios = verificar_cambio_cotizacion(transaccion)
-                        if cambios and cambios.get('hay_cambios'):
-                            datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
-                            transaccion.precio_base = datos_transaccion['precio_base']
-                            transaccion.cotizacion = datos_transaccion['cotizacion']
-                            transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
-                            transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
-                            transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
-                            transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
-                            transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
-                            transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                            transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
-                            transaccion.monto_original = datos_transaccion['monto_original']
-                            transaccion.monto = datos_transaccion['monto']
-                            transaccion.precio_final = datos_transaccion['precio_final']
-                            transaccion.save()
-                            request.session['transaccion'] = transaccion.id
-                            context = {
-                                'cambios': cambios,
-                                'transaccion': transaccion,
-                                'enable_2fa': is_2fa_enabled(),
-                                'user_email': transaccion.usuario.email if transaccion.usuario.email else ''
-                            }
-                            return render(request, 'ingreso_token.html', context)
-                        
-                        # Guardar la transacción en sesión para el 2FA
-                        request.session['transaccion'] = transaccion.id
-                        
-                        # Si el 2FA está habilitado, renderizar template con flag para mostrar modal
-                        if is_2fa_enabled():
-                            context = {
-                                'form': TokenForm(),
-                                'enable_2fa': True,
-                                'user_email': transaccion.usuario.email if transaccion.usuario.email else '',
-                                'show_2fa_modal': True
-                            }
-                            return render(request, 'ingreso_token.html', context)
-                        
-                        return redirect('ingreso_billetes', codigo=codigo)
-                    else:
+                    # Verificar si es operación de Tauser
+                    if transaccion.medio_pago != 'Efectivo':
                         messages.error(request, 'El token no corresponde a una operación de Tauser.')
                         return redirect('ingreso_token')
+                    
+                    # Verificar cambios de cotización para pagos en efectivo
+                    cambios = verificar_cambio_cotizacion(transaccion)
+                    if cambios and cambios.get('hay_cambios'):
+                        datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
+                        transaccion.precio_base = datos_transaccion['precio_base']
+                        transaccion.cotizacion = datos_transaccion['cotizacion']
+                        transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
+                        transaccion.porc_beneficio_segmento = datos_transaccion['porc_beneficio_segmento']
+                        transaccion.recargo_pago = datos_transaccion['monto_recargo_pago']
+                        transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
+                        transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
+                        transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
+                        transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
+                        transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
+                        transaccion.monto_original = datos_transaccion['monto_original']
+                        transaccion.monto = datos_transaccion['monto']
+                        transaccion.precio_final = datos_transaccion['precio_final']
+                        transaccion.save()
+                        request.session['transaccion'] = transaccion.id
+                        context = {
+                            'cambios': cambios,
+                            'transaccion': transaccion,
+                            'enable_2fa': is_2fa_enabled(),
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else ''
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
+                    # Guardar la transacción en sesión para el 2FA
+                    request.session['transaccion'] = transaccion.id
+                    
+                    # Si el 2FA está habilitado, renderizar template con flag para mostrar modal
+                    if is_2fa_enabled():
+                        context = {
+                            'form': TokenForm(),
+                            'enable_2fa': True,
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else '',
+                            'show_2fa_modal': True
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
+                    return redirect('ingreso_billetes', codigo=codigo)
                 else:
+                    # Transacción ya procesada - aplicar 2FA si está habilitado
+                    request.session['transaccion'] = transaccion.id
+                    
+                    if is_2fa_enabled():
+                        context = {
+                            'form': TokenForm(),
+                            'enable_2fa': True,
+                            'user_email': transaccion.usuario.email if transaccion.usuario.email else '',
+                            'show_2fa_modal': True,
+                            'transaccion_procesada': True  # Flag para indicar que ya está procesada
+                        }
+                        return render(request, 'ingreso_token.html', context)
+                    
                     procesar_transaccion(transaccion, Tauser.objects.get(puerto=int(request.get_port())))
                     return redirect('exito', codigo=codigo)
     else:
