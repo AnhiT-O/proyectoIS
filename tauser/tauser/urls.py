@@ -1,0 +1,32 @@
+"""
+URL configuration for tauser project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.urls import path
+from . import views
+from . import views_2fa
+
+urlpatterns = [
+    path('', views.inicio, name='inicio'),
+    path('ingreso/', views.ingreso_token, name='ingreso_token'),
+    path('verificar-2fa/', views.verificar_2fa, name='verificar_2fa'),
+    path('caja-fuerte/', views.caja_fuerte, name='caja_fuerte'),
+    path('ingreso-billetes/<str:codigo>/', views.ingreso_billetes, name='ingreso_billetes'),
+    path('exito/<str:codigo>/', views.exito, name='exito'),
+    
+    # URLs AJAX para 2FA
+    path('2fa/send-token/', views_2fa.send_2fa_token, name='send_2fa_token'),
+    path('2fa/verify-token/', views_2fa.verify_2fa_token, name='verify_2fa_token'),
+]

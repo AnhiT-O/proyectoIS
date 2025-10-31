@@ -1,0 +1,37 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+{% load formato_numeros %}
+
+{% block title %}
+    {% if transaccion.tipo == 'compra' %}
+        Compra Exitosa
+    {% elif transaccion.tipo == 'venta' %}
+        Venta Exitosa
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/inicio.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/inicio.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    {% if transaccion.estado == 'Completa' %}
+        <div class="logo">¡Transacción Completa!</div>
+        {% if transaccion.tipo == 'compra' %}
+            <p class="subtitulo">La compra de monedas se ha realizado exitosamente, se han extraído {{ transaccion.monto|formateado:transaccion.moneda.decimales }} {{ transaccion.moneda.simbolo }}.<br>¡Gracias por confiar en Global Exchange!.</p>
+        {% else %}
+            {% if transaccion.medio_cobro == 'Efectivo' %}
+                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, se han extraído Gs. {{ transaccion.precio_final|formateado }}.<br>¡Gracias por confiar en Global Exchange!.</p>
+            {% else %}
+                <p class="subtitulo">La venta de monedas se ha realizado exitosamente, tu dinero se ha acreditado automáticamente.<br>¡Gracias por confiar en Global Exchange!.</p>
+            {% endif %}
+        {% endif %}
+    {% elif transaccion.estado == 'Confirmada' %}
+        <div class="logo">Transacción Confirmada</div>
+        <p class="subtitulo">Se ha recibido el pago de esta operación correctamente, sin embargo, este Tauser no cuenta con billetes suficientes para completar la compra.<br>Intentalo en otro Tauser o en otro momento.</p>
+    {% endif %}
+    <a href="{% url 'inicio' %}" class="btn-enviar">Volver a Inicio</a>
+</div>
+{% endblock %}

@@ -17,19 +17,19 @@ import ast
 from datetime import date
 from decimal import Decimal
 import os
+import random
+import secrets
+import string
 from django.conf import settings
-import socket
-import requests
+from django.core.mail import EmailMessage
 from django.db import models
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
+import requests
 import stripe
 from monedas.models import Moneda, StockGuaranies, Denominacion
 from django.db import transaction
-import random
-import string
-from django.core.mail import EmailMessage
 
 class Recargos(models.Model):
     """
@@ -221,6 +221,7 @@ class TransactionToken(models.Model):
         
         return token_obj
 
+
 class Tauser(models.Model):
     puerto = models.SmallIntegerField(unique=True)
     sucursal = models.CharField(max_length=100, unique=True)
@@ -243,53 +244,6 @@ class Tauser(models.Model):
             str: Descripción del TAUser en formato "TAUser Puerto {puerto}"
         """
         return f"TAUser Puerto {self.puerto}"
-    
-    def esta_activo(self):
-        """
-        Verifica si hay un servidor Django corriendo en el puerto del TAUser.
-        
-        Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP
-        para confirmar que es un servidor Django.
-        
-        Returns:
-            bool: True si hay un servidor Django corriendo, False en caso contrario
-        """
-        try:
-            # Verificar si el puerto está en uso
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.settimeout(1)  # Timeout de 1 segundo
-                result = sock.connect_ex(('localhost', self.puerto))
-                
-                if result != 0:
-                    # Puerto no está en uso
-                    return False
-            
-            # Si el puerto está en uso, verificar si es un servidor Django
-            try:
-                response = requests.get(
-                    f'http://localhost:{self.puerto}/',
-                    timeout=2,
-                    headers={'User-Agent': 'TAUser-Checker/1.0'}
-                )
-                
-                # Verificar si la respuesta contiene indicadores de Django
-                # Django típicamente incluye estos headers o contenido
-                django_indicators = [
-                    'django' in response.headers.get('server', '').lower(),
-                    'csrftoken' in response.text.lower(),
-                    'django' in response.text.lower(),
-                    response.status_code in [200, 302, 404]  # Códigos típicos de Django
-                ]
-                
-                return any(django_indicators)
-                
-            except requests.exceptions.RequestException:
-                # Si hay error en la petición HTTP pero el puerto está abierto,
-                # asumimos que podría ser Django pero no responde correctamente
-                return True
-                
-        except Exception:
-            return False
     
 class BilletesTauser(models.Model):
     tauser = models.ForeignKey(Tauser, on_delete=models.CASCADE)
@@ -328,7 +282,7 @@ class Transaccion(models.Model):
         db_table: "transacciones"
     """
     cliente = models.ForeignKey('clientes.Cliente', on_delete=models.CASCADE)
-    tipo = models.CharField(max_length=7)  # 'compra' o 'venta'
+    tipo = models.CharField(max_length=10)  # 'compra' o 'venta'
     moneda = models.ForeignKey('monedas.Moneda', on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=30, decimal_places=8)
     cotizacion = models.IntegerField()
@@ -349,9 +303,9 @@ class Transaccion(models.Model):
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, default='Pendiente')
     razon = models.CharField(max_length=100, blank=True, null=True) 
-    token = models.CharField(max_length=8, blank=True, null=True, unique=True)
+    token = models.CharField(max_length=255, blank=True, null=True)
     factura = models.CharField(max_length=100, blank=True, null=True)
-    numero_factura = models.SmallIntegerField(blank=True, null=True)
+    numero_factura = models.SmallIntegerField(blank=True, null=True)  
     usuario = models.ForeignKey('usuarios.Usuario', on_delete=models.CASCADE)
     
     class Meta:
@@ -423,11 +377,11 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         # Calculo de recargos por medio de pago
         # Si el pago es con tarjeta de crédito
         if isinstance(dict_pago, dict) and 'brand' in dict_pago:
-            monto_recargo_pago =  Decimal(precio_final * Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100-Recargos.objects.get(marca=dict_pago['brand']).recargo)
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
         # Si el pago es con billetera electrónica
         elif dict_pago in Recargos.objects.filter(medio='Billetera Electrónica').values_list('marca', flat=True):
-            monto_recargo_pago =  Decimal(precio_final * Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100-Recargos.objects.get(marca=dict_pago).recargo)
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago).recargo
         # Si el pago es en efectivo o transferencia, no hay recargo
         else:
@@ -448,7 +402,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
     else:
         # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
         if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
+            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
             monto += redondeo_efectivo_monto
         else:
             redondeo_efectivo_monto = 0
@@ -470,7 +424,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         # Calculo de recargos por medio de pago y cobro
         # Si el pago es con tarjeta de crédito
         if isinstance(dict_pago, dict) and 'brand' in dict_pago:
-            monto_recargo_pago =  Decimal(monto * moneda.tasa_base) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
+            monto_recargo_pago =  Decimal(precio_final) * (Decimal(Recargos.objects.get(marca=dict_pago['brand']).recargo) / Decimal(100))
             porc_recargo_pago = Recargos.objects.get(marca=dict_pago['brand']).recargo
         else:
             monto_recargo_pago = 0
@@ -487,7 +441,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         precio_final -= monto_recargo_pago + monto_recargo_cobro
         # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
         if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
+            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
             precio_final += redondeo_efectivo_precio_final
         else:
             redondeo_efectivo_precio_final = 0
@@ -633,28 +587,8 @@ def generar_token_transaccion(transaccion):
     Se utiliza para transacciones con medios de pago que requieren verificación
     adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.
     """
-    # Generar token único de 8 caracteres (números y letras mayúsculas)
-    import string
-    import random
-    caracteres = string.ascii_uppercase + string.digits
-    
-    # Verificar unicidad del token
-    token = None
-    max_intentos = 100  # Evitar bucle infinito
-    intentos = 0
-    
-    while token is None and intentos < max_intentos:
-        token_candidato = ''.join(random.choice(caracteres) for _ in range(8))
-        # Verificar si el token ya existe en la base de datos
-        if not Transaccion.objects.filter(token=token_candidato).exists():
-            token = token_candidato
-        intentos += 1
-    
-    # Si no se pudo generar un token único, usar fallback con timestamp
-    if token is None:
-        import time
-        timestamp_suffix = str(int(time.time()))[-2:]  # Últimos 2 dígitos del timestamp
-        token = ''.join(random.choice(caracteres) for _ in range(6)) + timestamp_suffix
+    # Generar token único
+    token = secrets.token_urlsafe(32)
     
     # Crear datos del token
     datos_token = {
@@ -671,13 +605,13 @@ def generar_token_transaccion(transaccion):
         'datos': datos_token
     }
 
-def enviar_notificacion_cambio_cotizacion(usuario, transaccion, cambios_cotizacion):
+def enviar_notificacion_cambio_cotizacion_tauser(usuario_email, transaccion, cambios_cotizacion):
     """
     Envía un correo electrónico de notificación cuando se detectan cambios en la cotización
-    durante el proceso de confirmación de una transacción.
+    durante el proceso de confirmación de una transacción en el sistema TAUser.
     
     Args:
-        usuario: Usuario que realiza la transacción
+        usuario_email (str): Email del usuario operador que procesó la transacción
         transaccion: Instancia de la transacción afectada
         cambios_cotizacion (dict): Diccionario con información de cambios de cotización
             - 'hay_cambios': boolean indicando si hubo cambios
@@ -690,12 +624,10 @@ def enviar_notificacion_cambio_cotizacion(usuario, transaccion, cambios_cotizaci
     """
     try:
         from django.utils import timezone
-        from django.template.loader import render_to_string
-        import os
         
-        # Verificar que el usuario tenga email
-        if not usuario.email:
-            print(f"Usuario {usuario.username} no tiene email configurado para notificación de cambio de cotización")
+        # Verificar que haya email
+        if not usuario_email:
+            print("No se proporcionó email para notificación de cambio de cotización en TAUser")
             return False
             
         # Preparar datos para el template del email
@@ -727,7 +659,6 @@ def enviar_notificacion_cambio_cotizacion(usuario, transaccion, cambios_cotizaci
             cambio_favorable = diferencia > 0
             
         contexto_email = {
-            'usuario_nombre': usuario.first_name or usuario.username,
             'cliente_nombre': transaccion.cliente.nombre,
             'transaccion_id': transaccion.id,
             'tipo_operacion': transaccion.tipo,
@@ -743,23 +674,24 @@ def enviar_notificacion_cambio_cotizacion(usuario, transaccion, cambios_cotizaci
             'medio_pago': transaccion.medio_pago,
             'medio_cobro': transaccion.medio_cobro,
             'precio_final': transaccion.precio_final,
-            'empresa': 'Global Exchange'
+            'empresa': 'Global Exchange TAUser',
+            'token': transaccion.token or 'N/A'
         }
         
         # Preparar asunto del correo
         direccion_cambio = "bajó" if diferencia < 0 else "subió"
-        asunto = f"Cambio de Cotización Detectado - {moneda.nombre} {direccion_cambio} - Transacción #{transaccion.id}"
+        asunto = f"TAUser - Cambio de Cotización Detectado - {moneda.nombre} {direccion_cambio} - Token #{transaccion.token}"
         
         # Crear contenido del email en texto plano
         mensaje_texto = f"""
-Estimado/a {contexto_email['usuario_nombre']},
+Estimado/a Usuario,
 
-Se ha detectado un cambio en la cotización durante su proceso de transacción.
+Se ha detectado un cambio en la cotización durante el procesamiento de una transacción en el sistema TAUser.
 
 DETALLES DE LA TRANSACCIÓN:
 ================================
 Cliente: {contexto_email['cliente_nombre']}
-Transacción ID: #{contexto_email['transaccion_id']}
+Token de Transacción: #{contexto_email['token']}
 Tipo de Operación: {contexto_email['tipo_operacion'].title()}
 Moneda: {contexto_email['moneda_nombre']} ({contexto_email['moneda_simbolo']})
 Monto: {contexto_email['monto_transaccion']:,.{moneda.decimales}f} {contexto_email['moneda_simbolo']}
@@ -777,8 +709,8 @@ Medio de Cobro: {contexto_email['medio_cobro']}
 Monto Final: Gs. {contexto_email['precio_final']:,.0f}
 Fecha y Hora: {contexto_email['fecha_hora'].strftime('%d/%m/%Y %H:%M:%S')}
 
-Este cambio se detectó mientras usted se encontraba en la página de confirmación de la transacción.
-Puede continuar con la transacción aceptando el nuevo precio o cancelar la operación.
+Este cambio se detectó durante la verificación del token en el sistema TAUser.
+El cliente puede continuar con la transacción aceptando el nuevo precio o cancelar la operación.
 
 ---
 {contexto_email['empresa']}
@@ -790,23 +722,23 @@ Sistema Automatizado de Notificaciones
             subject=asunto,
             body=mensaje_texto,
             from_email=os.environ.get('EMAIL_HOST_USER'),
-            to=[usuario.email],
+            to=[usuario_email],
         )
         
         email.send()
-        print(f"Notificación de cambio de cotización enviada exitosamente a {usuario.email} para transacción #{transaccion.id}")
+        print(f"Notificación TAUser de cambio de cotización enviada exitosamente a {usuario_email} para token #{transaccion.token}")
         return True
         
     except Exception as e:
-        print(f"Error al enviar notificación de cambio de cotización: {str(e)}")
+        print(f"Error al enviar notificación TAUser de cambio de cotización: {str(e)}")
         return False
 
-def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
+def verificar_cambio_cotizacion(transaccion, usuario_email=None):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
     Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
-    Si detecta cambios, también envía una notificación por correo electrónico al usuario.
+    Si detecta cambios y se proporciona un email, también envía una notificación.
     
     Args:
         request (HttpRequest): Petición HTTP con datos de sesión
@@ -821,138 +753,102 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
             - 'email_enviado': boolean indicando si se envió notificación por email
     """
     try:
-        # Obtener datos de la sesión
-        datos_key = f'{tipo_transaccion}_datos'
-        precio_compra_key = 'precio_compra_inicial'
-        precio_venta_key = 'precio_venta_inicial'
-        
-        datos_transaccion = request.session.get(datos_key)
-        precio_compra_inicial = request.session.get(precio_compra_key)
-        precio_venta_inicial = request.session.get(precio_venta_key)
-        if not datos_transaccion or (precio_compra_inicial is None and precio_venta_inicial is None):
-            return None
-            
-        # Obtener moneda actual
-        moneda = Moneda.objects.get(id=datos_transaccion['moneda'])
-        cliente_activo = request.user.cliente_activo
-        
         # Calcular precios actuales
-        precios_actuales = moneda.get_precios_cliente(cliente_activo)
+        precios_actuales = transaccion.moneda.get_precios_cliente(transaccion.cliente)
         precio_compra_actual = precios_actuales['precio_compra']
         precio_venta_actual = precios_actuales['precio_venta']
 
         # Verificar si hay cambios
-        hay_cambios = (
-            precio_compra_actual != precio_compra_inicial and 
-            precio_venta_actual != precio_venta_inicial
-        )
+        hay_cambios = False
+        if transaccion.tipo == 'compra':
+            if transaccion.cotizacion != precio_venta_actual:
+                hay_cambios = True
+        else:
+            if transaccion.cotizacion != precio_compra_actual:
+                hay_cambios = True
+        
+
         if hay_cambios:
             cambios_info = {
                 'hay_cambios': True,
                 'valores_anteriores': {
-                    'precio_compra': precio_compra_inicial,
-                    'precio_venta': precio_venta_inicial
+                    'precio_compra': transaccion.cotizacion,
+                    'precio_venta': transaccion.cotizacion
                 },
                 'valores_actuales': {
                     'precio_compra': precio_compra_actual,
                     'precio_venta': precio_venta_actual
                 },
-                'moneda': moneda,
+                'moneda': transaccion.moneda,
                 'email_enviado': False
             }
             
-            # Enviar notificación por email si hay transacción en la sesión
-            transaccion_id = request.session.get('transaccion_id')
-            if transaccion_id:
-                try:
-                    transaccion = Transaccion.objects.get(id=transaccion_id)
-                    email_enviado = enviar_notificacion_cambio_cotizacion(
-                        request.user, 
-                        transaccion, 
-                        cambios_info
-                    )
-                    cambios_info['email_enviado'] = email_enviado
-                except Transaccion.DoesNotExist:
-                    print(f"Transacción {transaccion_id} no encontrada para envío de notificación")
+            # Enviar notificación por email si se proporciona
+            if usuario_email:
+                email_enviado = enviar_notificacion_cambio_cotizacion_tauser(
+                    usuario_email,
+                    transaccion,
+                    cambios_info
+                )
+                cambios_info['email_enviado'] = email_enviado
             
             return cambios_info
         
         return {'hay_cambios': False}
         
-    except Exception:
+    except Exception as e:
+        print(f"Error en verificar_cambio_cotizacion TAUser: {str(e)}")
         return None
     
 @transaction.atomic
-def procesar_transaccion(transaccion, recibido=0):
-    
-    if transaccion.medio_pago == 'Transferencia Bancaria':
-        transaccion.pagado = recibido
-        if recibido < transaccion.precio_final:
-            print('Notificar usuario que transferencia es incompleta')
+def procesar_transaccion(transaccion, tauser):
+    if transaccion.estado == 'Pendiente':
+        transaccion.estado = 'Confirmada'
+        generar_factura_electronica(transaccion)
+        transaccion.fecha_hora = timezone.now()
+        transaccion.save()
+        transaccion.cliente.consumo_diario += transaccion.precio_final
+        transaccion.cliente.consumo_mensual += transaccion.precio_final
+        transaccion.cliente.ultimo_consumo = date.today()
+        transaccion.cliente.save()
+        procesar_transaccion(transaccion, tauser)
+    elif transaccion.estado == 'Confirmada':
+        if transaccion.medio_cobro == 'Efectivo':
+            if transaccion.tipo == 'compra':
+                denominaciones = list(Denominacion.objects.filter(moneda=transaccion.moneda).order_by('valor').values_list('valor', flat=True))
+                cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=transaccion.moneda, tauser=tauser).order_by('denominacion__valor')
+                cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                extraer = billetes_necesarios(int(transaccion.monto), denominaciones, cantidades)
+                if extraer:
+                    for valor, cantidad in extraer.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=transaccion.moneda)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    transaccion.estado = 'Completa'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
+            else:
+                denominaciones = list(Denominacion.objects.filter(moneda=None).order_by('valor').values_list('valor', flat=True))
+                cantidades_qs = BilletesTauser.objects.filter(denominacion__moneda=None, tauser=tauser).order_by('denominacion__valor')
+                cantidades = {b.denominacion.valor: b.cantidad for b in cantidades_qs}
+                extraer = billetes_necesarios(transaccion.precio_final, denominaciones, cantidades)
+                if extraer:
+                    for valor, cantidad in extraer.items():
+                        denominacion = Denominacion.objects.get(valor=valor, moneda=None)
+                        tauser_billete = BilletesTauser.objects.get(denominacion=denominacion, tauser=tauser)
+                        tauser_billete.cantidad -= cantidad
+                        tauser_billete.save()
+                    transaccion.estado = 'Completa'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.save()
         else:
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            generar_factura_electronica(transaccion)
             stock = StockGuaranies.objects.first()
-            stock.cantidad += recibido
+            stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
             stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
-    elif transaccion.medio_pago in Recargos.objects.filter(medio='Billetera Electrónica'):
-        transaccion.pagado = recibido
-        if recibido < transaccion.precio_final:
-            print('Notificar usuario que transferencia es incompleta')
-        else:
-            transaccion.estado = 'Confirmada'
-            generar_factura_electronica(transaccion)
+            transaccion.estado = 'Completa'
             transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            monto_recargo_pago = Decimal(recibido) * (Decimal(Recargos.objects.get(marca=transaccion.medio_pago).recargo) / Decimal(100))
-            stock.cantidad += recibido - monto_recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
             transaccion.save()
-            print('Notificar usuario que transferencia fue confirmada y transacción confirmada')
-    elif transaccion.medio_pago.startswith('Tarjeta de Crédito'):
-        if transaccion.tipo == 'compra':
-            transaccion.pagado = transaccion.precio_final
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            stock.cantidad += transaccion.precio_final - transaccion.recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-        else:
-            transaccion.pagado = transaccion.precio_final
-            transaccion.estado = 'Confirmada'
-            transaccion.fecha_hora = timezone.now()
-            stock = StockGuaranies.objects.first()
-            stock.cantidad += (transaccion.monto * transaccion.moneda.tasa_base) - transaccion.recargo_pago
-            stock.save()
-            transaccion.cliente.consumo_diario += transaccion.precio_final
-            transaccion.cliente.consumo_mensual += transaccion.precio_final
-            transaccion.cliente.ultimo_consumo = date.today()
-            transaccion.cliente.save()
-            transaccion.save()
-            if transaccion.medio_cobro != 'Efectivo':
-                stock.cantidad -= transaccion.precio_final + transaccion.recargo_cobro
-                stock.save()
-                transaccion.estado = 'Completa'
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
-        resultado = generar_factura_electronica(transaccion)
-        print(resultado)
 
 def redondear_efectivo(monto, denominaciones):
     """
@@ -1055,7 +951,7 @@ def generar_factura_electronica(transaccion):
         'dCelRec': transaccion.cliente.telefono,
         'dEmailRec': transaccion.cliente.correo_electronico,
         'iNatRec': '1' if transaccion.cliente.tipo_documento == 'RUC' else '2',
-        'iTiOpe': '2',
+        'iTiOpe': '1',
         'iCondOpe': '1',
         'gPaConEIni': [
             {
@@ -1138,8 +1034,8 @@ def generar_factura_electronica(transaccion):
         transaccion.factura = cdc_data
         transaccion.save()
         print(f"Factura electrónica generada exitosamente")
-        
-        # Enviar factura por correo electrónico
+
+     # Enviar factura por correo electrónico
         try:
             # Descargar el PDF de la factura
             resultado_descarga = descargar_factura(cdc_data)
@@ -1188,44 +1084,6 @@ Global Exchange
                 
         except Exception as e:
             print(f"Error al enviar factura por correo: {str(e)}")
-    
-    return response_data
-
-def verificar_factura(CDC):
-    """
-    Verifica el estado de una factura electrónica mediante su CDC.
-    
-    Args:
-        CDC (str): Código de Control de la factura
-        dRucEm (str): RUC del emisor de la factura
-        
-    Returns:
-        dict: Diccionario con información de la factura verificada
-            - 'success': bool indicando si la verificación fue exitosa
-            - 'factura': dict con detalles de la factura
-            - 'error': str con mensaje de error (si aplica)
-    """
-    url = f"{settings.FACTURA_SEGURA_API_URL}/misife00/v1/esi"
-    
-    headers = {
-        'accept': 'application/json',
-        'Authentication-Token': os.environ.get('AUTHENTICATION_TOKEN'),
-        'Content-Type': 'application/json'
-    }
-    
-    payload = {
-        "operation": "get_estado_sifen",
-        "params": {
-            "CDC": CDC,
-            "dRucEm": '2595733'
-        }
-    }
-    
-    response = requests.post(url, headers=headers, json=payload, timeout=30)
-    response.raise_for_status()
-    response_data = response.json()
-    print(response_data)
-    
     return response_data
 
 def descargar_factura(CDC):
@@ -1268,3 +1126,50 @@ def descargar_factura(CDC):
         'filename': filename,
         'content_type': 'application/pdf'
     }
+
+def billetes_necesarios(monto, denominaciones, disponible):
+    """
+    Calcula la cantidad de billetes necesarios para cubrir un monto dado usando programación dinámica.
+    
+    Args:
+        monto (int): Monto total a cubrir
+        denominaciones (list): Lista de denominaciones disponibles (enteros)
+        disponible (dict): Diccionario con la cantidad disponible por denominación
+        
+    Returns:
+        dict: Diccionario con la cantidad de billetes por denominación necesarios, o None si no es posible
+    """
+    from collections import defaultdict
+    
+    # dp[i] = (min_billetes, configuracion) para completar monto i
+    # configuracion es un dict con {denominacion: cantidad_usada}
+    dp = defaultdict(lambda: (float('inf'), {}))
+    dp[0] = (0, {})  # Para monto 0, necesitamos 0 billetes
+    
+    # Recorrer todos los montos desde 1 hasta el monto objetivo
+    for i in range(1, monto + 1):
+        # Probar cada denominación
+        for denominacion in denominaciones:
+            if denominacion in disponible and disponible[denominacion] > 0 and i >= denominacion:
+                # Obtener la configuración anterior (para monto i - denominacion)
+                prev_billetes, prev_config = dp[i - denominacion]
+                
+                # Verificar cuántos billetes de esta denominación ya se han usado
+                billetes_usados_actual = prev_config.get(denominacion, 0)
+                
+                # Solo proceder si podemos usar otro billete de esta denominación
+                if billetes_usados_actual < disponible[denominacion]:
+                    nueva_cantidad_billetes = prev_billetes + 1
+                    
+                    # Si esta es una mejor solución (menos billetes)
+                    if nueva_cantidad_billetes < dp[i][0]:
+                        # Crear nueva configuración
+                        nueva_config = prev_config.copy()
+                        nueva_config[denominacion] = billetes_usados_actual + 1
+                        dp[i] = (nueva_cantidad_billetes, nueva_config)
+    
+    # Verificar si se encontró una solución para el monto objetivo
+    if dp[monto][0] == float('inf'):
+        return None  # No se pudo cubrir el monto con los billetes disponibles
+    
+    return dp[monto][1]  # Retornar la configuración óptima

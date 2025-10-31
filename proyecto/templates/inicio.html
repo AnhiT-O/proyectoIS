@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}Global Exchange - Inicio{% endblock %}
 
@@ -43,8 +43,8 @@
                 {% for cotizacion in cotizaciones %}
                     <tr class="fila-clickeable" data-url="{% url 'monedas:evolucion_cotizacion' cotizacion.moneda.pk %}" style="cursor: pointer;" title="Click para ver la evolución de {{ cotizacion.moneda.nombre }}">
                         <td><span class="moneda-simbolo" title="{{ cotizacion.moneda.nombre }}">{{ cotizacion.moneda.simbolo }}</span></td>
-                        <td>Gs. {{ cotizacion.precio_compra|intcomma }}</td>
-                        <td>Gs. {{ cotizacion.precio_venta|intcomma }}</td>
+                        <td>Gs. {{ cotizacion.precio_compra|formateado }}</td>
+                        <td>Gs. {{ cotizacion.precio_venta|formateado }}</td>
                         <td>{{ cotizacion.moneda.fecha_cotizacion|date:"d/m/Y H:i" }}</td>
                     </tr>
                 {% endfor %}

@@ -70,6 +70,8 @@ pip install psycopg2-binary #conexión con PostgreSQL
 pip install python-dotenv #variables de entorno
 pip install gunicorn #para despliegue de la página
 pip install stripe #pasarela de pagos
+pip install openpyxl #generación de archivos Excel
+pip install reportlab #generación de archivos PDF
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 
@@ -81,7 +83,10 @@ pip install python-dotenv #variables de entorno
 pip install pytest #para pruebas unitarias
 pip install pytest-django #integración de pruebas con django
 pip install sphinx #para documentación automática de código
+pip install sphinx_rtd_theme #tema para documentación
 pip install stripe #pasarela de pagos
+pip install openpyxl #generación de archivos Excel
+pip install reportlab #generación de archivos PDF
 #a medida que el proyecto avance se tendrán que instalar más dependencias
 ```
 

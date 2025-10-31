@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}{{ moneda.nombre }} - Global Exchange{% endblock %}
 
@@ -60,21 +60,21 @@
                     <span class="info-icono">💰</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Tasa Base</div>
-                        <div class="info-valor">Gs. {{ moneda.tasa_base|intcomma }}</div>
+                        <div class="info-valor">Gs. {{ moneda.tasa_base|formateado }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
                     <span class="info-icono">📉</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Comisión de Compra</div>
-                        <div class="info-valor">Gs. {{ moneda.comision_compra|intcomma }}</div>
+                        <div class="info-valor">Gs. {{ moneda.comision_compra|formateado }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
                     <span class="info-icono">📈</span>
                     <div class="info-contenido">
                         <div class="info-titulo">Comisión de Venta</div>
-                        <div class="info-valor">Gs. {{ moneda.comision_venta|intcomma }}</div>
+                        <div class="info-valor">Gs. {{ moneda.comision_venta|formateado }}</div>
                     </div>
                 </div>
                 <div class="info-celda">
@@ -98,7 +98,7 @@
                             <div class="denominaciones-lista">
                                 {% for denominacion in denominaciones %}
                                     <span class="denominacion-item">
-                                        {{ moneda.simbolo }} {{ denominacion|intcomma }}
+                                        {{ moneda.simbolo }} {{ denominacion|formateado }}
                                     </span>
                                 {% empty %}
                                     <span class="texto-vacio">No hay denominaciones configuradas</span>

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
+{% load formato_numeros %}
 
 {% block title %}Tauser - Sucursal {{ tauser.sucursal }} - Global Exchange{% endblock %}
 
@@ -32,7 +32,7 @@
                                 <div class="info-celda">
                                     <div class="info-contenido">
                                         <div class="info-titulo">{{ total.nombre }}</div>
-                                        <div class="info-valor">{{ total.total|intcomma }}</div>
+                                        <div class="info-valor">{{ total.total|formateado }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -82,10 +82,10 @@
                                         <tr>
                                             {% if billete.denominacion.moneda %}
                                                 <td>{{ billete.denominacion.moneda.nombre }}</td>
-                                                <td>{{ billete.denominacion.valor|intcomma }} {{ billete.denominacion.moneda.simbolo }}</td>
+                                                <td>{{ billete.denominacion.valor|formateado }} {{ billete.denominacion.moneda.simbolo }}</td>
                                             {% else %}
                                                 <td>Guaraní</td>
-                                                <td>Gs. {{ billete.denominacion.valor|intcomma }}</td>
+                                                <td>Gs. {{ billete.denominacion.valor|formateado }}</td>
                                             {% endif %}
                                             <td>{{ billete.cantidad }}</td>
                                         </tr>

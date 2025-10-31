@@ -113,10 +113,10 @@ def crear_moneda_usd(sender, **kwargs):
             Moneda.objects.create(
                 nombre='Dólar estadounidense',
                 simbolo='USD',
-                tasa_base=7000,
-                comision_compra=40,
-                comision_venta=70,
-                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 10, 10, 10, 50, 0))
+                tasa_base=7030,
+                comision_compra=30,
+                comision_venta=40,
+                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 10, 28, 13, 10, 0))
             )
             print("✓ Moneda USD creada automáticamente")
 
@@ -215,8 +215,25 @@ class HistorialCotizacion(models.Model):
         self.precio_venta = self.tasa_base + self.comision_venta
         super().save(*args, **kwargs)
 
-# Signal para crear registro en historial cuando se actualiza una moneda
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
+
+@receiver(pre_save, sender=Moneda)
+def guardar_valores_anteriores(sender, instance, **kwargs):
+    """
+    Guarda los valores anteriores de la moneda antes de actualizar
+    """
+    if instance.pk:  # Solo si ya existe en la BD
+        # old_instance: valores actuales en la BD (ANTES del save)
+        old_instance = Moneda.objects.get(pk=instance.pk)
+        
+        # instance: valores NUEVOS que se van a guardar
+        instance._old_tasa_base = old_instance.tasa_base
+        instance._old_comision_compra = old_instance.comision_compra
+        instance._old_comision_venta = old_instance.comision_venta
+        
+        # Puedes acceder a ambos:
+        print(f"Valor VIEJO: {old_instance.comision_compra}")
+        print(f"Valor NUEVO: {instance.comision_compra}")
 
 @receiver(post_save, sender=Moneda)
 def crear_historial_cotizacion(sender, instance, created, **kwargs):
@@ -224,7 +241,6 @@ def crear_historial_cotizacion(sender, instance, created, **kwargs):
     Crea un registro en el historial cuando se crea una moneda o se actualizan
     sus campos de cotización (tasa_base, comision_compra, comision_venta)
     """
-    # Si es una moneda nueva, crear historial
     if created:
         fecha_hoy = instance.fecha_cotizacion.date()
         HistorialCotizacion.objects.create(
@@ -236,12 +252,12 @@ def crear_historial_cotizacion(sender, instance, created, **kwargs):
             comision_venta=instance.comision_venta
         )
     else:
-        # Si es una edición, verificar si cambió algún campo de cotización
-        old_instance = Moneda.objects.get(pk=instance.pk)
+        # Verificar si cambió algún campo usando los valores guardados en pre_save
         if (
-            instance.tasa_base != old_instance.tasa_base or
-            instance.comision_compra != old_instance.comision_compra or
-            instance.comision_venta != old_instance.comision_venta
+            hasattr(instance, '_old_tasa_base') and
+            (instance.tasa_base != instance._old_tasa_base or
+             instance.comision_compra != instance._old_comision_compra or
+             instance.comision_venta != instance._old_comision_venta)
         ):
             fecha_hoy = timezone.now().date()
             HistorialCotizacion.objects.create(

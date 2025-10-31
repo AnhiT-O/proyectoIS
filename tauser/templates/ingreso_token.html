@@ -1,0 +1,459 @@
+{% extends 'llave_billetes.html' %}
+{% load static %}
+{% load formato_numeros %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'claro/formularios.css' %}" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="{% static 'oscuro/formularios.css' %}" media="(prefers-color-scheme: dark)">
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="form-cabecera">
+        <div class="logo">Tauser - Global Exchange</div>
+        <p class="subtitulo">Ingresa el token de transacción</p>
+    </div>
+    
+    <form method="post" novalidate id="tokenForm">
+        {% csrf_token %}
+        <div class="form-campo">
+            {{ form.codigo }}
+            {% if form.codigo.errors %}
+                <div class="form-errores">
+                    {% for error in form.codigo.errors %}
+                        <div class="mensaje-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="zona-botones">
+            <button type="submit" name="accion" value="enviar" class="btn-enviar">
+                Aceptar
+            </button>
+            <a href="{% url 'inicio' %}" class="btn-atras">
+                Volver al Inicio
+            </a>
+        </div>
+        
+        {% if enable_2fa %}
+        <div class="mensaje-info-2fa" style="margin-top: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">🔐</span>
+                <div>
+                    <strong>Verificación de Seguridad</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">
+                        {% if transaccion_procesada %}
+                            Por tu seguridad, necesitas verificar tu identidad antes de acceder a los detalles de esta transacción ya procesada.
+                        {% else %}
+                            Por tu seguridad, se enviará un código de verificación a tu correo electrónico para validar tu identidad antes de continuar con la transacción.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+    
+    {% if cambios %}
+    <div class="popup-overlay" style="display: flex">
+        <div class="popup-contenido" style="max-width: 700px;">
+            <div class="popup-cabecera">
+                <h3>¡La cotización ha cambiado!</h3>
+            </div>
+            <div class="popup-cuerpo">
+                {% if transaccion.tipo == 'compra' %}
+                    <p>El precio de venta a cambiado de Gs. {{ cambios.valores_anteriores.precio_venta|formateado }} a Gs. {{ cambios.valores_actuales.precio_venta|formateado }}</p>
+                {% else %}
+                    <p>El precio de compra a cambiado de Gs. {{ cambios.valores_anteriores.precio_compra|formateado }} a Gs. {{ cambios.valores_actuales.precio_compra|formateado }}</p>
+                {% endif %}
+                
+                {% if cambios.email_enviado %}
+                    <div class="mensaje-info" style="margin: 1rem 0; padding: 1rem; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 5px; color: #0c5460;">
+                        <strong>📧 Notificación enviada:</strong> Se ha enviado un correo electrónico a <strong>{{ email_usuario }}</strong> con los detalles del cambio de cotización para tu referencia.
+                    </div>
+                {% elif email_usuario %}
+                    <div class="mensaje-advertencia" style="margin: 1rem 0; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;">
+                        <strong>⚠️ Notificación no enviada:</strong> Hubo un problema al enviar la notificación por correo electrónico, pero puedes continuar con la transacción.
+                    </div>
+                {% else %}
+                    <div class="mensaje-advertencia" style="margin: 1rem 0; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404;">
+                        <strong>📧 Sin email:</strong> No se proporcionó un email para recibir notificaciones de cambios de cotización.
+                    </div>
+                {% endif %}
+                
+                <form method="post" id="confirmForm">
+                {% csrf_token %}
+                    <div class="zona-botones">
+                        <button type="submit" name="accion" value="aceptar" class="btn-enviar">
+                            Aceptar Nuevo Precio
+                        </button>
+                        <button type="submit" name="accion" value="cancelar" class="btn-atras">
+                            Cancelar Operación
+                        </button>
+                    </div>
+                </form>    
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Modal 2FA -->
+    <div id="modal2FA" class="popup-overlay" style="display: none;">
+        <div class="popup-contenido" style="max-width: 500px;">
+            <div class="popup-cabecera">
+                <h3>🔐 Verificación de Seguridad</h3>
+            </div>
+            <div class="popup-cuerpo">
+                <div id="step-sending" class="verification-step">
+                    <div class="loading-container" style="text-align: center; padding: 20px;">
+                        <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="margin-top: 15px;">Enviando código de verificación...</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #666;">Se enviará a <strong id="userEmail"></strong></p>
+                    </div>
+                </div>
+                
+                <div id="step-verify" class="verification-step" style="display: none;">
+                    <p id="verifyMessage">Se ha enviado un código de verificación de 6 dígitos al email <strong id="userEmailVerify"></strong></p>
+                    <div class="input-group" style="margin: 20px 0;">
+                        <label for="tokenInput">Código de verificación:</label>
+                        <input type="text" id="tokenInput" maxlength="6" placeholder="123456" 
+                               class="form-control" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; margin-top: 10px;">
+                        <small class="form-text text-muted" style="display: block; text-align: center; margin-top: 5px;">
+                            El código expira en <span id="timerDisplay">1:00</span>
+                        </small>
+                    </div>
+                    <div id="tokenError" class="mensaje-error" style="display: none;"></div>
+                    
+                    <div class="zona-botones">
+                        <button type="button" id="verificarBtn" class="btn-enviar">
+                            Verificar Código
+                        </button>
+                        <button type="button" id="reenviarBtn" class="btn-enviar" style="background-color: #6c757d;">
+                            Reenviar Código
+                        </button>
+                    </div>
+                    
+                    <!-- Botón cancelar en sección separada -->
+                    <div class="zona-botones" style="margin-top: 1rem;">
+                        <button type="button" id="cancelar2FABtn" class="btn-atras">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="step-error" class="verification-step" style="display: none;">
+                    <div class="mensaje-error">
+                        <p id="errorMessage">Error al enviar código de verificación</p>
+                        <div class="zona-botones">
+                            <button type="button" id="reintentar2FABtn" class="btn-enviar">
+                                Reintentar
+                            </button>
+                            <button type="button" id="cancelarError2FABtn" class="btn-atras">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#modal2FA .btn-enviar:disabled, 
+#modal2FA .btn-atras:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: #d6d6d6 !important;
+    color: #888888 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#modal2FA .btn-enviar:disabled:hover, 
+#modal2FA .btn-atras:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: #d6d6d6 !important;
+}
+</style>
+
+<script>
+// Variable global para almacenar el email del usuario
+let userEmailGlobal = '{{ user_email|default:"" }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal2FA = document.getElementById('modal2FA');
+    const tokenForm = document.getElementById('tokenForm');
+    const confirmForm = document.getElementById('confirmForm');
+    const tokenInput = document.getElementById('tokenInput');
+    const verificarBtn = document.getElementById('verificarBtn');
+    const reenviarBtn = document.getElementById('reenviarBtn');
+    const cancelar2FABtn = document.getElementById('cancelar2FABtn');
+    const reintentar2FABtn = document.getElementById('reintentar2FABtn');
+    const cancelarError2FABtn = document.getElementById('cancelarError2FABtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const tokenError = document.getElementById('tokenError');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    let countdownTimer = null;
+    let timeRemaining = 60; // 1 minuto
+    let shouldShow2FA = {% if enable_2fa %}true{% else %}false{% endif %};
+    let autoShow2FA = {% if show_2fa_modal %}true{% else %}false{% endif %};
+    let transaccionProcesada = {% if transaccion_procesada %}true{% else %}false{% endif %};
+    
+    // Función para actualizar email en el modal
+    function updateEmailDisplay(email) {
+        userEmailGlobal = email;
+        const emailElements = [
+            document.getElementById('userEmail'),
+            document.getElementById('userEmailVerify')
+        ];
+        emailElements.forEach(el => {
+            if (el) el.textContent = email;
+        });
+    }
+    
+    // Si viene el flag de auto-mostrar 2FA
+    if (autoShow2FA && userEmailGlobal) {
+        updateEmailDisplay(userEmailGlobal);
+        modal2FA.style.display = 'flex';
+        showStep('step-sending');
+        sendToken();
+    }
+    
+    // Función helper para manejar estados de botones
+    function setButtonStates(reenviarEnabled, verificarEnabled) {
+        reenviarBtn.disabled = !reenviarEnabled;
+        verificarBtn.disabled = !verificarEnabled;
+    }
+    
+    // Función para mostrar pasos del modal
+    function showStep(stepId) {
+        document.querySelectorAll('.verification-step').forEach(step => {
+            step.style.display = 'none';
+        });
+        document.getElementById(stepId).style.display = 'block';
+        
+        // Actualizar mensaje según el tipo de transacción
+        if (stepId === 'step-verify' && transaccionProcesada) {
+            const verifyMessage = document.getElementById('verifyMessage');
+            if (verifyMessage) {
+                verifyMessage.innerHTML = 'Se ha enviado un código de verificación de 6 dígitos al email <strong id="userEmailVerify">' + userEmailGlobal + '</strong> para acceder a los detalles de tu transacción.';
+            }
+        }
+    }
+    
+    // Función para iniciar countdown
+    function startCountdown() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        timeRemaining = 60;
+        reenviarBtn.textContent = 'Reenviar Código';
+        
+        countdownTimer = setInterval(() => {
+            timeRemaining--;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining <= 0) {
+                clearInterval(countdownTimer);
+                timerDisplay.textContent = 'Expirado';
+                showError('El código ha expirado. Solicita uno nuevo.');
+                setButtonStates(true, false);
+                reenviarBtn.textContent = 'Reenviar Código';
+                verificarBtn.textContent = 'Código Expirado';
+            }
+        }, 1000);
+    }
+    
+    // Función para mostrar errores
+    function showError(message) {
+        tokenError.textContent = message;
+        tokenError.style.display = 'block';
+    }
+    
+    // Función para limpiar errores
+    function clearError() {
+        tokenError.style.display = 'none';
+    }
+    
+    // Enviar token
+    function sendToken() {
+        clearError();
+        
+        fetch('/2fa/send-token/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showStep('step-verify');
+                setButtonStates(false, true);
+                reenviarBtn.textContent = 'Reenviar Código';
+                verificarBtn.textContent = 'Verificar Código';
+                startCountdown();
+                tokenInput.focus();
+            } else {
+                showStep('step-error');
+                errorMessage.textContent = data.message || 'Error al enviar código de verificación';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showStep('step-error');
+            errorMessage.textContent = 'Error de conexión. Intenta nuevamente.';
+        });
+    }
+    
+    // Verificar token
+    function verifyToken() {
+        const token = tokenInput.value.trim();
+        
+        if (!token) {
+            showError('Ingresa el código de verificación');
+            return;
+        }
+        
+        if (token.length !== 6 || !/^\d{6}$/.test(token)) {
+            showError('El código debe contener exactamente 6 dígitos');
+            return;
+        }
+        
+        clearError();
+        verificarBtn.disabled = true;
+        verificarBtn.textContent = 'Verificando...';
+        
+        fetch('/2fa/verify-token/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ token: token })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (countdownTimer) clearInterval(countdownTimer);
+                modal2FA.style.display = 'none';
+                
+                // Redirigir
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            } else {
+                showError(data.message || 'Código incorrecto');
+                verificarBtn.disabled = false;
+                verificarBtn.textContent = 'Verificar Código';
+                tokenInput.select();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Error de conexión. Intenta nuevamente.');
+            verificarBtn.disabled = false;
+            verificarBtn.textContent = 'Verificar Código';
+        });
+    }
+    
+    // Interceptar el form de confirmación de cambios (si existe)
+    if (confirmForm && shouldShow2FA) {
+        confirmForm.addEventListener('submit', function(e) {
+            const accion = e.submitter ? e.submitter.value : null;
+            
+            // Solo interceptar el botón "aceptar"
+            if (accion === 'aceptar') {
+                e.preventDefault();
+                
+                // Enviar el formulario y procesar respuesta
+                const formData = new FormData(confirmForm);
+                
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.show_2fa) {
+                        // Actualizar email y mostrar modal
+                        if (data.user_email) {
+                            updateEmailDisplay(data.user_email);
+                        }
+                        
+                        // Ocultar popup de cambios
+                        const popupCambios = confirmForm.closest('.popup-overlay');
+                        if (popupCambios) {
+                            popupCambios.style.display = 'none';
+                        }
+                        
+                        // Mostrar modal 2FA
+                        modal2FA.style.display = 'flex';
+                        showStep('step-sending');
+                        sendToken();
+                    } else if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al procesar la solicitud');
+                });
+            }
+        });
+    }
+    
+    // Event listeners
+    verificarBtn.addEventListener('click', verifyToken);
+    
+    // Permitir verificar con Enter
+    tokenInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            verifyToken();
+        }
+    });
+    
+    // Solo permitir números en el input
+    tokenInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/\D/g, '');
+        clearError();
+    });
+    
+    // Reenviar código
+    reenviarBtn.addEventListener('click', function() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        showStep('step-sending');
+        sendToken();
+    });
+    
+    // Cancelar desde modal de verificación
+    cancelar2FABtn.addEventListener('click', function() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        modal2FA.style.display = 'none';
+        window.location.href = '/';
+    });
+    
+    // Reintentar desde error
+    reintentar2FABtn.addEventListener('click', function() {
+        showStep('step-sending');
+        sendToken();
+    });
+    
+    // Cancelar desde error
+    cancelarError2FABtn.addEventListener('click', function() {
+        modal2FA.style.display = 'none';
+        window.location.href = '/';
+    });
+});
+</script>
+{% endblock %}
