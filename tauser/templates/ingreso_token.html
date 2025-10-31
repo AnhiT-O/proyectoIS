@@ -34,6 +34,20 @@
                 Volver al Inicio
             </a>
         </div>
+        
+        {% if enable_2fa %}
+        <div class="mensaje-info-2fa" style="margin-top: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">🔐</span>
+                <div>
+                    <strong>Verificación de Seguridad</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em;">
+                        Por tu seguridad, se enviará un código de verificación a tu correo electrónico para validar tu identidad antes de continuar con la transacción.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </form>
     
     {% if cambios %}
