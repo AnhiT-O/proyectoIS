@@ -185,4 +185,4 @@ TWO_FACTOR_AUTH = {
 
 # Configuración de Factura Segura
 FACTURA_SEGURA_API_URL = 'https://apitest.facturasegura.com.py'
-NUMERO_FACTURACION = 375
+NUMERO_FACTURACION = 376
