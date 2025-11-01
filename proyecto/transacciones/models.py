@@ -664,6 +664,7 @@ def generar_token_transaccion(transaccion):
     
     # Actualizar la transacción con el token y su expiración
     transaccion.token = token
+    transaccion.fecha_hora = timezone.now()
     transaccion.save()
 
     return {

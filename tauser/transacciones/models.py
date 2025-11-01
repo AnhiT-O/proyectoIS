@@ -598,6 +598,7 @@ def generar_token_transaccion(transaccion):
     
     # Actualizar la transacción con el token y su expiración
     transaccion.token = token
+    transaccion.fecha_hora = timezone.now()
     transaccion.save()
 
     return {
@@ -951,7 +952,7 @@ def generar_factura_electronica(transaccion):
         'dCelRec': transaccion.cliente.telefono,
         'dEmailRec': transaccion.cliente.correo_electronico,
         'iNatRec': '1' if transaccion.cliente.tipo_documento == 'RUC' else '2',
-        'iTiOpe': '1',
+        'iTiOpe': '2',
         'iCondOpe': '1',
         'gPaConEIni': [
             {

@@ -23,7 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from monedas.models import Moneda, StockGuaranies
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
@@ -31,7 +31,6 @@ from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conver
 from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
-from django.contrib.auth.models import User
 import ast
 import stripe
 import logging
@@ -90,7 +89,6 @@ def compra_monto_moneda(request):
         - tipo_transaccion: Tipo de operación ('compra')
         - limites_disponibles: Información de límites del cliente
     """
-    #verificar_factura('01025957333001003000037422025103118649440309')
     transacciones_pasadas = Transaccion.objects.filter(usuario=request.user, estado='Pendiente')
     if transacciones_pasadas:
         for t in transacciones_pasadas:
@@ -1389,8 +1387,6 @@ def venta_exito(request):
         else:
             try:
                 generar_token_transaccion(transaccion)
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
