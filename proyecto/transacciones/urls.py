@@ -52,6 +52,9 @@ urlpatterns = [
     # URLs para descargas de historial
     path('descargar/historial/pdf/', views.descargar_historial_pdf, name='descargar_historial_pdf'),
     path('descargar/historial/excel/', views.descargar_historial_excel, name='descargar_historial_excel'),
+    
+    # URL para descargar factura de transacción
+    path('descargar/factura/<int:transaccion_id>/', views.descargar_factura_view, name='descargar_factura'),
 
     path('gestion-transacciones/', views.ver_variables, name='ver_variables'),
     path('edicion-transacciones/', views.editar_variables, name='editar_variables'),

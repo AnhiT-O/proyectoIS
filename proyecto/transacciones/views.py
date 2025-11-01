@@ -23,7 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from monedas.models import Moneda, StockGuaranies
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
@@ -2560,3 +2560,75 @@ def descargar_historial_excel(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     return response
+
+@login_required
+def descargar_factura_view(request, transaccion_id):
+    """
+    Vista para descargar la factura electrónica de una transacción.
+    
+    Esta vista permite a los usuarios descargar el PDF de la factura electrónica
+    de una transacción completada. Utiliza la función descargar_factura del modelo
+    para obtener el contenido del PDF desde el servicio de facturación.
+    
+    Validaciones:
+        - La transacción debe existir
+        - El usuario debe tener permisos para acceder a la transacción
+        - La transacción debe tener una factura generada (campo factura no vacío)
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        transaccion_id (int): ID de la transacción para la cual descargar la factura
+        
+    Returns:
+        HttpResponse: Archivo PDF de la factura con content-type 'application/pdf'
+            - Nombre del archivo: 'factura_{CDC}.pdf'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(404): Si la transacción no existe
+        HttpResponse(403): Si el usuario no tiene permisos para acceder
+        HttpResponse(400): Si la transacción no tiene factura generada
+    """
+    try:
+        # Obtener la transacción
+        transaccion = get_object_or_404(Transaccion, id=transaccion_id)
+        
+        # Verificar permisos del usuario
+        if transaccion.cliente not in request.user.clientes_operados.all():
+            messages.error(request, "No tienes permiso para descargar la factura de esta transacción.")
+            return redirect('inicio')
+        
+        # Verificar que la transacción tenga factura generada
+        if not transaccion.factura:
+            messages.error(request, "Esta transacción no tiene una factura generada.")
+            return redirect('transacciones:historial_detalle', transaccion_id=transaccion.id)
+        
+        # Obtener el CDC de la factura
+        CDC = transaccion.factura
+        
+        # Descargar la factura usando la función del modelo
+        resultado = descargar_factura(CDC)
+        
+        if resultado['success']:
+            # Crear la respuesta HTTP con el PDF
+            response = HttpResponse(
+                resultado['content'],
+                content_type=resultado['content_type']
+            )
+            response['Content-Disposition'] = f'attachment; filename="{resultado["filename"]}"'
+            
+            logger.info(f"Factura descargada exitosamente para transacción {transaccion_id} por usuario {request.user.username}")
+            return response
+        else:
+            # Si hubo un error al descargar
+            messages.error(request, "Error al descargar la factura. Por favor, intente nuevamente.")
+            logger.error(f"Error al descargar factura para transacción {transaccion_id}: {resultado.get('error', 'Error desconocido')}")
+            return redirect('transacciones:historial_detalle', transaccion_id=transaccion.id)
+            
+    except Transaccion.DoesNotExist:
+        messages.error(request, "La transacción solicitada no existe.")
+        return redirect('inicio')
+    except Exception as e:
+        messages.error(request, f"Error inesperado al descargar la factura: {str(e)}")
+        logger.error(f"Error inesperado al descargar factura para transacción {transaccion_id}: {str(e)}")
+        return redirect('inicio')
