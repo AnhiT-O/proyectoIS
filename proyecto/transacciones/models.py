@@ -333,15 +333,12 @@ class Transaccion(models.Model):
     monto = models.DecimalField(max_digits=30, decimal_places=8)
     cotizacion = models.IntegerField()
     precio_base = models.IntegerField()
-    monto_original = models.DecimalField(max_digits=30, decimal_places=8)
     beneficio_segmento = models.IntegerField()
     porc_beneficio_segmento = models.CharField(max_length=3)
     recargo_pago = models.IntegerField()
     porc_recargo_pago = models.CharField(max_length=4)
     recargo_cobro = models.IntegerField()
     porc_recargo_cobro = models.CharField(max_length=4)
-    redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
-    redondeo_efectivo_precio_final = models.IntegerField()
     precio_final = models.IntegerField()
     pagado = models.IntegerField(default=0)
     medio_pago = models.CharField(max_length=50) 
@@ -375,9 +372,6 @@ class Transaccion(models.Model):
 def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
     """
     Returns:
-        monto_original (Decimal): Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
-        redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
-        redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
         cotizacion (int): Cotización de la moneda según el tipo de operación
         precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
         porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
@@ -386,7 +380,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
         monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
         porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
-        monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+        monto (Decimal): Monto de la divisa a operar
         precio_final (int): Monto en guaraníes final a pagar o cobrar
     """
     # Primero convertimos el pago y cobro a diccionarios si vienen como strings
@@ -398,13 +392,8 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         dict_cobro = ast.literal_eval(cobro)
     else:
         dict_cobro = cobro
-    # Se guarda el monto original
-    monto_original = monto
     # Calculos para compra
     if operacion == 'compra':
-        # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
-        redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
-        monto += redondeo_efectivo_monto
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base + moneda.comision_venta
         precio_base = monto * cotizacion
@@ -435,23 +424,11 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             porc_recargo_pago = 0
         # Calculo del monto en guaraníes a pagar con recargos
         precio_final += monto_recargo_pago
-        # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
-        if dict_pago == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
-            precio_final += redondeo_efectivo_precio_final
-        else:
-            redondeo_efectivo_precio_final = 0
         # No hay recargo por medio de cobro ya que siempre es en efectivo
         monto_recargo_cobro = 0
         porc_recargo_cobro = 0
     # Calculos para venta
     else:
-        # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
-        if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
-            monto += redondeo_efectivo_monto
-        else:
-            redondeo_efectivo_monto = 0
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base - moneda.comision_compra
         precio_base = monto * cotizacion
@@ -485,25 +462,16 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             porc_recargo_cobro = 0
         # Calculo del monto en guaraníes a cobrar con recargos
         precio_final -= monto_recargo_pago + monto_recargo_cobro
-        # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
-        if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
-            precio_final += redondeo_efectivo_precio_final
-        else:
-            redondeo_efectivo_precio_final = 0
             
     return {
         'cotizacion': int(cotizacion),
         'precio_base': int(precio_base),
         'beneficio_segmento': int(beneficio_segmento),
         'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
-        'redondeo_efectivo_monto': redondeo_efectivo_monto,
-        'redondeo_efectivo_precio_final': int(redondeo_efectivo_precio_final),
         'monto_recargo_pago': int(monto_recargo_pago),
         'porc_recargo_pago': f'{porc_recargo_pago}%',
         'monto_recargo_cobro': int(monto_recargo_cobro),
         'porc_recargo_cobro': f'{porc_recargo_cobro}%',
-        'monto_original': monto_original,
         'monto': monto,
         'precio_final': int(precio_final)
     }
@@ -955,16 +923,16 @@ def procesar_transaccion(transaccion, recibido=0):
         resultado = generar_factura_electronica(transaccion)
         print(resultado)
 
-def redondear_efectivo(monto, denominaciones):
+def no_redondeado(monto, denominaciones):
     """
-    Redondea un monto al múltiplo más cercano según las denominaciones disponibles.
+    Verifica si el monto es exacto con las denominaciones disponibles.
     
     Args:
         monto (Decimal): Monto a redondear
         denominaciones (list): Lista de denominaciones disponibles (enteros)
         
     Returns:
-        Decimal: Monto redondeado
+        Decimal: 0 si el monto es exacto, o el menor redondeo necesario
     """
     redondeo = denominaciones[0]
     for i in denominaciones:

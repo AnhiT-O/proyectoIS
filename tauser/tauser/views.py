@@ -27,7 +27,7 @@ from datetime import timedelta
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
-from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion, calcular_conversion, verificar_cambio_cotizacion
+from transacciones.models import Transaccion, Tauser, BilletesTauser, billetes_necesarios, procesar_transaccion, calcular_conversion, verificar_cambio_cotizacion, no_redondeado
 from transacciones.utils_2fa import is_2fa_enabled, create_transaction_token, validate_2fa_token
 from .forms import TokenForm, IngresoForm, Token2FAForm
 from monedas.models import Denominacion
@@ -348,6 +348,36 @@ def ingreso_token(request):
                         cambios = verificar_cambio_cotizacion(transaccion, email_usuario)
                         if cambios and cambios.get('hay_cambios'):
                             datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
+                            if transaccion.tipo == 'venta':
+                                if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
+                                    messages.error(request, 'El monto ingresado no está redondeado para pago en efectivo. Se cancela la transacción.')
+                                    transaccion.estado = 'Cancelada'
+                                    transaccion.fecha_hora = timezone.now()
+                                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                                    transaccion.save()
+                                    return redirect('inicio')
+                                if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                                    messages.error(request, 'El monto final no está redondeado para cobro en efectivo. Se cancela la transacción.')
+                                    transaccion.estado = 'Cancelada'
+                                    transaccion.fecha_hora = timezone.now()
+                                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                                    transaccion.save()
+                                    return redirect('inicio')
+                            else:
+                                if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                                    messages.error(request, 'El monto final no está redondeado para pago en efectivo. Se cancela la transacción.')
+                                    transaccion.estado = 'Cancelada'
+                                    transaccion.fecha_hora = timezone.now()
+                                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                                    transaccion.save()
+                                    return redirect('inicio')
+                                if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
+                                    messages.error(request, 'El monto ingresado no está redondeado para cobro en efectivo. Se cancela la transacción.')
+                                    transaccion.estado = 'Cancelada'
+                                    transaccion.fecha_hora = timezone.now()
+                                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                                    transaccion.save()
+                                    return redirect('inicio')
                             transaccion.precio_base = datos_transaccion['precio_base']
                             transaccion.cotizacion = datos_transaccion['cotizacion']
                             transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
@@ -356,9 +386,6 @@ def ingreso_token(request):
                             transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
                             transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
                             transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                            transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                            transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
-                            transaccion.monto_original = datos_transaccion['monto_original']
                             transaccion.monto = datos_transaccion['monto']
                             transaccion.precio_final = datos_transaccion['precio_final']
                             transaccion.save()

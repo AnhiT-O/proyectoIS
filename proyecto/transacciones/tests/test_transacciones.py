@@ -17,8 +17,7 @@ from transacciones.models import (
     Tauser,
     BilletesTauser,
     Transaccion,
-    calcular_conversion,
-    redondear_efectivo
+    calcular_conversion
 )
 from transacciones.forms import SeleccionMonedaMontoForm, VariablesForm
 from monedas.models import Moneda, Denominacion, StockGuaranies
@@ -277,15 +276,12 @@ class TestTransaccionModel:
             monto=Decimal("100"),
             cotizacion=8200,
             precio_base=820000,
-            monto_original=Decimal("100"),
             beneficio_segmento=0,
             porc_beneficio_segmento="0%",
             recargo_pago=0,
             porc_recargo_pago="0%",
             recargo_cobro=0,
             porc_recargo_cobro="0%",
-            redondeo_efectivo_monto=Decimal("0"),
-            redondeo_efectivo_precio_final=0,
             precio_final=820000,
             medio_pago="Efectivo",
             medio_cobro="Efectivo",
@@ -307,15 +303,12 @@ class TestTransaccionModel:
             monto=Decimal("50"),
             cotizacion=7850,
             precio_base=392500,
-            monto_original=Decimal("50"),
             beneficio_segmento=0,
             porc_beneficio_segmento="0%",
             recargo_pago=0,
             porc_recargo_pago="0%",
             recargo_cobro=0,
             porc_recargo_cobro="0%",
-            redondeo_efectivo_monto=Decimal("0"),
-            redondeo_efectivo_precio_final=0,
             precio_final=392500,
             medio_pago="Efectivo",
             medio_cobro="Efectivo",
