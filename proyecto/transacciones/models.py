@@ -908,25 +908,121 @@ def procesar_transaccion(transaccion, recibido=0):
                 transaccion.save()
         generar_factura_electronica(transaccion)
 
-def no_redondeado(monto, denominaciones):
+def no_redondeado(monto, denominaciones, cantidades=None):
     """
-    Verifica si el monto es exacto con las denominaciones disponibles.
+    Verifica si el monto puede ser formado exactamente con las denominaciones disponibles.
+    
+    Esta función utiliza el algoritmo de Frobenius optimizado y teoría de números
+    para determinar eficientemente si es posible formar el monto exacto usando 
+    una combinación de las denominaciones disponibles.
+    Por ejemplo, 707000 puede formarse con 141 billetes de 5000 y 1 billete de 2000.
     
     Args:
-        monto (Decimal): Monto a redondear
+        monto (int o Decimal): Monto a verificar
         denominaciones (list): Lista de denominaciones disponibles (enteros)
+        cantidades (dict, opcional): Diccionario con cantidades disponibles por denominación.
+                                    Si no se proporciona, se asume cantidad ilimitada.
         
     Returns:
-        Decimal: 0 si el monto es exacto, o el menor redondeo necesario
+        int: 0 si el monto se puede formar exactamente, o el menor redondeo necesario hacia arriba
     """
-    redondeo = denominaciones[0]
-    for i in denominaciones:
-        if monto % i == 0:
-            redondeo = 0
-            break
-        elif i - (monto % i) < redondeo:
-            redondeo = i - (monto % i)
-    return redondeo
+    from math import gcd
+    from functools import reduce
+    
+    monto = int(monto)  # Convertir a entero si viene como Decimal
+    
+    # Ordenar denominaciones de menor a mayor
+    denominaciones_ordenadas = sorted(denominaciones)
+    
+    # Calcular el MCD (máximo común divisor) de todas las denominaciones
+    mcd = reduce(gcd, denominaciones_ordenadas)
+    
+    # Si el monto no es múltiplo del MCD, nunca se podrá formar
+    if monto % mcd != 0:
+        # Buscar el menor redondeo que sea múltiplo del MCD
+        redondeo = mcd - (monto % mcd)
+        return redondeo
+    
+    # Si solo tenemos cantidades ilimitadas y el monto es múltiplo del MCD,
+    # siempre se puede formar (por el teorema de Frobenius para denominaciones con gcd=1,
+    # o su generalización cuando gcd>1)
+    if cantidades is None:
+        # Para dos denominaciones, podemos usar el número de Frobenius
+        if len(denominaciones_ordenadas) == 2:
+            a, b = denominaciones_ordenadas
+            if gcd(a, b) == 1:
+                # Número de Frobenius: g(a,b) = ab - a - b
+                frobenius = a * b - a - b
+                if monto > frobenius:
+                    return 0  # Todos los números mayores que Frobenius son alcanzables
+        
+        # Para el caso general con cantidades ilimitadas, verificamos con DP optimizado
+        # Solo hasta el menor valor que garantiza alcanzabilidad
+        menor = denominaciones_ordenadas[0]
+        limite = menor * denominaciones_ordenadas[-1]
+        
+        if monto <= limite:
+            # DP optimizado: solo guardamos si es posible alcanzar cada valor
+            dp = [False] * (monto + 1)
+            dp[0] = True
+            
+            for i in range(1, monto + 1):
+                for denom in denominaciones_ordenadas:
+                    if i >= denom and dp[i - denom]:
+                        dp[i] = True
+                        break
+            
+            if dp[monto]:
+                return 0
+        else:
+            # Para montos muy grandes, asumimos que se puede formar
+            return 0
+    else:
+        # Con cantidades limitadas, usamos DP con backtracking limitado
+        # Optimización: usar BFS en lugar de DP completo
+        from collections import deque
+        
+        visitados = {0}
+        cola = deque([(0, cantidades.copy())])
+        
+        # Límite de iteraciones para evitar bucles infinitos
+        max_iteraciones = min(10000, monto // min(denominaciones_ordenadas) + 1000)
+        iteraciones = 0
+        
+        while cola and iteraciones < max_iteraciones:
+            iteraciones += 1
+            valor_actual, cant_restantes = cola.popleft()
+            
+            if valor_actual == monto:
+                return 0
+            
+            # Probar agregar cada denominación
+            for denom in denominaciones_ordenadas:
+                if cant_restantes[denom] > 0:
+                    nuevo_valor = valor_actual + denom
+                    
+                    # Solo continuar si no nos pasamos y no lo visitamos
+                    if nuevo_valor <= monto and nuevo_valor not in visitados:
+                        visitados.add(nuevo_valor)
+                        nuevas_cantidades = cant_restantes.copy()
+                        nuevas_cantidades[denom] -= 1
+                        cola.append((nuevo_valor, nuevas_cantidades))
+    
+    # Si no se puede formar, buscar el menor redondeo
+    menor_denominacion = min(denominaciones_ordenadas)
+    
+    # Buscar el siguiente múltiplo del MCD que sea alcanzable
+    for incremento in range(mcd, mcd * menor_denominacion + 1, mcd):
+        monto_redondeado = monto + incremento
+        
+        # Verificación rápida recursiva con límite
+        if incremento <= menor_denominacion * 2:
+            resultado = no_redondeado(monto_redondeado, denominaciones, cantidades)
+            if resultado == 0:
+                return incremento
+    
+    # Fallback: retornar el MCD como redondeo mínimo
+    return mcd
 
 def generar_factura_electronica(transaccion):
     """
