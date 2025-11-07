@@ -281,14 +281,19 @@ def ingreso_token(request):
             except Transaccion.DoesNotExist:
                 messages.error(request, 'Transacción no encontrada.')
                 return redirect('ingreso_token')
-            # Si el 2FA está habilitado, devolver respuesta JSON para mostrar modal
+            
+            # Guardar la transacción en sesión para el 2FA
+            request.session['transaccion'] = transaccion.id
+            
+            # Si el 2FA está habilitado, devolver respuesta JSON para el modal
             if is_2fa_enabled():
                 from django.http import JsonResponse
                 return JsonResponse({
                     'success': True,
                     'show_2fa': True,
-                    'user_email': transaccion.usuario.email
+                    'user_email': transaccion.usuario.email if transaccion.usuario.email else ''
                 })
+            
             return redirect('ingreso_billetes', codigo=transaccion.token)
         
         elif accion == 'cancelar':
@@ -344,8 +349,7 @@ def ingreso_token(request):
                     
                     if transaccion.medio_pago == 'Efectivo':
                         # Obtener email del usuario que procesó la transacción para notificaciones
-                        email_usuario = getattr(transaccion.usuario, 'email', None)
-                        cambios = verificar_cambio_cotizacion(transaccion, email_usuario)
+                        cambios = verificar_cambio_cotizacion(transaccion)
                         if cambios and cambios.get('hay_cambios'):
                             datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, transaccion.tipo, transaccion.medio_pago, transaccion.medio_cobro, transaccion.cliente.segmento)
                             if transaccion.tipo == 'venta':
@@ -395,7 +399,6 @@ def ingreso_token(request):
                             context = {
                                 'cambios': cambios,
                                 'transaccion': transaccion,
-                                'email_usuario': email_usuario,
                                 'enable_2fa': is_2fa_enabled(),
                                 'user_email': transaccion.usuario.email if transaccion.usuario.email else ''
                             }

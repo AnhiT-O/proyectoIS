@@ -173,7 +173,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Configuración de 2FA para transacciones
-ENABLE_2FA_TRANSACTIONS = False # Cambiar a False para deshabilitar completamente el 2FA
+ENABLE_2FA_TRANSACTIONS = True # Cambiar a False para deshabilitar completamente el 2FA
 
 # Configuración específica del 2FA
 TWO_FACTOR_AUTH = {

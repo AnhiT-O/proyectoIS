@@ -830,20 +830,6 @@ def verificar_cambio_cotizacion_sesion(request, tipo_transaccion='compra'):
                 'email_enviado': False
             }
             
-            # Enviar notificación por email si hay transacción en la sesión
-            transaccion_id = request.session.get('transaccion_id')
-            if transaccion_id:
-                try:
-                    transaccion = Transaccion.objects.get(id=transaccion_id)
-                    email_enviado = enviar_notificacion_cambio_cotizacion(
-                        request.user, 
-                        transaccion, 
-                        cambios_info
-                    )
-                    cambios_info['email_enviado'] = email_enviado
-                except Transaccion.DoesNotExist:
-                    print(f"Transacción {transaccion_id} no encontrada para envío de notificación")
-            
             return cambios_info
         
         return {'hay_cambios': False}
@@ -920,8 +906,7 @@ def procesar_transaccion(transaccion, recibido=0):
                 transaccion.estado = 'Completa'
                 transaccion.fecha_hora = timezone.now()
                 transaccion.save()
-        resultado = generar_factura_electronica(transaccion)
-        print(resultado)
+        generar_factura_electronica(transaccion)
 
 def no_redondeado(monto, denominaciones):
     """
@@ -959,6 +944,7 @@ def generar_factura_electronica(transaccion):
             - 'pdf_url': str con la URL del PDF
             - 'error': str con mensaje de error (si aplica)
     """
+    
     for numero in range(settings.NUMERO_FACTURACION, 400):
         if not Transaccion.objects.filter(numero_factura=numero).exists():
             transaccion.numero_factura = numero

@@ -151,7 +151,7 @@ MESSAGE_TAGS = {
 LOGIN_URL = '/login/'
 
 # Configuración de 2FA para transacciones
-ENABLE_2FA_TRANSACTIONS = False  # Habilitar o deshabilitar el sistema 2FA
+ENABLE_2FA_TRANSACTIONS = True  # Habilitar o deshabilitar el sistema 2FA
 TWO_FACTOR_AUTH = {
     'TOKEN_LENGTH': 6,  # Longitud del token (6 dígitos)
     'TOKEN_EXPIRY_MINUTES': 1,  # Minutos de validez del token

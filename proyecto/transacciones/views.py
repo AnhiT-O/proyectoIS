@@ -452,9 +452,17 @@ def compra_confirmacion(request):
                 datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'compra', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
                 if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
                     messages.error(request, 'El monto final no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                    transaccion.save()
                     return redirect('transacciones:compra_monto_moneda')
                 if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
                     messages.error(request, 'El monto ingresado no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                    transaccion.save()
                     return redirect('transacciones:compra_monto_moneda')
                 transaccion.precio_base = datos_transaccion['precio_base']
                 transaccion.cotizacion = datos_transaccion['cotizacion']
@@ -537,9 +545,9 @@ def compra_confirmacion(request):
         if request.session.get('transaccion_id'):
             transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
             context = {
-            'transaccion': transaccion,
-            'paso_actual': 4,
-            'titulo_paso': 'Confirmación de Compra'
+                'transaccion': transaccion,
+                'paso_actual': 4,
+                'titulo_paso': 'Confirmación de Compra'
             }
             return render(request, 'transacciones/confirmacion.html', context)
         
@@ -1172,9 +1180,17 @@ def venta_confirmacion(request):
                 datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'venta', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
                 if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
                     messages.error(request, 'El monto ingresado no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                    transaccion.save()
                     return redirect('transacciones:venta_monto_moneda')
                 if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
                     messages.error(request, 'El monto final no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                    transaccion.save()
                     return redirect('transacciones:venta_monto_moneda')
                 transaccion.precio_base = datos_transaccion['precio_base']
                 transaccion.cotizacion = datos_transaccion['cotizacion']

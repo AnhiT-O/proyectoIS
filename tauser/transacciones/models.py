@@ -702,7 +702,7 @@ Sistema Automatizado de Notificaciones
         print(f"Error al enviar notificación TAUser de cambio de cotización: {str(e)}")
         return False
 
-def verificar_cambio_cotizacion(transaccion, usuario_email=None):
+def verificar_cambio_cotizacion(transaccion):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
@@ -751,15 +751,6 @@ def verificar_cambio_cotizacion(transaccion, usuario_email=None):
                 'moneda': transaccion.moneda,
                 'email_enviado': False
             }
-            
-            # Enviar notificación por email si se proporciona
-            if usuario_email:
-                email_enviado = enviar_notificacion_cambio_cotizacion_tauser(
-                    usuario_email,
-                    transaccion,
-                    cambios_info
-                )
-                cambios_info['email_enviado'] = email_enviado
             
             return cambios_info
         
@@ -855,6 +846,7 @@ def generar_factura_electronica(transaccion):
             - 'pdf_url': str con la URL del PDF
             - 'error': str con mensaje de error (si aplica)
     """
+            
     for numero in range(settings.NUMERO_FACTURACION, 400):
         if not Transaccion.objects.filter(numero_factura=numero).exists():
             transaccion.numero_factura = numero
