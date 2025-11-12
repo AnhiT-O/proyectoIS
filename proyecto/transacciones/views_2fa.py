@@ -199,7 +199,8 @@ def verify_2fa_token(request):
                     'success': True,
                     'message': str - Mensaje de confirmación,
                     'transaccion_id': int - ID de la transacción verificada,
-                    'redirect_url': str - URL para redirección
+                    'confirmacion_url': str - URL para enviar POST,
+                    'requires_post': True - Indica que se debe hacer POST
                 }
             En caso de error:
                 {
@@ -230,15 +231,30 @@ def verify_2fa_token(request):
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url;
+            if (data.success && data.requires_post) {
+                // Hacer POST a la URL de confirmación con accion='confirmar'
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = data.confirmacion_url;
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'accion';
+                input.value = 'confirmar';
+                form.appendChild(input);
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrftoken;
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     
     Note:
         - El token debe ser exactamente 6 dígitos numéricos
         - El token se marca como usado después de una verificación exitosa
-        - La URL de redirección depende del tipo de transacción (compra/venta)
+        - Se envía POST a compra_confirmacion o venta_confirmacion con accion='confirmar'
     """
     try:
         # Verificar si 2FA está habilitado
@@ -285,17 +301,18 @@ def verify_2fa_token(request):
                 
                 logger.info(f"Token 2FA validado exitosamente para transacción {transaccion.id} por usuario {request.user.username}")
                 
-                # Redirigir al flujo normal de éxito según el tipo de transacción
+                # Enviar POST a confirmación según el tipo de transacción
                 if transaccion.tipo == 'compra':
-                    redirect_url = '/operaciones/comprar/exito/'
+                    confirmacion_url = '/operaciones/comprar/confirmacion/'
                 else:  # venta
-                    redirect_url = '/operaciones/vender/exito/'
+                    confirmacion_url = '/operaciones/vender/confirmacion/'
                 
                 return JsonResponse({
                     'success': True,
                     'message': 'Token verificado correctamente. Continuando con la transacción...',
                     'transaccion_id': transaccion.id,
-                    'redirect_url': redirect_url
+                    'confirmacion_url': confirmacion_url,
+                    'requires_post': True  # Indica que se debe hacer POST en lugar de redirect
                 })
                 
             except Transaccion.DoesNotExist:

@@ -79,9 +79,9 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 --
 
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
-Euro	EUR	t	8300	200	100	2	2025-10-28 15:40:00
-Real	BRL	t	1300	20	30	2	2025-10-28 15:41:00
-Peso argentino	ARP	t	5	1	1	0	2025-10-28 15:42:00
+Euro	EUR	t	8100	250	200	2	2025-11-06 10:31:00
+Real	BRL	t	1300	15	40	2	2025-11-06 10:30:00
+Peso argentino	ARP	t	5	1	1	0	2025-10-10 10:50:00
 \.
 
 COPY public.historial_cotizaciones (nombre_moneda, fecha, tasa_base, comision_compra, comision_venta, precio_compra, precio_venta, fecha_registro, moneda_id) FROM stdin;
@@ -99,6 +99,12 @@ Euro	2025-10-22	8500	350	50	8150	8550	2025-10-22 15:41:00	2
 Dólar estadounidense	2025-10-23	7030	30	30	7000	7060	2025-10-23 15:00:00	1
 Real	2025-10-28	1300	20	30	1280	1330	2025-10-28 13:10:00	3
 Euro	2025-10-28	8300	200	100	8150	8550	2025-10-28 13:10:00	2
+Dólar estadounidense	2025-10-28	7030	30	40	7000	7070	2025-10-28 13:10:00	1
+Euro	2025-11-01	8300	300	100	8000	8400	2025-11-01 12:30:00	2
+Real	2025-11-01	1300	30	20	1270	1320	2025-11-01 12:30:00	3
+Dólar estadounidense	2025-11-01	7030	30	50	7000	7080	2025-11-01 12:30:00	1
+Euro	2025-11-06	8100	250	200	7850	8300	2025-11-06 10:30:00	2
+Real	2025-11-06	1300	15	40	1285	1340	2025-11-06 10:30:00	3
 \.
 
 COPY public.denominaciones (valor, moneda_id) FROM stdin;

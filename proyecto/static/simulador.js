@@ -224,22 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div style="text-align: left;">
         `;
 
-        if (data.redondeo_monto) {
-            if (operacionSeleccionada === 'compra') {
-                resultadoHTML += `
-                    <small>Se redondea el monto ingresado a ${formatNumber(data.monto_final)} por medio de cobro Efectivo</small><br>
-                    <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
-                `;
-            } else {
-                resultadoHTML += `
-                    <small>Se redondea el monto ingresado a ${formatNumber(data.monto_final)} por medio de pago Efectivo</small><br>
-                    <small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>
-                `;
-            }
-        } else {
-            resultadoHTML += `<small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>`;
-        }
-
+        resultadoHTML += `<small>Precio base: ${formatNumber(data.precio_base)} Gs.</small><br>`;
         
         if (data.beneficio_segmento > 0) {
             resultadoHTML += `<small>Beneficio por segmento: ${formatNumber(data.beneficio_segmento)}</small><br>`;
@@ -254,46 +239,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (operacionSeleccionada === 'compra') {
-            if (data.redondeo_precio_final) {           
-                resultadoHTML += `
+            resultadoHTML += `
                     <br>
                     <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
                         Costo: ${formatNumber(data.precio_final)} Gs.
-                    </span><br>
-                    <small>Se redondea el costo por medio de pago Efectivo</small>
+                    </span>
                 </div>
             `;
-            } else  {
-                resultadoHTML += `
-                        <br>
-                        <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
-                            Costo: ${formatNumber(data.precio_final)} Gs.
-                        </span>
-                    </div>
-                `;
-            }
         }
         else {
-            if (data.redondeo_precio_final) {
-                resultadoHTML += `
+            resultadoHTML += `
                     <br>
                     <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
                         Cobro: ${formatNumber(data.precio_final)} Gs.
-                    </span><br>
-                    <small>Se redondea el cobro por medio de cobro Efectivo</small>
+                    </span>
                 </div>
             `;
-            } else  {
-                resultadoHTML += `
-                        <br>
-                        <span style="font-size: 1.1em; font-weight: bold; color: #308d3aff;">
-                            Cobro: ${formatNumber(data.precio_final)} Gs.
-                        </span>
-                    </div>
-                `;
-            }
         }
-        
+
+        if (data.no_pago) {
+            resultadoHTML += `
+                <div style="color: #d32f2f;">
+                    <strong>Advertencia:</strong> El monto no está redondeado para pago en efectivo.
+                </div>
+            `;
+        }
+
+        if (data.no_cobro) {
+            resultadoHTML += `
+                <div style="color: #d32f2f;">
+                    <strong>Advertencia:</strong> El monto no está redondeado para cobro en efectivo.
+                </div>
+            `;
+        }
+
         resultadoDiv.innerHTML = resultadoHTML;
     }
     

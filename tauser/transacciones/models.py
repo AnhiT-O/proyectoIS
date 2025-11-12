@@ -287,15 +287,12 @@ class Transaccion(models.Model):
     monto = models.DecimalField(max_digits=30, decimal_places=8)
     cotizacion = models.IntegerField()
     precio_base = models.IntegerField()
-    monto_original = models.DecimalField(max_digits=30, decimal_places=8)
     beneficio_segmento = models.IntegerField()
     porc_beneficio_segmento = models.CharField(max_length=3)
     recargo_pago = models.IntegerField()
     porc_recargo_pago = models.CharField(max_length=4)
     recargo_cobro = models.IntegerField()
     porc_recargo_cobro = models.CharField(max_length=4)
-    redondeo_efectivo_monto = models.DecimalField(max_digits=30, decimal_places=8)
-    redondeo_efectivo_precio_final = models.IntegerField()
     precio_final = models.IntegerField()
     pagado = models.IntegerField(default=0)
     medio_pago = models.CharField(max_length=50) 
@@ -329,9 +326,6 @@ class Transaccion(models.Model):
 def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efectivo', segmentacion='minorista'):
     """
     Returns:
-        monto_original (Decimal): Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
-        redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
-        redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
         cotizacion (int): Cotización de la moneda según el tipo de operación
         precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
         porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
@@ -340,7 +334,7 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
         monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
         porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
-        monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+        monto (Decimal): Monto de la divisa a operar
         precio_final (int): Monto en guaraníes final a pagar o cobrar
     """
     # Primero convertimos el pago y cobro a diccionarios si vienen como strings
@@ -352,13 +346,8 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
         dict_cobro = ast.literal_eval(cobro)
     else:
         dict_cobro = cobro
-    # Se guarda el monto original
-    monto_original = monto
     # Calculos para compra
     if operacion == 'compra':
-        # La compra siempre tendrá como medio de cobro efectivo, por lo que se debe redondear el monto hacia arriba
-        redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
-        monto += redondeo_efectivo_monto
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base + moneda.comision_venta
         precio_base = monto * cotizacion
@@ -389,23 +378,11 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             porc_recargo_pago = 0
         # Calculo del monto en guaraníes a pagar con recargos
         precio_final += monto_recargo_pago
-        # Si el pago es en efectivo, se redondea el monto a pagar hacia abajo
-        if dict_pago == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
-            precio_final += redondeo_efectivo_precio_final
-        else:
-            redondeo_efectivo_precio_final = 0
         # No hay recargo por medio de cobro ya que siempre es en efectivo
         monto_recargo_cobro = 0
         porc_recargo_cobro = 0
     # Calculos para venta
     else:
-        # Calculo de redondeo si el pago es en efectivo, sino no hay redondeo
-        if dict_pago == 'Efectivo':
-            redondeo_efectivo_monto = redondear_efectivo(monto, Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))
-            monto += redondeo_efectivo_monto
-        else:
-            redondeo_efectivo_monto = 0
         # Se guarda la cotización y el precio base
         cotizacion = moneda.tasa_base - moneda.comision_compra
         precio_base = monto * cotizacion
@@ -439,25 +416,16 @@ def calcular_conversion(monto, moneda, operacion, pago='Efectivo', cobro='Efecti
             porc_recargo_cobro = 0
         # Calculo del monto en guaraníes a cobrar con recargos
         precio_final -= monto_recargo_pago + monto_recargo_cobro
-        # Si el cobro es en efectivo, se redondea el monto a cobrar hacia abajo
-        if dict_cobro == 'Efectivo':
-            redondeo_efectivo_precio_final = redondear_efectivo(precio_final, Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))
-            precio_final += redondeo_efectivo_precio_final
-        else:
-            redondeo_efectivo_precio_final = 0
             
     return {
         'cotizacion': int(cotizacion),
         'precio_base': int(precio_base),
         'beneficio_segmento': int(beneficio_segmento),
         'porc_beneficio_segmento': f'{porc_beneficio_segmento}%',
-        'redondeo_efectivo_monto': redondeo_efectivo_monto,
-        'redondeo_efectivo_precio_final': int(redondeo_efectivo_precio_final),
         'monto_recargo_pago': int(monto_recargo_pago),
         'porc_recargo_pago': f'{porc_recargo_pago}%',
         'monto_recargo_cobro': int(monto_recargo_cobro),
         'porc_recargo_cobro': f'{porc_recargo_cobro}%',
-        'monto_original': monto_original,
         'monto': monto,
         'precio_final': int(precio_final)
     }
@@ -598,6 +566,7 @@ def generar_token_transaccion(transaccion):
     
     # Actualizar la transacción con el token y su expiración
     transaccion.token = token
+    transaccion.fecha_hora = timezone.now()
     transaccion.save()
 
     return {
@@ -733,7 +702,7 @@ Sistema Automatizado de Notificaciones
         print(f"Error al enviar notificación TAUser de cambio de cotización: {str(e)}")
         return False
 
-def verificar_cambio_cotizacion(transaccion, usuario_email=None):
+def verificar_cambio_cotizacion(transaccion):
     """
     Verifica si ha habido cambios en la cotización durante el proceso de transacción.
     
@@ -782,15 +751,6 @@ def verificar_cambio_cotizacion(transaccion, usuario_email=None):
                 'moneda': transaccion.moneda,
                 'email_enviado': False
             }
-            
-            # Enviar notificación por email si se proporciona
-            if usuario_email:
-                email_enviado = enviar_notificacion_cambio_cotizacion_tauser(
-                    usuario_email,
-                    transaccion,
-                    cambios_info
-                )
-                cambios_info['email_enviado'] = email_enviado
             
             return cambios_info
         
@@ -850,25 +810,101 @@ def procesar_transaccion(transaccion, tauser):
             transaccion.fecha_hora = timezone.now()
             transaccion.save()
 
-def redondear_efectivo(monto, denominaciones):
+def no_redondeado(monto, denominaciones, cantidades=None):
     """
-    Redondea un monto al múltiplo más cercano según las denominaciones disponibles.
+    Verifica si el monto puede ser formado exactamente con las denominaciones disponibles.
+    
+    Esta función utiliza el algoritmo de Frobenius optimizado y teoría de números
+    para determinar eficientemente si es posible formar el monto exacto usando 
+    una combinación de las denominaciones disponibles.
+    Por ejemplo, 707000 puede formarse con 141 billetes de 5000 y 1 billete de 2000.
     
     Args:
-        monto (Decimal): Monto a redondear
+        monto (int o Decimal): Monto a verificar
         denominaciones (list): Lista de denominaciones disponibles (enteros)
+        cantidades (dict, opcional): Diccionario con cantidades disponibles por denominación.
+                                    Si no se proporciona, se asume cantidad ilimitada.
         
     Returns:
-        Decimal: Monto redondeado
+        int: 0 si el monto se puede formar exactamente, o el menor redondeo necesario hacia arriba
     """
-    redondeo = denominaciones[0]
-    for i in denominaciones:
-        if monto % i == 0:
-            redondeo = 0
-            break
-        elif i - (monto % i) < redondeo:
-            redondeo = i - (monto % i)
-    return redondeo
+    from math import gcd
+    from functools import reduce
+    
+    monto = int(monto)  # Convertir a entero si viene como Decimal
+    
+    # Ordenar denominaciones de menor a mayor
+    denominaciones_ordenadas = sorted(denominaciones)
+    
+    # Calcular el MCD (máximo común divisor) de todas las denominaciones
+    mcd = reduce(gcd, denominaciones_ordenadas)
+    
+    # Si el monto no es múltiplo del MCD, nunca se podrá formar
+    if monto % mcd != 0:
+        # Buscar el menor redondeo que sea múltiplo del MCD
+        redondeo = mcd - (monto % mcd)
+        return redondeo
+    
+    # Si solo tenemos cantidades ilimitadas y el monto es múltiplo del MCD,
+    # siempre se puede formar (por el teorema de Frobenius para denominaciones con gcd=1,
+    # o su generalización cuando gcd>1)
+    if cantidades is None:
+        # Para dos denominaciones, podemos usar el número de Frobenius
+        if len(denominaciones_ordenadas) == 2:
+            a, b = denominaciones_ordenadas
+            if gcd(a, b) == 1:
+                # Número de Frobenius: g(a,b) = ab - a - b
+                frobenius = a * b - a - b
+                if monto > frobenius:
+                    return 0  # Todos los números mayores que Frobenius son alcanzables
+        
+        # Para el caso general con cantidades ilimitadas, verificamos con DP optimizado
+        # Solo hasta el menor valor que garantiza alcanzabilidad
+        menor = denominaciones_ordenadas[0]
+        limite = menor * denominaciones_ordenadas[-1]
+        
+        if monto <= limite:
+            # DP optimizado: solo guardamos si es posible alcanzar cada valor
+            dp = [False] * (monto + 1)
+            dp[0] = True
+            
+            for i in range(1, monto + 1):
+                for denom in denominaciones_ordenadas:
+                    if i >= denom and dp[i - denom]:
+                        dp[i] = True
+                        break
+            
+            if dp[monto]:
+                return 0
+        else:
+            # Para montos muy grandes, asumimos que se puede formar
+            return 0
+    else:
+        # Con cantidades limitadas, usamos billetes_necesarios que ya existe
+        resultado = billetes_necesarios(monto, denominaciones_ordenadas, cantidades)
+        if resultado is not None:
+            return 0
+    
+    # Si no se puede formar, buscar el menor redondeo
+    menor_denominacion = min(denominaciones_ordenadas)
+    
+    # Buscar el siguiente múltiplo del MCD que sea alcanzable
+    for incremento in range(mcd, mcd * menor_denominacion + 1, mcd):
+        monto_redondeado = monto + incremento
+        
+        # Verificación rápida
+        if cantidades is None:
+            # Para cantidades ilimitadas, verificar si es múltiplo del MCD
+            if monto_redondeado % mcd == 0:
+                return incremento
+        else:
+            # Para cantidades limitadas, usar billetes_necesarios
+            resultado = billetes_necesarios(monto_redondeado, denominaciones_ordenadas, cantidades)
+            if resultado is not None:
+                return incremento
+    
+    # Fallback: retornar el MCD como redondeo mínimo
+    return mcd
 
 def generar_factura_electronica(transaccion):
     """
@@ -886,6 +922,7 @@ def generar_factura_electronica(transaccion):
             - 'pdf_url': str con la URL del PDF
             - 'error': str con mensaje de error (si aplica)
     """
+            
     for numero in range(settings.NUMERO_FACTURACION, 400):
         if not Transaccion.objects.filter(numero_factura=numero).exists():
             transaccion.numero_factura = numero
@@ -951,7 +988,7 @@ def generar_factura_electronica(transaccion):
         'dCelRec': transaccion.cliente.telefono,
         'dEmailRec': transaccion.cliente.correo_electronico,
         'iNatRec': '1' if transaccion.cliente.tipo_documento == 'RUC' else '2',
-        'iTiOpe': '1',
+        'iTiOpe': '2',
         'iCondOpe': '1',
         'gPaConEIni': [
             {

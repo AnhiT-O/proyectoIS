@@ -5,9 +5,9 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from .forms import LoginForm, SimuladorForm
-from monedas.models import Moneda
+from monedas.models import Moneda, Denominacion
 from django.http import JsonResponse
-from transacciones.models import Transaccion, calcular_conversion
+from transacciones.models import Transaccion, calcular_conversion, no_redondeado
 
 def inicio(request):
     """
@@ -147,7 +147,19 @@ def simular(request):
                 operacion = form.cleaned_data['operacion']
                 medio_pago = form.cleaned_data['medio_pago']
                 medio_cobro = form.cleaned_data['medio_cobro']
-                resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmento if cliente is not None else 'minorista')
+                resultado = calcular_conversion(monto, moneda, operacion, medio_pago, medio_cobro, cliente.segmento if cliente else 'minorista')
+                no_pago = False
+                no_cobro = False
+                if operacion == 'venta':
+                    if medio_pago == 'Efectivo' and no_redondeado(monto, list(Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))) > 0:
+                        no_pago = True
+                    if medio_cobro == 'Efectivo' and no_redondeado(resultado['precio_final'], list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                        no_cobro = True
+                else:
+                    if medio_pago == 'Efectivo' and no_redondeado(resultado['precio_final'], list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                        no_pago = True
+                    if medio_cobro == 'Efectivo' and no_redondeado(monto, list(Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))) > 0:
+                        no_cobro = True
                 respuesta = {
                     'success': True,
                     'precio_base': float(resultado['precio_base']),
@@ -155,9 +167,9 @@ def simular(request):
                     'monto_recargo_pago': float(resultado['monto_recargo_pago']),
                     'monto_recargo_cobro': float(resultado['monto_recargo_cobro']),
                     'monto_final': float(resultado['monto']),
-                    'redondeo_monto': True if resultado['redondeo_efectivo_monto'] > 0 else False,
-                    'redondeo_precio_final': True if resultado['redondeo_efectivo_precio_final'] > 0 else False,
-                    'precio_final': float(resultado['precio_final'])
+                    'precio_final': float(resultado['precio_final']),
+                    'no_pago': no_pago,
+                    'no_cobro': no_cobro
                 }
 
                 return JsonResponse(respuesta)

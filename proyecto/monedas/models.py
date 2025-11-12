@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
+from django.apps import apps
 
 class Moneda(models.Model):
     nombre = models.CharField(
@@ -115,8 +116,8 @@ def crear_moneda_usd(sender, **kwargs):
                 simbolo='USD',
                 tasa_base=7030,
                 comision_compra=30,
-                comision_venta=40,
-                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 10, 28, 13, 10, 0))
+                comision_venta=30,
+                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 11, 6, 10, 30, 0))
             )
             print("✓ Moneda USD creada automáticamente")
 
@@ -239,7 +240,9 @@ def guardar_valores_anteriores(sender, instance, **kwargs):
 def crear_historial_cotizacion(sender, instance, created, **kwargs):
     """
     Crea un registro en el historial cuando se crea una moneda o se actualizan
-    sus campos de cotización (tasa_base, comision_compra, comision_venta)
+    sus campos de cotización (tasa_base, comision_compra, comision_venta).
+    También envía notificaciones por correo a usuarios con transacciones pendientes
+    en efectivo cuando hay cambios de cotización.
     """
     if created:
         fecha_hoy = instance.fecha_cotizacion.date()
@@ -268,3 +271,47 @@ def crear_historial_cotizacion(sender, instance, created, **kwargs):
                 comision_compra=instance.comision_compra,
                 comision_venta=instance.comision_venta
             )
+            
+            # Enviar notificaciones a usuarios con transacciones pendientes en efectivo
+            try:
+                # Importar aquí para evitar dependencias circulares
+                from transacciones.models import Transaccion, enviar_notificacion_cambio_cotizacion
+                
+                # Obtener transacciones pendientes con medio de pago "Efectivo" para esta moneda
+                transacciones_pendientes = Transaccion.objects.filter(
+                    moneda=instance,
+                    estado='Pendiente',
+                    medio_pago='Efectivo'
+                )
+                
+                # Preparar información de cambios de cotización
+                cambios_info = {
+                    'hay_cambios': True,
+                    'valores_anteriores': {
+                        'precio_compra': instance._old_tasa_base - instance._old_comision_compra,
+                        'precio_venta': instance._old_tasa_base + instance._old_comision_venta
+                    },
+                    'valores_actuales': {
+                        'precio_compra': instance.tasa_base - instance.comision_compra,
+                        'precio_venta': instance.tasa_base + instance.comision_venta
+                    },
+                    'moneda': instance
+                }
+                
+                # Enviar correo a cada usuario con transacción pendiente
+                usuarios_notificados = set()  # Para evitar duplicados
+                for transaccion in transacciones_pendientes:
+                    if transaccion.usuario.email and transaccion.usuario.id not in usuarios_notificados:
+                        enviar_notificacion_cambio_cotizacion(
+                            transaccion.usuario,
+                            transaccion,
+                            cambios_info
+                        )
+                        usuarios_notificados.add(transaccion.usuario.id)
+                        
+                if usuarios_notificados:
+                    print(f"Notificaciones de cambio de cotización enviadas a {len(usuarios_notificados)} usuario(s) "
+                          f"con transacciones pendientes en efectivo para {instance.nombre}")
+                          
+            except Exception as e:
+                print(f"Error al enviar notificaciones de cambio de cotización: {str(e)}")
