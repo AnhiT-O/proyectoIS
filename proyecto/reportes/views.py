@@ -39,9 +39,15 @@ def transacciones_reportes(request):
         try:
             parts = [p.strip() for p in rango_fecha.split('-')]
             if len(parts) >= 2:
-                # permitir formatos con guion largo u otros, tomar los primeros dos
-                dt_desde = datetime.strptime(parts[0], '%Y-%m-%d')
-                dt_hasta = datetime.strptime(parts[1], '%Y-%m-%d')
+                # intentar YYYY-MM-DD primero, si falla intentar DD-MM-YYYY
+                fecha1 = parts[0]
+                fecha2 = parts[1]
+                try:
+                    dt_desde = datetime.strptime(fecha1, '%Y-%m-%d')
+                    dt_hasta = datetime.strptime(fecha2, '%Y-%m-%d')
+                except Exception:
+                    dt_desde = datetime.strptime(fecha1, '%d-%m-%Y')
+                    dt_hasta = datetime.strptime(fecha2, '%d-%m-%Y')
                 qs = qs.filter(fecha_hora__gte=dt_desde, fecha_hora__lte=dt_hasta)
         except Exception:
             # Si falla el parseo, no aplicar filtro por rango
@@ -83,6 +89,7 @@ def transacciones_reportes(request):
         tipo = getattr(t, 'tipo', '').lower()
         moneda_obj = getattr(t, 'moneda', None)
         moneda_nombre = getattr(moneda_obj, 'nombre', 'Sin moneda') if moneda_obj else 'Sin moneda'
+        moneda_simbolo = getattr(moneda_obj, 'simbolo', '') if moneda_obj else ''
 
         monto_origen = getattr(t, 'monto_origen', None)
         if monto_origen is None:
@@ -213,21 +220,22 @@ def transacciones_reportes(request):
         porcentaje_descuento_display = porcentaje_descuento
 
         filas.append({
-             'fecha': fecha,
-             'tipo_transaccion': tipo,
-             'moneda': moneda_nombre,
-             'monto_origen': monto_origen,
-             'monto_destino': monto_destino,
-             'comision_compra': comision_compra_val,
-             'comision_venta': comision_venta_val,
-             'porcentaje_descuento': porcentaje_descuento,
-             'porcentaje_descuento_display': porcentaje_descuento_display,
-             'segmento': segmento_nombre,
-             'beneficio_segmento': beneficio_segmento,
-             'ganancia_comp': ganancia_comp,
-             'ganancia_vta': ganancia_vta,
-             'cliente': cliente_nombre,
-             'estado': estado,
+            'fecha': fecha,
+            'tipo_transaccion': tipo,
+            'moneda': moneda_nombre,
+            'moneda_simbolo': moneda_simbolo,
+            'monto_origen': monto_origen,
+            'monto_destino': monto_destino,
+            'comision_compra': comision_compra_val,
+            'comision_venta': comision_venta_val,
+            'porcentaje_descuento': porcentaje_descuento,
+            'porcentaje_descuento_display': porcentaje_descuento_display,
+            'segmento': segmento_nombre,
+            'beneficio_segmento': beneficio_segmento,
+            'ganancia_comp': ganancia_comp,
+            'ganancia_vta': ganancia_vta,
+            'cliente': cliente_nombre,
+            'estado': estado,
          })
 
     total_ganancia = sum(resumen_por_moneda.values())

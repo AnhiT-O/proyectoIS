@@ -15,6 +15,7 @@
 .zona-busqueda .busqueda-form { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
 .zona-busqueda .campo-filtro { display:flex; flex-direction:column; gap:0.25rem; margin-right:0.75rem; }
 .zona-busqueda .campo-filtro label { font-size: 12px; color:#555; }
+.zona-busqueda .campo-filtro input, .zona-busqueda .campo-filtro select { color: inherit; }
 .zona-busqueda .campo-filtro input[type="date"],
 .zona-busqueda .campo-filtro select { font-size:12px; padding:6px 8px; border-radius:6px; min-width:130px; }
 .botones-busqueda { display:flex; gap:0.5rem; align-items:center; }
@@ -23,6 +24,10 @@
     .zona-busqueda .busqueda-form { flex-direction:column; align-items:flex-start; }
     .zona-busqueda .campo-filtro { width:100%; }
     .gestion-tabla th, .gestion-tabla td { font-size: 11px; padding:6px; }
+}
+/* Modo oscuro: etiquetas más claras */
+@media (prefers-color-scheme: dark) {
+    .zona-busqueda .campo-filtro label { color: #cbd5e1; }
 }
 </style>
 {% endblock %}
@@ -37,7 +42,7 @@
         <form method="get" class="busqueda-form">
             <div class="campo-filtro">
                 <label>Rango de fechas</label>
-                <input type="text" name="rango_fecha" class="select-filtro" placeholder="YYYY-MM-DD - YYYY-MM-DD" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
+                <input type="text" name="rango_fecha" class="select-filtro" placeholder="DD-MM-YYYY - DD-MM-YYYY" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
             </div>
             <div class="campo-filtro">
                 <label>Moneda</label>
@@ -119,7 +124,7 @@
                 <td>{{ f.cliente }}</td>
                 <td>{{ f.tipo_transaccion|title }}</td>
                 <td>{{ f.moneda }}</td>
-                <td>{{ f.monto_origen|floatformat:2 }}</td>
+                <td>{{ f.monto_origen|floatformat:2 }} {{ f.moneda_simbolo }}</td>
                 <td>{{ f.monto_destino|floatformat:2 }} PYG</td>
                 <td>{{ f.comision_compra|floatformat:2 }}</td>
                 <td>{{ f.ganancia_comp|floatformat:2 }} PYG</td>
@@ -169,7 +174,7 @@
                 <td>{{ f.cliente }}</td>
                 <td>{{ f.tipo_transaccion|title }}</td>
                 <td>{{ f.moneda }}</td>
-                <td>{{ f.monto_origen|floatformat:2 }}</td>
+                <td>{{ f.monto_origen|floatformat:2 }} {{ f.moneda_simbolo }}</td>
                 <td>{{ f.monto_destino|floatformat:2 }} PYG</td>
                 <td>{{ f.comision_venta|floatformat:2 }}</td>
                 <td>{{ f.ganancia_vta|floatformat:2 }} PYG</td>
@@ -195,9 +200,13 @@
     </table>
     {% endif %}
 
+    {% if not filas %}
+    <div style="margin-top:1rem; color:#6c757d;">No se encontraron transacciones con los filtros aplicados.</div>
+    {% endif %}
+
     <!-- Resumen por moneda -->
     <div class="zona-resumen" style="margin-top:1.5rem;">
-        <h3>Resumen de Ganancias por Moneda</h3>
+        <h2>Resumen de Ganancias por Moneda</h2>
         <table class="gestion-tabla">
             <thead>
                 <tr>
@@ -209,7 +218,7 @@
                 {% for moneda, ganancia in resumen_por_moneda.items %}
                 <tr>
                     <td>{{ moneda }}</td>
-                    <td>{{ ganancia|floatformat:2 }}</td>
+                    <td>{{ ganancia|floatformat:2 }} PYG</td>
                 </tr>
                 {% endfor %}
             </tbody>
