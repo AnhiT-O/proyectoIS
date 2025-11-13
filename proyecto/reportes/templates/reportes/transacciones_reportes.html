@@ -86,7 +86,7 @@
 
     <div class="zona-conteo">
         <div class="conteo-info">
-            Total de transacciones: <span class="conteo">{{ filas|length }}</span>
+            <h2>Total de transacciones:</h2> <span class="conteo">{{ filas|length }}</span>
             {% if f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
                 <span style="margin-left: 1rem; color: #6c757d;">
                     ({{ filas|length }} resultado{{ filas|length|pluralize }})
@@ -108,7 +108,7 @@
                 <th>Monto Destino</th>
                 <th>Comisión Compra</th>
                 <th>Ganancia Comp</th>
-                <th>Descuento %</th>
+                <th>Descuento</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -120,14 +120,14 @@
                 <td>{{ f.tipo_transaccion|title }}</td>
                 <td>{{ f.moneda }}</td>
                 <td>{{ f.monto_origen|floatformat:2 }}</td>
-                <td>{{ f.monto_destino|floatformat:2 }}</td>
+                <td>{{ f.monto_destino|floatformat:2 }} PYG</td>
                 <td>{{ f.comision_compra|floatformat:2 }}</td>
-                <td>{{ f.ganancia_comp|floatformat:2 }}</td>
+                <td>{{ f.ganancia_comp|floatformat:2 }} PYG</td>
                 <td>
                     {% if f.beneficio_segmento %}
-                        {{ f.beneficio_segmento }}
+                        {{ f.beneficio_segmento }}%
                     {% else %}
-                        {{ f.porcentaje_descuento_display }}
+                        {{ f.porcentaje_descuento_display }}%
 
                         {% comment %} Solo imprimimos la etiqueta si hay segmento Y no es 'minorista' {% endcomment %}
                         {% if f.segmento and f.segmento|lower != 'minorista' %}
@@ -158,7 +158,7 @@
                 <th>Monto Destino</th>
                 <th>Comisión Venta</th>
                 <th>Ganancia Vta</th>
-                <th>Descuento %</th>
+                <th>Descuento</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -170,14 +170,14 @@
                 <td>{{ f.tipo_transaccion|title }}</td>
                 <td>{{ f.moneda }}</td>
                 <td>{{ f.monto_origen|floatformat:2 }}</td>
-                <td>{{ f.monto_destino|floatformat:2 }}</td>
+                <td>{{ f.monto_destino|floatformat:2 }} PYG</td>
                 <td>{{ f.comision_venta|floatformat:2 }}</td>
-                <td>{{ f.ganancia_vta|floatformat:2 }}</td>
+                <td>{{ f.ganancia_vta|floatformat:2 }} PYG</td>
                 <td>
                     {% if f.beneficio_segmento %}
-                        {{ f.beneficio_segmento }}
+                        {{ f.beneficio_segmento }}%
                     {% else %}
-                        {{ f.porcentaje_descuento_display }}
+                        {{ f.porcentaje_descuento_display }}%
 
                         {% comment %} Solo imprimimos la etiqueta si hay segmento Y no es 'minorista' {% endcomment %}
                         {% if f.segmento and f.segmento|lower != 'minorista' %}
