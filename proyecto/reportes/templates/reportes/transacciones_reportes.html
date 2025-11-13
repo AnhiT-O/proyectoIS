@@ -41,11 +41,11 @@
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
             <div class="campo-filtro">
-                <label>Rango de fechas</label>
+                <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
                 <input type="text" name="rango_fecha" class="select-filtro" placeholder="DD-MM-YYYY - DD-MM-YYYY" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
             </div>
             <div class="campo-filtro">
-                <label>Moneda</label>
+                <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
                 <select name="moneda" class="select-filtro">
                     <option value="">Todas</option>
                     {% for m in monedas %}
@@ -54,7 +54,7 @@
                 </select>
             </div>
             <div class="campo-filtro">
-                <label>Estado</label>
+                <label style="font-weight: bold; font-size: 1.1em;">Estado</label>
                 <select name="estado" class="select-filtro">
                     <option value="">Todos</option>
                     <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
@@ -65,7 +65,7 @@
                 </select>
             </div>
             <div class="campo-filtro">
-                <label>Operación</label>
+                <label style="font-weight: bold; font-size: 1.1em;">Operación</label>
                 <select name="tipo" class="select-filtro" onchange="this.form.submit()">
                     <option value="">Todos</option>
                     <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
@@ -73,7 +73,7 @@
                 </select>
             </div>
             <div class="campo-filtro">
-                <label>Cliente</label>
+                <label style="font-weight: bold; font-size: 1.1em;">Cliente</label>
                 <select name="cliente" class="select-filtro">
                     <option value="">Todos</option>
                     {% for c in clientes %}
@@ -112,7 +112,7 @@
                 <th>Monto Origen</th>
                 <th>Monto Destino</th>
                 <th>Comisión Compra</th>
-                <th>Ganancia Comp</th>
+                <th>Ganancia Compra</th>
                 <th>Descuento</th>
                 <th>Estado</th>
             </tr>
@@ -162,7 +162,7 @@
                 <th>Monto Origen</th>
                 <th>Monto Destino</th>
                 <th>Comisión Venta</th>
-                <th>Ganancia Vta</th>
+                <th>Ganancia Venta</th>
                 <th>Descuento</th>
                 <th>Estado</th>
             </tr>
