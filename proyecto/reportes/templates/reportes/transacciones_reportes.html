@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes de Transacciones - Global Exchange{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
+<style>
+/* Texto más compacto para ajustarse mejor al fondo */
+.contenido { font-size: 13px; }
+.gestion-cabecera h2 { font-size: 1rem; margin-bottom: 0.5rem; }
+.gestion-tabla th, .gestion-tabla td { font-size: 12px; padding: 6px 8px; }
+.gestion-tabla thead th { font-size: 12px; }
+.zona-busqueda .busqueda-form { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
+.zona-busqueda .campo-filtro { display:flex; flex-direction:column; gap:0.25rem; margin-right:0.75rem; }
+.zona-busqueda .campo-filtro label { font-size: 12px; color:#555; }
+.zona-busqueda .campo-filtro input[type="date"],
+.zona-busqueda .campo-filtro select { font-size:12px; padding:6px 8px; border-radius:6px; min-width:130px; }
+.botones-busqueda { display:flex; gap:0.5rem; align-items:center; }
+.btn-buscar, .btn-limpiar { font-size: 12px; padding:6px 10px; }
+@media (max-width: 768px) {
+    .zona-busqueda .busqueda-form { flex-direction:column; align-items:flex-start; }
+    .zona-busqueda .campo-filtro { width:100%; }
+    .gestion-tabla th, .gestion-tabla td { font-size: 11px; padding:6px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contenido">
+    <div class="gestion-cabecera">
+        <h1>Reportes de Transacciones</h1>
+    </div>
+
+    <div class="zona-busqueda">
+        <form method="get" class="busqueda-form">
+            <div class="campo-filtro">
+                <label>Rango de fechas</label>
+                <input type="text" name="rango_fecha" class="select-filtro" placeholder="YYYY-MM-DD - YYYY-MM-DD" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
+            </div>
+            <div class="campo-filtro">
+                <label>Moneda</label>
+                <select name="moneda" class="select-filtro">
+                    <option value="">Todas</option>
+                    {% for m in monedas %}
+                        <option value="{{ m.id }}" {% if f_moneda|stringformat:'s' == m.id|stringformat:'s' %}selected{% endif %}>{{ m.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="campo-filtro">
+                <label>Estado</label>
+                <select name="estado" class="select-filtro">
+                    <option value="">Todos</option>
+                    <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="Confirmada" {% if f_estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
+                    <option value="Completa" {% if f_estado == 'Completa' %}selected{% endif %}>Completa</option>
+                    <option value="Cancelada" {% if f_estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
+                    <option value="Anulada" {% if f_estado == 'Anulada' %}selected{% endif %}>Anulada</option>
+                </select>
+            </div>
+            <div class="campo-filtro">
+                <label>Operación</label>
+                <select name="tipo" class="select-filtro" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
+                    <option value="venta" {% if f_tipo == 'venta' %}selected{% endif %}>Venta</option>
+                </select>
+            </div>
+            <div class="campo-filtro">
+                <label>Cliente</label>
+                <select name="cliente" class="select-filtro">
+                    <option value="">Todos</option>
+                    {% for c in clientes %}
+                        <option value="{{ c.id }}" {% if f_cliente|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+         
+             <div class="botones-busqueda">
+                 <button type="submit" class="btn-buscar">Buscar</button>
+                 <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
+             </div>
+         </form>
+     </div>
+
+    <div class="zona-conteo">
+        <div class="conteo-info">
+            Total de transacciones: <span class="conteo">{{ filas|length }}</span>
+            {% if f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
+                <span style="margin-left: 1rem; color: #6c757d;">
+                    ({{ filas|length }} resultado{{ filas|length|pluralize }})
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if show_compra %}
+    <h2>Compras</h2>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th>Fecha/Hora</th>
+                <th>Cliente</th>
+                <th>Operación</th>
+                <th>Moneda</th>
+                <th>Monto Origen</th>
+                <th>Monto Destino</th>
+                <th>Comisión Compra</th>
+                <th>Ganancia Comp</th>
+                <th>% Descuento</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in filas_compra %}
+            <tr>
+                <td><strong>{% if f.fecha %}{{ f.fecha|date:"d/m/Y" }}{% endif %}</strong><br><small>{% if f.fecha %}{{ f.fecha|time:"H:i:s" }}{% endif %}</small></td>
+                <td>{{ f.cliente }}</td>
+                <td>{{ f.tipo_transaccion|title }}</td>
+                <td>{{ f.moneda }}</td>
+                <td>{{ f.monto_origen|floatformat:2 }}</td>
+                <td>{{ f.monto_destino|floatformat:2 }}</td>
+                <td>{{ f.comision_compra|floatformat:2 }}</td>
+                <td>{{ f.ganancia_comp|floatformat:2 }}</td>
+                <td>
+                    {% if f.beneficio_segmento %}
+                        {{ f.beneficio_segmento }}
+                    {% else %}
+                        {{ f.porcentaje_descuento_display }}{% if f.segmento %} <small>({{ f.segmento }})</small>{% endif %}
+                    {% endif %}
+                </td>
+                <td>{{ f.estado }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10">No hay compras registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if show_venta %}
+    <h2>Ventas</h2>
+    <table class="gestion-tabla">
+        <thead>
+            <tr>
+                <th>Fecha/Hora</th>
+                <th>Cliente</th>
+                <th>Operación</th>
+                <th>Moneda</th>
+                <th>Monto Origen</th>
+                <th>Monto Destino</th>
+                <th>Comisión Venta</th>
+                <th>Ganancia Vta</th>
+                <th>% Descuento</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in filas_venta %}
+            <tr>
+                <td><strong>{% if f.fecha %}{{ f.fecha|date:"d/m/Y" }}{% endif %}</strong><br><small>{% if f.fecha %}{{ f.fecha|time:"H:i:s" }}{% endif %}</small></td>
+                <td>{{ f.cliente }}</td>
+                <td>{{ f.tipo_transaccion|title }}</td>
+                <td>{{ f.moneda }}</td>
+                <td>{{ f.monto_origen|floatformat:2 }}</td>
+                <td>{{ f.monto_destino|floatformat:2 }}</td>
+                <td>{{ f.comision_venta|floatformat:2 }}</td>
+                <td>{{ f.ganancia_vta|floatformat:2 }}</td>
+                <td>
+                    {% if f.beneficio_segmento %}
+                        {{ f.beneficio_segmento }}
+                    {% else %}
+                        {{ f.porcentaje_descuento_display }}{% if f.segmento %} <small>({{ f.segmento }})</small>{% endif %}
+                    {% endif %}
+                </td>
+                <td>{{ f.estado }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10">No hay ventas registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <!-- Resumen por moneda -->
+    <div class="zona-resumen" style="margin-top:1.5rem;">
+        <h3>Resumen de Ganancias por Moneda</h3>
+        <table class="gestion-tabla">
+            <thead>
+                <tr>
+                    <th>Moneda</th>
+                    <th>Ganancia Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for moneda, ganancia in resumen_por_moneda.items %}
+                <tr>
+                    <td>{{ moneda }}</td>
+                    <td>{{ ganancia|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="zona-acciones" style="margin-top: 2rem">
+        <div class="acciones-contenido">
+            <a href="/" class="btn-secundario">
+                Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

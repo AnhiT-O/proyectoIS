@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Cargar variables de entorno desde el archivo .env en el directorio raíz del proyecto
 # El .env está un nivel arriba del directorio 'proyecto'
-load_dotenv(BASE_DIR.parent / '.env')
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion'
+    'medios_acreditacion',
+    'reportes',
 ]
 
 MIDDLEWARE = [

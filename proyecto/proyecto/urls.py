@@ -10,7 +10,8 @@ urlpatterns = [
     path('clientes/', include('clientes.urls')),
     path('monedas/', include('monedas.urls')),
     path('simulador/', views.simular, name='simular'),
-    path('operaciones/', include('transacciones.urls'))
+    path('operaciones/', include('transacciones.urls')),
+    path('reportes/', include(('reportes.urls', 'reportes'), namespace='reportes')),
 ]
 
 handler403 = 'proyecto.views.custom_permission_denied_view'
