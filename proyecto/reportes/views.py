@@ -110,41 +110,51 @@ def transacciones_reportes(request):
         cliente_obj = getattr(t, 'cliente', None)
         segmento_nombre = None
         beneficio_segmento = None
+
+        # Si cliente tiene segmento, intentar mapear por nombre a porcentajes definidos
         if cliente_obj is not None:
             segmento = getattr(cliente_obj, 'segmento', None)
             if segmento is not None:
-                # segmento puede ser un objeto con atributos, una cadena (nombre) o una PK
-                if hasattr(segmento, 'porcentaje_descuento') or hasattr(segmento, 'pordes') or hasattr(segmento, 'porcentaje'):
-                    porcentaje_descuento = getattr(segmento, 'porcentaje_descuento', None) or getattr(segmento, 'pordes', None) or getattr(segmento, 'porcentaje', None)
-                    # intentar extraer nombre del segmento si está disponible
-                    segmento_nombre = getattr(segmento, 'nombre', None) or getattr(segmento, 'nombre_segmento', None)
-                    # intentar obtener beneficio del segmento
-                    beneficio_segmento = getattr(segmento, 'beneficio_segmento', None) or getattr(segmento, 'beneficio', None)
+                # obtener nombre del segmento si viene como objeto o string
+                seg_name = None
+                if hasattr(segmento, 'nombre'):
+                    seg_name = getattr(segmento, 'nombre', None)
+                elif isinstance(segmento, str):
+                    seg_name = segmento
                 else:
-                    # intentar buscar un objeto Segmento por nombre o id
+                    # intentar obtener nombre de objeto relacionado
                     try:
-                        from clientes.models import Segmento
                         seg_obj = None
-                        if isinstance(segmento, str):
-                            seg_obj = Segmento.objects.filter(nombre__iexact=segmento).first()
-                            if seg_obj:
-                                segmento_nombre = getattr(seg_obj, 'nombre', None)
-                                beneficio_segmento = getattr(seg_obj, 'beneficio_segmento', None) or getattr(seg_obj, 'beneficio', None)
-                        else:
-                            try:
-                                seg_obj = Segmento.objects.filter(pk=int(segmento)).first()
-                                if seg_obj:
-                                    segmento_nombre = getattr(seg_obj, 'nombre', None)
-                                    beneficio_segmento = getattr(seg_obj, 'beneficio_segmento', None) or getattr(seg_obj, 'beneficio', None)
-                            except Exception:
-                                seg_obj = None
+                        from clientes.models import Segmento
+                        seg_obj = Segmento.objects.filter(pk=int(segmento)).first()
                         if seg_obj:
-                            porcentaje_descuento = getattr(seg_obj, 'porcentaje_descuento', None) or getattr(seg_obj, 'pordes', None) or getattr(seg_obj, 'porcentaje', None)
+                            seg_name = getattr(seg_obj, 'nombre', None)
                     except Exception:
-                        porcentaje_descuento = None
-        # fallback a valor en la transacción o 0
-        # Priorizar beneficio_segmento definido en la propia transacción si existe
-        beneficio_segmento = getattr(t, 'beneficio_segmento', beneficio_segmento)
+                        seg_name = None
+
+                if seg_name:
+                    segmento_nombre = str(seg_name)
+                    sn = segmento_nombre.strip().lower()
+                    # Mapear segmentos a porcentajes: minorista 0, corporativo 5, vip 10
+                    mapping = {
+                        'minorista': 0.0,
+                        'corporativo': 5.0,
+                        'vip': 10.0,
+                    }
+                    if sn in mapping:
+                        porcentaje_descuento = mapping[sn]
+                        beneficio_segmento = mapping[sn]
+
+        # Priorizar el valor guardado en la transacción: 'porc_beneficio_segmento' o 'beneficio_segmento'
+        trans_benef = getattr(t, 'porc_beneficio_segmento', None) or getattr(t, 'beneficio_segmento', None)
+        if trans_benef is not None:
+            try:
+                porcentaje_descuento = float(trans_benef or 0)
+                beneficio_segmento = trans_benef
+            except Exception:
+                pass
+
+        # Si aún no se definió, fallback a campos genéricos en la transacción
         if porcentaje_descuento is None:
             porcentaje_descuento = float(getattr(t, 'porcentaje_descuento', None) or getattr(t, 'pordes', 0) or 0)
         else:
@@ -174,7 +184,7 @@ def transacciones_reportes(request):
         if tipo == 'venta':
             # usar comision_venta y monto_destino (comision como número directo)
             comision_venta_val = comision_venta
-            ganancia_vta = monto_destino * (comision_venta - (comision_venta * porcentaje_descuento / 100))
+            ganancia_vta = monto_origen * (comision_venta - (comision_venta * porcentaje_descuento /100))
         elif tipo == 'compra':
             comision_compra_val = comision_compra
             ganancia_comp = monto_origen * (comision_compra - (comision_compra * porcentaje_descuento / 100))

@@ -108,7 +108,7 @@
                 <th>Monto Destino</th>
                 <th>Comisión Compra</th>
                 <th>Ganancia Comp</th>
-                <th>% Descuento</th>
+                <th>Descuento %</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -127,7 +127,13 @@
                     {% if f.beneficio_segmento %}
                         {{ f.beneficio_segmento }}
                     {% else %}
-                        {{ f.porcentaje_descuento_display }}{% if f.segmento %} <small>({{ f.segmento }})</small>{% endif %}
+                        {{ f.porcentaje_descuento_display }}
+
+                        {% comment %} Solo imprimimos la etiqueta si hay segmento Y no es 'minorista' {% endcomment %}
+                        {% if f.segmento and f.segmento|lower != 'minorista' %}
+                             <small>({{ f.segmento }})</small>
+                        {% endif %}
+
                     {% endif %}
                 </td>
                 <td>{{ f.estado }}</td>
@@ -152,7 +158,7 @@
                 <th>Monto Destino</th>
                 <th>Comisión Venta</th>
                 <th>Ganancia Vta</th>
-                <th>% Descuento</th>
+                <th>Descuento %</th>
                 <th>Estado</th>
             </tr>
         </thead>
@@ -171,7 +177,13 @@
                     {% if f.beneficio_segmento %}
                         {{ f.beneficio_segmento }}
                     {% else %}
-                        {{ f.porcentaje_descuento_display }}{% if f.segmento %} <small>({{ f.segmento }})</small>{% endif %}
+                        {{ f.porcentaje_descuento_display }}
+
+                        {% comment %} Solo imprimimos la etiqueta si hay segmento Y no es 'minorista' {% endcomment %}
+                        {% if f.segmento and f.segmento|lower != 'minorista' %}
+                             <small>({{ f.segmento }})</small>
+                        {% endif %}
+
                     {% endif %}
                 </td>
                 <td>{{ f.estado }}</td>
