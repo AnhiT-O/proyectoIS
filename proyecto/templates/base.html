@@ -76,6 +76,15 @@
                                             🏧 Revisar Tausers
                                         </a>
                                     {% endif %}
+
+                                    {# Mostrar enlace a reportes si el usuario pertenece al grupo 'Administrador' #}
+                                    {% for g in user.groups.all %}
+                                        {% if g.name == 'Administrador' %}
+                                            <a href="{% url 'reportes:transacciones' %}" class="gestion-seleccion">
+                                                📊 Reportes
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
                             </div>
                         {% endif %}

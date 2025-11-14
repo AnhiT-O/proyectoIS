@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion'
+    'medios_acreditacion',
+    'reportes',
 ]
 
 MIDDLEWARE = [
