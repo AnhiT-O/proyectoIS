@@ -205,6 +205,7 @@ function actualizarEstadisticas(data) {
     
     // Período
     const periodoTexto = {
+        'hoy': 'Hoy',
         'semana': 'Última semana',
         'mes': 'Último mes',
         '6meses': 'Últimos 6 meses',

@@ -317,7 +317,9 @@ def obtener_datos_ganancias(request):
     
     # Calcular fecha de inicio según el rango
     fecha_hasta = datetime.now()
-    if rango == 'semana':
+    if rango == 'hoy':
+        fecha_desde = fecha_hasta.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif rango == 'semana':
         fecha_desde = fecha_hasta - timedelta(days=7)
     elif rango == 'mes':
         fecha_desde = fecha_hasta - timedelta(days=30)
