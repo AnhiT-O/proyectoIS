@@ -15,7 +15,7 @@
     <div class="dashboard-cabecera">
         <div class="cabecera-principal">
             <h1 class="titulo-dashboard">
-                💰 Dashboard de Ganancias
+                Dashboard de Ganancias
             </h1>
             <div class="botones-accion">
                 <a href="{% url 'reportes:transacciones' %}" class="btn-secundario">
@@ -55,7 +55,7 @@
         <!-- Estadísticas principales -->
         <div class="estadisticas-principales">
             <div class="stat-card stat-ganancia">
-                <div class="stat-icono">💵</div>
+                <div class="stat-icono"></div>
                 <div class="stat-contenido">
                     <div class="stat-label">Ganancia Total</div>
                     <div class="stat-valor" id="ganancia-total">₲ 0</div>
@@ -63,7 +63,7 @@
             </div>
             
             <div class="stat-card stat-periodo">
-                <div class="stat-icono">📅</div>
+                <div class="stat-icono"></div>
                 <div class="stat-contenido">
                     <div class="stat-label">Período</div>
                     <div class="stat-valor" id="periodo-actual">Último mes</div>
@@ -71,7 +71,7 @@
             </div>
             
             <div class="stat-card stat-moneda">
-                <div class="stat-icono">💱</div>
+                <div class="stat-icono"></div>
                 <div class="stat-contenido">
                     <div class="stat-label">Moneda</div>
                     <div class="stat-valor" id="moneda-actual">Todas</div>
@@ -84,20 +84,6 @@
             <div class="contenedor-grafico">
                 <h3 class="titulo-grafico">Evolución de Ganancias</h3>
                 <canvas id="graficoGanancias"></canvas>
-            </div>
-        </div>
-
-        <!-- Información adicional -->
-        <div class="info-adicional">
-            <div class="tarjeta-info">
-                <h4>📊 Resumen</h4>
-                <p>Este dashboard muestra la evolución de las ganancias generadas por las transacciones completadas en el período seleccionado.</p>
-                <ul>
-                    <li>Las ganancias se calculan aplicando las comisiones de compra/venta según el tipo de transacción.</li>
-                    <li>Se consideran los descuentos por segmento del cliente (Minorista 0%, Corporativo 5%, VIP 10%).</li>
-                    <li>Solo se cuentan transacciones con estado "Completa".</li>
-                    <li>Los valores se muestran en Guaraníes (PYG).</li>
-                </ul>
             </div>
         </div>
     </div>
