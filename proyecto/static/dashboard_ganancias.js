@@ -1,7 +1,7 @@
 // Variables globales
 let graficoGanancias = null;
 let datosActuales = [];
-let rangoActual = 'mes';
+let rangoActual = 'hoy';
 let monedaActual = null;
 
 // Colores del tema

@@ -312,7 +312,7 @@ def obtener_datos_ganancias(request):
         return JsonResponse({'error': 'Acceso denegado'}, status=403)
     
     # Obtener parámetros
-    rango = request.GET.get('rango', 'mes')
+    rango = request.GET.get('rango', 'hoy')
     moneda_id = request.GET.get('moneda_id', None)
     
     # Calcular fecha de inicio según el rango
