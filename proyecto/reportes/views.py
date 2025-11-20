@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.decorators import login_required
 from transacciones.models import Transaccion
 from monedas.models import Moneda
 from clientes.models import Cliente
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.db.models import Sum, Q
+from collections import defaultdict
 
 
 @login_required
@@ -271,3 +273,170 @@ def transacciones_reportes(request):
         'f_colspan': f_colspan,
     }
     return render(request, 'reportes/transacciones_reportes.html', context)
+
+
+@login_required
+def dashboard_ganancias(request):
+    """
+    Dashboard de ganancias con gráfico temporal.
+    Acceso exclusivo para Administradores.
+    Muestra por defecto las ganancias totales del último mes.
+    """
+    user = request.user
+    if not user.groups.filter(name='Administrador').exists():
+        return HttpResponseForbidden('Acceso denegado: requiere rol Administrador')
+    
+    monedas = Moneda.objects.all()
+    
+    context = {
+        'monedas': monedas,
+    }
+    return render(request, 'reportes/dashboard_ganancias.html', context)
+
+
+@login_required
+def obtener_datos_ganancias(request):
+    """
+    API endpoint que devuelve datos de ganancias en formato JSON para el gráfico.
+    Parámetros GET:
+    - rango: 'semana', 'mes', '6meses', 'año'
+    - moneda_id: ID de moneda específica (opcional, si no se envía devuelve total de todas)
+    
+    Retorna JSON con:
+    - fechas: lista de fechas
+    - ganancias: lista de ganancias por fecha
+    - ganancia_total: suma total
+    """
+    user = request.user
+    if not user.groups.filter(name='Administrador').exists():
+        return JsonResponse({'error': 'Acceso denegado'}, status=403)
+    
+    # Obtener parámetros
+    rango = request.GET.get('rango', 'mes')
+    moneda_id = request.GET.get('moneda_id', None)
+    
+    # Calcular fecha de inicio según el rango
+    fecha_hasta = datetime.now()
+    if rango == 'semana':
+        fecha_desde = fecha_hasta - timedelta(days=7)
+    elif rango == 'mes':
+        fecha_desde = fecha_hasta - timedelta(days=30)
+    elif rango == '6meses':
+        fecha_desde = fecha_hasta - timedelta(days=180)
+    elif rango == 'año':
+        fecha_desde = fecha_hasta - timedelta(days=365)
+    else:
+        fecha_desde = fecha_hasta - timedelta(days=30)
+    
+    # Filtrar transacciones
+    qs = Transaccion.objects.filter(
+        fecha_hora__gte=fecha_desde,
+        fecha_hora__lte=fecha_hasta,
+        estado__iexact='completa'
+    ).order_by('fecha_hora')
+    
+    # Filtrar por moneda si se especifica
+    if moneda_id:
+        try:
+            qs = qs.filter(moneda__id=int(moneda_id))
+        except Exception:
+            pass
+    
+    # Diccionario para agrupar ganancias por fecha
+    ganancias_por_fecha = defaultdict(float)
+    
+    for t in qs:
+        fecha = getattr(t, 'fecha_hora', getattr(t, 'fecha', None))
+        if not fecha:
+            continue
+            
+        # Agrupar por día
+        fecha_str = fecha.strftime('%Y-%m-%d')
+        
+        tipo = getattr(t, 'tipo', '').lower()
+        moneda_obj = getattr(t, 'moneda', None)
+        
+        monto_origen = getattr(t, 'monto_origen', None)
+        if monto_origen is None:
+            monto_origen = getattr(t, 'monto', 0)
+        
+        # Obtener comisiones
+        comision_compra = getattr(t, 'comision_compra', None)
+        comision_venta = getattr(t, 'comision_venta', None)
+        if moneda_obj is not None:
+            if not comision_compra:
+                comision_compra = getattr(moneda_obj, 'comision_compra', getattr(moneda_obj, 'comision_comp', 0) or 0)
+            if not comision_venta:
+                comision_venta = getattr(moneda_obj, 'comision_venta', getattr(moneda_obj, 'comision_vta', 0) or 0)
+        
+        comision_compra = float(comision_compra or 0)
+        comision_venta = float(comision_venta or 0)
+        
+        # Obtener descuento
+        porcentaje_descuento = None
+        cliente_obj = getattr(t, 'cliente', None)
+        
+        if cliente_obj is not None:
+            segmento = getattr(cliente_obj, 'segmento', None)
+            if segmento is not None:
+                seg_name = None
+                if hasattr(segmento, 'nombre'):
+                    seg_name = getattr(segmento, 'nombre', None)
+                elif isinstance(segmento, str):
+                    seg_name = segmento
+                
+                if seg_name:
+                    sn = str(seg_name).strip().lower()
+                    mapping = {
+                        'minorista': 0.0,
+                        'corporativo': 5.0,
+                        'vip': 10.0,
+                    }
+                    if sn in mapping:
+                        porcentaje_descuento = mapping[sn]
+        
+        trans_benef = getattr(t, 'porc_beneficio_segmento', None) or getattr(t, 'beneficio_segmento', None)
+        if trans_benef is not None:
+            try:
+                porcentaje_descuento = float(trans_benef or 0)
+            except Exception:
+                pass
+        
+        if porcentaje_descuento is None:
+            porcentaje_descuento = float(getattr(t, 'porcentaje_descuento', None) or getattr(t, 'pordes', 0) or 0)
+        
+        try:
+            monto_origen = float(monto_origen or 0)
+        except Exception:
+            monto_origen = 0.0
+        
+        # Calcular ganancia según tipo
+        ganancia_trans = 0.0
+        
+        if tipo == 'venta':
+            ganancia_trans = monto_origen * (comision_venta - (comision_venta * porcentaje_descuento / 100))
+        elif tipo == 'compra':
+            ganancia_trans = monto_origen * (comision_compra - (comision_compra * porcentaje_descuento / 100))
+        
+        ganancias_por_fecha[fecha_str] += ganancia_trans
+    
+    # Convertir a listas ordenadas
+    fechas_ordenadas = sorted(ganancias_por_fecha.keys())
+    ganancias_lista = [round(ganancias_por_fecha[f], 2) for f in fechas_ordenadas]
+    ganancia_total = sum(ganancias_lista)
+    
+    # Formatear fechas para mejor visualización
+    fechas_formateadas = []
+    for f in fechas_ordenadas:
+        try:
+            dt = datetime.strptime(f, '%Y-%m-%d')
+            fechas_formateadas.append(dt.strftime('%d/%m/%Y'))
+        except Exception:
+            fechas_formateadas.append(f)
+    
+    return JsonResponse({
+        'fechas': fechas_formateadas,
+        'ganancias': ganancias_lista,
+        'ganancia_total': round(ganancia_total, 2),
+        'moneda': 'Todas' if not moneda_id else Moneda.objects.filter(id=moneda_id).first().nombre if Moneda.objects.filter(id=moneda_id).exists() else 'Desconocida'
+    })
