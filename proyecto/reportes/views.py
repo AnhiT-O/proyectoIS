@@ -198,8 +198,8 @@ def transacciones_reportes(request):
             comision_compra_val = comision_compra
             ganancia_comp = monto_origen * (comision_compra - (comision_compra * porcentaje_descuento / 100))
 
-        # Solo se consideran ganancias si la transacción está completa
-        if not (estado and str(estado).lower() == 'completa'):
+        # Solo se consideran ganancias si la transacción está completa o confirmada
+        if not (estado and str(estado).lower() in ['completa', 'confirmada']):
             ganancia_comp = 0.0
             ganancia_vta = 0.0
 
@@ -333,8 +333,9 @@ def obtener_datos_ganancias(request):
     # Filtrar transacciones
     qs = Transaccion.objects.filter(
         fecha_hora__gte=fecha_desde,
-        fecha_hora__lte=fecha_hasta,
-        estado__iexact='completa'
+        fecha_hora__lte=fecha_hasta
+    ).filter(
+        Q(estado__iexact='completa') | Q(estado__iexact='confirmada')
     ).order_by('fecha_hora')
     
     # Filtrar por moneda si se especifica

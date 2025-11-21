@@ -79,8 +79,8 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 --
 
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
-Euro	EUR	t	8100	250	200	2	2025-11-06 10:31:00
-Real	BRL	t	1300	15	40	2	2025-11-06 10:30:00
+Euro	EUR	t	7900	500	250	2	2025-11-21 09:36:00
+Real	BRL	t	1320	40	20	2	2025-11-21 09:37:00
 Peso argentino	ARP	t	5	1	1	0	2025-10-10 10:50:00
 \.
 
@@ -105,6 +105,12 @@ Real	2025-11-01	1300	30	20	1270	1320	2025-11-01 12:30:00	3
 Dólar estadounidense	2025-11-01	7030	30	50	7000	7080	2025-11-01 12:30:00	1
 Euro	2025-11-06	8100	250	200	7850	8300	2025-11-06 10:30:00	2
 Real	2025-11-06	1300	15	40	1285	1340	2025-11-06 10:30:00	3
+Dólar estadounidense	2025-11-06	7030	30	30	7000	7060	2025-11-06 10:30:00	1
+Euro	2025-11-14	7900	250	300	7650	8200	2025-11-14 11:41:00	2
+Real	2025-11-14	1320	30	30	1290	1350	2025-11-14 11:42:00	3
+Dólar estadounidense	2025-11-14	7000	60	40	6940	7040	2025-11-14 11:40:00	1
+Euro	2025-11-21	7900	500	250	7400	8150	2025-11-21 09:36:00	2
+Real	2025-11-21	1320	40	20	1280	1340	2025-11-21 09:37:00	3
 \.
 
 COPY public.denominaciones (valor, moneda_id) FROM stdin;
@@ -181,19 +187,11 @@ COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
 1	36	100
 \.
 
---
--- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
 COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 4	Rol encargado de bloquear o desbloquear usuarios del sistema.
 5	Rol encargado de gestionar y asignar clientes a usuarios.
 \.
 
-
---
--- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
---
 
 COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, telefono, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
 pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	irismendoza012@fpuna.edu.py	0984552373	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
@@ -202,11 +200,6 @@ pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ez
 pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	totiespinola@fpuna.edu.py	0982977328	5167191	f	t	2025-09-20 12:56:51.22464-03	1
 pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	losrivarola612@fpuna.edu.py	0981458383	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
-
-
---
--- Data for Name: usuarios_clientes; Type: TABLE DATA; Schema: public; Owner: postgres
---
 
 COPY public.clientes_usuarios (cliente_id, usuario_id) FROM stdin;
 4	4
@@ -222,10 +215,6 @@ COPY public.clientes_usuarios (cliente_id, usuario_id) FROM stdin;
 \.
 
 
---
--- Data for Name: usuarios_groups; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
 COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
 5	3
 3	2
@@ -233,6 +222,10 @@ COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
 1	5
 1	4
 4	1
+\.
+
+COPY public.transacciones (tipo, monto, cotizacion, precio_base, beneficio_segmento, porc_beneficio_segmento, recargo_pago, porc_recargo_pago, recargo_cobro, porc_recargo_cobro, precio_final, pagado, medio_pago, medio_cobro, fecha_hora, estado, razon, token, factura, numero_factura, cliente_id, moneda_id, usuario_id) FROM stdin;
+venta	50	6930	346500	0	0%	3500	1.0%	0	0%	0	343000	343000	Tarjeta de Crédito (**** **** **** 4242)	Cuenta bancaria - Banco Atlas (593406)	2025-11-21 09:58:56.36467-03	Completa	\N	\N	\N	\N	1	1	4
 \.
 
 --

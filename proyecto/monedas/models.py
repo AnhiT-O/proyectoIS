@@ -114,10 +114,10 @@ def crear_moneda_usd(sender, **kwargs):
             Moneda.objects.create(
                 nombre='Dólar estadounidense',
                 simbolo='USD',
-                tasa_base=7030,
-                comision_compra=30,
-                comision_venta=30,
-                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 11, 6, 10, 30, 0))
+                tasa_base=7000,
+                comision_compra=70,
+                comision_venta=40,
+                fecha_cotizacion=timezone.make_aware(timezone.datetime(2025, 11, 21, 9, 35, 0))
             )
             print("✓ Moneda USD creada automáticamente")
 
