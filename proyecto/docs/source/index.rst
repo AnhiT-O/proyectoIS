@@ -5,7 +5,7 @@
 
 Documentación de Global Exchange
 =============================
-
+Grupo 1 IS2 2025
 
 .. toctree::
    :maxdepth: 2

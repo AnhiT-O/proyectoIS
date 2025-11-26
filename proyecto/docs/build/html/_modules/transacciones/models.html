@@ -96,19 +96,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">decimal</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.mail</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmailMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_migrate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.dispatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">receiver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">stripe</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">monedas.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moneda</span><span class="p">,</span> <span class="n">StockGuaranies</span><span class="p">,</span> <span class="n">Denominacion</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">transaction</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">django.core.mail</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmailMessage</span>
 
 <div class="viewcode-block" id="Recargos">
 <a class="viewcode-back" href="../../transacciones.html#transacciones.models.Recargos">[documentos]</a>
@@ -324,6 +324,7 @@
 </div>
 
 
+
 <div class="viewcode-block" id="Tauser">
 <a class="viewcode-back" href="../../transacciones.html#transacciones.models.Tauser">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Tauser</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
@@ -347,57 +348,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Descripción del TAUser en formato &quot;TAUser Puerto {puerto}&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;TAUser Puerto </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">puerto</span><span class="si">}</span><span class="s2">&quot;</span>
-    
-<div class="viewcode-block" id="Tauser.esta_activo">
-<a class="viewcode-back" href="../../transacciones.html#transacciones.models.Tauser.esta_activo">[documentos]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">esta_activo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Verifica si hay un servidor Django corriendo en el puerto del TAUser.</span>
-<span class="sd">        </span>
-<span class="sd">        Primero verifica si el puerto está en uso, luego intenta hacer una petición HTTP</span>
-<span class="sd">        para confirmar que es un servidor Django.</span>
-<span class="sd">        </span>
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True si hay un servidor Django corriendo, False en caso contrario</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Verificar si el puerto está en uso</span>
-            <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">sock</span><span class="p">:</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Timeout de 1 segundo</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">connect_ex</span><span class="p">((</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">puerto</span><span class="p">))</span>
-                
-                <span class="k">if</span> <span class="n">result</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># Puerto no está en uso</span>
-                    <span class="k">return</span> <span class="kc">False</span>
-            
-            <span class="c1"># Si el puerto está en uso, verificar si es un servidor Django</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">puerto</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">,</span>
-                    <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;User-Agent&#39;</span><span class="p">:</span> <span class="s1">&#39;TAUser-Checker/1.0&#39;</span><span class="p">}</span>
-                <span class="p">)</span>
-                
-                <span class="c1"># Verificar si la respuesta contiene indicadores de Django</span>
-                <span class="c1"># Django típicamente incluye estos headers o contenido</span>
-                <span class="n">django_indicators</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="s1">&#39;django&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-                    <span class="s1">&#39;csrftoken&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-                    <span class="s1">&#39;django&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
-                    <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">302</span><span class="p">,</span> <span class="mi">404</span><span class="p">]</span>  <span class="c1"># Códigos típicos de Django</span>
-                <span class="p">]</span>
-                
-                <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">django_indicators</span><span class="p">)</span>
-                
-            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
-                <span class="c1"># Si hay error en la petición HTTP pero el puerto está abierto,</span>
-                <span class="c1"># asumimos que podría ser Django pero no responde correctamente</span>
-                <span class="k">return</span> <span class="kc">True</span>
-                
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-</div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;TAUser Puerto </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">puerto</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
     
 <div class="viewcode-block" id="BilletesTauser">
@@ -442,7 +393,7 @@
 <span class="sd">        db_table: &quot;transacciones&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cliente</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;clientes.Cliente&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
-    <span class="n">tipo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>  <span class="c1"># &#39;compra&#39; o &#39;venta&#39;</span>
+    <span class="n">tipo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># &#39;compra&#39; o &#39;venta&#39;</span>
     <span class="n">moneda</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;monedas.Moneda&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
     <span class="n">monto</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span><span class="n">max_digits</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
     <span class="n">cotizacion</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
@@ -460,9 +411,9 @@
     <span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">estado</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;Pendiente&#39;</span><span class="p">)</span>
     <span class="n">razon</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
-    <span class="n">token</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">factura</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">numero_factura</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">numero_factura</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SmallIntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
     <span class="n">usuario</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;usuarios.Usuario&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
     
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
@@ -529,11 +480,11 @@
         <span class="c1"># Calculo de recargos por medio de pago</span>
         <span class="c1"># Si el pago es con tarjeta de crédito</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_pago</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;brand&#39;</span> <span class="ow">in</span> <span class="n">dict_pago</span><span class="p">:</span>
-            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">precio_final</span> <span class="o">*</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="o">-</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span>
+            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">precio_final</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
             <span class="n">porc_recargo_pago</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span>
         <span class="c1"># Si el pago es con billetera electrónica</span>
         <span class="k">elif</span> <span class="n">dict_pago</span> <span class="ow">in</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">medio</span><span class="o">=</span><span class="s1">&#39;Billetera Electrónica&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;marca&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">precio_final</span> <span class="o">*</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">)</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="o">-</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">)</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span>
+            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">precio_final</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">)</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
             <span class="n">porc_recargo_pago</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">)</span><span class="o">.</span><span class="n">recargo</span>
         <span class="c1"># Si el pago es en efectivo o transferencia, no hay recargo</span>
         <span class="k">else</span><span class="p">:</span>
@@ -564,7 +515,7 @@
         <span class="c1"># Calculo de recargos por medio de pago y cobro</span>
         <span class="c1"># Si el pago es con tarjeta de crédito</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_pago</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;brand&#39;</span> <span class="ow">in</span> <span class="n">dict_pago</span><span class="p">:</span>
-            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">monto</span> <span class="o">*</span> <span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
+            <span class="n">monto_recargo_pago</span> <span class="o">=</span>  <span class="n">Decimal</span><span class="p">(</span><span class="n">precio_final</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
             <span class="n">porc_recargo_pago</span> <span class="o">=</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">dict_pago</span><span class="p">[</span><span class="s1">&#39;brand&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">recargo</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">monto_recargo_pago</span> <span class="o">=</span> <span class="mi">0</span>
@@ -724,28 +675,8 @@
 <span class="sd">    Se utiliza para transacciones con medios de pago que requieren verificación</span>
 <span class="sd">    adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Generar token único de 8 caracteres (números y letras mayúsculas)</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-    <span class="n">caracteres</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span>
-    
-    <span class="c1"># Verificar unicidad del token</span>
-    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">max_intentos</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># Evitar bucle infinito</span>
-    <span class="n">intentos</span> <span class="o">=</span> <span class="mi">0</span>
-    
-    <span class="k">while</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">intentos</span> <span class="o">&lt;</span> <span class="n">max_intentos</span><span class="p">:</span>
-        <span class="n">token_candidato</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">caracteres</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
-        <span class="c1"># Verificar si el token ya existe en la base de datos</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">token_candidato</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">token</span> <span class="o">=</span> <span class="n">token_candidato</span>
-        <span class="n">intentos</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-    <span class="c1"># Si no se pudo generar un token único, usar fallback con timestamp</span>
-    <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-        <span class="n">timestamp_suffix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># Últimos 2 dígitos del timestamp</span>
-        <span class="n">token</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">caracteres</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span> <span class="o">+</span> <span class="n">timestamp_suffix</span>
+    <span class="c1"># Generar token único</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">token_urlsafe</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
     
     <span class="c1"># Crear datos del token</span>
     <span class="n">datos_token</span> <span class="o">=</span> <span class="p">{</span>
@@ -764,15 +695,15 @@
     <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="enviar_notificacion_cambio_cotizacion">
-<a class="viewcode-back" href="../../transacciones.html#transacciones.models.enviar_notificacion_cambio_cotizacion">[documentos]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">enviar_notificacion_cambio_cotizacion</span><span class="p">(</span><span class="n">usuario</span><span class="p">,</span> <span class="n">transaccion</span><span class="p">,</span> <span class="n">cambios_cotizacion</span><span class="p">):</span>
+<div class="viewcode-block" id="enviar_notificacion_cambio_cotizacion_tauser">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.enviar_notificacion_cambio_cotizacion_tauser">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">enviar_notificacion_cambio_cotizacion_tauser</span><span class="p">(</span><span class="n">usuario_email</span><span class="p">,</span> <span class="n">transaccion</span><span class="p">,</span> <span class="n">cambios_cotizacion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Envía un correo electrónico de notificación cuando se detectan cambios en la cotización</span>
-<span class="sd">    durante el proceso de confirmación de una transacción.</span>
+<span class="sd">    durante el proceso de confirmación de una transacción en el sistema TAUser.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        usuario: Usuario que realiza la transacción</span>
+<span class="sd">        usuario_email (str): Email del usuario operador que procesó la transacción</span>
 <span class="sd">        transaccion: Instancia de la transacción afectada</span>
 <span class="sd">        cambios_cotizacion (dict): Diccionario con información de cambios de cotización</span>
 <span class="sd">            - &#39;hay_cambios&#39;: boolean indicando si hubo cambios</span>
@@ -785,12 +716,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">django.template.loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_to_string</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
         
-        <span class="c1"># Verificar que el usuario tenga email</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Usuario </span><span class="si">{</span><span class="n">usuario</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> no tiene email configurado para notificación de cambio de cotización&quot;</span><span class="p">)</span>
+        <span class="c1"># Verificar que haya email</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">usuario_email</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No se proporcionó email para notificación de cambio de cotización en TAUser&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
             
         <span class="c1"># Preparar datos para el template del email</span>
@@ -822,7 +751,6 @@
             <span class="n">cambio_favorable</span> <span class="o">=</span> <span class="n">diferencia</span> <span class="o">&gt;</span> <span class="mi">0</span>
             
         <span class="n">contexto_email</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;usuario_nombre&#39;</span><span class="p">:</span> <span class="n">usuario</span><span class="o">.</span><span class="n">first_name</span> <span class="ow">or</span> <span class="n">usuario</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
             <span class="s1">&#39;cliente_nombre&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span>
             <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s1">&#39;tipo_operacion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span><span class="p">,</span>
@@ -838,23 +766,24 @@
             <span class="s1">&#39;medio_pago&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">,</span>
             <span class="s1">&#39;medio_cobro&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span><span class="p">,</span>
             <span class="s1">&#39;precio_final&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span>
-            <span class="s1">&#39;empresa&#39;</span><span class="p">:</span> <span class="s1">&#39;Global Exchange&#39;</span>
+            <span class="s1">&#39;empresa&#39;</span><span class="p">:</span> <span class="s1">&#39;Global Exchange TAUser&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">token</span> <span class="ow">or</span> <span class="s1">&#39;N/A&#39;</span>
         <span class="p">}</span>
         
         <span class="c1"># Preparar asunto del correo</span>
         <span class="n">direccion_cambio</span> <span class="o">=</span> <span class="s2">&quot;bajó&quot;</span> <span class="k">if</span> <span class="n">diferencia</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;subió&quot;</span>
-        <span class="n">asunto</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cambio de Cotización Detectado - </span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">direccion_cambio</span><span class="si">}</span><span class="s2"> - Transacción #</span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">asunto</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;TAUser - Cambio de Cotización Detectado - </span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">direccion_cambio</span><span class="si">}</span><span class="s2"> - Token #</span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
         
         <span class="c1"># Crear contenido del email en texto plano</span>
         <span class="n">mensaje_texto</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">Estimado/a </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;usuario_nombre&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span>
+<span class="s2">Estimado/a Usuario,</span>
 
-<span class="s2">Se ha detectado un cambio en la cotización durante su proceso de transacción.</span>
+<span class="s2">Se ha detectado un cambio en la cotización durante el procesamiento de una transacción en el sistema TAUser.</span>
 
 <span class="s2">DETALLES DE LA TRANSACCIÓN:</span>
 <span class="s2">================================</span>
 <span class="s2">Cliente: </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;cliente_nombre&#39;</span><span class="p">]</span><span class="si">}</span>
-<span class="s2">Transacción ID: #</span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;transaccion_id&#39;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">Token de Transacción: #</span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;token&#39;</span><span class="p">]</span><span class="si">}</span>
 <span class="s2">Tipo de Operación: </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;tipo_operacion&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span>
 <span class="s2">Moneda: </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;moneda_nombre&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;moneda_simbolo&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)</span>
 <span class="s2">Monto: </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;monto_transaccion&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">,.</span><span class="si">{</span><span class="n">moneda</span><span class="o">.</span><span class="n">decimales</span><span class="si">}</span><span class="s2">f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;moneda_simbolo&#39;</span><span class="p">]</span><span class="si">}</span>
@@ -872,8 +801,8 @@
 <span class="s2">Monto Final: Gs. </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;precio_final&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span>
 <span class="s2">Fecha y Hora: </span><span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;fecha_hora&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span>
 
-<span class="s2">Este cambio se detectó mientras usted se encontraba en la página de confirmación de la transacción.</span>
-<span class="s2">Puede continuar con la transacción aceptando el nuevo precio o cancelar la operación.</span>
+<span class="s2">Este cambio se detectó durante la verificación del token en el sistema TAUser.</span>
+<span class="s2">El cliente puede continuar con la transacción aceptando el nuevo precio o cancelar la operación.</span>
 
 <span class="s2">---</span>
 <span class="si">{</span><span class="n">contexto_email</span><span class="p">[</span><span class="s1">&#39;empresa&#39;</span><span class="p">]</span><span class="si">}</span>
@@ -885,26 +814,26 @@
             <span class="n">subject</span><span class="o">=</span><span class="n">asunto</span><span class="p">,</span>
             <span class="n">body</span><span class="o">=</span><span class="n">mensaje_texto</span><span class="p">,</span>
             <span class="n">from_email</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;EMAIL_HOST_USER&#39;</span><span class="p">),</span>
-            <span class="n">to</span><span class="o">=</span><span class="p">[</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="p">],</span>
+            <span class="n">to</span><span class="o">=</span><span class="p">[</span><span class="n">usuario_email</span><span class="p">],</span>
         <span class="p">)</span>
         
         <span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Notificación de cambio de cotización enviada exitosamente a </span><span class="si">{</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2"> para transacción #</span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Notificación TAUser de cambio de cotización enviada exitosamente a </span><span class="si">{</span><span class="n">usuario_email</span><span class="si">}</span><span class="s2"> para token #</span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
         
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error al enviar notificación de cambio de cotización: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error al enviar notificación TAUser de cambio de cotización: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="verificar_cambio_cotizacion_sesion">
-<a class="viewcode-back" href="../../transacciones.html#transacciones.models.verificar_cambio_cotizacion_sesion">[documentos]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">verificar_cambio_cotizacion_sesion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">tipo_transaccion</span><span class="o">=</span><span class="s1">&#39;compra&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="verificar_cambio_cotizacion">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.verificar_cambio_cotizacion">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verificar_cambio_cotizacion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Verifica si ha habido cambios en la cotización durante el proceso de transacción.</span>
 <span class="sd">    </span>
 <span class="sd">    Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.</span>
-<span class="sd">    Si detecta cambios, también envía una notificación por correo electrónico al usuario.</span>
+<span class="sd">    Si detecta cambios y se proporciona un email, también envía una notificación.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        request (HttpRequest): Petición HTTP con datos de sesión</span>
@@ -919,43 +848,33 @@
 <span class="sd">            - &#39;email_enviado&#39;: boolean indicando si se envió notificación por email</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Obtener datos de la sesión</span>
-        <span class="n">datos_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tipo_transaccion</span><span class="si">}</span><span class="s1">_datos&#39;</span>
-        <span class="n">precio_compra_key</span> <span class="o">=</span> <span class="s1">&#39;precio_compra_inicial&#39;</span>
-        <span class="n">precio_venta_key</span> <span class="o">=</span> <span class="s1">&#39;precio_venta_inicial&#39;</span>
-        
-        <span class="n">datos_transaccion</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">datos_key</span><span class="p">)</span>
-        <span class="n">precio_compra_inicial</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">precio_compra_key</span><span class="p">)</span>
-        <span class="n">precio_venta_inicial</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">precio_venta_key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">datos_transaccion</span> <span class="ow">or</span> <span class="p">(</span><span class="n">precio_compra_inicial</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">precio_venta_inicial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-            
-        <span class="c1"># Obtener moneda actual</span>
-        <span class="n">moneda</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;moneda&#39;</span><span class="p">])</span>
-        <span class="n">cliente_activo</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">cliente_activo</span>
-        
         <span class="c1"># Calcular precios actuales</span>
-        <span class="n">precios_actuales</span> <span class="o">=</span> <span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">cliente_activo</span><span class="p">)</span>
+        <span class="n">precios_actuales</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">get_precios_cliente</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="p">)</span>
         <span class="n">precio_compra_actual</span> <span class="o">=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_compra&#39;</span><span class="p">]</span>
         <span class="n">precio_venta_actual</span> <span class="o">=</span> <span class="n">precios_actuales</span><span class="p">[</span><span class="s1">&#39;precio_venta&#39;</span><span class="p">]</span>
 
         <span class="c1"># Verificar si hay cambios</span>
-        <span class="n">hay_cambios</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">precio_compra_actual</span> <span class="o">!=</span> <span class="n">precio_compra_inicial</span> <span class="ow">and</span> 
-            <span class="n">precio_venta_actual</span> <span class="o">!=</span> <span class="n">precio_venta_inicial</span>
-        <span class="p">)</span>
+        <span class="n">hay_cambios</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cotizacion</span> <span class="o">!=</span> <span class="n">precio_venta_actual</span><span class="p">:</span>
+                <span class="n">hay_cambios</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cotizacion</span> <span class="o">!=</span> <span class="n">precio_compra_actual</span><span class="p">:</span>
+                <span class="n">hay_cambios</span> <span class="o">=</span> <span class="kc">True</span>
+        
+
         <span class="k">if</span> <span class="n">hay_cambios</span><span class="p">:</span>
             <span class="n">cambios_info</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s1">&#39;hay_cambios&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="s1">&#39;valores_anteriores&#39;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precio_compra_inicial</span><span class="p">,</span>
-                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precio_venta_inicial</span>
+                    <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cotizacion</span><span class="p">,</span>
+                    <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cotizacion</span>
                 <span class="p">},</span>
                 <span class="s1">&#39;valores_actuales&#39;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">precio_compra_actual</span><span class="p">,</span>
                     <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">precio_venta_actual</span>
                 <span class="p">},</span>
-                <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda</span><span class="p">,</span>
+                <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">,</span>
                 <span class="s1">&#39;email_enviado&#39;</span><span class="p">:</span> <span class="kc">False</span>
             <span class="p">}</span>
             
@@ -963,82 +882,62 @@
         
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;hay_cambios&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
         
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error en verificar_cambio_cotizacion TAUser: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
     
 <div class="viewcode-block" id="procesar_transaccion">
 <a class="viewcode-back" href="../../transacciones.html#transacciones.models.procesar_transaccion">[documentos]</a>
 <span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">recibido</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    
-    <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span> <span class="o">==</span> <span class="s1">&#39;Transferencia Bancaria&#39;</span><span class="p">:</span>
-        <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">=</span> <span class="n">recibido</span>
-        <span class="k">if</span> <span class="n">recibido</span> <span class="o">&lt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Notificar usuario que transferencia es incompleta&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="s1">&#39;Pendiente&#39;</span><span class="p">:</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Confirmada&#39;</span>
+        <span class="n">generar_factura_electronica</span><span class="p">(</span><span class="n">transaccion</span><span class="p">)</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_diario</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_mensual</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">ultimo_consumo</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="s1">&#39;Confirmada&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+                <span class="n">denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                <span class="n">cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                <span class="n">cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">cantidades_qs</span><span class="p">}</span>
+                <span class="n">extraer</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span> <span class="n">denominaciones</span><span class="p">,</span> <span class="n">cantidades</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">extraer</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">valor</span><span class="p">,</span> <span class="n">cantidad</span> <span class="ow">in</span> <span class="n">extraer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">,</span> <span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">cantidad</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Completa&#39;</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                <span class="n">cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                <span class="n">cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">cantidades_qs</span><span class="p">}</span>
+                <span class="n">extraer</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span> <span class="n">denominaciones</span><span class="p">,</span> <span class="n">cantidades</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">extraer</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">valor</span><span class="p">,</span> <span class="n">cantidad</span> <span class="ow">in</span> <span class="n">extraer</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">,</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">cantidad</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Completa&#39;</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Confirmada&#39;</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">generar_factura_electronica</span><span class="p">(</span><span class="n">transaccion</span><span class="p">)</span>
             <span class="n">stock</span> <span class="o">=</span> <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">recibido</span>
+            <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span> <span class="o">+</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_cobro</span>
             <span class="n">stock</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_diario</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_mensual</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">ultimo_consumo</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Notificar usuario que transferencia fue confirmada y transacción confirmada&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span> <span class="ow">in</span> <span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">medio</span><span class="o">=</span><span class="s1">&#39;Billetera Electrónica&#39;</span><span class="p">):</span>
-        <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">=</span> <span class="n">recibido</span>
-        <span class="k">if</span> <span class="n">recibido</span> <span class="o">&lt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Notificar usuario que transferencia es incompleta&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Confirmada&#39;</span>
-            <span class="n">generar_factura_electronica</span><span class="p">(</span><span class="n">transaccion</span><span class="p">)</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Completa&#39;</span>
             <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">stock</span> <span class="o">=</span> <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="n">monto_recargo_pago</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">recibido</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">Recargos</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">marca</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">)</span><span class="o">.</span><span class="n">recargo</span><span class="p">)</span> <span class="o">/</span> <span class="n">Decimal</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">recibido</span> <span class="o">-</span> <span class="n">monto_recargo_pago</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_diario</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_mensual</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">ultimo_consumo</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Notificar usuario que transferencia fue confirmada y transacción confirmada&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Tarjeta de Crédito&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Confirmada&#39;</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">stock</span> <span class="o">=</span> <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_pago</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_diario</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_mensual</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">ultimo_consumo</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Confirmada&#39;</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-            <span class="n">stock</span> <span class="o">=</span> <span class="n">StockGuaranies</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span> <span class="o">*</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">)</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_pago</span>
-            <span class="n">stock</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_diario</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">consumo_mensual</span> <span class="o">+=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">ultimo_consumo</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span> <span class="o">!=</span> <span class="s1">&#39;Efectivo&#39;</span><span class="p">:</span>
-                <span class="n">stock</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span> <span class="o">+</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_cobro</span>
-                <span class="n">stock</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-                <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Completa&#39;</span>
-                <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-                <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">generar_factura_electronica</span><span class="p">(</span><span class="n">transaccion</span><span class="p">)</span></div>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="no_redondeado">
@@ -1113,35 +1012,10 @@
             <span class="c1"># Para montos muy grandes, asumimos que se puede formar</span>
             <span class="k">return</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Con cantidades limitadas, usamos DP con backtracking limitado</span>
-        <span class="c1"># Optimización: usar BFS en lugar de DP completo</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
-        
-        <span class="n">visitados</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">}</span>
-        <span class="n">cola</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cantidades</span><span class="o">.</span><span class="n">copy</span><span class="p">())])</span>
-        
-        <span class="c1"># Límite de iteraciones para evitar bucles infinitos</span>
-        <span class="n">max_iteraciones</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="n">monto</span> <span class="o">//</span> <span class="nb">min</span><span class="p">(</span><span class="n">denominaciones_ordenadas</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">)</span>
-        <span class="n">iteraciones</span> <span class="o">=</span> <span class="mi">0</span>
-        
-        <span class="k">while</span> <span class="n">cola</span> <span class="ow">and</span> <span class="n">iteraciones</span> <span class="o">&lt;</span> <span class="n">max_iteraciones</span><span class="p">:</span>
-            <span class="n">iteraciones</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">valor_actual</span><span class="p">,</span> <span class="n">cant_restantes</span> <span class="o">=</span> <span class="n">cola</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
-            
-            <span class="k">if</span> <span class="n">valor_actual</span> <span class="o">==</span> <span class="n">monto</span><span class="p">:</span>
-                <span class="k">return</span> <span class="mi">0</span>
-            
-            <span class="c1"># Probar agregar cada denominación</span>
-            <span class="k">for</span> <span class="n">denom</span> <span class="ow">in</span> <span class="n">denominaciones_ordenadas</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">cant_restantes</span><span class="p">[</span><span class="n">denom</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">nuevo_valor</span> <span class="o">=</span> <span class="n">valor_actual</span> <span class="o">+</span> <span class="n">denom</span>
-                    
-                    <span class="c1"># Solo continuar si no nos pasamos y no lo visitamos</span>
-                    <span class="k">if</span> <span class="n">nuevo_valor</span> <span class="o">&lt;=</span> <span class="n">monto</span> <span class="ow">and</span> <span class="n">nuevo_valor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visitados</span><span class="p">:</span>
-                        <span class="n">visitados</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nuevo_valor</span><span class="p">)</span>
-                        <span class="n">nuevas_cantidades</span> <span class="o">=</span> <span class="n">cant_restantes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                        <span class="n">nuevas_cantidades</span><span class="p">[</span><span class="n">denom</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
-                        <span class="n">cola</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nuevo_valor</span><span class="p">,</span> <span class="n">nuevas_cantidades</span><span class="p">))</span>
+        <span class="c1"># Con cantidades limitadas, usamos billetes_necesarios que ya existe</span>
+        <span class="n">resultado</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="n">monto</span><span class="p">,</span> <span class="n">denominaciones_ordenadas</span><span class="p">,</span> <span class="n">cantidades</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resultado</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
     
     <span class="c1"># Si no se puede formar, buscar el menor redondeo</span>
     <span class="n">menor_denominacion</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">denominaciones_ordenadas</span><span class="p">)</span>
@@ -1150,10 +1024,15 @@
     <span class="k">for</span> <span class="n">incremento</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mcd</span><span class="p">,</span> <span class="n">mcd</span> <span class="o">*</span> <span class="n">menor_denominacion</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mcd</span><span class="p">):</span>
         <span class="n">monto_redondeado</span> <span class="o">=</span> <span class="n">monto</span> <span class="o">+</span> <span class="n">incremento</span>
         
-        <span class="c1"># Verificación rápida recursiva con límite</span>
-        <span class="k">if</span> <span class="n">incremento</span> <span class="o">&lt;=</span> <span class="n">menor_denominacion</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">resultado</span> <span class="o">=</span> <span class="n">no_redondeado</span><span class="p">(</span><span class="n">monto_redondeado</span><span class="p">,</span> <span class="n">denominaciones</span><span class="p">,</span> <span class="n">cantidades</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">resultado</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Verificación rápida</span>
+        <span class="k">if</span> <span class="n">cantidades</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Para cantidades ilimitadas, verificar si es múltiplo del MCD</span>
+            <span class="k">if</span> <span class="n">monto_redondeado</span> <span class="o">%</span> <span class="n">mcd</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">incremento</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Para cantidades limitadas, usar billetes_necesarios</span>
+            <span class="n">resultado</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="n">monto_redondeado</span><span class="p">,</span> <span class="n">denominaciones_ordenadas</span><span class="p">,</span> <span class="n">cantidades</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resultado</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">incremento</span>
     
     <span class="c1"># Fallback: retornar el MCD como redondeo mínimo</span>
@@ -1179,6 +1058,7 @@
 <span class="sd">            - &#39;pdf_url&#39;: str con la URL del PDF</span>
 <span class="sd">            - &#39;error&#39;: str con mensaje de error (si aplica)</span>
 <span class="sd">    </span>
+<span class="sd">            </span>
 <span class="sd">    for numero in range(settings.NUMERO_FACTURACION, 400):</span>
 <span class="sd">        if not Transaccion.objects.filter(numero_factura=numero).exists():</span>
 <span class="sd">            transaccion.numero_factura = numero</span>
@@ -1327,8 +1207,8 @@
 <span class="sd">        transaccion.factura = cdc_data</span>
 <span class="sd">        transaccion.save()</span>
 <span class="sd">        print(f&quot;Factura electrónica generada exitosamente&quot;)</span>
-<span class="sd">        </span>
-<span class="sd">        # Enviar factura por correo electrónico</span>
+
+<span class="sd">     # Enviar factura por correo electrónico</span>
 <span class="sd">        try:</span>
 <span class="sd">            # Descargar el PDF de la factura</span>
 <span class="sd">            resultado_descarga = descargar_factura(cdc_data)</span>
@@ -1377,49 +1257,8 @@
 <span class="sd">                </span>
 <span class="sd">        except Exception as e:</span>
 <span class="sd">            print(f&quot;Error al enviar factura por correo: {str(e)}&quot;)</span>
-<span class="sd">    </span>
 <span class="sd">    return response_data</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="verificar_factura">
-<a class="viewcode-back" href="../../transacciones.html#transacciones.models.verificar_factura">[documentos]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">verificar_factura</span><span class="p">(</span><span class="n">CDC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Verifica el estado de una factura electrónica mediante su CDC.</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        CDC (str): Código de Control de la factura</span>
-<span class="sd">        dRucEm (str): RUC del emisor de la factura</span>
-<span class="sd">        </span>
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Diccionario con información de la factura verificada</span>
-<span class="sd">            - &#39;success&#39;: bool indicando si la verificación fue exitosa</span>
-<span class="sd">            - &#39;factura&#39;: dict con detalles de la factura</span>
-<span class="sd">            - &#39;error&#39;: str con mensaje de error (si aplica)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">settings</span><span class="o">.</span><span class="n">FACTURA_SEGURA_API_URL</span><span class="si">}</span><span class="s2">/misife00/v1/esi&quot;</span>
-    
-    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;accept&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;Authentication-Token&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AUTHENTICATION_TOKEN&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span>
-    <span class="p">}</span>
-    
-    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;get_estado_sifen&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;CDC&quot;</span><span class="p">:</span> <span class="n">CDC</span><span class="p">,</span>
-            <span class="s2">&quot;dRucEm&quot;</span><span class="p">:</span> <span class="s1">&#39;2595733&#39;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-    <span class="n">response_data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">response_data</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">response_data</span></div>
 
 
 <div class="viewcode-block" id="descargar_factura">
@@ -1464,6 +1303,56 @@
         <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
         <span class="s1">&#39;content_type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/pdf&#39;</span>
     <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="billetes_necesarios">
+<a class="viewcode-back" href="../../transacciones.html#transacciones.models.billetes_necesarios">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">billetes_necesarios</span><span class="p">(</span><span class="n">monto</span><span class="p">,</span> <span class="n">denominaciones</span><span class="p">,</span> <span class="n">disponible</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcula la cantidad de billetes necesarios para cubrir un monto dado usando programación dinámica.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        monto (int): Monto total a cubrir</span>
+<span class="sd">        denominaciones (list): Lista de denominaciones disponibles (enteros)</span>
+<span class="sd">        disponible (dict): Diccionario con la cantidad disponible por denominación</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Diccionario con la cantidad de billetes por denominación necesarios, o None si no es posible</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+    
+    <span class="c1"># dp[i] = (min_billetes, configuracion) para completar monto i</span>
+    <span class="c1"># configuracion es un dict con {denominacion: cantidad_usada}</span>
+    <span class="n">dp</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span> <span class="p">{}))</span>
+    <span class="n">dp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">{})</span>  <span class="c1"># Para monto 0, necesitamos 0 billetes</span>
+    
+    <span class="c1"># Recorrer todos los montos desde 1 hasta el monto objetivo</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">monto</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Probar cada denominación</span>
+        <span class="k">for</span> <span class="n">denominacion</span> <span class="ow">in</span> <span class="n">denominaciones</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">denominacion</span> <span class="ow">in</span> <span class="n">disponible</span> <span class="ow">and</span> <span class="n">disponible</span><span class="p">[</span><span class="n">denominacion</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">denominacion</span><span class="p">:</span>
+                <span class="c1"># Obtener la configuración anterior (para monto i - denominacion)</span>
+                <span class="n">prev_billetes</span><span class="p">,</span> <span class="n">prev_config</span> <span class="o">=</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">denominacion</span><span class="p">]</span>
+                
+                <span class="c1"># Verificar cuántos billetes de esta denominación ya se han usado</span>
+                <span class="n">billetes_usados_actual</span> <span class="o">=</span> <span class="n">prev_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                
+                <span class="c1"># Solo proceder si podemos usar otro billete de esta denominación</span>
+                <span class="k">if</span> <span class="n">billetes_usados_actual</span> <span class="o">&lt;</span> <span class="n">disponible</span><span class="p">[</span><span class="n">denominacion</span><span class="p">]:</span>
+                    <span class="n">nueva_cantidad_billetes</span> <span class="o">=</span> <span class="n">prev_billetes</span> <span class="o">+</span> <span class="mi">1</span>
+                    
+                    <span class="c1"># Si esta es una mejor solución (menos billetes)</span>
+                    <span class="k">if</span> <span class="n">nueva_cantidad_billetes</span> <span class="o">&lt;</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="c1"># Crear nueva configuración</span>
+                        <span class="n">nueva_config</span> <span class="o">=</span> <span class="n">prev_config</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                        <span class="n">nueva_config</span><span class="p">[</span><span class="n">denominacion</span><span class="p">]</span> <span class="o">=</span> <span class="n">billetes_usados_actual</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">nueva_cantidad_billetes</span><span class="p">,</span> <span class="n">nueva_config</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar si se encontró una solución para el monto objetivo</span>
+    <span class="k">if</span> <span class="n">dp</span><span class="p">[</span><span class="n">monto</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># No se pudo cubrir el monto con los billetes disponibles</span>
+    
+    <span class="k">return</span> <span class="n">dp</span><span class="p">[</span><span class="n">monto</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Retornar la configuración óptima</span></div>
 
 </pre></div>
 

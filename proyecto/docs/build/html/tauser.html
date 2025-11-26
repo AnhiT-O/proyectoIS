@@ -53,7 +53,31 @@
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tauser</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-tauser">Paquete principal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#modulos-de-proyecto-tauser">Módulos de proyecto tauser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modulos-de-proyecto-tauser">Módulos de proyecto tauser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.forms.IngresoForm"><code class="docutils literal notranslate"><span class="pre">IngresoForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.IngresoForm.archivo"><code class="docutils literal notranslate"><span class="pre">IngresoForm.archivo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.IngresoForm.clean_archivo"><code class="docutils literal notranslate"><span class="pre">IngresoForm.clean_archivo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.IngresoForm.media"><code class="docutils literal notranslate"><span class="pre">IngresoForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.forms.Token2FAForm"><code class="docutils literal notranslate"><span class="pre">Token2FAForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.Token2FAForm.media"><code class="docutils literal notranslate"><span class="pre">Token2FAForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.forms.TokenForm"><code class="docutils literal notranslate"><span class="pre">TokenForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.TokenForm.codigo"><code class="docutils literal notranslate"><span class="pre">TokenForm.codigo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.TokenForm.clean_codigo"><code class="docutils literal notranslate"><span class="pre">TokenForm.clean_codigo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tauser.forms.TokenForm.media"><code class="docutils literal notranslate"><span class="pre">TokenForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.caja_fuerte"><code class="docutils literal notranslate"><span class="pre">caja_fuerte()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.exito"><code class="docutils literal notranslate"><span class="pre">exito()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.ingreso_billetes"><code class="docutils literal notranslate"><span class="pre">ingreso_billetes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.ingreso_token"><code class="docutils literal notranslate"><span class="pre">ingreso_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.inicio"><code class="docutils literal notranslate"><span class="pre">inicio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tauser.views.verificar_2fa"><code class="docutils literal notranslate"><span class="pre">verificar_2fa()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
@@ -92,6 +116,544 @@
 </section>
 <section id="modulos-de-proyecto-tauser">
 <h2>Módulos de proyecto tauser<a class="headerlink" href="#modulos-de-proyecto-tauser" title="Link to this heading"></a></h2>
+<p id="module-tauser.forms">Formularios para el sistema TAUser (Terminal Autónomo de Usuario).</p>
+<p>Este módulo contiene los formularios utilizados en el sistema TAUser para la entrada
+y validación de datos por parte de los clientes en las terminales autónomas.</p>
+<dl class="simple">
+<dt>Classes:</dt><dd><p>TokenForm: Formulario para ingreso y validación de tokens de transacción
+IngresoForm: Formulario para carga de archivos con información de billetes</p>
+</dd>
+</dl>
+<p>Author: Equipo de desarrollo Global Exchange
+Date: 2025</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tauser.forms.IngresoForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tauser.forms.</span></span><span class="sig-name descname"><span class="pre">IngresoForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_order=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_field_class=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/forms.html#IngresoForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.forms.IngresoForm" title="Link to this definition"></a></dt>
+<dd><p>Formulario para la carga de archivos con información de billetes.</p>
+<p>Este formulario se utiliza tanto para el ingreso de billetes a la caja fuerte
+del TAUser como para el procesamiento de pagos en transacciones. El archivo
+debe contener información estructurada sobre los billetes (moneda, valor, cantidad).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tauser.forms.IngresoForm.archivo">
+<span class="sig-name descname"><span class="pre">archivo</span></span><a class="headerlink" href="#tauser.forms.IngresoForm.archivo" title="Link to this definition"></a></dt>
+<dd><p>Campo de carga de archivo de texto plano
+- Solo acepta archivos .txt
+- Máximo 5MB de tamaño
+- Debe estar codificado en UTF-8
+- Contiene datos tabulados de billetes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FileField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt>File Format Expected:</dt><dd><p>Línea 1: «Ingreso» o «Extraccion» (para caja fuerte)
+Líneas siguientes: [Moneda][TAB][Valor][TAB][Cantidad]</p>
+<p>Ejemplo:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">Ingreso</span>
+<span class="pre">Dólar</span>&#160;&#160; <span class="pre">1</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">50</span>
+<span class="pre">Dólar</span>&#160;&#160; <span class="pre">5</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">20</span>
+<span class="pre">Guaraní</span> <span class="pre">50000</span>&#160;&#160; <span class="pre">10</span>
+<span class="pre">`</span></code></p>
+</dd>
+<dt>Validation:</dt><dd><ul class="simple">
+<li><p>Verifica extensión .txt</p></li>
+<li><p>Limita tamaño a 5MB</p></li>
+<li><p>Valida codificación UTF-8</p></li>
+<li><p>Previene carga de archivos maliciosos</p></li>
+</ul>
+</dd>
+<dt>Usage:</dt><dd><p>form = IngresoForm(request.POST, request.FILES)
+if form.is_valid():</p>
+<blockquote>
+<div><p>archivo = form.cleaned_data[“archivo”]
+# Procesar contenido del archivo…</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tauser.forms.IngresoForm.clean_archivo">
+<span class="sig-name descname"><span class="pre">clean_archivo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/forms.html#IngresoForm.clean_archivo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.forms.IngresoForm.clean_archivo" title="Link to this definition"></a></dt>
+<dd><p>Valida el archivo cargado para garantizar seguridad e integridad.</p>
+<p>Realiza múltiples validaciones sobre el archivo subido para prevenir
+problemas de seguridad y garantizar que el contenido pueda ser procesado
+correctamente por el sistema TAUser.</p>
+<dl class="simple">
+<dt>Validations Performed:</dt><dd><ol class="arabic simple">
+<li><p>Extensión de archivo: Solo acepta archivos .txt</p></li>
+<li><p>Tamaño de archivo: Máximo 5MB para prevenir DoS</p></li>
+<li><p>Codificación: Debe ser UTF-8 válido</p></li>
+<li><p>Contenido: Debe ser texto plano legible</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>El archivo validado listo para procesamiento</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>InMemoryUploadedFile</p>
+</dd>
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si el archivo no cumple con alguna validación:
+    - Extensión incorrecta
+    - Tamaño excesivo
+    - Codificación inválida
+    - Contenido no legible</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Security Notes:</dt><dd><ul class="simple">
+<li><p>Previene carga de archivos ejecutables</p></li>
+<li><p>Limita el tamaño para evitar ataques DoS</p></li>
+<li><p>Valida la codificación para prevenir inyección</p></li>
+<li><p>Resetea el puntero del archivo después de la validación</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tauser.forms.IngresoForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#tauser.forms.IngresoForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tauser.forms.Token2FAForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tauser.forms.</span></span><span class="sig-name descname"><span class="pre">Token2FAForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_order=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_field_class=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/forms.html#Token2FAForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.forms.Token2FAForm" title="Link to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="tauser.forms.Token2FAForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#tauser.forms.Token2FAForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tauser.forms.TokenForm">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tauser.forms.</span></span><span class="sig-name descname"><span class="pre">TokenForm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_id='id_%s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_class=&lt;class</span> <span class="pre">'django.forms.utils.ErrorList'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_suffix=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty_permitted=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_order=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_required_attribute=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renderer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_field_class=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/forms.html#TokenForm"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.forms.TokenForm" title="Link to this definition"></a></dt>
+<dd><p>Formulario para el ingreso y validación de tokens de transacción.</p>
+<p>Este formulario se utiliza en las terminales TAUser para que los clientes
+ingresen el token de 8 caracteres que recibieron del sistema principal
+para procesar sus transacciones de manera segura.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tauser.forms.TokenForm.codigo">
+<span class="sig-name descname"><span class="pre">codigo</span></span><a class="headerlink" href="#tauser.forms.TokenForm.codigo" title="Link to this definition"></a></dt>
+<dd><p>Campo de texto para ingresar el token alfanumérico
+- Máximo 8 caracteres
+- Solo acepta caracteres alfanuméricos (letras y números)
+- Campo obligatorio con enfoque automático
+- Incluye validación personalizada de formato</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CharField</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl>
+<dt>Validation:</dt><dd><ul class="simple">
+<li><p>Verifica que el código tenga exactamente 8 caracteres</p></li>
+<li><p>Valida que solo contenga caracteres alfanuméricos</p></li>
+<li><p>Muestra mensajes de error personalizados</p></li>
+</ul>
+</dd>
+<dt>Usage:</dt><dd><p>form = TokenForm(request.POST)
+if form.is_valid():</p>
+<blockquote>
+<div><p>token = form.cleaned_data[“codigo”]
+# Procesar el token…</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tauser.forms.TokenForm.clean_codigo">
+<span class="sig-name descname"><span class="pre">clean_codigo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/forms.html#TokenForm.clean_codigo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.forms.TokenForm.clean_codigo" title="Link to this definition"></a></dt>
+<dd><p>Valida el formato del código de transacción ingresado.</p>
+<p>Realiza validaciones específicas para garantizar que el token
+cumple con los requisitos de seguridad del sistema:
+- Longitud exacta de 8 caracteres
+- Solo caracteres alfanuméricos (sin espacios ni símbolos)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Devuelve<span class="colon">:</span></dt>
+<dd class="field-odd"><p>El código validado y limpio</p>
+</dd>
+<dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValidationError</strong> – Si el código no cumple con el formato requerido</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Esta validación es crítica para la seguridad del sistema,
+ya que previene inyección de código malicioso y garantiza
+la integridad de los tokens de transacción.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tauser.forms.TokenForm.media">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">media</span></span><a class="headerlink" href="#tauser.forms.TokenForm.media" title="Link to this definition"></a></dt>
+<dd><p>Return all media required to render the widgets on this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-tauser.views">Vistas para el sistema TAUser (Terminal Autónomo de Usuario).</p>
+<p>Este módulo contiene todas las vistas necesarias para el funcionamiento de las
+terminales TAUser, que permiten a los clientes completar sus transacciones de
+cambio de moneda de forma autónoma mediante interfaces específicas.</p>
+<p>El sistema TAUser maneja:
+- Ingreso y validación de tokens de transacción
+- Procesamiento de pagos en efectivo
+- Gestión de caja fuerte (ingreso/extracción de billetes)
+- Detección de cambios de cotización en tiempo real
+- Confirmación y finalización de transacciones</p>
+<dl class="simple">
+<dt>Functions:</dt><dd><p>inicio: Vista principal del TAUser
+caja_fuerte: Gestión de billetes en caja fuerte
+ingreso_token: Validación de tokens y detección de cambios de cotización
+ingreso_billetes: Procesamiento de pagos en efectivo
+exito: Confirmación de transacción completada</p>
+</dd>
+</dl>
+<p>Author: Equipo de desarrollo Global Exchange
+Date: 2025</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.caja_fuerte">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">caja_fuerte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#caja_fuerte"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.caja_fuerte" title="Link to this definition"></a></dt>
+<dd><p>Vista para gestión de caja fuerte del TAUser.</p>
+<p>Permite el ingreso y extracción de billetes en la caja fuerte del TAUser
+mediante la carga de archivos de texto con formato específico. Esta función
+es crucial para mantener el stock de billetes necesario para las operaciones
+de cambio.</p>
+<dl class="simple">
+<dt>Functionality:</dt><dd><ul class="simple">
+<li><p>GET: Muestra formulario de carga de archivo</p></li>
+<li><p>POST: Procesa archivo y actualiza inventario de billetes</p></li>
+</ul>
+</dd>
+<dt>File Format Expected:</dt><dd><p>Línea 1: «Ingreso» o «Extraccion»
+Líneas siguientes: [Moneda][TAB][Valor][TAB][Cantidad]</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP
+- GET: Renderiza formulario
+- POST: Procesa archivo cargado
+- FILES: Contiene el archivo .txt con datos de billetes</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de gestión de caja fuerte (caja_fuerte.html)</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>caja_fuerte.html - Interfaz para carga de archivos de billetes</p>
+</dd>
+<dt>Context:</dt><dd><p>form (IngresoForm): Formulario para carga de archivo</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Muestra<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – Captura errores de procesamiento de archivo y redirige</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Business Logic:</dt><dd><ol class="arabic simple">
+<li><p>Valida formato del archivo</p></li>
+<li><p>Identifica TAUser por puerto</p></li>
+<li><p>Procesa operaciones de ingreso/extracción</p></li>
+<li><p>Actualiza stock de billetes en base de datos</p></li>
+<li><p>Valida disponibilidad para extracciones</p></li>
+</ol>
+</dd>
+<dt>Security Notes:</dt><dd><ul class="simple">
+<li><p>Validación de formato de archivo</p></li>
+<li><p>Verificación de stock antes de extracciones</p></li>
+<li><p>Manejo seguro de excepciones</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.exito">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">exito</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codigo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#exito"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.exito" title="Link to this definition"></a></dt>
+<dd><p>Vista de confirmación para transacciones completadas exitosamente.</p>
+<p>Renderiza la página de éxito que se muestra al cliente cuando su
+transacción ha sido procesada y completada exitosamente en el TAUser.
+Esta vista proporciona un resumen final de la operación realizada.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP</p></li>
+<li><p><strong>codigo</strong> (<em>str</em>) – Token de transacción de 8 caracteres</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de éxito con detalles de transacción completada</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>exito.html - Página de confirmación final con resumen de transacción</p>
+</dd>
+<dt>Context:</dt><dd><dl class="simple">
+<dt>transaccion (Transaccion): Objeto completo de la transacción finalizada</dt><dd><ul class="simple">
+<li><p>Incluye todos los detalles: cliente, montos, fechas, etc.</p></li>
+<li><p>Estado debe ser “Completa” para llegar a esta vista</p></li>
+<li><p>Contiene información de facturación si aplica</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Business Context:</dt><dd><p>Esta vista se alcanza únicamente cuando:
+1. El token es válido y la transacción existe
+2. El pago fue procesado correctamente
+3. Los billetes fueron intercambiados exitosamente
+4. El estado de transacción cambió a “Completa”
+5. El inventario del TAUser fue actualizado</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<ul class="simple">
+<li><p>No requiere validación adicional de estado ya que solo
+se accede tras procesamiento exitoso</p></li>
+<li><p>La transacción ya fue marcada como “Completa”</p></li>
+<li><p>Sirve como comprobante final para el cliente</p></li>
+<li><p>Puede incluir información de facturación electrónica</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.ingreso_billetes">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">ingreso_billetes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codigo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#ingreso_billetes"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.ingreso_billetes" title="Link to this definition"></a></dt>
+<dd><p>Vista para procesamiento de pagos en efectivo mediante ingreso de billetes.</p>
+<p>Esta función maneja la fase final del proceso de transacción en TAUser,
+donde los clientes ingresan físicamente los billetes para completar
+sus operaciones de compra o venta de monedas extranjeras.</p>
+<dl class="simple">
+<dt>Functionality:</dt><dd><ul class="simple">
+<li><p>Validación de billetes según tipo de operación (compra/venta)</p></li>
+<li><p>Cálculo automático de vueltos cuando corresponde</p></li>
+<li><p>Verificación de disponibilidad de billetes para vueltos</p></li>
+<li><p>Actualización en tiempo real del estado de pago</p></li>
+<li><p>Gestión de inventario de billetes en TAUser</p></li>
+<li><p>Procesamiento y finalización de transacciones</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP
+- POST: Procesa archivo con billetes ingresados
+- GET: Muestra formulario de carga de archivo
+- FILES: Archivo .txt con información de billetes</p></li>
+<li><p><strong>codigo</strong> (<em>str</em>) – Token de transacción de 8 caracteres</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Respuesta según el estado del procesamiento:</dt><dd><ul class="simple">
+<li><p>Formulario de ingreso (GET o errores de validación)</p></li>
+<li><p>Página de éxito (transacción completada)</p></li>
+<li><p>Mensajes de error/advertencia (pagos parciales o problemas)</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl>
+<dt>Template:</dt><dd><p>ingreso_billetes.html - Interfaz para carga de archivos de billetes</p>
+</dd>
+<dt>Context:</dt><dd><p>form (IngresoForm): Formulario para carga de archivo
+transaccion (Transaccion): Objeto de transacción en proceso</p>
+</dd>
+<dt>Business Logic - Compras (Cliente paga Guaraníes, recibe Moneda Extranjera):</dt><dd><ol class="arabic simple">
+<li><p>Valida que solo se ingresen billetes en Guaraníes</p></li>
+<li><p>Verifica denominaciones válidas existentes</p></li>
+<li><p>Calcula total ingresado vs precio final</p></li>
+<li><p>Gestiona vueltos automáticamente si se excede el monto</p></li>
+<li><p>Actualiza inventario del TAUser</p></li>
+<li><p>Entrega moneda extranjera calculada</p></li>
+</ol>
+</dd>
+<dt>Business Logic - Ventas (Cliente entrega Moneda Extranjera, recibe Guaraníes):</dt><dd><ol class="arabic simple">
+<li><p>Valida que se ingresen billetes de la moneda específica</p></li>
+<li><p>Verifica denominaciones válidas de la moneda</p></li>
+<li><p>Calcula total vs monto requerido de moneda extranjera</p></li>
+<li><p>Gestiona vueltos en moneda extranjera si aplica</p></li>
+<li><p>Entrega guaraníes equivalentes</p></li>
+</ol>
+</dd>
+<dt>Validation &amp; Security:</dt><dd><ul class="simple">
+<li><p>Verificación de denominaciones válidas por moneda</p></li>
+<li><p>Control de stock suficiente para vueltos</p></li>
+<li><p>Validación de archivos de billetes</p></li>
+<li><p>Actualización atómica de inventarios</p></li>
+<li><p>Prevención de transacciones duplicadas</p></li>
+</ul>
+</dd>
+<dt>Error Handling:</dt><dd><ul class="simple">
+<li><p>Transacciones no encontradas o inválidas</p></li>
+<li><p>Archivos de billetes malformados</p></li>
+<li><p>Denominaciones no reconocidas</p></li>
+<li><p>Stock insuficiente para vueltos</p></li>
+<li><p>Billetes incorrectos según tipo de operación</p></li>
+</ul>
+</dd>
+<dt>File Format Expected (Billetes):</dt><dd><p>[Moneda][TAB][Valor][TAB][Cantidad]</p>
+<p>Ejemplos:
+- Compra: «Guaraní      50000   5» (5 billetes de 50,000 Gs)
+- Venta: «Dólar 100     2» (2 billetes de $100 USD)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.ingreso_token">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">ingreso_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#ingreso_token"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.ingreso_token" title="Link to this definition"></a></dt>
+<dd><p>Vista principal para procesamiento de tokens de transacción.</p>
+<p>Esta función maneja el núcleo del sistema TAUser, permitiendo a los clientes
+ingresar sus tokens de transacción y procesando la lógica de negocio asociada,
+incluyendo detección de cambios de cotización, validación de tokens y
+gestión del flujo de transacciones.</p>
+<dl class="simple">
+<dt>Functionality:</dt><dd><ul class="simple">
+<li><p>Validación y procesamiento de tokens de 8 caracteres</p></li>
+<li><p>Detección automática de cambios de cotización</p></li>
+<li><p>Manejo de expiración de transacciones (5 minutos)</p></li>
+<li><p>Notificaciones por email a usuarios operadores</p></li>
+<li><p>Gestión de estados de transacción (Pendiente, Cancelada, Completa)</p></li>
+<li><p>Redirección a ingreso de billetes para pagos en efectivo</p></li>
+</ul>
+</dd>
+<dt>Flow Control:</dt><dd><p>POST “aceptar”: Cliente acepta cambios de cotización
+POST “cancelar”: Cliente cancela por cambios de cotización
+POST “enviar”: Cliente ingresa nuevo token para procesar
+GET: Muestra formulario de ingreso de token</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP
+- POST: Procesa acciones del cliente (aceptar/cancelar/enviar)
+- GET: Renderiza formulario de ingreso de token
+- session: Mantiene estado de transacciones en progreso</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Respuesta según la acción:</dt><dd><ul class="simple">
+<li><p>Formulario de ingreso (GET)</p></li>
+<li><p>Página de confirmación con cambios detectados</p></li>
+<li><p>Redirección a ingreso de billetes</p></li>
+<li><p>Página de éxito para transacciones completadas</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>ingreso_token.html - Interfaz para ingreso de tokens y confirmación</p>
+</dd>
+<dt>Context (cuando hay cambios de cotización):</dt><dd><p>cambios (dict): Información de cambios detectados
+transaccion (Transaccion): Objeto transacción actualizado
+email_usuario (str): Email del usuario operador para notificaciones</p>
+</dd>
+<dt>Business Logic:</dt><dd><ol class="arabic simple">
+<li><p>Valida formato y existencia del token</p></li>
+<li><p>Verifica estado y expiración de transacción</p></li>
+<li><p>Detecta cambios de cotización en tiempo real</p></li>
+<li><p>Envía notificaciones por email al operador</p></li>
+<li><p>Actualiza precios según nuevas cotizaciones</p></li>
+<li><p>Gestiona flujo hacia ingreso de billetes</p></li>
+</ol>
+</dd>
+<dt>Security &amp; Validation:</dt><dd><ul class="simple">
+<li><p>Tokens alfanuméricos de 8 caracteres únicamente</p></li>
+<li><p>Validación de estados de transacción</p></li>
+<li><p>Control de expiración (5 minutos máximo)</p></li>
+<li><p>Verificación de medios de pago compatibles con TAUser</p></li>
+<li><p>Manejo seguro de sesiones y contexto</p></li>
+</ul>
+</dd>
+<dt>Error Handling:</dt><dd><ul class="simple">
+<li><p>Transacciones no encontradas</p></li>
+<li><p>Tokens expirados o inválidos</p></li>
+<li><p>Transacciones ya procesadas o canceladas</p></li>
+<li><p>Medios de pago incompatibles con TAUser</p></li>
+</ul>
+</dd>
+<dt>Email Notifications:</dt><dd><p>Envía automáticamente notificaciones al usuario operador cuando:
+- Se detectan cambios de cotización
+- Incluye detalles de precios anteriores vs actuales
+- Proporciona información completa de la transacción</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.inicio">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">inicio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#inicio"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.inicio" title="Link to this definition"></a></dt>
+<dd><p>Vista principal del sistema TAUser.</p>
+<p>Renderiza la página de inicio de la terminal autónoma donde los clientes
+pueden acceder a las diferentes funcionalidades disponibles como ingreso
+de tokens, gestión de caja fuerte, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP de Django</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página de inicio renderizada (inicio.html)</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Template:</dt><dd><p>inicio.html - Interfaz principal del TAUser con opciones de navegación</p>
+</dd>
+<dt>Context:</dt><dd><p>No requiere contexto adicional</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Esta vista no requiere autenticación ya que el TAUser opera
+de forma autónoma sin login de usuarios.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tauser.views.verificar_2fa">
+<span class="sig-prename descclassname"><span class="pre">tauser.views.</span></span><span class="sig-name descname"><span class="pre">verificar_2fa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tauser/views.html#verificar_2fa"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#tauser.views.verificar_2fa" title="Link to this definition"></a></dt>
+<dd><p>Vista para verificar el código 2FA antes de continuar con el ingreso de billetes.</p>
+</dd></dl>
+
 </section>
 </section>
 

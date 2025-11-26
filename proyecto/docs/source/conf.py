@@ -36,8 +36,24 @@ napoleon_google_docstring = True
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../../'))
-sys.path.insert(0, os.path.abspath('../../'))
+
+# Directorio donde está este archivo (docs/source/)
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# docs/
+BASE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
+
+# proyecto/
+PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+# raíz del repo (donde están proyecto/ y tauser/)
+REPO_ROOT = os.path.abspath(os.path.join(PROJECT_DIR, ".."))
+
+# Agregar rutas al sys.path para que Python encuentre los módulos
+sys.path.insert(0, REPO_ROOT)
+sys.path.insert(0, PROJECT_DIR)
+sys.path.insert(0, os.path.join(REPO_ROOT, "tauser"))
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proyecto.settings')
 import django
 django.setup()

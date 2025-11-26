@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resumen: código de modulo &mdash; documentación de Global Exchange - Versión 2</title>
+  <title>manage &mdash; documentación de Global Exchange - Versión 2</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -66,7 +66,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Resumen: código de modulo</li>
+          <li class="breadcrumb-item"><a href="index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">manage</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -75,24 +76,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Todos los módulos para los cuales disponen código</h1>
-<ul><li><a href="clientes/models.html">clientes.models</a></li>
-<li><a href="django/db/models/fields/related_descriptors.html">django.db.models.fields.related_descriptors</a></li>
-<li><a href="django/db/models/query_utils.html">django.db.models.query_utils</a></li>
-<li><a href="manage.html">manage</a></li>
-<li><a href="medios_acreditacion/models.html">medios_acreditacion.models</a></li>
-<li><a href="monedas/models.html">monedas.models</a></li>
-<li><a href="monedas/templatetags/formato_numeros.html">monedas.templatetags.formato_numeros</a></li>
-<li><a href="proyecto/forms.html">proyecto.forms</a></li>
-<li><a href="proyecto/views.html">proyecto.views</a></li>
-<li><a href="reportes/views.html">reportes.views</a></li>
-<li><a href="roles/models.html">roles.models</a></li>
-<li><a href="tauser/forms.html">tauser.forms</a></li>
-<li><a href="tauser/views.html">tauser.views</a></li>
-<li><a href="transacciones/models.html">transacciones.models</a></li>
-<li><a href="transacciones/utils_2fa.html">transacciones.utils_2fa</a></li>
-<li><a href="usuarios/models.html">usuarios.models</a></li>
-</ul>
+  <h1>Código fuente para manage</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Django&#39;s command-line utility for administrative tasks.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../manage.html#manage.main">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run administrative tasks.&quot;&quot;&quot;</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class="p">,</span> <span class="s1">&#39;tauser.settings&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">django.core.management</span><span class="w"> </span><span class="kn">import</span> <span class="n">execute_from_command_line</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;Couldn&#39;t import Django. Are you sure it&#39;s installed and &quot;</span>
+            <span class="s2">&quot;available on your PYTHONPATH environment variable? Did you &quot;</span>
+            <span class="s2">&quot;forget to activate a virtual environment?&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="n">execute_from_command_line</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
 
            </div>
           </div>

@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tauser.forms &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">tauser.forms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para tauser.forms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Formularios para el sistema TAUser (Terminal Autónomo de Usuario).</span>
+
+<span class="sd">Este módulo contiene los formularios utilizados en el sistema TAUser para la entrada</span>
+<span class="sd">y validación de datos por parte de los clientes en las terminales autónomas.</span>
+
+<span class="sd">Classes:</span>
+<span class="sd">    TokenForm: Formulario para ingreso y validación de tokens de transacción</span>
+<span class="sd">    IngresoForm: Formulario para carga de archivos con información de billetes</span>
+
+<span class="sd">Author: Equipo de desarrollo Global Exchange</span>
+<span class="sd">Date: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django</span><span class="w"> </span><span class="kn">import</span> <span class="n">forms</span>
+
+
+<div class="viewcode-block" id="TokenForm">
+<a class="viewcode-back" href="../../tauser.html#tauser.forms.TokenForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TokenForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para el ingreso y validación de tokens de transacción.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario se utiliza en las terminales TAUser para que los clientes</span>
+<span class="sd">    ingresen el token de 8 caracteres que recibieron del sistema principal</span>
+<span class="sd">    para procesar sus transacciones de manera segura.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        codigo (CharField): Campo de texto para ingresar el token alfanumérico</span>
+<span class="sd">            - Máximo 8 caracteres</span>
+<span class="sd">            - Solo acepta caracteres alfanuméricos (letras y números)</span>
+<span class="sd">            - Campo obligatorio con enfoque automático</span>
+<span class="sd">            - Incluye validación personalizada de formato</span>
+<span class="sd">    </span>
+<span class="sd">    Validation:</span>
+<span class="sd">        - Verifica que el código tenga exactamente 8 caracteres</span>
+<span class="sd">        - Valida que solo contenga caracteres alfanuméricos</span>
+<span class="sd">        - Muestra mensajes de error personalizados</span>
+<span class="sd">    </span>
+<span class="sd">    Usage:</span>
+<span class="sd">        form = TokenForm(request.POST)</span>
+<span class="sd">        if form.is_valid():</span>
+<span class="sd">            token = form.cleaned_data[&#39;codigo&#39;]</span>
+<span class="sd">            # Procesar el token...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">codigo</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;autofocus&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;maxlength&#39;</span><span class="p">:</span> <span class="mi">8</span>
+        <span class="p">}),</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el código de transacción.&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="TokenForm.clean_codigo">
+<a class="viewcode-back" href="../../tauser.html#tauser.forms.TokenForm.clean_codigo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_codigo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida el formato del código de transacción ingresado.</span>
+<span class="sd">        </span>
+<span class="sd">        Realiza validaciones específicas para garantizar que el token</span>
+<span class="sd">        cumple con los requisitos de seguridad del sistema:</span>
+<span class="sd">        - Longitud exacta de 8 caracteres</span>
+<span class="sd">        - Solo caracteres alfanuméricos (sin espacios ni símbolos)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: El código validado y limpio</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el código no cumple con el formato requerido</span>
+<span class="sd">            </span>
+<span class="sd">        Note:</span>
+<span class="sd">            Esta validación es crítica para la seguridad del sistema,</span>
+<span class="sd">            ya que previene inyección de código malicioso y garantiza</span>
+<span class="sd">            la integridad de los tokens de transacción.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">codigo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;codigo&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">codigo</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">codigo</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El código debe ser alfanumérico y tener exactamente 8 caracteres.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">codigo</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="IngresoForm">
+<a class="viewcode-back" href="../../tauser.html#tauser.forms.IngresoForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IngresoForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulario para la carga de archivos con información de billetes.</span>
+<span class="sd">    </span>
+<span class="sd">    Este formulario se utiliza tanto para el ingreso de billetes a la caja fuerte</span>
+<span class="sd">    del TAUser como para el procesamiento de pagos en transacciones. El archivo</span>
+<span class="sd">    debe contener información estructurada sobre los billetes (moneda, valor, cantidad).</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        archivo (FileField): Campo de carga de archivo de texto plano</span>
+<span class="sd">            - Solo acepta archivos .txt</span>
+<span class="sd">            - Máximo 5MB de tamaño</span>
+<span class="sd">            - Debe estar codificado en UTF-8</span>
+<span class="sd">            - Contiene datos tabulados de billetes</span>
+<span class="sd">    </span>
+<span class="sd">    File Format Expected:</span>
+<span class="sd">        Línea 1: &quot;Ingreso&quot; o &quot;Extraccion&quot; (para caja fuerte)</span>
+<span class="sd">        Líneas siguientes: [Moneda][TAB][Valor][TAB][Cantidad]</span>
+<span class="sd">        </span>
+<span class="sd">        Ejemplo:</span>
+<span class="sd">        ```</span>
+<span class="sd">        Ingreso</span>
+<span class="sd">        Dólar	1	50</span>
+<span class="sd">        Dólar	5	20</span>
+<span class="sd">        Guaraní	50000	10</span>
+<span class="sd">        ```</span>
+<span class="sd">    </span>
+<span class="sd">    Validation:</span>
+<span class="sd">        - Verifica extensión .txt</span>
+<span class="sd">        - Limita tamaño a 5MB</span>
+<span class="sd">        - Valida codificación UTF-8</span>
+<span class="sd">        - Previene carga de archivos maliciosos</span>
+<span class="sd">    </span>
+<span class="sd">    Usage:</span>
+<span class="sd">        form = IngresoForm(request.POST, request.FILES)</span>
+<span class="sd">        if form.is_valid():</span>
+<span class="sd">            archivo = form.cleaned_data[&#39;archivo&#39;]</span>
+<span class="sd">            # Procesar contenido del archivo...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">archivo</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">FileInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;accept&#39;</span><span class="p">:</span> <span class="s1">&#39;.txt&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes seleccionar un archivo .txt.&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="IngresoForm.clean_archivo">
+<a class="viewcode-back" href="../../tauser.html#tauser.forms.IngresoForm.clean_archivo">[documentos]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_archivo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Valida el archivo cargado para garantizar seguridad e integridad.</span>
+<span class="sd">        </span>
+<span class="sd">        Realiza múltiples validaciones sobre el archivo subido para prevenir</span>
+<span class="sd">        problemas de seguridad y garantizar que el contenido pueda ser procesado</span>
+<span class="sd">        correctamente por el sistema TAUser.</span>
+<span class="sd">        </span>
+<span class="sd">        Validations Performed:</span>
+<span class="sd">            1. Extensión de archivo: Solo acepta archivos .txt</span>
+<span class="sd">            2. Tamaño de archivo: Máximo 5MB para prevenir DoS</span>
+<span class="sd">            3. Codificación: Debe ser UTF-8 válido</span>
+<span class="sd">            4. Contenido: Debe ser texto plano legible</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            InMemoryUploadedFile: El archivo validado listo para procesamiento</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValidationError: Si el archivo no cumple con alguna validación:</span>
+<span class="sd">                - Extensión incorrecta</span>
+<span class="sd">                - Tamaño excesivo</span>
+<span class="sd">                - Codificación inválida</span>
+<span class="sd">                - Contenido no legible</span>
+<span class="sd">        </span>
+<span class="sd">        Security Notes:</span>
+<span class="sd">            - Previene carga de archivos ejecutables</span>
+<span class="sd">            - Limita el tamaño para evitar ataques DoS</span>
+<span class="sd">            - Valida la codificación para prevenir inyección</span>
+<span class="sd">            - Resetea el puntero del archivo después de la validación</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">archivo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;archivo&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">archivo</span><span class="p">:</span>
+            <span class="c1"># Verificar que sea un archivo .txt</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">archivo</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El archivo debe tener extensión .txt.&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Verificar el tamaño del archivo (máximo 5MB)</span>
+            <span class="k">if</span> <span class="n">archivo</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El archivo no debe superar los 5MB.&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Verificar que el contenido sea texto plano</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">archivo</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">contenido</span> <span class="o">=</span> <span class="n">archivo</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="n">archivo</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Resetear el puntero del archivo</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El archivo debe contener texto válido en UTF-8.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">archivo</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Token2FAForm">
+<a class="viewcode-back" href="../../tauser.html#tauser.forms.Token2FAForm">[documentos]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Token2FAForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">codigo_2fa</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;form-control&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;autofocus&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;maxlength&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="s1">&#39;placeholder&#39;</span><span class="p">:</span> <span class="s1">&#39;Ingrese el código de 6 dígitos&#39;</span>
+        <span class="p">}),</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">error_messages</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="s1">&#39;Debes ingresar el código de verificación 2FA.&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">clean_codigo_2fa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">codigo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;codigo_2fa&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">codigo</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">codigo</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;El código debe contener exactamente 6 dígitos numéricos.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">codigo</span></div>
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -124,10 +124,6 @@
         <span class="n">max_length</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
         <span class="n">unique</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
-    <span class="n">telefono</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
-        <span class="n">max_length</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
     <span class="n">cliente_activo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
         <span class="s1">&#39;clientes.Cliente&#39;</span><span class="p">,</span>
         <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">SET_NULL</span><span class="p">,</span>

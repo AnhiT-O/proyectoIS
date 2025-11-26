@@ -137,43 +137,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
-
-
-<div class="viewcode-block" id="crear_roles_predefinidos">
-<a class="viewcode-back" href="../../roles.html#roles.models.crear_roles_predefinidos">[documentos]</a>
-<span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">crear_roles_predefinidos</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Crea los roles predefinidos después de ejecutar las migraciones.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        sender: El remitente de la señal (AppConfig).</span>
-<span class="sd">        **kwargs: Argumentos adicionales.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Definir los roles predefinidos con sus descripciones</span>
-    <span class="n">roles_predefinidos</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span>
-            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Operador&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;descripcion&#39;</span><span class="p">:</span> <span class="s1">&#39;Rol para usuarios que operan en el sistema, no posee ningún permiso especial, pero pueden operar con clientes y realizar transacciones.&#39;</span>
-        <span class="p">},</span>
-        <span class="p">{</span>
-            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Analista cambiario&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;descripcion&#39;</span><span class="p">:</span> <span class="s1">&#39;Rol responsable del análisis de tipos de cambio, pueden gestionar cotizaciones y recargos de transacciones.&#39;</span>
-        <span class="p">},</span>
-        <span class="p">{</span>
-            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Administrador&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;descripcion&#39;</span><span class="p">:</span> <span class="s1">&#39;Rol con acceso completo al sistema, posee todos los permisos disponibles.&#39;</span>
-        <span class="p">}</span>
-    <span class="p">]</span>
-    
-    <span class="k">for</span> <span class="n">rol_data</span> <span class="ow">in</span> <span class="n">roles_predefinidos</span><span class="p">:</span>
-        <span class="n">rol</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Roles</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">rol_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
-            <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;descripcion&#39;</span><span class="p">:</span> <span class="n">rol_data</span><span class="p">[</span><span class="s1">&#39;descripcion&#39;</span><span class="p">]}</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rol &#39;</span><span class="si">{</span><span class="n">rol</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">&#39; creado exitosamente.&quot;</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>
