@@ -443,3 +443,180 @@ def obtener_datos_ganancias(request):
         'ganancia_total': round(ganancia_total, 2),
         'moneda': 'Todas' if not moneda_id else Moneda.objects.filter(id=moneda_id).first().nombre if Moneda.objects.filter(id=moneda_id).exists() else 'Desconocida'
     })
+
+@login_required
+def obtener_desglose_ganancias(request):
+    """
+    API endpoint que devuelve datos de ganancias por moneda para los gráficos.
+    Parámetros GET:
+    - rango: 'hoy', 'semana', 'mes', '6meses', 'año'
+    - moneda_id: ID de moneda específica (opcional)
+    Retorna JSON con la estructura que espera el frontend:
+    {
+        "desglose": {
+            "venta": {"labels": [...], "percents": [...], "values": [...]},
+            "compra": {"labels": [...], "percents": [...], "values": [...]},
+            "total": {"labels": [...], "values": [...]}
+        }
+    }
+    """
+    user = request.user
+    if not user.groups.filter(name='Administrador').exists():
+        return JsonResponse({'error': 'Acceso denegado'}, status=403)
+
+    rango = request.GET.get('rango', 'hoy')
+    moneda_id = request.GET.get('moneda_id', None)
+
+    fecha_hasta = datetime.now()
+    if rango == 'hoy':
+        fecha_desde = fecha_hasta.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif rango == 'semana':
+        fecha_desde = fecha_hasta - timedelta(days=7)
+    elif rango == 'mes':
+        fecha_desde = fecha_hasta - timedelta(days=30)
+    elif rango == '6meses':
+        fecha_desde = fecha_hasta - timedelta(days=180)
+    elif rango == 'año':
+        fecha_desde = fecha_hasta - timedelta(days=365)
+    else:
+        fecha_desde = fecha_hasta - timedelta(days=30)
+
+    qs = Transaccion.objects.filter(
+        fecha_hora__gte=fecha_desde,
+        fecha_hora__lte=fecha_hasta
+    ).filter(
+        Q(estado__iexact='completa') | Q(estado__iexact='confirmada')
+    )
+
+    if moneda_id:
+        try:
+            qs = qs.filter(moneda__id=int(moneda_id))
+        except Exception:
+            pass
+
+    # Diccionarios para acumular por tipo de transacción
+    ganancias_venta = defaultdict(float)
+    ganancias_compra = defaultdict(float)
+
+    for t in qs:
+        tipo = getattr(t, 'tipo', '').lower()
+        moneda_obj = getattr(t, 'moneda', None)
+        if moneda_obj is None:
+            continue
+        moneda_nombre = getattr(moneda_obj, 'nombre', 'Desconocida')
+
+        monto_origen = getattr(t, 'monto_origen', None)
+        if monto_origen is None:
+            monto_origen = getattr(t, 'monto', 0)
+        try:
+            monto_origen = float(monto_origen or 0)
+        except:
+            monto_origen = 0
+
+        # Obtener comisiones
+        comision_compra = getattr(t, 'comision_compra', getattr(moneda_obj, 'comision_compra', 0) or 0)
+        comision_venta = getattr(t, 'comision_venta', getattr(moneda_obj, 'comision_venta', 0) or 0)
+        comision_compra = float(comision_compra or 0)
+        comision_venta = float(comision_venta or 0)
+
+        # Descuento: intentar obtener desde segmento del cliente, luego campos en la transacción, luego fallback
+        porcentaje_descuento = None
+        cliente_obj = getattr(t, 'cliente', None)
+        if cliente_obj is not None:
+            segmento = getattr(cliente_obj, 'segmento', None)
+            if segmento is not None:
+                seg_name = None
+                if hasattr(segmento, 'nombre'):
+                    seg_name = getattr(segmento, 'nombre', None)
+                elif isinstance(segmento, str):
+                    seg_name = segmento
+                else:
+                    try:
+                        from clientes.models import Segmento
+                        seg_obj = Segmento.objects.filter(pk=int(segmento)).first()
+                        if seg_obj:
+                            seg_name = getattr(seg_obj, 'nombre', None)
+                    except Exception:
+                        seg_name = None
+
+                if seg_name:
+                    sn = str(seg_name).strip().lower()
+                    mapping = {
+                        'minorista': 0.0,
+                        'corporativo': 5.0,
+                        'vip': 10.0,
+                    }
+                    if sn in mapping:
+                        porcentaje_descuento = mapping[sn]
+
+        # Priorizar valor guardado en la transacción si existe
+        trans_benef = getattr(t, 'porc_beneficio_segmento', None) or getattr(t, 'beneficio_segmento', None)
+        if trans_benef is not None:
+            try:
+                porcentaje_descuento = float(trans_benef or 0)
+            except Exception:
+                pass
+
+        # Fallback a campos genéricos de la transacción
+        if porcentaje_descuento is None:
+            porcentaje_descuento = float(getattr(t, 'porcentaje_descuento', None) or getattr(t, 'pordes', 0) or 0)
+
+        # Calcular ganancia según tipo
+        ganancia_trans = 0.0
+        if tipo == 'venta':
+            ganancia_trans = monto_origen * (comision_venta - (comision_venta * porcentaje_descuento / 100))
+            ganancias_venta[moneda_nombre] += ganancia_trans
+        elif tipo == 'compra':
+            ganancia_trans = monto_origen * (comision_compra - (comision_compra * porcentaje_descuento / 100))
+            ganancias_compra[moneda_nombre] += ganancia_trans
+
+    # Total por moneda
+    monedas = set(list(ganancias_venta.keys()) + list(ganancias_compra.keys()))
+    total_por_moneda = {m: round(ganancias_venta.get(m, 0)+ganancias_compra.get(m, 0), 2) for m in monedas}
+
+    # Preparar listas para Chart.js
+    def preparar_listas(dic):
+        """Prepara listas desde un diccionario para uso en Chart.js.
+
+        Args:
+            dic (dict): mapa etiqueta->valor numérico.
+
+        Returns:
+            tuple: (labels, values, percents)
+                - labels: lista de keys (ordenadas según inserción en el dict)
+                - values: lista de values redondeados a 2 decimales
+                - percents: lista de porcentajes relativos (0-100) calculados sobre la suma
+        """
+        labels = list(dic.keys())
+        values = [round(dic[m], 2) for m in labels]
+        total = sum(values)
+        percents = [round(v / total * 100, 2) if total > 0 else 0 for v in values]
+        return labels, values, percents
+
+    labels_v, values_v, percents_v = preparar_listas(ganancias_venta)
+    labels_c, values_c, percents_c = preparar_listas(ganancias_compra)
+    labels_t, values_t, _ = preparar_listas(total_por_moneda)
+
+
+    total_general = round(sum(total_por_moneda.values()), 2)
+    moneda_actual = 'Todas'
+    if moneda_id:
+        try:
+            m = Moneda.objects.filter(id=int(moneda_id)).first()
+            if m:
+                moneda_actual = m.nombre
+            else:
+                moneda_actual = 'Desconocida'
+        except Exception:
+            moneda_actual = 'Desconocida'
+
+    return JsonResponse({
+        'desglose': {
+            'venta': {'labels': labels_v, 'percents': percents_v, 'values': values_v},
+            'compra': {'labels': labels_c, 'percents': percents_c, 'values': values_c},
+            'total': {'labels': labels_t, 'values': values_t}
+        },
+        'ganancia_total': total_general,
+        'moneda': moneda_actual
+    })
+
