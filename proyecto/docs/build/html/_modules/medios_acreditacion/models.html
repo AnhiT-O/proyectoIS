@@ -48,7 +48,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -92,7 +93,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
 
 <div class="viewcode-block" id="MedioAcreditacion">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.MedioAcreditacion">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MedioAcreditacion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo abstracto base para medios de acreditación.</span>
@@ -128,7 +129,7 @@
     <span class="p">)</span>
     
 <div class="viewcode-block" id="MedioAcreditacion.Meta">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.MedioAcreditacion.Meta">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.Meta">[documentos]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Metadatos del modelo base.&quot;&quot;&quot;</span>
         <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Esto hace que sea un modelo abstracto (no crea tabla)</span></div>
@@ -137,7 +138,7 @@
 
 
 <div class="viewcode-block" id="CuentaBancaria">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.CuentaBancaria">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CuentaBancaria</span><span class="p">(</span><span class="n">MedioAcreditacion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo que representa una cuenta bancaria asociada a un cliente.</span>
@@ -203,7 +204,7 @@
 
 
 <div class="viewcode-block" id="Billetera">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.Billetera">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.Billetera">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Billetera</span><span class="p">(</span><span class="n">MedioAcreditacion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo que representa una billetera electrónica asociada a un cliente.</span>
@@ -239,7 +240,7 @@
     <span class="p">)</span>
     
 <div class="viewcode-block" id="Billetera.get_tipo_billetera_display">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.Billetera.get_tipo_billetera_display">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.Billetera.get_tipo_billetera_display">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_tipo_billetera_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Método personalizado para mostrar el tipo de billetera correctamente.&quot;&quot;&quot;</span>
         <span class="n">display_map</span> <span class="o">=</span> <span class="p">{</span>
@@ -268,7 +269,7 @@
 
 
 <div class="viewcode-block" id="TarjetaLocal">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.TarjetaLocal">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TarjetaLocal</span><span class="p">(</span><span class="n">MedioAcreditacion</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo que representa una tarjeta de crédito local (Panal o Cabal) asociada a un cliente.</span>
@@ -329,21 +330,21 @@
     <span class="p">)</span>
     
 <div class="viewcode-block" id="TarjetaLocal.get_last4">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.TarjetaLocal.get_last4">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_last4">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_last4</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene los últimos 4 dígitos de la tarjeta.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numero_tarjeta</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span></div>
 
     
 <div class="viewcode-block" id="TarjetaLocal.get_numero_enmascarado">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_numero_enmascarado</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retorna el número de tarjeta enmascarado.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;**** **** **** </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_last4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
     
 <div class="viewcode-block" id="TarjetaLocal.save">
-<a class="viewcode-back" href="../../tauser.html#medios_acreditacion.models.TarjetaLocal.save">[documentos]</a>
+<a class="viewcode-back" href="../../medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.save">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sobrescribe el método save para actualizar last4 automáticamente.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_last4</span><span class="p">()</span>

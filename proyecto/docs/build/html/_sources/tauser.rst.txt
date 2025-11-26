@@ -1,4 +1,4 @@
-tauser
+Tauser
 ======
 
 Documentación generada para el paquete tauser y las aplicaciones del proyecto.
@@ -14,58 +14,7 @@ Paquete principal
     :members:
     :undoc-members:
     :show-inheritance:
-
-Aplicaciones
------------
-
-Clientes
-^^^^^^^^
-
-.. automodule:: clientes.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Medios de acreditación
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: medios_acreditacion.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Monedas
-^^^^^^^
-
-.. automodule:: monedas.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Roles
-^^^^^
-
-.. automodule:: roles.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Transacciones
-^^^^^^^^^^^^^
-
-.. automodule:: transacciones.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Usuarios
-^^^^^^^^
-
-.. automodule:: usuarios.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+    
 Módulos de proyecto tauser
 -------------------------
 

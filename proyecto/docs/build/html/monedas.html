@@ -114,7 +114,8 @@
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -270,7 +271,9 @@ después de ejecutar las migraciones</p>
 <dt class="sig sig-object py" id="monedas.models.crear_historial_cotizacion">
 <span class="sig-prename descclassname"><span class="pre">monedas.models.</span></span><span class="sig-name descname"><span class="pre">crear_historial_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">created</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/monedas/models.html#crear_historial_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#monedas.models.crear_historial_cotizacion" title="Link to this definition"></a></dt>
 <dd><p>Crea un registro en el historial cuando se crea una moneda o se actualizan
-sus campos de cotización (tasa_base, comision_compra, comision_venta)</p>
+sus campos de cotización (tasa_base, comision_compra, comision_venta).
+También envía notificaciones por correo a usuarios con transacciones pendientes
+en efectivo cuando hay cambios de cotización.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -360,7 +363,7 @@ para administrar monedas: creación, edición o activación.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="monedas.forms.MonedaForm.Meta.model">
 <span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#monedas.forms.MonedaForm.Meta.model" title="Link to this definition"></a></dt>
-<dd><p>alias de <a class="reference internal" href="tauser.html#monedas.models.Moneda" title="monedas.models.Moneda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Moneda</span></code></a></p>
+<dd><p>alias de <a class="reference internal" href="#monedas.models.Moneda" title="monedas.models.Moneda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Moneda</span></code></a></p>
 </dd></dl>
 
 </dd></dl>

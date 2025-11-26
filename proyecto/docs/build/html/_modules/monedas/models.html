@@ -48,7 +48,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -81,9 +82,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">post_migrate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.dispatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">receiver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.apps</span><span class="w"> </span><span class="kn">import</span> <span class="n">apps</span>
 
 <div class="viewcode-block" id="Moneda">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Moneda</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="n">nombre</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
         <span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
@@ -105,7 +107,7 @@
     <span class="n">fecha_cotizacion</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
     
 <div class="viewcode-block" id="Moneda.save">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda.save">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.save">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
             <span class="n">old</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
@@ -130,7 +132,7 @@
         <span class="p">]</span>
 
 <div class="viewcode-block" id="Moneda.calcular_precio_venta">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda.calcular_precio_venta">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.calcular_precio_venta">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calcular_precio_venta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;minorista&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calcula el precio de venta aplicando el beneficio del cliente.</span>
@@ -152,7 +154,7 @@
 
 
 <div class="viewcode-block" id="Moneda.calcular_precio_compra">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda.calcular_precio_compra">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.calcular_precio_compra">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calcular_precio_compra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segmento</span><span class="o">=</span><span class="s1">&#39;minorista&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calcula el precio de compra aplicando el beneficio del cliente.</span>
@@ -174,7 +176,7 @@
 
 
 <div class="viewcode-block" id="Moneda.get_precios_cliente">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda.get_precios_cliente">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.get_precios_cliente">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_precios_cliente</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cliente</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtiene los precios finales para un cliente específico&quot;&quot;&quot;</span>
         <span class="n">precio_compra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calcular_precio_compra</span><span class="p">(</span><span class="n">cliente</span><span class="o">.</span><span class="n">segmento</span><span class="p">)</span>
@@ -186,7 +188,7 @@
 
 
 <div class="viewcode-block" id="Moneda.clean">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Moneda.clean">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Moneda.clean">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simbolo</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">simbolo</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
@@ -198,7 +200,7 @@
 
 
 <div class="viewcode-block" id="crear_moneda_usd">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.crear_moneda_usd">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_moneda_usd">[documentos]</a>
 <span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">crear_moneda_usd</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -211,16 +213,16 @@
             <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
                 <span class="n">nombre</span><span class="o">=</span><span class="s1">&#39;Dólar estadounidense&#39;</span><span class="p">,</span>
                 <span class="n">simbolo</span><span class="o">=</span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
-                <span class="n">tasa_base</span><span class="o">=</span><span class="mi">7030</span><span class="p">,</span>
-                <span class="n">comision_compra</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                <span class="n">tasa_base</span><span class="o">=</span><span class="mi">7000</span><span class="p">,</span>
+                <span class="n">comision_compra</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span>
                 <span class="n">comision_venta</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-                <span class="n">fecha_cotizacion</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">make_aware</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">fecha_cotizacion</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">make_aware</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Moneda USD creada automáticamente&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StockGuaranies">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.StockGuaranies">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.StockGuaranies">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StockGuaranies</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo para almacenar el stock de guaraníes disponible en la casa de cambio</span>
@@ -240,7 +242,7 @@
 
     
 <div class="viewcode-block" id="crear_stock_guaranies_inicial">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.crear_stock_guaranies_inicial">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_stock_guaranies_inicial">[documentos]</a>
 <span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">crear_stock_guaranies_inicial</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -253,7 +255,7 @@
 
 
 <div class="viewcode-block" id="Denominacion">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.Denominacion">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.Denominacion">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Denominacion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo para representar las denominaciones de una moneda específica</span>
@@ -272,7 +274,7 @@
 
     
 <div class="viewcode-block" id="crear_denominaciones_iniciales">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.crear_denominaciones_iniciales">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_denominaciones_iniciales">[documentos]</a>
 <span class="nd">@receiver</span><span class="p">(</span><span class="n">post_migrate</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">crear_denominaciones_iniciales</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -292,7 +294,7 @@
 
 
 <div class="viewcode-block" id="HistorialCotizacion">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.HistorialCotizacion">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.HistorialCotizacion">[documentos]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HistorialCotizacion</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modelo para almacenar el historial de cotizaciones de las monedas</span>
@@ -319,7 +321,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fecha</span><span class="si">}</span><span class="s2">&quot;</span>
 
 <div class="viewcode-block" id="HistorialCotizacion.save">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.HistorialCotizacion.save">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.HistorialCotizacion.save">[documentos]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Guardar automáticamente el nombre de la moneda</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moneda</span><span class="p">:</span>
@@ -335,7 +337,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models.signals</span><span class="w"> </span><span class="kn">import</span> <span class="n">pre_save</span><span class="p">,</span> <span class="n">post_save</span>
 
 <div class="viewcode-block" id="guardar_valores_anteriores">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.guardar_valores_anteriores">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.guardar_valores_anteriores">[documentos]</a>
 <span class="nd">@receiver</span><span class="p">(</span><span class="n">pre_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Moneda</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">guardar_valores_anteriores</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -356,12 +358,14 @@
 
 
 <div class="viewcode-block" id="crear_historial_cotizacion">
-<a class="viewcode-back" href="../../tauser.html#monedas.models.crear_historial_cotizacion">[documentos]</a>
+<a class="viewcode-back" href="../../monedas.html#monedas.models.crear_historial_cotizacion">[documentos]</a>
 <span class="nd">@receiver</span><span class="p">(</span><span class="n">post_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">Moneda</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">crear_historial_cotizacion</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crea un registro en el historial cuando se crea una moneda o se actualizan</span>
-<span class="sd">    sus campos de cotización (tasa_base, comision_compra, comision_venta)</span>
+<span class="sd">    sus campos de cotización (tasa_base, comision_compra, comision_venta).</span>
+<span class="sd">    También envía notificaciones por correo a usuarios con transacciones pendientes</span>
+<span class="sd">    en efectivo cuando hay cambios de cotización.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
         <span class="n">fecha_hoy</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">fecha_cotizacion</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
@@ -389,7 +393,51 @@
                 <span class="n">tasa_base</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span><span class="p">,</span>
                 <span class="n">comision_compra</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
                 <span class="n">comision_venta</span><span class="o">=</span><span class="n">instance</span><span class="o">.</span><span class="n">comision_venta</span>
-            <span class="p">)</span></div>
+            <span class="p">)</span>
+            
+            <span class="c1"># Enviar notificaciones a usuarios con transacciones pendientes en efectivo</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Importar aquí para evitar dependencias circulares</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transaccion</span><span class="p">,</span> <span class="n">enviar_notificacion_cambio_cotizacion</span>
+                
+                <span class="c1"># Obtener transacciones pendientes con medio de pago &quot;Efectivo&quot; para esta moneda</span>
+                <span class="n">transacciones_pendientes</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                    <span class="n">moneda</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                    <span class="n">estado</span><span class="o">=</span><span class="s1">&#39;Pendiente&#39;</span><span class="p">,</span>
+                    <span class="n">medio_pago</span><span class="o">=</span><span class="s1">&#39;Efectivo&#39;</span>
+                <span class="p">)</span>
+                
+                <span class="c1"># Preparar información de cambios de cotización</span>
+                <span class="n">cambios_info</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;hay_cambios&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;valores_anteriores&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">instance</span><span class="o">.</span><span class="n">_old_tasa_base</span> <span class="o">-</span> <span class="n">instance</span><span class="o">.</span><span class="n">_old_comision_compra</span><span class="p">,</span>
+                        <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">instance</span><span class="o">.</span><span class="n">_old_tasa_base</span> <span class="o">+</span> <span class="n">instance</span><span class="o">.</span><span class="n">_old_comision_venta</span>
+                    <span class="p">},</span>
+                    <span class="s1">&#39;valores_actuales&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;precio_compra&#39;</span><span class="p">:</span> <span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">-</span> <span class="n">instance</span><span class="o">.</span><span class="n">comision_compra</span><span class="p">,</span>
+                        <span class="s1">&#39;precio_venta&#39;</span><span class="p">:</span> <span class="n">instance</span><span class="o">.</span><span class="n">tasa_base</span> <span class="o">+</span> <span class="n">instance</span><span class="o">.</span><span class="n">comision_venta</span>
+                    <span class="p">},</span>
+                    <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">instance</span>
+                <span class="p">}</span>
+                
+                <span class="c1"># Enviar correo a cada usuario con transacción pendiente</span>
+                <span class="n">usuarios_notificados</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Para evitar duplicados</span>
+                <span class="k">for</span> <span class="n">transaccion</span> <span class="ow">in</span> <span class="n">transacciones_pendientes</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="ow">and</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">usuarios_notificados</span><span class="p">:</span>
+                        <span class="n">enviar_notificacion_cambio_cotizacion</span><span class="p">(</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="p">,</span>
+                            <span class="n">transaccion</span><span class="p">,</span>
+                            <span class="n">cambios_info</span>
+                        <span class="p">)</span>
+                        <span class="n">usuarios_notificados</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                        
+                <span class="k">if</span> <span class="n">usuarios_notificados</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Notificaciones de cambio de cotización enviadas a </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">usuarios_notificados</span><span class="p">)</span><span class="si">}</span><span class="s2"> usuario(s) &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;con transacciones pendientes en efectivo para </span><span class="si">{</span><span class="n">instance</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                          
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error al enviar notificaciones de cambio de cotización: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 

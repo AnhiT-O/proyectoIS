@@ -50,7 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -159,11 +160,12 @@
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.descargar_factura"><code class="docutils literal notranslate"><span class="pre">descargar_factura()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.enviar_notificacion_cambio_cotizacion"><code class="docutils literal notranslate"><span class="pre">enviar_notificacion_cambio_cotizacion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.generar_factura_electronica"><code class="docutils literal notranslate"><span class="pre">generar_factura_electronica()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.no_redondeado"><code class="docutils literal notranslate"><span class="pre">no_redondeado()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.verificar_factura"><code class="docutils literal notranslate"><span class="pre">verificar_factura()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
@@ -171,6 +173,7 @@
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.descargar_factura_view"><code class="docutils literal notranslate"><span class="pre">descargar_factura_view()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.descargar_historial_excel"><code class="docutils literal notranslate"><span class="pre">descargar_historial_excel()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.descargar_historial_pdf"><code class="docutils literal notranslate"><span class="pre">descargar_historial_pdf()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
@@ -235,10 +238,16 @@
 <li class="toctree-l2"><a class="reference internal" href="usuarios.html#usuarios.forms.RegistroUsuarioForm"><code class="docutils literal notranslate"><span class="pre">RegistroUsuarioForm</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tauser.html#module-tauser">Paquete principal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tauser.html#aplicaciones">Aplicaciones</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tauser.html#modulos-de-proyecto-tauser">Módulos de proyecto tauser</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reportes.html#reportes.views.dashboard_ganancias"><code class="docutils literal notranslate"><span class="pre">dashboard_ganancias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reportes.html#reportes.views.obtener_datos_ganancias"><code class="docutils literal notranslate"><span class="pre">obtener_datos_ganancias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reportes.html#reportes.views.obtener_desglose_ganancias"><code class="docutils literal notranslate"><span class="pre">obtener_desglose_ganancias()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reportes.html#reportes.views.transacciones_reportes"><code class="docutils literal notranslate"><span class="pre">transacciones_reportes()</span></code></a></li>
 </ul>
 </li>
 </ul>

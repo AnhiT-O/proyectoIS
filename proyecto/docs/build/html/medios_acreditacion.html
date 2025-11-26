@@ -49,7 +49,8 @@
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -91,7 +92,7 @@ Billetera: Modelo que representa una billetera electrónica de un cliente.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="medios_acreditacion.models.Billetera">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">Billetera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#Billetera"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.Billetera" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="tauser.html#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
 <p>Modelo que representa una billetera electrónica asociada a un cliente.</p>
 <p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
 nro_documento, cliente, fecha_creacion, activo.</p>
@@ -116,7 +117,7 @@ nro_documento, cliente, fecha_creacion, activo.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="medios_acreditacion.models.CuentaBancaria">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">CuentaBancaria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#CuentaBancaria"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.CuentaBancaria" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="tauser.html#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
 <p>Modelo que representa una cuenta bancaria asociada a un cliente.</p>
 <p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
 nro_documento, cliente, fecha_creacion, activo.</p>
@@ -221,7 +222,7 @@ de acreditación como cuentas bancarias y billeteras electrónicas.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="medios_acreditacion.models.TarjetaLocal">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">medios_acreditacion.models.</span></span><span class="sig-name descname"><span class="pre">TarjetaLocal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/medios_acreditacion/models.html#TarjetaLocal"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#medios_acreditacion.models.TarjetaLocal" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="tauser.html#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#medios_acreditacion.models.MedioAcreditacion" title="medios_acreditacion.models.MedioAcreditacion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a></p>
 <p>Modelo que representa una tarjeta de crédito local (Panal o Cabal) asociada a un cliente.</p>
 <p>Hereda de MedioAcreditacion los campos comunes: nombre_titular,
 nro_documento, cliente.</p>
@@ -326,7 +327,7 @@ personalizadas y mensajes de error específicos para cada campo.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="medios_acreditacion.forms.BilleteraForm.Meta.model">
 <span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#medios_acreditacion.forms.BilleteraForm.Meta.model" title="Link to this definition"></a></dt>
-<dd><p>alias de <a class="reference internal" href="tauser.html#medios_acreditacion.models.Billetera" title="medios_acreditacion.models.Billetera"><code class="xref py py-class docutils literal notranslate"><span class="pre">Billetera</span></code></a></p>
+<dd><p>alias de <a class="reference internal" href="#medios_acreditacion.models.Billetera" title="medios_acreditacion.models.Billetera"><code class="xref py py-class docutils literal notranslate"><span class="pre">Billetera</span></code></a></p>
 </dd></dl>
 
 </dd></dl>
@@ -411,7 +412,7 @@ personalizadas y mensajes de error específicos para cada campo.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="medios_acreditacion.forms.CuentaBancariaForm.Meta.model">
 <span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#medios_acreditacion.forms.CuentaBancariaForm.Meta.model" title="Link to this definition"></a></dt>
-<dd><p>alias de <a class="reference internal" href="tauser.html#medios_acreditacion.models.CuentaBancaria" title="medios_acreditacion.models.CuentaBancaria"><code class="xref py py-class docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></p>
+<dd><p>alias de <a class="reference internal" href="#medios_acreditacion.models.CuentaBancaria" title="medios_acreditacion.models.CuentaBancaria"><code class="xref py py-class docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a></p>
 </dd></dl>
 
 </dd></dl>
@@ -547,7 +548,7 @@ Limpia espacios y verifica que contenga solo dígitos.</p>
 <dd class="field-odd"><p>La instancia de la tarjeta creada.</p>
 </dd>
 <dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="tauser.html#medios_acreditacion.models.TarjetaLocal" title="medios_acreditacion.models.TarjetaLocal">TarjetaLocal</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#medios_acreditacion.models.TarjetaLocal" title="medios_acreditacion.models.TarjetaLocal">TarjetaLocal</a></p>
 </dd>
 <dt class="field-odd">Muestra<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ValidationError</strong> – Si no se especifica cliente o si ocurre algún error.</p>

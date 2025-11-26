@@ -18,3 +18,4 @@ Documentación de Global Exchange
    transacciones
    usuarios
    tauser
+   reportes

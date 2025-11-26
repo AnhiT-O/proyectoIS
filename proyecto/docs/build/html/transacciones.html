@@ -95,11 +95,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.descargar_factura"><code class="docutils literal notranslate"><span class="pre">descargar_factura()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.enviar_notificacion_cambio_cotizacion"><code class="docutils literal notranslate"><span class="pre">enviar_notificacion_cambio_cotizacion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.generar_factura_electronica"><code class="docutils literal notranslate"><span class="pre">generar_factura_electronica()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.no_redondeado"><code class="docutils literal notranslate"><span class="pre">no_redondeado()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#transacciones.models.redondear_efectivo"><code class="docutils literal notranslate"><span class="pre">redondear_efectivo()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.verificar_cambio_cotizacion_sesion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion_sesion()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.models.verificar_factura"><code class="docutils literal notranslate"><span class="pre">verificar_factura()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_confirmacion"><code class="docutils literal notranslate"><span class="pre">compra_confirmacion()</span></code></a></li>
@@ -107,6 +108,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_cobro"><code class="docutils literal notranslate"><span class="pre">compra_medio_cobro()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_medio_pago"><code class="docutils literal notranslate"><span class="pre">compra_medio_pago()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.compra_monto_moneda"><code class="docutils literal notranslate"><span class="pre">compra_monto_moneda()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transacciones.views.descargar_factura_view"><code class="docutils literal notranslate"><span class="pre">descargar_factura_view()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.descargar_historial_excel"><code class="docutils literal notranslate"><span class="pre">descargar_historial_excel()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.descargar_historial_pdf"><code class="docutils literal notranslate"><span class="pre">descargar_historial_pdf()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transacciones.views.detalle_historial"><code class="docutils literal notranslate"><span class="pre">detalle_historial()</span></code></a></li>
@@ -150,7 +152,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -464,10 +467,7 @@ Elimina tokens previos no usados del mismo usuario.</p>
 <span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">calcular_conversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moneda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operacion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pago</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cobro</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Efectivo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentacion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'minorista'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#calcular_conversion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.calcular_conversion" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Devuelve<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Monto de la divisa que el cliente ingresó inicialmente en el formulario de operaciones
-redondeo_efectivo_monto (Decimal): Monto de redondeo aplicado si la divisa será pagada o cobrada en efectivo
-redondeo_efectivo_precio_final (int): Monto de redondeo aplicado si el monto en guaraníes final será pagado o cobrado en efectivo
-cotizacion (int): Cotización de la moneda según el tipo de operación
+<dd class="field-odd"><p>Cotización de la moneda según el tipo de operación
 precio_base (int): Monto en guaraníes sin considerar recargos o beneficios por segmento
 porc_beneficio_segmento (str): Porcentaje de beneficio aplicado según el segmento del cliente
 beneficio_segmento (int): Beneficio aplicado en la operación según el segmento del cliente
@@ -475,11 +475,11 @@ monto_recargo_pago (int): Monto del recargo aplicado según el medio de pago
 porc_recargo_pago (str): Porcentaje del recargo aplicado según el medio de pago
 monto_recargo_cobro (int): Monto del recargo aplicado según el medio de cobro
 porc_recargo_cobro (str): Porcentaje del recargo aplicado según el medio
-monto (Decimal): Monto de la divisa después de aplicar redondeos si corresponde
+monto (Decimal): Monto de la divisa a operar
 precio_final (int): Monto en guaraníes final a pagar o cobrar</p>
 </dd>
 <dt class="field-even">Tipo del valor devuelto<span class="colon">:</span></dt>
-<dd class="field-even"><p>monto_original (Decimal)</p>
+<dd class="field-even"><p>cotizacion (int)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -547,32 +547,35 @@ Crea los recargos estándar para diferentes medios de pago si no existen.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="transacciones.models.generar_factura_electronica">
-<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">generar_factura_electronica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#generar_factura_electronica"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.generar_factura_electronica" title="Link to this definition"></a></dt>
-<dd><p>Genera una factura electrónica para una transacción completada.</p>
+<dt class="sig sig-object py" id="transacciones.models.enviar_notificacion_cambio_cotizacion">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">enviar_notificacion_cambio_cotizacion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usuario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cambios_cotizacion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#enviar_notificacion_cambio_cotizacion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.enviar_notificacion_cambio_cotizacion" title="Link to this definition"></a></dt>
+<dd><p>Envía un correo electrónico de notificación cuando se detectan cambios en la cotización
+durante el proceso de confirmación de una transacción.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parámetros<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>transaccion</strong> (<a class="reference internal" href="#transacciones.models.Transaccion" title="transacciones.models.Transaccion"><em>Transaccion</em></a>) – Instancia de transacción para la cual generar factura</p>
-</dd>
-<dt class="field-even">Devuelve<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>Diccionario con información de la factura generada</dt><dd><ul class="simple">
-<li><p>’success”: bool indicando si se generó correctamente</p></li>
-<li><p>’numero_factura”: str con el número de factura</p></li>
-<li><p>’cdc”: str con el Código de Control (CDC)</p></li>
-<li><p>”xml”: str con el XML de la factura</p></li>
-<li><p>’pdf_url”: str con la URL del PDF</p></li>
-<li><p>’error”: str con mensaje de error (si aplica)</p></li>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>usuario</strong> – Usuario que realiza la transacción</p></li>
+<li><p><strong>transaccion</strong> – Instancia de la transacción afectada</p></li>
+<li><p><strong>cambios_cotizacion</strong> (<em>dict</em>) – Diccionario con información de cambios de cotización
+- “hay_cambios”: boolean indicando si hubo cambios
+- “valores_anteriores”: dict con precios originales
+- “valores_actuales”: dict con precios actuales
+- “moneda”: instancia de la moneda</p></li>
 </ul>
 </dd>
-</dl>
-</p>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>True si el correo se envió exitosamente, False en caso contrario</p>
 </dd>
 <dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.generar_factura_electronica">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">generar_factura_electronica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transaccion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#generar_factura_electronica"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.generar_factura_electronica" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="transacciones.models.generar_token_transaccion">
@@ -580,6 +583,32 @@ Crea los recargos estándar para diferentes medios de pago si no existen.</p>
 <dd><p>Genera un token único de seguridad para transacciones específicas.</p>
 <p>Se utiliza para transacciones con medios de pago que requieren verificación
 adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.models.no_redondeado">
+<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">no_redondeado</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominaciones</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cantidades</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#no_redondeado"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.no_redondeado" title="Link to this definition"></a></dt>
+<dd><p>Verifica si el monto puede ser formado exactamente con las denominaciones disponibles.</p>
+<p>Esta función utiliza el algoritmo de Frobenius optimizado y teoría de números
+para determinar eficientemente si es posible formar el monto exacto usando
+una combinación de las denominaciones disponibles.
+Por ejemplo, 707000 puede formarse con 141 billetes de 5000 y 1 billete de 2000.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monto</strong> (<em>int o Decimal</em>) – Monto a verificar</p></li>
+<li><p><strong>denominaciones</strong> (<em>list</em>) – Lista de denominaciones disponibles (enteros)</p></li>
+<li><p><strong>cantidades</strong> (<em>dict</em><em>, </em><em>opcional</em>) – Diccionario con cantidades disponibles por denominación.
+Si no se proporciona, se asume cantidad ilimitada.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 si el monto se puede formar exactamente, o el menor redondeo necesario hacia arriba</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -608,30 +637,11 @@ adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="transacciones.models.redondear_efectivo">
-<span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">redondear_efectivo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">denominaciones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#redondear_efectivo"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.redondear_efectivo" title="Link to this definition"></a></dt>
-<dd><p>Redondea un monto al múltiplo más cercano según las denominaciones disponibles.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>monto</strong> (<em>Decimal</em>) – Monto a redondear</p></li>
-<li><p><strong>denominaciones</strong> (<em>list</em>) – Lista de denominaciones disponibles (enteros)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Devuelve<span class="colon">:</span></dt>
-<dd class="field-even"><p>Monto redondeado</p>
-</dd>
-<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Decimal</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="transacciones.models.verificar_cambio_cotizacion_sesion">
 <span class="sig-prename descclassname"><span class="pre">transacciones.models.</span></span><span class="sig-name descname"><span class="pre">verificar_cambio_cotizacion_sesion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tipo_transaccion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'compra'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/models.html#verificar_cambio_cotizacion_sesion"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.models.verificar_cambio_cotizacion_sesion" title="Link to this definition"></a></dt>
 <dd><p>Verifica si ha habido cambios en la cotización durante el proceso de transacción.</p>
-<p>Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.</p>
+<p>Compara los precios almacenados en la sesión al iniciar la transacción con los precios actuales.
+Si detecta cambios, también envía una notificación por correo electrónico al usuario.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parámetros<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -646,6 +656,7 @@ adicional como Efectivo o Transferencia. El token tiene una validez de 5 minutos
 <li><p>’valores_anteriores”: dict con precio_compra y precio_venta originales</p></li>
 <li><p>’valores_actuales”: dict con precio_compra y precio_venta actuales</p></li>
 <li><p>’moneda”: instancia de la moneda</p></li>
+<li><p>’email_enviado”: boolean indicando si se envió notificación por email</p></li>
 </ul>
 </dd>
 </dl>
@@ -903,6 +914,51 @@ antes de proceder al siguiente paso.</p>
 <li><p>titulo_paso: Título descriptivo del paso</p></li>
 <li><p>tipo_transaccion: Tipo de operación (“compra”)</p></li>
 <li><p>limites_disponibles: Información de límites del cliente</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transacciones.views.descargar_factura_view">
+<span class="sig-prename descclassname"><span class="pre">transacciones.views.</span></span><span class="sig-name descname"><span class="pre">descargar_factura_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transaccion_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/transacciones/views.html#descargar_factura_view"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#transacciones.views.descargar_factura_view" title="Link to this definition"></a></dt>
+<dd><p>Vista para descargar la factura electrónica de una transacción.</p>
+<p>Esta vista permite a los usuarios descargar el PDF de la factura electrónica
+de una transacción completada. Utiliza la función descargar_factura del modelo
+para obtener el contenido del PDF desde el servicio de facturación.</p>
+<dl class="simple">
+<dt>Validaciones:</dt><dd><ul class="simple">
+<li><p>La transacción debe existir</p></li>
+<li><p>El usuario debe tener permisos para acceder a la transacción</p></li>
+<li><p>La transacción debe tener una factura generada (campo factura no vacío)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>HttpRequest</em>) – Petición HTTP</p></li>
+<li><p><strong>transaccion_id</strong> (<em>int</em>) – ID de la transacción para la cual descargar la factura</p></li>
+</ul>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Archivo PDF de la factura con content-type “application/pdf”</dt><dd><ul class="simple">
+<li><p>Nombre del archivo: “factura_{CDC}.pdf”</p></li>
+<li><p>Headers configurados para descarga automática</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+<dt class="field-even">Muestra<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>404</strong><strong>)</strong> – Si la transacción no existe</p></li>
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>403</strong><strong>)</strong> – Si el usuario no tiene permisos para acceder</p></li>
+<li><p><strong>HttpResponse</strong><strong>(</strong><strong>400</strong><strong>)</strong> – Si la transacción no tiene factura generada</p></li>
 </ul>
 </dd>
 </dl>
@@ -1900,7 +1956,8 @@ Si es válido, prepara la transacción para continuar con el flujo normal.</p>
 <dt>{</dt><dd><p>“success”: True,
 “message”: str - Mensaje de confirmación,
 “transaccion_id”: int - ID de la transacción verificada,
-“redirect_url”: str - URL para redirección</p>
+“confirmacion_url”: str - URL para enviar POST,
+“requires_post”: True - Indica que se debe hacer POST</p>
 </dd>
 </dl>
 <p>}</p>
@@ -1951,7 +2008,22 @@ body: JSON.stringify({token: “123456”})</p>
 .then(data =&gt; {</p>
 <blockquote>
 <div><dl class="simple">
-<dt>if (data.success) {</dt><dd><p>window.location.href = data.redirect_url;</p>
+<dt>if (data.success &amp;&amp; data.requires_post) {</dt><dd><p>// Hacer POST a la URL de confirmación con accion=”confirmar”
+const form = document.createElement(“form”);
+form.method = “POST”;
+form.action = data.confirmacion_url;
+const input = document.createElement(“input”);
+input.type = “hidden”;
+input.name = “accion”;
+input.value = “confirmar”;
+form.appendChild(input);
+const csrfInput = document.createElement(“input”);
+csrfInput.type = “hidden”;
+csrfInput.name = “csrfmiddlewaretoken”;
+csrfInput.value = csrftoken;
+form.appendChild(csrfInput);
+document.body.appendChild(form);
+form.submit();</p>
 </dd>
 </dl>
 <p>}</p>
@@ -1964,7 +2036,7 @@ body: JSON.stringify({token: “123456”})</p>
 <ul class="simple">
 <li><p>El token debe ser exactamente 6 dígitos numéricos</p></li>
 <li><p>El token se marca como usado después de una verificación exitosa</p></li>
-<li><p>La URL de redirección depende del tipo de transacción (compra/venta)</p></li>
+<li><p>Se envía POST a compra_confirmacion o venta_confirmacion con accion=”confirmar”</p></li>
 </ul>
 </div>
 </dd></dl>

@@ -48,7 +48,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
 </ul>
 
         </div>
@@ -282,7 +283,8 @@
 <span class="sd">                    &#39;success&#39;: True,</span>
 <span class="sd">                    &#39;message&#39;: str - Mensaje de confirmación,</span>
 <span class="sd">                    &#39;transaccion_id&#39;: int - ID de la transacción verificada,</span>
-<span class="sd">                    &#39;redirect_url&#39;: str - URL para redirección</span>
+<span class="sd">                    &#39;confirmacion_url&#39;: str - URL para enviar POST,</span>
+<span class="sd">                    &#39;requires_post&#39;: True - Indica que se debe hacer POST</span>
 <span class="sd">                }</span>
 <span class="sd">            En caso de error:</span>
 <span class="sd">                {</span>
@@ -313,15 +315,30 @@
 <span class="sd">        })</span>
 <span class="sd">        .then(response =&gt; response.json())</span>
 <span class="sd">        .then(data =&gt; {</span>
-<span class="sd">            if (data.success) {</span>
-<span class="sd">                window.location.href = data.redirect_url;</span>
+<span class="sd">            if (data.success &amp;&amp; data.requires_post) {</span>
+<span class="sd">                // Hacer POST a la URL de confirmación con accion=&#39;confirmar&#39;</span>
+<span class="sd">                const form = document.createElement(&#39;form&#39;);</span>
+<span class="sd">                form.method = &#39;POST&#39;;</span>
+<span class="sd">                form.action = data.confirmacion_url;</span>
+<span class="sd">                const input = document.createElement(&#39;input&#39;);</span>
+<span class="sd">                input.type = &#39;hidden&#39;;</span>
+<span class="sd">                input.name = &#39;accion&#39;;</span>
+<span class="sd">                input.value = &#39;confirmar&#39;;</span>
+<span class="sd">                form.appendChild(input);</span>
+<span class="sd">                const csrfInput = document.createElement(&#39;input&#39;);</span>
+<span class="sd">                csrfInput.type = &#39;hidden&#39;;</span>
+<span class="sd">                csrfInput.name = &#39;csrfmiddlewaretoken&#39;;</span>
+<span class="sd">                csrfInput.value = csrftoken;</span>
+<span class="sd">                form.appendChild(csrfInput);</span>
+<span class="sd">                document.body.appendChild(form);</span>
+<span class="sd">                form.submit();</span>
 <span class="sd">            }</span>
 <span class="sd">        });</span>
 <span class="sd">    </span>
 <span class="sd">    Note:</span>
 <span class="sd">        - El token debe ser exactamente 6 dígitos numéricos</span>
 <span class="sd">        - El token se marca como usado después de una verificación exitosa</span>
-<span class="sd">        - La URL de redirección depende del tipo de transacción (compra/venta)</span>
+<span class="sd">        - Se envía POST a compra_confirmacion o venta_confirmacion con accion=&#39;confirmar&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Verificar si 2FA está habilitado</span>
@@ -368,17 +385,18 @@
                 
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Token 2FA validado exitosamente para transacción </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> por usuario </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 
-                <span class="c1"># Redirigir al flujo normal de éxito según el tipo de transacción</span>
+                <span class="c1"># Enviar POST a confirmación según el tipo de transacción</span>
                 <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
-                    <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/comprar/exito/&#39;</span>
+                    <span class="n">confirmacion_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/comprar/confirmacion/&#39;</span>
                 <span class="k">else</span><span class="p">:</span>  <span class="c1"># venta</span>
-                    <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/vender/exito/&#39;</span>
+                    <span class="n">confirmacion_url</span> <span class="o">=</span> <span class="s1">&#39;/operaciones/vender/confirmacion/&#39;</span>
                 
                 <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
                     <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Token verificado correctamente. Continuando con la transacción...&#39;</span><span class="p">,</span>
                     <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                    <span class="s1">&#39;redirect_url&#39;</span><span class="p">:</span> <span class="n">redirect_url</span>
+                    <span class="s1">&#39;confirmacion_url&#39;</span><span class="p">:</span> <span class="n">confirmacion_url</span><span class="p">,</span>
+                    <span class="s1">&#39;requires_post&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># Indica que se debe hacer POST en lugar de redirect</span>
                 <span class="p">})</span>
                 
             <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
