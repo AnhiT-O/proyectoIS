@@ -225,7 +225,29 @@ COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
 \.
 
 COPY public.transacciones (tipo, monto, cotizacion, precio_base, beneficio_segmento, porc_beneficio_segmento, recargo_pago, porc_recargo_pago, recargo_cobro, porc_recargo_cobro, precio_final, pagado, medio_pago, medio_cobro, fecha_hora, estado, razon, token, factura, numero_factura, cliente_id, moneda_id, usuario_id) FROM stdin;
-venta	50	6930	346500	0	0%	3500	1.0%	0	0%	0	343000	343000	Tarjeta de Crédito (**** **** **** 4242)	Cuenta bancaria - Banco Atlas (593406)	2025-11-21 09:58:56.36467-03	Completa	\N	\N	\N	\N	1	1	4
+venta	500	6930	3465000	0	0%	35000	1.0%	0	0%	3430000	3430000	Tarjeta de Crédito (**** **** **** 4242)	Cuenta bancaria - Banco Atlas (593406)	2025-11-21 09:58:56.36467-03	Completa	\N	\N	\N	\N	1	1	4
+compra	800	7070	5656000	0	0%	0	0%	0	0%	5656000	5656000	Efectivo	Efectivo	2025-09-15 10:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+venta	650	6930	4504500	0	0%	45500	1.0%	0	0%	4459000	4459000	Tarjeta de Crédito (**** **** **** 1234)	Cuenta bancaria - Banco Familiar (39784)	2025-09-20 14:20:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	1200	8650	10380000	0	0%	155700	1.5%	0	0%	10535700	10535700	Tarjeta de Crédito (**** **** **** 5678)	Efectivo	2025-09-25 11:15:00-03	Completa	\N	\N	\N	\N	3	2	4
+venta	1000	6930	6930000	0	0%	138600	2.0%	0	0%	6791400	6791400	Billetera Electrónica - Tigo Money (0981123123)	Transferencia bancaria - Banco Atlas (593406)	2025-10-05 09:45:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	450	7070	3181500	318150	10%	0	0%	0	0%	2863350	2863350	Efectivo	Efectivo	2025-10-10 16:30:00-03	Completa	\N	\N	\N	\N	4	1	4
+venta	850	7900	6715000	671500	10%	0	0%	0	0%	6043500	6043500	Efectivo	Cuenta bancaria - Cooperativa Universitaria (32329)	2025-10-15 13:00:00-03	Completa	\N	\N	\N	\N	4	2	4
+compra	2500	1340	3350000	0	0%	33833	1.0%	0	0%	3383833	3383833	Tarjeta de Crédito (**** **** **** 9876)	Efectivo	2025-10-20 10:00:00-03	Completa	\N	\N	\N	\N	3	3	4
+venta	700	6930	4851000	0	0%	0	0%	0	0%	4851000	4851000	Transferencia bancaria - Banco Basa (426868)	Cuenta bancaria - Banco Basa (426868)	2025-10-25 15:20:00-03	Completa	\N	\N	\N	\N	3	1	4
+compra	950	8300	7885000	788500	10%	0	0%	0	0%	7096500	7096500	Efectivo	Efectivo	2025-11-01 11:30:00-03	Completa	\N	\N	\N	\N	6	2	4
+venta	1800	1280	2304000	230400	10%	0	0%	0	0%	2073600	2073600	Efectivo	Transferencia bancaria - Banco Familiar (254591)	2025-11-05 14:45:00-03	Completa	\N	\N	\N	\N	9	3	4
+compra	3500	7060	24710000	1235500	5%	0	0%	0	0%	23474500	23474500	Transferencia bancaria - ueno bank (783750)	Efectivo	2025-11-10 09:00:00-03	Completa	\N	\N	\N	\N	10	1	4
+venta	2000	6940	13880000	694000	5%	0	0%	0	0%	13186000	13186000	Efectivo	Transferencia bancaria - ueno bank (783750)	2025-11-12 16:15:00-03	Completa	\N	\N	\N	\N	10	1	4
+compra	1100	7060	7766000	0	0%	232980	3.0%	0	0%	7998980	7998980	Billetera Electrónica - Zimple (0981123123)	Efectivo	2025-11-15 10:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+venta	750	7400	5550000	555000	10%	0	0%	0	0%	4995000	4995000	Efectivo	Cuenta bancaria - Cooperativa Universitaria (32329)	2025-11-18 13:20:00-03	Completa	\N	\N	\N	\N	4	2	4
+compra	1500	1340	2010000	100500	5%	0	0%	0	0%	1909500	1909500	Efectivo	Efectivo	2025-11-20 11:00:00-03	Completa	\N	\N	\N	\N	8	3	4
+venta	900	1280	1152000	57600	5%	0	0%	0	0%	1094400	1094400	Efectivo	Transferencia bancaria - ueno bank (969643)	2025-11-22 15:45:00-03	Completa	\N	\N	\N	\N	1	3	4
+compra	550	8150	4482500	448250	10%	0	0%	0	0%	4034250	4034250	Efectivo	Efectivo	2025-11-25 10:15:00-03	Completa	\N	\N	\N	\N	6	2	4
+venta	850	6930	5890500	0	0%	88358	1.5%	0	0%	5802142	5802142	Tarjeta de Crédito (**** **** **** 4321)	Cuenta bancaria - Banco Atlas (593406)	2025-11-26 09:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	2200	7060	15532000	776600	5%	0	0%	0	0%	14755400	14755400	Transferencia bancaria - ueno bank (783750)	Efectivo	2025-11-28 08:00:00-03	Completa	\N	\N	\N	\N	10	1	4
+venta	1200	6930	8316000	0	0%	83160	1.0%	0	0%	8232840	8232840	Tarjeta de Crédito (**** **** **** 8888)	Cuenta bancaria - Banco Familiar (39784)	2025-11-28 11:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	700	8150	5705000	570500	10%	0	0%	0	0%	5134500	5134500	Efectivo	Efectivo	2025-11-28 14:45:00-03	Completa	\N	\N	\N	\N	4	2	4
+venta	1600	1280	2048000	102400	5%	0	0%	0	0%	1945600	1945600	Efectivo	Cuenta bancaria - Banco Basa (426868)	2025-11-28 17:20:00-03	Completa	\N	\N	\N	\N	8	3	4
 \.
 
 --
