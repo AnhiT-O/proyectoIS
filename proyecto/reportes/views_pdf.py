@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 from transacciones.models import Transaccion
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from django.utils.timezone import localtime, make_aware
 from datetime import datetime
 from monedas.models import Moneda
 from clientes.models import Cliente
@@ -203,10 +204,34 @@ def view2(request):
 
     # Crear PDF
     buffer = BytesIO()
+    # dejar más espacio superior para el encabezado
+    top_margin = 90
     doc = SimpleDocTemplate(buffer, pagesize=landscape(A4),
-                            leftMargin=18, rightMargin=18, topMargin=18, bottomMargin=18)
+                            leftMargin=18, rightMargin=18, topMargin=top_margin, bottomMargin=18)
     elements = []
     styles = getSampleStyleSheet()
+
+    # Fecha/hora de generación (local)
+    gen_time_str = localtime(now()).strftime('%d/%m/%Y %H:%M:%S')
+
+    def header_footer(canvas, doc):
+        canvas.saveState()
+        width, height = doc.pagesize
+        # Logo como texto (izquierda)
+        canvas.setFont('Helvetica-Bold', 16)
+        canvas.drawString(20, height - 40, ' Global Exchange')
+        # Título centrado
+        canvas.setFont('Helvetica-Bold', 14)
+        canvas.drawCentredString(width/2.0, height - 40, 'Reporte de Transacciones')
+        # Fecha/hora debajo del título
+        canvas.setFont('Helvetica', 9)
+        canvas.drawCentredString(width/2.0, height - 56, f'Generado: {gen_time_str}')
+
+        # Pie: número de página en el centro
+        canvas.setFont('Helvetica', 9)
+        page_num_text = f'Página {canvas.getPageNumber()}'
+        canvas.drawCentredString(width/2.0, 18, page_num_text)
+        canvas.restoreState()
 
     # Cabecera con resumen de filtros
     # (No se incluirá un bloque de filtros aplicados en el PDF)
@@ -232,6 +257,9 @@ def view2(request):
         ]))
         elements.append(compras_table)
         elements.append(Spacer(1, 18))
+        # Si también hay ventas, insertar salto de página para que Ventas comience en página nueva
+        if len(ventas_data) > 1:
+            elements.append(PageBreak())
 
     # Tabla de Ventas
     if len(ventas_data) > 1:
@@ -272,8 +300,8 @@ def view2(request):
     ]))
     elements.append(resumen_table)
 
-    # Generar PDF
-    doc.build(elements)
+    # Generar PDF usando callbacks para encabezado/pie en cada página
+    doc.build(elements, onFirstPage=header_footer, onLaterPages=header_footer)
     pdf = buffer.getvalue()
     buffer.close()
 
