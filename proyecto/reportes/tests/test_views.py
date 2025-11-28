@@ -291,3 +291,60 @@ class TestReportesViews:
         resp = client.get(url, {'rango': 'hoy'})
         data = resp.json()
         assert float(data['ganancia_total']) == pytest.approx(0.0, abs=1e-6)
+
+    def test_transacciones_reportes_incluye_ganancia_por_moneda(self):
+        """Comprueba que la vista `transacciones_reportes` incluye la ganancia acumulada por moneda.
+
+        Escenario:
+        - Crear usuario admin, moneda con comision_venta=10, cliente y una transacción de venta completa.
+        - Llamar a la vista `reportes:transacciones`.
+        Resultado esperado: el contexto contiene `resumen_por_moneda` con la ganancia esperada.
+        """
+        client = Client()
+        admin_grp, _ = Group.objects.get_or_create(name='Administrador')
+        admin = Usuario.objects.create(
+            username='admin_report',
+            email='admin_report@example.com',
+            first_name='Admin',
+            last_name='Report',
+            numero_documento='90000009',
+            telefono='0990000009',
+            is_active=True,
+        )
+        admin.set_password('password')
+        admin.save()
+        admin.groups.add(admin_grp)
+
+        moneda = Moneda.objects.create(nombre='GMon', simbolo='GM', tasa_base=100, comision_compra=1, comision_venta=10)
+
+        cliente = Cliente.objects.create(
+            nombre='Cliente Report',
+            tipo_documento='CI',
+            numero_documento='70000004',
+            correo_electronico='cr@test.com',
+            telefono='0997000004',
+            tipo='F', direccion='Dirección', ocupacion='Ninguna', segmento='minorista'
+        )
+
+        operador = Usuario.objects.create(
+            username='oper_report', email='oper_report@example.com', first_name='OperR', last_name='Rep',
+            numero_documento='90000010', telefono='0990000010', is_active=True
+        )
+        operador.set_password('password')
+        operador.save()
+
+        # monto = 50 => ganancia = 50 * 10 = 500
+        Transaccion.objects.create(
+            cliente=cliente, tipo='venta', moneda=moneda, monto=Decimal('50'), cotizacion=0,
+            precio_base=0, beneficio_segmento=0, porc_beneficio_segmento='0', recargo_pago=0,
+            porc_recargo_pago='0', recargo_cobro=0, porc_recargo_cobro='0', precio_final=0,
+            pagado=0, medio_pago='Efectivo', medio_cobro='Efectivo', estado='completa', usuario=operador
+        )
+
+        client.force_login(admin)
+        url = reverse('reportes:transacciones')
+        resp = client.get(url)
+        assert resp.status_code == 200
+        resumen = resp.context.get('resumen_por_moneda', {})
+        # comparar la ganancia acumulada por el nombre de la moneda
+        assert resumen.get('GMon') == pytest.approx(50 * 10, rel=1e-6)
