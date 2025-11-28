@@ -18,7 +18,7 @@ GIT_TAG="${1:-desarrollo}"
 
 # --- Cambio de rama/tag de Git ---
 echo "Cambiando a la rama/tag: $GIT_TAG"
-git checkout "$GIT_TAG"
+git checkout $GIT_TAG
 
 if [ $? -ne 0 ]; then
 	echo "Error: No se pudo cambiar a la rama/tag '$GIT_TAG'"
