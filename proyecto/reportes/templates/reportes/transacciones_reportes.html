@@ -230,8 +230,24 @@
             <a href="/" class="btn-secundario">
                 Volver al Inicio
             </a>
+            <a id="btn-download-pdf" href="#" class="btn-secundario" style="margin-left:0.5rem;">
+                Descargar PDF
+            </a>
         </div>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('btn-download-pdf');
+    if(!btn) return;
+    // reconstruir querystring actual
+    const qs = window.location.search || '';
+    const base = '{% url "reportes:transacciones_pdf" %}';
+    btn.href = base + qs;
+});
+</script>
 {% endblock %}
