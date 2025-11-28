@@ -44,6 +44,7 @@ def transacciones_reportes(request):
     estado_filter = request.GET.get('estado')
     cliente_id = request.GET.get('cliente')
     tipo_filter = request.GET.get('tipo')
+    segmento_filter = request.GET.get('segmento')
     
     # Obtener rango de años disponibles para los selectores
     años_rango = []
@@ -133,6 +134,8 @@ def transacciones_reportes(request):
             qs = qs.filter(cliente__id=int(cliente_id))
         except Exception:
             pass
+    if segmento_filter:
+        qs = qs.filter(cliente__segmento__iexact=segmento_filter)
 
     filas = []
     resumen_por_moneda = {}
@@ -304,6 +307,9 @@ def transacciones_reportes(request):
     # Calcular colspan para el mensaje vacío: columnas fijas = 5 (Fecha, Cliente, Operación, Moneda, Monto, %Descuento, Estado) ajustado por cada tabla
     f_colspan = 5 + (2 if show_compra else 0) + 2  # kept fallback, template uses per-table colspan separately
 
+    # Obtener segmentos disponibles desde las opciones del modelo
+    segmentos_disponibles = Cliente.SEGMENTO_CHOICES
+
     context = {
         'filas': filas,
         'filas_compra': filas_compra,
@@ -312,6 +318,7 @@ def transacciones_reportes(request):
         'resumen_por_moneda': resumen_por_moneda,
         'monedas': Moneda.objects.all(),
         'clientes': Cliente.objects.all(),
+        'segmentos': segmentos_disponibles,
         'años_rango': años_rango,
         'dias_lista': dias_lista,
         'meses_lista': meses_lista,
@@ -328,6 +335,7 @@ def transacciones_reportes(request):
         'f_estado': estado_filter,
         'f_tipo': tipo_filter,
         'f_cliente': cliente_id,
+        'f_segmento': segmento_filter,
         'show_compra': show_compra,
         'show_venta': show_venta,
         'f_colspan': f_colspan,

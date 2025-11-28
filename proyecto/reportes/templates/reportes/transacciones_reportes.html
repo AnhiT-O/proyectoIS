@@ -258,6 +258,15 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Segmentación</label>
+                        <select name="segmento" class="select-filtro">
+                            <option value="">Todos</option>
+                            {% for valor, nombre in segmentos %}
+                                <option value="{{ valor }}" {% if f_segmento == valor %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="botones-busqueda">
                         <button type="submit" class="btn-buscar">Buscar</button>
                         <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
@@ -270,7 +279,7 @@
     <div class="zona-conteo">
         <div class="conteo-info">
             <h2>Total de transacciones:</h2> <span class="conteo">{{ filas|length }}</span>
-            {% if f_dia_inicio or f_mes_inicio or f_año_inicio or f_dia_fin or f_mes_fin or f_año_fin or f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
+            {% if f_dia_inicio or f_mes_inicio or f_año_inicio or f_dia_fin or f_mes_fin or f_año_fin or f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente or f_segmento %}
                 <span style="margin-left: 1rem; color: #6c757d;">
                     ({{ filas|length }} resultado{{ filas|length|pluralize }})
                 </span>
