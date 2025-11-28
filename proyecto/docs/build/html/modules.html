@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tauser &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=f85f4cfb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportes.html">Reportes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tauser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tauser">
+<h1>tauser<a class="headerlink" href="#tauser" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="clientes.html">Clientes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="clientes.html#clientes.models.Cliente"><code class="docutils literal notranslate"><span class="pre">Cliente</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.TIPO_CLIENTE_CHOICES"><code class="docutils literal notranslate"><span class="pre">Cliente.TIPO_CLIENTE_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.TIPO_DOCUMENTO_CHOICES"><code class="docutils literal notranslate"><span class="pre">Cliente.TIPO_DOCUMENTO_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.SEGMENTO_CHOICES"><code class="docutils literal notranslate"><span class="pre">Cliente.SEGMENTO_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.BENEFICIOS_SEGMENTO"><code class="docutils literal notranslate"><span class="pre">Cliente.BENEFICIOS_SEGMENTO</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#id0"><code class="docutils literal notranslate"><span class="pre">Cliente.SEGMENTO_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#id1"><code class="docutils literal notranslate"><span class="pre">Cliente.TIPO_CLIENTE_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#id2"><code class="docutils literal notranslate"><span class="pre">Cliente.TIPO_DOCUMENTO_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.get_segmento_display"><code class="docutils literal notranslate"><span class="pre">Cliente.get_segmento_display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.get_tipo_display"><code class="docutils literal notranslate"><span class="pre">Cliente.get_tipo_display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="clientes.html#clientes.models.Cliente.get_tipo_documento_display"><code class="docutils literal notranslate"><span class="pre">Cliente.get_tipo_documento_display()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="medios_acreditacion.html">Medios de Acreditación</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.Billetera"><code class="docutils literal notranslate"><span class="pre">Billetera</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.Billetera.TIPO_BILLETERA_CHOICES"><code class="docutils literal notranslate"><span class="pre">Billetera.TIPO_BILLETERA_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.Billetera.cliente_id"><code class="docutils literal notranslate"><span class="pre">Billetera.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.Billetera.get_tipo_billetera_display"><code class="docutils literal notranslate"><span class="pre">Billetera.get_tipo_billetera_display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria.BANCO_CHOICES"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria.BANCO_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria.cliente_id"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.CuentaBancaria.get_banco_display"><code class="docutils literal notranslate"><span class="pre">CuentaBancaria.get_banco_display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.nombre_titular"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.nombre_titular</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.nro_documento"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.nro_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.cliente"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.fecha_creacion"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.fecha_creacion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.activo"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.activo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.Meta"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.Meta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.Meta.abstract"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.Meta.abstract</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.MedioAcreditacion.cliente_id"><code class="docutils literal notranslate"><span class="pre">MedioAcreditacion.cliente_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.TIPO_TARJETA_CHOICES"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.TIPO_TARJETA_CHOICES</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.cliente_id"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_brand_display"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.get_brand_display()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_last4"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.get_last4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_next_by_fecha_creacion"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.get_next_by_fecha_creacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_numero_enmascarado"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.get_numero_enmascarado()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.get_previous_by_fecha_creacion"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.get_previous_by_fecha_creacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="medios_acreditacion.html#medios_acreditacion.models.TarjetaLocal.save"><code class="docutils literal notranslate"><span class="pre">TarjetaLocal.save()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="monedas.html">Monedas</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="monedas.html#monedas.models.Denominacion"><code class="docutils literal notranslate"><span class="pre">Denominacion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Denominacion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Denominacion.moneda_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="monedas.html#monedas.models.Moneda"><code class="docutils literal notranslate"><span class="pre">Moneda</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.calcular_precio_compra"><code class="docutils literal notranslate"><span class="pre">Moneda.calcular_precio_compra()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.calcular_precio_venta"><code class="docutils literal notranslate"><span class="pre">Moneda.calcular_precio_venta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.clean"><code class="docutils literal notranslate"><span class="pre">Moneda.clean()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.get_next_by_fecha_cotizacion"><code class="docutils literal notranslate"><span class="pre">Moneda.get_next_by_fecha_cotizacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.get_precios_cliente"><code class="docutils literal notranslate"><span class="pre">Moneda.get_precios_cliente()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.get_previous_by_fecha_cotizacion"><code class="docutils literal notranslate"><span class="pre">Moneda.get_previous_by_fecha_cotizacion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="monedas.html#monedas.models.Moneda.save"><code class="docutils literal notranslate"><span class="pre">Moneda.save()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="monedas.html#monedas.models.StockGuaranies"><code class="docutils literal notranslate"><span class="pre">StockGuaranies</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#roles.models.Roles"><code class="docutils literal notranslate"><span class="pre">Roles</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#roles.models.Roles.descripcion"><code class="docutils literal notranslate"><span class="pre">Roles.descripcion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#roles.models.Roles.nombre"><code class="docutils literal notranslate"><span class="pre">Roles.nombre</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tauser.html">Tauser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tauser.html#module-tauser">Paquete principal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tauser.html#modulos-de-proyecto-tauser">Módulos de proyecto tauser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.forms.IngresoForm"><code class="docutils literal notranslate"><span class="pre">IngresoForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.IngresoForm.archivo"><code class="docutils literal notranslate"><span class="pre">IngresoForm.archivo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.IngresoForm.clean_archivo"><code class="docutils literal notranslate"><span class="pre">IngresoForm.clean_archivo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.IngresoForm.media"><code class="docutils literal notranslate"><span class="pre">IngresoForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.forms.Token2FAForm"><code class="docutils literal notranslate"><span class="pre">Token2FAForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.Token2FAForm.media"><code class="docutils literal notranslate"><span class="pre">Token2FAForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.forms.TokenForm"><code class="docutils literal notranslate"><span class="pre">TokenForm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.TokenForm.codigo"><code class="docutils literal notranslate"><span class="pre">TokenForm.codigo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.TokenForm.clean_codigo"><code class="docutils literal notranslate"><span class="pre">TokenForm.clean_codigo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tauser.html#tauser.forms.TokenForm.media"><code class="docutils literal notranslate"><span class="pre">TokenForm.media</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.caja_fuerte"><code class="docutils literal notranslate"><span class="pre">caja_fuerte()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.exito"><code class="docutils literal notranslate"><span class="pre">exito()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.ingreso_billetes"><code class="docutils literal notranslate"><span class="pre">ingreso_billetes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.ingreso_token"><code class="docutils literal notranslate"><span class="pre">ingreso_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.inicio"><code class="docutils literal notranslate"><span class="pre">inicio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tauser.html#tauser.views.verificar_2fa"><code class="docutils literal notranslate"><span class="pre">verificar_2fa()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transacciones.html">Transacciones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.BilletesTauser"><code class="docutils literal notranslate"><span class="pre">BilletesTauser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.BilletesTauser.denominacion_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.denominacion_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.BilletesTauser.tauser_id"><code class="docutils literal notranslate"><span class="pre">BilletesTauser.tauser_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.LimiteGlobal"><code class="docutils literal notranslate"><span class="pre">LimiteGlobal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Recargos"><code class="docutils literal notranslate"><span class="pre">Recargos</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Tauser"><code class="docutils literal notranslate"><span class="pre">Tauser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion"><code class="docutils literal notranslate"><span class="pre">Transaccion</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.cliente"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.tipo"><code class="docutils literal notranslate"><span class="pre">Transaccion.tipo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.moneda"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.monto"><code class="docutils literal notranslate"><span class="pre">Transaccion.monto</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.medio_pago"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_pago</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.medio_cobro"><code class="docutils literal notranslate"><span class="pre">Transaccion.medio_cobro</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.fecha_hora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.estado"><code class="docutils literal notranslate"><span class="pre">Transaccion.estado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.token"><code class="docutils literal notranslate"><span class="pre">Transaccion.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.token_expiracion"><code class="docutils literal notranslate"><span class="pre">Transaccion.token_expiracion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.usuario"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.cliente_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.cliente_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.get_next_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_next_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.get_previous_by_fecha_hora"><code class="docutils literal notranslate"><span class="pre">Transaccion.get_previous_by_fecha_hora()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.moneda_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.moneda_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.Transaccion.usuario_id"><code class="docutils literal notranslate"><span class="pre">Transaccion.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken"><code class="docutils literal notranslate"><span class="pre">TransactionToken</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.generate_token"><code class="docutils literal notranslate"><span class="pre">TransactionToken.generate_token()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.get_next_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_next_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.get_previous_by_expires_at"><code class="docutils literal notranslate"><span class="pre">TransactionToken.get_previous_by_expires_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.is_valid"><code class="docutils literal notranslate"><span class="pre">TransactionToken.is_valid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.mark_as_used"><code class="docutils literal notranslate"><span class="pre">TransactionToken.mark_as_used()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transacciones.html#transacciones.models.TransactionToken.usuario_id"><code class="docutils literal notranslate"><span class="pre">TransactionToken.usuario_id</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.billetes_necesarios"><code class="docutils literal notranslate"><span class="pre">billetes_necesarios()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.calcular_conversion"><code class="docutils literal notranslate"><span class="pre">calcular_conversion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_limite_global_inicial"><code class="docutils literal notranslate"><span class="pre">crear_limite_global_inicial()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.crear_recargos"><code class="docutils literal notranslate"><span class="pre">crear_recargos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.descargar_factura"><code class="docutils literal notranslate"><span class="pre">descargar_factura()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.enviar_notificacion_cambio_cotizacion_tauser"><code class="docutils literal notranslate"><span class="pre">enviar_notificacion_cambio_cotizacion_tauser()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.generar_factura_electronica"><code class="docutils literal notranslate"><span class="pre">generar_factura_electronica()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.generar_token_transaccion"><code class="docutils literal notranslate"><span class="pre">generar_token_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.no_redondeado"><code class="docutils literal notranslate"><span class="pre">no_redondeado()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_pago_stripe"><code class="docutils literal notranslate"><span class="pre">procesar_pago_stripe()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.procesar_transaccion"><code class="docutils literal notranslate"><span class="pre">procesar_transaccion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.models.verificar_cambio_cotizacion"><code class="docutils literal notranslate"><span class="pre">verificar_cambio_cotizacion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.cleanup_expired_tokens"><code class="docutils literal notranslate"><span class="pre">cleanup_expired_tokens()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.create_transaction_token"><code class="docutils literal notranslate"><span class="pre">create_transaction_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.generate_2fa_token"><code class="docutils literal notranslate"><span class="pre">generate_2fa_token()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.get_token_status"><code class="docutils literal notranslate"><span class="pre">get_token_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.is_2fa_enabled"><code class="docutils literal notranslate"><span class="pre">is_2fa_enabled()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.send_2fa_email"><code class="docutils literal notranslate"><span class="pre">send_2fa_email()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="transacciones.html#transacciones.utils_2fa.validate_2fa_token"><code class="docutils literal notranslate"><span class="pre">validate_2fa_token()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usuarios.html">Usuarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario"><code class="docutils literal notranslate"><span class="pre">Usuario</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.username"><code class="docutils literal notranslate"><span class="pre">Usuario.username</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.first_name"><code class="docutils literal notranslate"><span class="pre">Usuario.first_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.last_name"><code class="docutils literal notranslate"><span class="pre">Usuario.last_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.email"><code class="docutils literal notranslate"><span class="pre">Usuario.email</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.tipo_documento"><code class="docutils literal notranslate"><span class="pre">Usuario.tipo_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.numero_documento"><code class="docutils literal notranslate"><span class="pre">Usuario.numero_documento</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.cliente_activo"><code class="docutils literal notranslate"><span class="pre">Usuario.cliente_activo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.bloqueado"><code class="docutils literal notranslate"><span class="pre">Usuario.bloqueado</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.is_active"><code class="docutils literal notranslate"><span class="pre">Usuario.is_active</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.date_joined"><code class="docutils literal notranslate"><span class="pre">Usuario.date_joined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.es_admin"><code class="docutils literal notranslate"><span class="pre">Usuario.es_admin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="usuarios.html#usuarios.models.Usuario.nombre_completo"><code class="docutils literal notranslate"><span class="pre">Usuario.nombre_completo()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

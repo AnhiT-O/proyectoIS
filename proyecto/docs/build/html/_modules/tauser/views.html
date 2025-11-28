@@ -1,0 +1,917 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tauser.views &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">tauser.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para tauser.views</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Vistas para el sistema TAUser (Terminal Autónomo de Usuario).</span>
+
+<span class="sd">Este módulo contiene todas las vistas necesarias para el funcionamiento de las</span>
+<span class="sd">terminales TAUser, que permiten a los clientes completar sus transacciones de</span>
+<span class="sd">cambio de moneda de forma autónoma mediante interfaces específicas.</span>
+
+<span class="sd">El sistema TAUser maneja:</span>
+<span class="sd">- Ingreso y validación de tokens de transacción</span>
+<span class="sd">- Procesamiento de pagos en efectivo</span>
+<span class="sd">- Gestión de caja fuerte (ingreso/extracción de billetes)</span>
+<span class="sd">- Detección de cambios de cotización en tiempo real</span>
+<span class="sd">- Confirmación y finalización de transacciones</span>
+
+<span class="sd">Functions:</span>
+<span class="sd">    inicio: Vista principal del TAUser</span>
+<span class="sd">    caja_fuerte: Gestión de billetes en caja fuerte</span>
+<span class="sd">    ingreso_token: Validación de tokens y detección de cambios de cotización</span>
+<span class="sd">    ingreso_billetes: Procesamiento de pagos en efectivo</span>
+<span class="sd">    exito: Confirmación de transacción completada</span>
+
+<span class="sd">Author: Equipo de desarrollo Global Exchange  </span>
+<span class="sd">Date: 2025</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transaccion</span><span class="p">,</span> <span class="n">Tauser</span><span class="p">,</span> <span class="n">BilletesTauser</span><span class="p">,</span> <span class="n">billetes_necesarios</span><span class="p">,</span> <span class="n">procesar_transaccion</span><span class="p">,</span> <span class="n">calcular_conversion</span><span class="p">,</span> <span class="n">verificar_cambio_cotizacion</span><span class="p">,</span> <span class="n">no_redondeado</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.utils_2fa</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_2fa_enabled</span><span class="p">,</span> <span class="n">create_transaction_token</span><span class="p">,</span> <span class="n">validate_2fa_token</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenForm</span><span class="p">,</span> <span class="n">IngresoForm</span><span class="p">,</span> <span class="n">Token2FAForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">monedas.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Denominacion</span>
+
+
+<div class="viewcode-block" id="inicio">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.inicio">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inicio</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista principal del sistema TAUser.</span>
+<span class="sd">    </span>
+<span class="sd">    Renderiza la página de inicio de la terminal autónoma donde los clientes</span>
+<span class="sd">    pueden acceder a las diferentes funcionalidades disponibles como ingreso</span>
+<span class="sd">    de tokens, gestión de caja fuerte, etc.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto de solicitud HTTP de Django</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página de inicio renderizada (inicio.html)</span>
+<span class="sd">        </span>
+<span class="sd">    Template:</span>
+<span class="sd">        inicio.html - Interfaz principal del TAUser con opciones de navegación</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        No requiere contexto adicional</span>
+<span class="sd">        </span>
+<span class="sd">    Note:</span>
+<span class="sd">        Esta vista no requiere autenticación ya que el TAUser opera</span>
+<span class="sd">        de forma autónoma sin login de usuarios.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;inicio.html&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="caja_fuerte">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.caja_fuerte">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">caja_fuerte</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para gestión de caja fuerte del TAUser.</span>
+<span class="sd">    </span>
+<span class="sd">    Permite el ingreso y extracción de billetes en la caja fuerte del TAUser</span>
+<span class="sd">    mediante la carga de archivos de texto con formato específico. Esta función</span>
+<span class="sd">    es crucial para mantener el stock de billetes necesario para las operaciones</span>
+<span class="sd">    de cambio.</span>
+<span class="sd">    </span>
+<span class="sd">    Functionality:</span>
+<span class="sd">        - GET: Muestra formulario de carga de archivo</span>
+<span class="sd">        - POST: Procesa archivo y actualiza inventario de billetes</span>
+<span class="sd">        </span>
+<span class="sd">    File Format Expected:</span>
+<span class="sd">        Línea 1: &quot;Ingreso&quot; o &quot;Extraccion&quot;</span>
+<span class="sd">        Líneas siguientes: [Moneda][TAB][Valor][TAB][Cantidad]</span>
+<span class="sd">        </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto de solicitud HTTP</span>
+<span class="sd">            - GET: Renderiza formulario</span>
+<span class="sd">            - POST: Procesa archivo cargado</span>
+<span class="sd">            - FILES: Contiene el archivo .txt con datos de billetes</span>
+<span class="sd">            </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página de gestión de caja fuerte (caja_fuerte.html)</span>
+<span class="sd">        </span>
+<span class="sd">    Template:</span>
+<span class="sd">        caja_fuerte.html - Interfaz para carga de archivos de billetes</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        form (IngresoForm): Formulario para carga de archivo</span>
+<span class="sd">        </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        Exception: Captura errores de procesamiento de archivo y redirige</span>
+<span class="sd">        </span>
+<span class="sd">    Business Logic:</span>
+<span class="sd">        1. Valida formato del archivo</span>
+<span class="sd">        2. Identifica TAUser por puerto</span>
+<span class="sd">        3. Procesa operaciones de ingreso/extracción</span>
+<span class="sd">        4. Actualiza stock de billetes en base de datos</span>
+<span class="sd">        5. Valida disponibilidad para extracciones</span>
+<span class="sd">        </span>
+<span class="sd">    Security Notes:</span>
+<span class="sd">        - Validación de formato de archivo</span>
+<span class="sd">        - Verificación de stock antes de extracciones</span>
+<span class="sd">        - Manejo seguro de excepciones</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">IngresoForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="c1"># Inicializar variables para procesamiento del archivo</span>
+            <span class="n">accion</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &quot;Ingreso&quot; o &quot;Extraccion&quot;</span>
+            <span class="n">billetes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Lista de nombres de monedas</span>
+            <span class="n">valores</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># Lista de valores/denominaciones</span>
+            <span class="n">cantidades</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Lista de cantidades de billetes</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Procesar archivo cargado línea por línea</span>
+                <span class="n">archivo</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;archivo&#39;</span><span class="p">]</span>
+                <span class="n">lineas</span> <span class="o">=</span> <span class="n">archivo</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">lineas</span><span class="p">:</span>
+                    <span class="c1"># Primera línea determina la acción</span>
+                    <span class="n">accion</span> <span class="o">=</span> <span class="n">lineas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    
+                    <span class="c1"># Procesar cada línea con datos de billetes</span>
+                    <span class="k">for</span> <span class="n">linea</span> <span class="ow">in</span> <span class="n">lineas</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                        <span class="n">lectura_billetes</span> <span class="o">=</span> <span class="n">linea</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">billetes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>      <span class="c1"># Nombre de moneda</span>
+                        <span class="n">valores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># Valor/denominación</span>
+                        <span class="n">cantidades</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="c1"># Cantidad</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># Manejo de errores de procesamiento del archivo</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;caja_fuerte&#39;</span><span class="p">)</span>
+            <span class="c1"># Identificar el TAUser actual por el puerto de la solicitud</span>
+            <span class="n">tauser</span> <span class="o">=</span> <span class="n">Tauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">puerto</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_port</span><span class="p">()))</span>
+            
+            <span class="k">if</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;Ingreso&#39;</span><span class="p">:</span>
+                <span class="c1"># Procesar ingreso de billetes a la caja fuerte</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Buscar denominación según tipo de moneda</span>
+                        <span class="k">if</span> <span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Guaraní&#39;</span><span class="p">:</span>
+                            <span class="c1"># Moneda local (guaraníes) tiene moneda=None</span>
+                            <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># Moneda extranjera</span>
+                            <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda__nombre</span><span class="o">=</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;La denominación </span><span class="si">{</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> no se reconoce.&#39;</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="p">,</span> <span class="n">creado</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Se han ingresado </span><span class="si">{</span><span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> billetes de </span><span class="si">{</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Procesar extracción de billetes de la caja fuerte</span>
+                <span class="c1"># Primera pasada: Validar disponibilidad de billetes para extracción</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Buscar denominación según tipo de moneda</span>
+                        <span class="k">if</span> <span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Guaraní&#39;</span><span class="p">:</span>
+                            <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda__nombre</span><span class="o">=</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;La denominación </span><span class="si">{</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> no se reconoce.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;caja_fuerte&#39;</span><span class="p">)</span>
+                    
+                    <span class="c1"># Verificar stock disponible</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="kc">None</span>
+                    
+                    <span class="c1"># Validar que hay suficientes billetes para la extracción</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">tauser_billete</span> <span class="ow">or</span> <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">&lt;</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No hay suficientes billetes de </span><span class="si">{</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> para la extracción.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;caja_fuerte&#39;</span><span class="p">)</span>
+                <span class="c1"># Segunda pasada: Realizar la extracción</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Guaraní&#39;</span><span class="p">:</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda__nombre</span><span class="o">=</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    
+                    <span class="c1"># Actualizar stock restando la cantidad extraída</span>
+                    <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Se han extraído </span><span class="si">{</span><span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> billetes de </span><span class="si">{</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Acción no reconocida en el archivo</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No se reconoce la acción.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;caja_fuerte&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Método GET: Mostrar formulario vacío</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">IngresoForm</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;caja_fuerte.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="ingreso_token">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.ingreso_token">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ingreso_token</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista principal para procesamiento de tokens de transacción.</span>
+<span class="sd">    </span>
+<span class="sd">    Esta función maneja el núcleo del sistema TAUser, permitiendo a los clientes</span>
+<span class="sd">    ingresar sus tokens de transacción y procesando la lógica de negocio asociada,</span>
+<span class="sd">    incluyendo detección de cambios de cotización, validación de tokens y</span>
+<span class="sd">    gestión del flujo de transacciones.</span>
+<span class="sd">    </span>
+<span class="sd">    Functionality:</span>
+<span class="sd">        - Validación y procesamiento de tokens de 8 caracteres</span>
+<span class="sd">        - Detección automática de cambios de cotización</span>
+<span class="sd">        - Manejo de expiración de transacciones (5 minutos)</span>
+<span class="sd">        - Notificaciones por email a usuarios operadores</span>
+<span class="sd">        - Gestión de estados de transacción (Pendiente, Cancelada, Completa)</span>
+<span class="sd">        - Redirección a ingreso de billetes para pagos en efectivo</span>
+<span class="sd">    </span>
+<span class="sd">    Flow Control:</span>
+<span class="sd">        POST &#39;aceptar&#39;: Cliente acepta cambios de cotización</span>
+<span class="sd">        POST &#39;cancelar&#39;: Cliente cancela por cambios de cotización  </span>
+<span class="sd">        POST &#39;enviar&#39;: Cliente ingresa nuevo token para procesar</span>
+<span class="sd">        GET: Muestra formulario de ingreso de token</span>
+<span class="sd">        </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto de solicitud HTTP</span>
+<span class="sd">            - POST: Procesa acciones del cliente (aceptar/cancelar/enviar)</span>
+<span class="sd">            - GET: Renderiza formulario de ingreso de token</span>
+<span class="sd">            - session: Mantiene estado de transacciones en progreso</span>
+<span class="sd">            </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Respuesta según la acción:</span>
+<span class="sd">            - Formulario de ingreso (GET)</span>
+<span class="sd">            - Página de confirmación con cambios detectados</span>
+<span class="sd">            - Redirección a ingreso de billetes</span>
+<span class="sd">            - Página de éxito para transacciones completadas</span>
+<span class="sd">            </span>
+<span class="sd">    Template:</span>
+<span class="sd">        ingreso_token.html - Interfaz para ingreso de tokens y confirmación</span>
+<span class="sd">        </span>
+<span class="sd">    Context (cuando hay cambios de cotización):</span>
+<span class="sd">        cambios (dict): Información de cambios detectados</span>
+<span class="sd">        transaccion (Transaccion): Objeto transacción actualizado</span>
+<span class="sd">        email_usuario (str): Email del usuario operador para notificaciones</span>
+<span class="sd">        </span>
+<span class="sd">    Business Logic:</span>
+<span class="sd">        1. Valida formato y existencia del token</span>
+<span class="sd">        2. Verifica estado y expiración de transacción</span>
+<span class="sd">        3. Detecta cambios de cotización en tiempo real</span>
+<span class="sd">        4. Envía notificaciones por email al operador</span>
+<span class="sd">        5. Actualiza precios según nuevas cotizaciones</span>
+<span class="sd">        6. Gestiona flujo hacia ingreso de billetes</span>
+<span class="sd">        </span>
+<span class="sd">    Security &amp; Validation:</span>
+<span class="sd">        - Tokens alfanuméricos de 8 caracteres únicamente</span>
+<span class="sd">        - Validación de estados de transacción</span>
+<span class="sd">        - Control de expiración (5 minutos máximo)</span>
+<span class="sd">        - Verificación de medios de pago compatibles con TAUser</span>
+<span class="sd">        - Manejo seguro de sesiones y contexto</span>
+<span class="sd">        </span>
+<span class="sd">    Error Handling:</span>
+<span class="sd">        - Transacciones no encontradas</span>
+<span class="sd">        - Tokens expirados o inválidos</span>
+<span class="sd">        - Transacciones ya procesadas o canceladas</span>
+<span class="sd">        - Medios de pago incompatibles con TAUser</span>
+<span class="sd">        </span>
+<span class="sd">    Email Notifications:</span>
+<span class="sd">        Envía automáticamente notificaciones al usuario operador cuando:</span>
+<span class="sd">        - Se detectan cambios de cotización</span>
+<span class="sd">        - Incluye detalles de precios anteriores vs actuales</span>
+<span class="sd">        - Proporciona información completa de la transacción</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">TokenForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">accion</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accion&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;aceptar&#39;</span><span class="p">:</span>
+            <span class="c1"># Cliente acepta los nuevos precios por cambio de cotización</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transaccion&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción no encontrada.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Guardar la transacción en sesión para el 2FA</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span>
+            
+            <span class="c1"># Si el 2FA está habilitado, devolver respuesta JSON para el modal</span>
+            <span class="k">if</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonResponse</span>
+                <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+                    <span class="s1">&#39;success&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;show_2fa&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s1">&#39;user_email&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;cancelar&#39;</span><span class="p">:</span>
+            <span class="c1"># Cliente cancela la transacción debido a cambios de cotización</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transaccion&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción no encontrada.&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Marcar transacción como cancelada con razón específica</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Usuario cancela debido a cambios de cotización&#39;</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción cancelada.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;enviar&#39;</span><span class="p">:</span>
+            <span class="c1"># Cliente ingresa un token para procesar transacción</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">TokenForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">codigo</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;codigo&#39;</span><span class="p">]</span>
+                
+                <span class="c1"># Buscar transacción por token</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción no encontrada.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+                
+                <span class="c1"># Validar estado de la transacción</span>
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="s1">&#39;Cancelada&#39;</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Este token corresponde a una transacción ya cancelada.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="s1">&#39;Completa&#39;</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Este token corresponde a una transacción ya completada.&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">==</span> <span class="s1">&#39;Pendiente&#39;</span><span class="p">:</span>
+                    <span class="c1"># Verificar expiración de transacción (límite: 5 minutos)</span>
+                    <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">&lt;</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+                        <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                        <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Expira el tiempo para confirmar la transacción&#39;</span>
+                        <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                        
+                        <span class="c1"># Mensaje diferenciado según si ya se pagó algo</span>
+                        <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">messages</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El token ha expirado. Contacta a soporte para el reembolso de lo pagado.&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El token ha expirado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span><span class="p">:</span>
+                        <span class="c1"># Obtener email del usuario que procesó la transacción para notificaciones</span>
+                        <span class="n">cambios</span> <span class="o">=</span> <span class="n">verificar_cambio_cotizacion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">cambios</span> <span class="ow">and</span> <span class="n">cambios</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hay_cambios&#39;</span><span class="p">):</span>
+                            <span class="n">datos_transaccion</span> <span class="o">=</span> <span class="n">calcular_conversion</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">,</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">,</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span><span class="p">,</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">,</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span><span class="p">,</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">segmento</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span> <span class="ow">and</span> <span class="n">no_redondeado</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El monto ingresado no está redondeado para pago en efectivo. Se cancela la transacción.&#39;</span><span class="p">)</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Monto no redondeado para pago en efectivo tras cambio de cotización&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span> <span class="ow">and</span> <span class="n">no_redondeado</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El monto final no está redondeado para cobro en efectivo. Se cancela la transacción.&#39;</span><span class="p">)</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Monto no redondeado para cobro en efectivo tras cambio de cotización&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span> <span class="ow">and</span> <span class="n">no_redondeado</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El monto final no está redondeado para pago en efectivo. Se cancela la transacción.&#39;</span><span class="p">)</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Monto no redondeado para pago en efectivo tras cambio de cotización&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span> <span class="o">==</span> <span class="s1">&#39;Efectivo&#39;</span> <span class="ow">and</span> <span class="n">no_redondeado</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El monto ingresado no está redondeado para cobro en efectivo. Se cancela la transacción.&#39;</span><span class="p">)</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Monto no redondeado para cobro en efectivo tras cambio de cotización&#39;</span>
+                                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_base</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;precio_base&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">cotizacion</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;cotizacion&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">beneficio_segmento</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;beneficio_segmento&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">porc_beneficio_segmento</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;porc_beneficio_segmento&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_pago</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;monto_recargo_pago&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">porc_recargo_pago</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;porc_recargo_pago&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">recargo_cobro</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;monto_recargo_cobro&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">porc_recargo_cobro</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;porc_recargo_cobro&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;monto&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span> <span class="o">=</span> <span class="n">datos_transaccion</span><span class="p">[</span><span class="s1">&#39;precio_final&#39;</span><span class="p">]</span>
+                            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                            
+                            <span class="c1"># Guardar transacción en sesión y mostrar confirmación de cambios</span>
+                            <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span>
+                            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s1">&#39;cambios&#39;</span><span class="p">:</span> <span class="n">cambios</span><span class="p">,</span>
+                                <span class="s1">&#39;transaccion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="p">,</span>
+                                <span class="s1">&#39;enable_2fa&#39;</span><span class="p">:</span> <span class="n">is_2fa_enabled</span><span class="p">(),</span>
+                                <span class="s1">&#39;user_email&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                            <span class="p">}</span>
+                            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;ingreso_token.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                        
+                        <span class="c1"># Guardar la transacción en sesión para el 2FA</span>
+                        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span>
+                        
+                        <span class="c1"># Si el 2FA está habilitado, renderizar template con flag para mostrar modal</span>
+                        <span class="k">if</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+                            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">TokenForm</span><span class="p">(),</span>
+                                <span class="s1">&#39;enable_2fa&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                <span class="s1">&#39;user_email&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;show_2fa_modal&#39;</span><span class="p">:</span> <span class="kc">True</span>
+                            <span class="p">}</span>
+                            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;ingreso_token.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                        
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Medio de pago no compatible con TAUser (solo efectivo)</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El token no corresponde a una operación de Tauser.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Transacción ya procesada - aplicar 2FA si está habilitado</span>
+                    <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span>
+                    
+                    <span class="k">if</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+                        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">TokenForm</span><span class="p">(),</span>
+                            <span class="s1">&#39;enable_2fa&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s1">&#39;user_email&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;show_2fa_modal&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s1">&#39;transaccion_procesada&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># Flag para indicar que ya está procesada</span>
+                        <span class="p">}</span>
+                        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;ingreso_token.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                    
+                    <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">Tauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">puerto</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_port</span><span class="p">())))</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;exito&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Método GET: Mostrar formulario de ingreso de token</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">TokenForm</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;enable_2fa&#39;</span><span class="p">:</span> <span class="n">is_2fa_enabled</span><span class="p">(),</span>
+        <span class="s1">&#39;user_email&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;ingreso_token.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ingreso_billetes">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.ingreso_billetes">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ingreso_billetes</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">codigo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para procesamiento de pagos en efectivo mediante ingreso de billetes.</span>
+<span class="sd">    </span>
+<span class="sd">    Esta función maneja la fase final del proceso de transacción en TAUser,</span>
+<span class="sd">    donde los clientes ingresan físicamente los billetes para completar</span>
+<span class="sd">    sus operaciones de compra o venta de monedas extranjeras.</span>
+<span class="sd">    </span>
+<span class="sd">    Functionality:</span>
+<span class="sd">        - Validación de billetes según tipo de operación (compra/venta)</span>
+<span class="sd">        - Cálculo automático de vueltos cuando corresponde</span>
+<span class="sd">        - Verificación de disponibilidad de billetes para vueltos</span>
+<span class="sd">        - Actualización en tiempo real del estado de pago</span>
+<span class="sd">        - Gestión de inventario de billetes en TAUser</span>
+<span class="sd">        - Procesamiento y finalización de transacciones</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto de solicitud HTTP</span>
+<span class="sd">            - POST: Procesa archivo con billetes ingresados</span>
+<span class="sd">            - GET: Muestra formulario de carga de archivo</span>
+<span class="sd">            - FILES: Archivo .txt con información de billetes</span>
+<span class="sd">        codigo (str): Token de transacción de 8 caracteres</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Respuesta según el estado del procesamiento:</span>
+<span class="sd">            - Formulario de ingreso (GET o errores de validación)</span>
+<span class="sd">            - Página de éxito (transacción completada)</span>
+<span class="sd">            - Mensajes de error/advertencia (pagos parciales o problemas)</span>
+<span class="sd">            </span>
+<span class="sd">    Template:</span>
+<span class="sd">        ingreso_billetes.html - Interfaz para carga de archivos de billetes</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        form (IngresoForm): Formulario para carga de archivo</span>
+<span class="sd">        transaccion (Transaccion): Objeto de transacción en proceso</span>
+<span class="sd">        </span>
+<span class="sd">    Business Logic - Compras (Cliente paga Guaraníes, recibe Moneda Extranjera):</span>
+<span class="sd">        1. Valida que solo se ingresen billetes en Guaraníes</span>
+<span class="sd">        2. Verifica denominaciones válidas existentes</span>
+<span class="sd">        3. Calcula total ingresado vs precio final</span>
+<span class="sd">        4. Gestiona vueltos automáticamente si se excede el monto</span>
+<span class="sd">        5. Actualiza inventario del TAUser</span>
+<span class="sd">        6. Entrega moneda extranjera calculada</span>
+<span class="sd">        </span>
+<span class="sd">    Business Logic - Ventas (Cliente entrega Moneda Extranjera, recibe Guaraníes):</span>
+<span class="sd">        1. Valida que se ingresen billetes de la moneda específica</span>
+<span class="sd">        2. Verifica denominaciones válidas de la moneda</span>
+<span class="sd">        3. Calcula total vs monto requerido de moneda extranjera</span>
+<span class="sd">        4. Gestiona vueltos en moneda extranjera si aplica</span>
+<span class="sd">        5. Entrega guaraníes equivalentes</span>
+<span class="sd">        </span>
+<span class="sd">    Validation &amp; Security:</span>
+<span class="sd">        - Verificación de denominaciones válidas por moneda</span>
+<span class="sd">        - Control de stock suficiente para vueltos</span>
+<span class="sd">        - Validación de archivos de billetes</span>
+<span class="sd">        - Actualización atómica de inventarios</span>
+<span class="sd">        - Prevención de transacciones duplicadas</span>
+<span class="sd">        </span>
+<span class="sd">    Error Handling:</span>
+<span class="sd">        - Transacciones no encontradas o inválidas</span>
+<span class="sd">        - Archivos de billetes malformados</span>
+<span class="sd">        - Denominaciones no reconocidas</span>
+<span class="sd">        - Stock insuficiente para vueltos</span>
+<span class="sd">        - Billetes incorrectos según tipo de operación</span>
+<span class="sd">        </span>
+<span class="sd">    File Format Expected (Billetes):</span>
+<span class="sd">        [Moneda][TAB][Valor][TAB][Cantidad]</span>
+<span class="sd">        </span>
+<span class="sd">        Ejemplos:</span>
+<span class="sd">        - Compra: &quot;Guaraní	50000	5&quot; (5 billetes de 50,000 Gs)</span>
+<span class="sd">        - Venta: &quot;Dólar	100	2&quot; (2 billetes de $100 USD)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Obtener transacción por token</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción no encontrada.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">IngresoForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">billetes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">valores</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cantidades</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">archivo</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;archivo&#39;</span><span class="p">]</span>
+                <span class="n">lineas</span> <span class="o">=</span> <span class="n">archivo</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">lineas</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">linea</span> <span class="ow">in</span> <span class="n">lineas</span><span class="p">:</span>
+                        <span class="n">lectura_billetes</span> <span class="o">=</span> <span class="n">linea</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">billetes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">valores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="n">cantidades</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lectura_billetes</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Billetes no reconocidos. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+            <span class="n">tauser</span> <span class="o">=</span> <span class="n">Tauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">puerto</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">get_port</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Guaraní&#39;</span><span class="p">:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Solo se aceptan billetes en Guaraníes para compras. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">den</span><span class="o">.</span><span class="n">valor</span> <span class="k">for</span> <span class="n">den</span> <span class="ow">in</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)]:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;La denominación </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> no se reconoce. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="n">total</span> <span class="o">+=</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="p">:</span>
+                    <span class="n">v_denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">v_cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                    <span class="n">v_cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">v_cantidades_qs</span><span class="p">}</span>
+                    <span class="n">vuelto</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span> <span class="n">v_denominaciones</span><span class="p">,</span> <span class="n">v_cantidades</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">vuelto</span><span class="p">:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No hay billetes suficientes para dar el vuelto. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="p">,</span> <span class="n">creado</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">+=</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">&lt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Se ha ingresado Gs. </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; aún faltan Gs. </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">&gt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">:</span>
+                    <span class="n">v_denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">v_cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                    <span class="n">v_cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">v_cantidades_qs</span><span class="p">}</span>
+                    <span class="n">vuelto</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span> <span class="n">v_denominaciones</span><span class="p">,</span> <span class="n">v_cantidades</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">valor</span><span class="p">,</span> <span class="n">cantidad</span> <span class="ow">in</span> <span class="n">vuelto</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">,</span> <span class="n">moneda</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">cantidad</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Tu vuelto es Gs. </span><span class="si">{</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">)</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Retiralo.&#39;</span><span class="p">)</span>
+                    <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;exito&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;exito&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="p">:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Solo se aceptan billetes de </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">nombre</span><span class="si">}</span><span class="s1"> para ventas. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">den</span><span class="o">.</span><span class="n">valor</span> <span class="k">for</span> <span class="n">den</span> <span class="ow">in</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)]:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;La denominación </span><span class="si">{</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> no se reconoce. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="n">total</span> <span class="o">+=</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="p">:</span>
+                    <span class="n">v_denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">v_cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                    <span class="n">v_cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">v_cantidades_qs</span><span class="p">}</span>
+                    <span class="n">vuelto</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span> <span class="n">v_denominaciones</span><span class="p">,</span> <span class="n">v_cantidades</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">vuelto</span><span class="p">:</span>
+                        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No hay billetes suficientes para dar el vuelto. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">billetes</span><span class="p">)):</span>
+                    <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">moneda__nombre</span><span class="o">=</span><span class="n">billetes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">tauser_billete</span><span class="p">,</span> <span class="n">creado</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">+=</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">+=</span> <span class="n">valores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">cantidades</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">fecha_hora</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                    <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">&lt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Se ha ingresado </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s1">,&#39;</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; aún faltan </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">&gt;</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">:</span>
+                    <span class="n">v_denominaciones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;valor&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">v_cantidades_qs</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">denominacion__moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;denominacion__valor&#39;</span><span class="p">)</span>
+                    <span class="n">v_cantidades</span> <span class="o">=</span> <span class="p">{</span><span class="n">b</span><span class="o">.</span><span class="n">denominacion</span><span class="o">.</span><span class="n">valor</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">cantidad</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">v_cantidades_qs</span><span class="p">}</span>
+                    <span class="n">vuelto</span> <span class="o">=</span> <span class="n">billetes_necesarios</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span> <span class="o">-</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span> <span class="n">v_denominaciones</span><span class="p">,</span> <span class="n">v_cantidades</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">valor</span><span class="p">,</span> <span class="n">cantidad</span> <span class="ow">in</span> <span class="n">vuelto</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">denominacion</span> <span class="o">=</span> <span class="n">Denominacion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">valor</span><span class="o">=</span><span class="n">valor</span><span class="p">,</span> <span class="n">moneda</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span> <span class="o">=</span> <span class="n">BilletesTauser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">denominacion</span><span class="o">=</span><span class="n">denominacion</span><span class="p">,</span> <span class="n">tauser</span><span class="o">=</span><span class="n">tauser</span><span class="p">)</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">cantidad</span> <span class="o">-=</span> <span class="n">cantidad</span>
+                        <span class="n">tauser_billete</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Tu vuelto es </span><span class="si">{</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">pagado</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">)</span><span class="si">:</span><span class="s1">,.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">simbolo</span><span class="si">}</span><span class="s1">. Retiralo.&#39;</span><span class="p">)</span>
+                    <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;exito&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">procesar_transaccion</span><span class="p">(</span><span class="n">transaccion</span><span class="p">,</span> <span class="n">tauser</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;exito&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Billetes no reconocidos. Se devuelve lo ingresado.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">IngresoForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;ingreso_billetes.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span> <span class="s1">&#39;transaccion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="exito">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.exito">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">exito</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">codigo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista de confirmación para transacciones completadas exitosamente.</span>
+<span class="sd">    </span>
+<span class="sd">    Renderiza la página de éxito que se muestra al cliente cuando su</span>
+<span class="sd">    transacción ha sido procesada y completada exitosamente en el TAUser.</span>
+<span class="sd">    Esta vista proporciona un resumen final de la operación realizada.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request (HttpRequest): Objeto de solicitud HTTP</span>
+<span class="sd">        codigo (str): Token de transacción de 8 caracteres</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        HttpResponse: Página de éxito con detalles de transacción completada</span>
+<span class="sd">        </span>
+<span class="sd">    Template:</span>
+<span class="sd">        exito.html - Página de confirmación final con resumen de transacción</span>
+<span class="sd">        </span>
+<span class="sd">    Context:</span>
+<span class="sd">        transaccion (Transaccion): Objeto completo de la transacción finalizada</span>
+<span class="sd">            - Incluye todos los detalles: cliente, montos, fechas, etc.</span>
+<span class="sd">            - Estado debe ser &#39;Completa&#39; para llegar a esta vista</span>
+<span class="sd">            - Contiene información de facturación si aplica</span>
+<span class="sd">        </span>
+<span class="sd">    Business Context:</span>
+<span class="sd">        Esta vista se alcanza únicamente cuando:</span>
+<span class="sd">        1. El token es válido y la transacción existe</span>
+<span class="sd">        2. El pago fue procesado correctamente</span>
+<span class="sd">        3. Los billetes fueron intercambiados exitosamente  </span>
+<span class="sd">        4. El estado de transacción cambió a &#39;Completa&#39;</span>
+<span class="sd">        5. El inventario del TAUser fue actualizado</span>
+<span class="sd">        </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - No requiere validación adicional de estado ya que solo</span>
+<span class="sd">          se accede tras procesamiento exitoso</span>
+<span class="sd">        - La transacción ya fue marcada como &#39;Completa&#39;</span>
+<span class="sd">        - Sirve como comprobante final para el cliente</span>
+<span class="sd">        - Puede incluir información de facturación electrónica</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Obtener transacción completada por token</span>
+    <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">codigo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;exito.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;transaccion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="verificar_2fa">
+<a class="viewcode-back" href="../../tauser.html#tauser.views.verificar_2fa">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verificar_2fa</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vista para verificar el código 2FA antes de continuar con el ingreso de billetes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Verificar que el 2FA esté habilitado</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_2fa_enabled</span><span class="p">():</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El sistema de verificación 2FA no está habilitado.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar que exista una transacción en sesión</span>
+    <span class="n">transaccion_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transaccion&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">transaccion_id</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;No hay transacción pendiente.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">transaccion</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">transaccion_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción no encontrada.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Verificar que el usuario asociado a la transacción tenga email</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;El usuario asociado a esta transacción no tiene email configurado.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_token&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">accion</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accion&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;enviar_codigo&#39;</span><span class="p">:</span>
+            <span class="c1"># Enviar el código 2FA al usuario</span>
+            <span class="n">transaccion_data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;transaccion_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s1">&#39;cliente_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">cliente</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s1">&#39;tipo&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">tipo</span><span class="p">,</span>
+                <span class="s1">&#39;monto&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">monto</span><span class="p">),</span>
+                <span class="s1">&#39;moneda_id&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">moneda</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="s1">&#39;precio_final&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">precio_final</span><span class="p">,</span>
+                <span class="s1">&#39;medio_pago&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_pago</span><span class="p">,</span>
+                <span class="s1">&#39;medio_cobro&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">medio_cobro</span>
+            <span class="p">}</span>
+            
+            <span class="n">result</span> <span class="o">=</span> <span class="n">create_transaction_token</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="p">,</span> <span class="n">transaccion_data</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;2fa_sent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Código de verificación enviado a </span><span class="si">{</span><span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+            
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;verificar_2fa&#39;</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;verificar&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">Token2FAForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="n">codigo_2fa</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;codigo_2fa&#39;</span><span class="p">]</span>
+                
+                <span class="c1"># Validar el código 2FA</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">validate_2fa_token</span><span class="p">(</span><span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="p">,</span> <span class="n">codigo_2fa</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Código verificado correctamente.&#39;</span><span class="p">)</span>
+                    <span class="c1"># Limpiar la flag de 2FA enviado</span>
+                    <span class="k">if</span> <span class="s1">&#39;2fa_sent&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;2fa_sent&#39;</span><span class="p">]</span>
+                    <span class="c1"># Redirigir al ingreso de billetes</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;ingreso_billetes&#39;</span><span class="p">,</span> <span class="n">codigo</span><span class="o">=</span><span class="n">transaccion</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;verificar_2fa&#39;</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="n">accion</span> <span class="o">==</span> <span class="s1">&#39;cancelar&#39;</span><span class="p">:</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">estado</span> <span class="o">=</span> <span class="s1">&#39;Cancelada&#39;</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">razon</span> <span class="o">=</span> <span class="s1">&#39;Usuario cancela la verificación 2FA&#39;</span>
+            <span class="n">transaccion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># Limpiar la sesión</span>
+            <span class="k">if</span> <span class="s1">&#39;transaccion&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;transaccion&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;2fa_sent&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;2fa_sent&#39;</span><span class="p">]</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Transacción cancelada.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;inicio&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">Token2FAForm</span><span class="p">()</span>
+    
+    <span class="c1"># Verificar si ya se envió el código</span>
+    <span class="n">codigo_enviado</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;2fa_sent&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;transaccion&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="p">,</span>
+        <span class="s1">&#39;codigo_enviado&#39;</span><span class="p">:</span> <span class="n">codigo_enviado</span><span class="p">,</span>
+        <span class="s1">&#39;usuario_email&#39;</span><span class="p">:</span> <span class="n">transaccion</span><span class="o">.</span><span class="n">usuario</span><span class="o">.</span><span class="n">email</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;verificar_2fa.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -90,6 +90,27 @@
     </div>
 </div>
 
+<!-- BEGIN: contenido extra copiado desde graficos_desglose.html -->
+<div class="contenido" style="margin-top:1.5rem;">
+    <h2>Ganancias por Moneda</h2>
+    <div class="grafico-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px;">
+            <h3 id="titulo-grafico-venta" style="margin:0 0 8px 0;">Ganancia de Venta</h3>
+            <div style="height:220px; max-height:220px;"><canvas id="pieVenta" style="width:100%;height:100%;"></canvas></div>
+        </div>
+        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px;">
+            <h3 style="margin:0 0 8px 0;">Ganancia de Compra</h3>
+            <div style="height:220px; max-height:220px;"><canvas id="pieCompra" style="width:100%;height:100%;"></canvas></div>
+        </div>
+        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px; grid-column:1 / -1;">
+            <h3 style="margin:0 0 8px 0;">Ganancia Total por Moneda</h3>
+            <div style="height:420px; max-height:65vh;"><canvas id="barTotal" style="width:100%;height:100%;"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- END: contenido extra copiado desde graficos_desglose.html -->
+
 <!-- Loading overlay -->
 <div id="loading-overlay" class="loading-overlay" style="display: none;">
     <div class="loading-spinner"></div>
@@ -101,9 +122,206 @@
 {% block extra_js %}
 <script src="{% static 'dashboard_ganancias.js' %}"></script>
 <script>
-// Inicialización cuando se carga el DOM
+// Inicialización del dashboard
 document.addEventListener('DOMContentLoaded', function() {
     inicializarDashboard();
+});
+</script>
+
+<script>
+// Script de gráficos (único): fetch con credentials y lógica de visualización
+document.addEventListener('DOMContentLoaded', function(){
+    const pieVentaEl = document.getElementById('pieVenta');
+    const pieCompraEl = document.getElementById('pieCompra');
+    const barTotalEl = document.getElementById('barTotal');
+    const ctxVenta = pieVentaEl ? pieVentaEl.getContext('2d') : null;
+    const ctxCompra = pieCompraEl ? pieCompraEl.getContext('2d') : null;
+    const ctxTotal = barTotalEl ? barTotalEl.getContext('2d') : null;
+    if(!ctxVenta || !ctxCompra || !ctxTotal) return;
+
+    const palette = ['#9C6BFF','#6EA8FF','#C084FC','#A164D4','#7AB6FF','#B58CFF','#85C1F9','#B296FF'];
+    let chartV=null, chartC=null, chartT=null;
+    let currentMoneda = '';
+    const containerVenta = pieVentaEl ? pieVentaEl.closest('.grafico-card') : null;
+    const containerCompra = pieCompraEl ? pieCompraEl.closest('.grafico-card') : null;
+    const containerTotal = barTotalEl ? barTotalEl.closest('.grafico-card') : null;
+
+    function showMessage(text){
+        let msg = document.getElementById('graficos-mensaje');
+        if(!msg){
+            msg = document.createElement('div');
+            msg.id = 'graficos-mensaje';
+            msg.style.color = '#ccc';
+            msg.style.textAlign = 'center';
+            msg.style.padding = '24px';
+            msg.style.width = '100%';
+            msg.style.boxSizing = 'border-box';
+            const parent = containerVenta ? containerVenta.parentNode : document.querySelector('.contenido');
+            if(parent) parent.parentNode.insertBefore(msg, parent.nextSibling);
+        }
+        msg.textContent = text;
+        if(containerVenta) containerVenta.style.display = 'none';
+        if(containerCompra) containerCompra.style.display = 'none';
+        if(containerTotal) containerTotal.style.display = 'none';
+    }
+    function hideMessage(){
+        const msg = document.getElementById('graficos-mensaje'); if(msg) msg.remove();
+        if(containerVenta) containerVenta.style.display = '';
+        if(containerCompra) containerCompra.style.display = '';
+        if(containerTotal) containerTotal.style.display = '';
+    }
+
+    function fetchDesglose(rango='mes', moneda_id=''){
+        currentMoneda = moneda_id || '';
+        // Desglose usa endpoint dedicado
+        let url =  '{% url "reportes:api_desglose_ganancias" %}?rango=' + encodeURIComponent(rango);
+        if(moneda_id) url += '&moneda_id=' + encodeURIComponent(moneda_id);
+        return fetch(url, { credentials: 'same-origin' })
+            .then(function(res){ if(!res.ok){ console.error('Error al obtener desglose:', res.status); return null; } return res.json(); })
+            .catch(function(err){ console.error('Fetch error desglose', err); return null; });
+    }
+
+    function fetchDatosGenerales(rango='mes', moneda_id=''){
+        // Datos generales (evolución / totales)
+        let url = '/reportes/api/obtener-datos-ganancias/?rango=' + encodeURIComponent(rango||'mes');
+        if(moneda_id) url += '&moneda_id=' + encodeURIComponent(moneda_id);
+        return fetch(url, { credentials: 'same-origin' })
+            .then(function(res){ if(!res.ok){ console.error('Error al obtener datos generales:', res.status); return null; } return res.json(); })
+            .catch(function(err){ console.error('Fetch error datos generales', err); return null; });
+    }
+
+    function render(desglose){
+        // validar
+        if(!desglose){ showMessage('No hay datos disponibles para este período.'); return; }
+        // sumar totales
+        let totalSum = 0;
+        if(desglose.total && Array.isArray(desglose.total.values)) totalSum = desglose.total.values.reduce((a,b)=>a + (Number(b)||0), 0);
+        else {
+            const sv = (desglose.venta && Array.isArray(desglose.venta.values)) ? desglose.venta.values.reduce((a,b)=>a + (Number(b)||0),0) : 0;
+            const sc = (desglose.compra && Array.isArray(desglose.compra.values)) ? desglose.compra.values.reduce((a,b)=>a + (Number(b)||0),0) : 0;
+            totalSum = sv + sc;
+        }
+        if(totalSum <= 0){ showMessage('No hay datos disponibles para este período.'); return; }
+
+        // moneda específica -> pie comparativo
+        if(currentMoneda){
+            const ventaVals = (desglose.venta && Array.isArray(desglose.venta.values)) ? desglose.venta.values : [];
+            const compraVals = (desglose.compra && Array.isArray(desglose.compra.values)) ? desglose.compra.values : [];
+            const ventaSum = ventaVals.reduce((a,b)=>a + (Number(b)||0),0);
+            const compraSum = compraVals.reduce((a,b)=>a + (Number(b)||0),0);
+            if(ventaSum + compraSum <= 0){ showMessage('No hay datos disponibles para este período.'); return; }
+            hideMessage(); if(containerCompra) containerCompra.style.display = 'none'; if(containerTotal) containerTotal.style.display = 'none'; if(containerVenta) containerVenta.style.display = '';
+            // 🔥 Cambiar el título del gráfico
+            const tituloVenta = document.getElementById('titulo-grafico-venta');
+            if (tituloVenta) tituloVenta.innerText = 'Ganancia de Compra y Venta';
+            if(chartV) chartV.destroy();
+            chartV = new Chart(ctxVenta, { type:'pie', data:{ labels:['Venta','Compra'], datasets:[{ data:[ventaSum, compraSum], backgroundColor:[palette[1], palette[0]] }] }, options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{
+                    tooltip:{
+                        callbacks:{
+                            label:function(ctx){
+                                let val = Number(ctx.raw || 0);
+                                if (isNaN(val)) return '₲ 0';
+                                return '₲ ' + val.toLocaleString('es-PY');  // <--- AQUÍ MUESTRA VALOR
+                            }
+                        }
+                    }
+                }
+            }
+        });
+            return;
+        }
+
+        // caso general: mostrar todos
+        hideMessage(); if(containerVenta) containerVenta.style.display = ''; if(containerCompra) containerCompra.style.display = ''; if(containerTotal) containerTotal.style.display = '';
+
+        // venta
+        const v = desglose.venta || {labels:[], percents:[], values:[]}; const labelsV = v.labels || []; const dataV = v.values || []; const colorsV = labelsV.map((_,i)=> palette[i % palette.length]); if(chartV) chartV.destroy();
+        chartV = new Chart(ctxVenta, { type:'pie', data:{ labels: labelsV, datasets:[{ data: dataV, backgroundColor: colorsV }] }, options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{
+                    tooltip:{
+                        callbacks:{
+                            label:function(ctx){
+                                let val = Number(ctx.raw || 0);
+                                if (isNaN(val)) return '₲ 0';
+                                return '₲ ' + val.toLocaleString('es-PY');  // <--- AQUÍ MUESTRA VALOR
+                            }
+                        }
+                   }
+                }
+            } 
+        });
+
+        // compra
+        const c = desglose.compra || {labels:[], percents:[], values:[]}; const labelsC = c.labels || []; const dataC = c.values|| []; const colorsC = labelsC.map((_,i)=> palette[(i+1) % palette.length]); if(chartC) chartC.destroy();
+        chartC = new Chart(ctxCompra, { type:'pie', data:{ labels: labelsC, datasets:[{ data: dataC, backgroundColor: colorsC }] }, options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{
+                    tooltip:{
+                        callbacks:{
+                            label:function(ctx){
+                                let val = Number(ctx.raw || 0);
+                                if (isNaN(val)) return '₲ 0';
+                                return '₲ ' + val.toLocaleString('es-PY');  // <--- AQUÍ MUESTRA VALOR
+                            }
+                        }
+                   }
+                }
+            }  
+        });
+
+        // total
+        const t = desglose.total || {labels:[], values:[]}; const labelsT = t.labels || []; const dataT = t.values || []; const colorsT = labelsT.map((_,i)=> palette[(i+2) % palette.length]); if(chartT) chartT.destroy();
+        chartT = new Chart(ctxTotal, {
+            type: 'bar',
+            data: {
+                labels: labelsT,
+                datasets: [{
+                    label: 'Ganancia Total',
+                    data: dataT,
+                    backgroundColor: colorsT,
+                    borderRadius: 6,
+                    maxBarThickness: 40,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value){
+                                try{ return '₲ ' + Number(value).toLocaleString('es-PYG'); }
+                                catch(e){ return '₲ ' + value; }
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx){
+                                var v = Number(ctx.raw || ctx.parsed || 0);
+                                try{ return '₲ ' + v.toLocaleString('es-PY'); }
+                                catch(e){ return '₲ ' + v; }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // inicial: cargar datos generales y desglose
+    const activeBtn = document.querySelector('.btn-filtro.active'); const initialRange = activeBtn ? activeBtn.dataset.rango : 'mes';
+    const selectMon = document.getElementById('select-moneda'); const initialMon = selectMon ? selectMon.value : '';
+    fetchDatosGenerales(initialRange, initialMon).then(data=>{ if(data){ const gt = document.getElementById('ganancia-total'); if(gt) gt.innerText = data.ganancia_total; const ma = document.getElementById('moneda-actual'); if(ma) ma.innerText = data.moneda; } }).catch(e=>console.error(e));
+    fetchDesglose(initialRange, initialMon).then(data=>{ if(data && data.desglose) render(data.desglose); }).catch(e=>console.error(e));
+
+    // eventos
+    document.querySelectorAll('.btn-filtro').forEach(function(b){ b.addEventListener('click', function(){ document.querySelectorAll('.btn-filtro').forEach(function(x){ x.classList.remove('active'); }); this.classList.add('active'); const rango = this.dataset.rango; const mon = selectMon ? selectMon.value : ''; fetchDatosGenerales(rango, mon).then(d=>{ if(d){ const gt = document.getElementById('ganancia-total'); if(gt) gt.innerText = d.ganancia_total; const ma = document.getElementById('moneda-actual'); if(ma) ma.innerText = d.moneda; } }).catch(e=>console.error(e)); fetchDesglose(rango, mon).then(d=>{ if(d && d.desglose) render(d.desglose); }).catch(e=>console.error(e)); document.getElementById('periodo-actual').innerText = 'Periodo: ' + (rango=='hoy'? 'Hoy' : rango); }); });
+    if(selectMon){ selectMon.addEventListener('change', function(){ const moneda_id = this.value; const active = document.querySelector('.btn-filtro.active'); const rango = active ? active.dataset.rango : 'mes'; fetchDatosGenerales(rango, moneda_id).then(d=>{ if(d){ const gt = document.getElementById('ganancia-total'); if(gt) gt.innerText = d.ganancia_total; const ma = document.getElementById('moneda-actual'); if(ma) ma.innerText = d.moneda; } }).catch(e=>console.error(e)); fetchDesglose(rango, moneda_id).then(d=>{ if(d && d.desglose) render(d.desglose); }).catch(e=>console.error(e)); }); }
 });
 </script>
 {% endblock %}
