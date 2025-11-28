@@ -380,8 +380,7 @@
 
     {% if not filas %}
     <div style="margin-top:1rem; color:#6c757d;">No se encontraron transacciones con los filtros aplicados.</div>
-    {% endif %}
-
+    {% else %}
     <!-- Resumen por moneda -->
     <div class="zona-resumen" style="margin-top:1.5rem;">
         <h2>Resumen de Ganancias por Moneda</h2>
@@ -402,6 +401,7 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
 
     <div class="zona-acciones" style="margin-top: 2rem">
         <div class="acciones-contenido">
