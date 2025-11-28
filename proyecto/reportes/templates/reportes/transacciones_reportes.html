@@ -492,26 +492,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validar formulario antes del envío
     const form = document.querySelector('.busqueda-form');
     form.addEventListener('submit', function(e) {
-        let errores = [];
+        let hayErrores = false;
+        
+        // Limpiar errores previos
+        mostrarError(errorInicio, '');
+        mostrarError(errorFin, '');
         
         // Validar fecha de inicio
         const inicioValida = validarInicio();
         if (!inicioValida) {
-            errores.push('Fecha de inicio inválida');
+            hayErrores = true;
         }
         
         // Validar fecha final
         const finalValida = validarFinal();
         if (!finalValida) {
-            errores.push('Fecha final inválida');
+            hayErrores = true;
         }
         
         // Validar que si hay una fecha, debe haber la otra
         const tieneInicio = diaInicio.value && mesInicio.value && añoInicio.value;
         const tieneFinal = diaFin.value && mesFin.value && añoFin.value;
         
-        if ((tieneInicio && !tieneFinal) || (!tieneInicio && tieneFinal)) {
-            errores.push('Debe ingresar tanto la fecha de inicio como la fecha final');
+        if ((tieneInicio && !tieneFinal)) {
+            mostrarError(errorFin, 'Debe ingresar la fecha final');
+            hayErrores = true;
+        }
+        
+        if ((!tieneInicio && tieneFinal)) {
+            mostrarError(errorInicio, 'Debe ingresar la fecha de inicio');
+            hayErrores = true;
         }
         
         // Validar que fecha de inicio sea anterior o igual a fecha final
@@ -520,13 +530,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const fechaFinal = new Date(parseInt(añoFin.value), parseInt(mesFin.value) - 1, parseInt(diaFin.value));
             
             if (fechaInicio > fechaFinal) {
-                errores.push('La fecha de inicio debe ser anterior o igual a la fecha final');
+                mostrarError(errorFin, 'La fecha final debe ser posterior o igual a la fecha de inicio');
+                hayErrores = true;
             }
         }
         
-        if (errores.length > 0) {
+        if (hayErrores) {
             e.preventDefault();
-            alert('Errores encontrados:\n\n' + errores.join('\n'));
         }
     });
 });
