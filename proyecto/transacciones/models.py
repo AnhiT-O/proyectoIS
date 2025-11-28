@@ -1025,7 +1025,6 @@ def no_redondeado(monto, denominaciones, cantidades=None):
     return mcd
 
 def generar_factura_electronica(transaccion):
-    print("Genera factura")
     """
     Genera una factura electrónica para una transacción completada.
     
@@ -1040,6 +1039,7 @@ def generar_factura_electronica(transaccion):
             - 'xml': str con el XML de la factura
             - 'pdf_url': str con la URL del PDF
             - 'error': str con mensaje de error (si aplica)
+    """
     
     for numero in range(settings.NUMERO_FACTURACION, 400):
         if not Transaccion.objects.filter(numero_factura=numero).exists():
@@ -1198,7 +1198,7 @@ def generar_factura_electronica(transaccion):
             if resultado_descarga.get('success'):
                 # Preparar el correo electrónico
                 asunto = f'Factura Electrónica - Global Exchange'
-                mensaje = f
+                mensaje = f"""
 Estimado/a {transaccion.cliente.nombre},
 
 Adjuntamos la factura electrónica correspondiente a su transacción de {transaccion.tipo} realizada el {transaccion.fecha_hora.strftime('%d/%m/%Y %H:%M')}.
@@ -1214,7 +1214,7 @@ Gracias por confiar en Global Exchange.
 
 Saludos cordiales,
 Global Exchange
-
+"""
                 
                 # Crear el correo electrónico
                 email = EmailMessage(
@@ -1241,7 +1241,6 @@ Global Exchange
             print(f"Error al enviar factura por correo: {str(e)}")
     
     return response_data
-    """
 
 def verificar_factura(CDC):
     """
