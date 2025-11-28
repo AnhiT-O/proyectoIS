@@ -1,7 +1,7 @@
 """
-Pruebas simples para las vistas de `proyecto.reportes.views`.
+Pruebas para las vistas de `proyecto.reportes.views`.
 
-Estas pruebas verifican permisos y la API JSON de ganancias en forma básica.
+Estas pruebas verifican permisos y la API JSON de ganancias.
 """
 
 import pytest
@@ -18,7 +18,7 @@ from transacciones.models import Transaccion
 
 @pytest.mark.django_db
 class TestReportesViews:
-    """Pruebas básicas de autorización y cálculo en reportes/views.py"""
+    """Pruebas de autorización y cálculo en reportes/views.py"""
 
     def test_transacciones_reportes_denegado_para_no_admin(self):
         """Verifica que un usuario sin el grupo 'Administrador' reciba 403 al acceder a la vista.
@@ -26,6 +26,11 @@ class TestReportesViews:
         Escenario:
         - Crear un usuario normal sin pertenecer al grupo Administrador.
         - Hacer login y solicitar la vista `reportes:transacciones`.
+        Flujo (pasos):
+        1. Crear usuario de prueba.
+        2. Hacer login con `client.force_login(user)`.
+        3. Realizar GET a la vista `reportes:transacciones`.
+        4. Comprobar que la respuesta es HTTP 403.
         Resultado esperado: HTTP 403 (acceso denegado).
         """
         client = Client()
@@ -53,6 +58,11 @@ class TestReportesViews:
         Escenario:
         - Crear/obtener el grupo 'Administrador' y un usuario que pertenezca a ese grupo.
         - Iniciar sesión y solicitar la vista `reportes:transacciones`.
+        Flujo (pasos):
+        1. Crear/obtener grupo 'Administrador'.
+        2. Crear usuario y añadirlo al grupo.
+        3. Hacer login como admin y realizar GET a `reportes:transacciones`.
+        4. Verificar HTTP 200 y claves `filas` y `resumen_por_moneda` en el contexto.
         Resultado esperado: HTTP 200 y claves esperadas en el contexto del template.
         """
         client = Client()
@@ -82,11 +92,19 @@ class TestReportesViews:
     def test_obtener_datos_ganancias_calculo_basico(self):
         """Valida la API JSON de ganancias para una transacción de venta simple.
 
-        Escenario:
-        - Crear usuario administrador y moneda con `comision_venta=10`.
-        - Crear una transacción de tipo 'venta' con monto 100 y estado 'completa'.
-        - Llamar a `reportes:api_ganancias` con rango 'hoy'.
-        Resultado esperado: la ganancia total reportada coincide con 100 * comision_venta.
+          Escenario:
+          - Crear usuario administrador y moneda con `comision_venta=10`.
+          - Crear una transacción de tipo 'venta' con monto 100 y estado 'completa'.
+          - Llamar a `reportes:api_ganancias` con rango 'hoy'.
+          Flujo (pasos):
+          1. Crear admin y asignarle el grupo 'Administrador'.
+          2. Crear moneda, cliente y usuario operador.
+          3. Crear transacción de tipo 'venta' con monto 100 y estado 'completa'.
+          4. Hacer login como admin y realizar GET a la API `api_ganancias` con
+              `rango='hoy'`.
+          5. Parsear JSON y comprobar que `ganancia_total` coincide con el valor
+              esperado (100 * comision_venta).
+          Resultado esperado: la ganancia total reportada coincide con 100 * comision_venta.
         """
         client = Client()
         admin_grp, _ = Group.objects.get_or_create(name='Administrador')
@@ -173,6 +191,12 @@ class TestReportesViews:
         Escenario:
         - Crear dos monedas y una transacción en cada una (ambas completadas).
         - Consultar la API especificando `moneda_id` de la primera moneda.
+        Flujo (pasos):
+        1. Crear admin y asignarle el grupo 'Administrador'.
+        2. Crear dos monedas y los objetos cliente/operador necesarios.
+        3. Crear una transacción completa por moneda.
+        4. Hacer login como admin y GET a `api_ganancias` con `moneda_id`.
+        5. Comprobar que `ganancia_total` corresponde solo a la moneda filtrada.
         Resultado esperado: `ganancia_total` corresponde solo a las transacciones de la moneda indicada.
         """
         client = Client()
@@ -245,6 +269,12 @@ class TestReportesViews:
         Escenario:
         - Crear una transacción con estado 'Pendiente'.
         - Llamar a la API de ganancias.
+        Flujo (pasos):
+        1. Crear admin y asignarle grupo 'Administrador'.
+        2. Crear moneda, cliente y operador.
+        3. Crear una transacción con estado 'Pendiente'.
+        4. Login como admin y GET a `api_ganancias`.
+        5. Verificar que `ganancia_total` es 0.0.
         Resultado esperado: `ganancia_total` es 0.0.
         """
         client = Client()
@@ -298,6 +328,12 @@ class TestReportesViews:
         Escenario:
         - Crear usuario admin, moneda con comision_venta=10, cliente y una transacción de venta completa.
         - Llamar a la vista `reportes:transacciones`.
+        Flujo (pasos):
+        1. Crear admin y grupo 'Administrador'.
+        2. Crear moneda, cliente y operador.
+        3. Crear una transacción completa de tipo 'venta' con monto 50.
+        4. Login como admin y GET a `reportes:transacciones`.
+        5. Obtener `resumen_por_moneda` del contexto y comprobar la ganancia.
         Resultado esperado: el contexto contiene `resumen_por_moneda` con la ganancia esperada.
         """
         client = Client()
@@ -348,3 +384,41 @@ class TestReportesViews:
         resumen = resp.context.get('resumen_por_moneda', {})
         # comparar la ganancia acumulada por el nombre de la moneda
         assert resumen.get('GMon') == pytest.approx(50 * 10, rel=1e-6)
+
+    def test_dashboard_ganancias_muestra_monedas_para_admin(self):
+        """Verifica que la vista `dashboard_ganancias` es accesible por administradores y devuelve monedas.
+
+        Flujo (pasos):
+        1. Crear/obtener grupo 'Administrador' y crear un usuario admin.
+        2. Crear un par de instancias `Moneda` para poblar la base.
+        3. Login como admin y GET a `reportes:dashboard_ganancias`.
+        4. Comprobar que `resp.context['monedas']` contiene las monedas creadas.
+        """
+        client = Client()
+        admin_grp, _ = Group.objects.get_or_create(name='Administrador')
+        admin = Usuario.objects.create(
+            username='admin_dash',
+            email='admin_dash@example.com',
+            first_name='Admin',
+            last_name='Dash',
+            numero_documento='90000011',
+            telefono='0990000011',
+            is_active=True,
+        )
+        admin.set_password('password')
+        admin.save()
+        admin.groups.add(admin_grp)
+
+        # crear algunas monedas
+        Moneda.objects.create(nombre='MD1', simbolo='M1', tasa_base=10)
+        Moneda.objects.create(nombre='MD2', simbolo='M2', tasa_base=20)
+
+        client.force_login(admin)
+        url = reverse('reportes:dashboard_ganancias')
+        resp = client.get(url)
+        assert resp.status_code == 200
+        assert 'monedas' in resp.context
+        monedas_qs = resp.context['monedas']
+        # Debe contener al menos las monedas creadas
+        assert any(m.nombre == 'MD1' for m in monedas_qs)
+        assert any(m.nombre == 'MD2' for m in monedas_qs)
