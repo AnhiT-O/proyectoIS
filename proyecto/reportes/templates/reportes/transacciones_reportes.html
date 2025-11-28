@@ -6,39 +6,8 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'claro/gestion.css' %}" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="{% static 'oscuro/gestion.css' %}" media="(prefers-color-scheme: dark)">
-<style>
-/* Texto más compacto para ajustarse mejor al fondo */
-.contenido { font-size: 13px; }
-.gestion-cabecera h2 { font-size: 1rem; margin-bottom: 0.5rem; }
-.contenido > h2 {
-    /* Espacio visible entre títulos de sección (h2) y las tablas */
-    margin-top: 1.25rem;
-    margin-bottom: 0.75rem;
-}
-.contenido .zona-resumen > h2 {
-    /* Asegura espacio entre el h2 dentro de la zona-resumen y su tabla (estaba anidado, no aplicado por > selector) */
-    margin-bottom: 0.75rem;
-}
-.gestion-tabla th, .gestion-tabla td { font-size: 12px; padding: 6px 8px; }
-.gestion-tabla thead th { font-size: 12px; }
-.zona-busqueda .busqueda-form { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
-.zona-busqueda .campo-filtro { display:flex; flex-direction:column; gap:0.25rem; margin-right:0.75rem; }
-.zona-busqueda .campo-filtro label { font-size: 12px; color:#555; }
-.zona-busqueda .campo-filtro input, .zona-busqueda .campo-filtro select { color: inherit; }
-.zona-busqueda .campo-filtro input[type="date"],
-.zona-busqueda .campo-filtro select { font-size:12px; padding:6px 8px; border-radius:6px; min-width:130px; }
-.botones-busqueda { display:flex; gap:0.5rem; align-items:center; }
-.btn-buscar, .btn-limpiar { font-size: 12px; padding:6px 10px; }
-@media (max-width: 768px) {
-    .zona-busqueda .busqueda-form { flex-direction:column; align-items:flex-start; }
-    .zona-busqueda .campo-filtro { width:100%; }
-    .gestion-tabla th, .gestion-tabla td { font-size: 11px; padding:6px; }
-}
-/* Modo oscuro: etiquetas más claras */
-@media (prefers-color-scheme: dark) {
-    .zona-busqueda .campo-filtro label { color: #cbd5e1; }
-}
-</style>
+<link rel="stylesheet" href="{% static 'claro/transacciones_reportes.css' %}" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="{% static 'oscuro/transacciones_reportes.css' %}" media="(prefers-color-scheme: dark)">
 {% endblock %}
 
 {% block content %}
@@ -49,59 +18,129 @@
 
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
-                <input type="text" name="rango_fecha" class="select-filtro" placeholder="DD-MM-YYYY - DD-MM-YYYY" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
+            {% csrf_token %}
+            <div class="filtros-layout">
+                <!-- Sector de fechas (izquierda) -->
+                <div class="sector-fechas">
+                    <div class="campo-filtro campo-fechas">
+                        <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
+                        <div class="fechas-container">
+                            <div class="fecha-input-group">
+                                <label class="fecha-sublabel">Fecha de inicio</label>
+                                <div class="selectores-fecha">
+                                    <select name="dia_inicio" class="select-filtro selector-fecha" title="Día">
+                                        <option value="">Día</option>
+                                        {% for dia in dias_lista %}
+                                            <option value="{{ dia }}" {% if f_dia_inicio == dia %}selected{% endif %}>{{ dia }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="mes_inicio" class="select-filtro selector-fecha" title="Mes">
+                                        <option value="">Mes</option>
+                                        {% for mes in meses_lista %}
+                                            <option value="{{ mes }}" {% if f_mes_inicio == mes %}selected{% endif %}>{{ mes }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="año_inicio" class="select-filtro selector-fecha" title="Año">
+                                        <option value="">Año</option>
+                                        {% for año in años_rango reversed %}
+                                            <option value="{{ año }}" {% if f_año_inicio|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div id="error-fecha-inicio" class="error-message-fecha"></div>
+                            </div>
+                            
+                            <div class="fecha-input-group">
+                                <label class="fecha-sublabel">Fecha de fin</label>
+                                <div class="fecha-final-container">
+                                    <div class="selectores-fecha">
+                                        <select name="dia_fin" class="select-filtro selector-fecha" title="Día">
+                                            <option value="">Día</option>
+                                            {% for dia in dias_lista %}
+                                                <option value="{{ dia }}" {% if f_dia_fin == dia %}selected{% endif %}>{{ dia }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="mes_fin" class="select-filtro selector-fecha" title="Mes">
+                                            <option value="">Mes</option>
+                                            {% for mes in meses_lista %}
+                                                <option value="{{ mes }}" {% if f_mes_fin == mes %}selected{% endif %}>{{ mes }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="año_fin" class="select-filtro selector-fecha" title="Año">
+                                            <option value="">Año</option>
+                                            {% for año in años_rango reversed %}
+                                                <option value="{{ año }}" {% if f_año_fin|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="error-fecha-fin" class="error-message-fecha"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sector de otros filtros (derecha) -->
+                <div class="sector-otros-filtros">
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
+                        <select name="moneda" class="select-filtro">
+                            <option value="">Todas</option>
+                            {% for m in monedas %}
+                                <option value="{{ m.id }}" {% if f_moneda|stringformat:'s' == m.id|stringformat:'s' %}selected{% endif %}>{{ m.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Estado</label>
+                        <select name="estado" class="select-filtro">
+                            <option value="">Todos</option>
+                            <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="Confirmada" {% if f_estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
+                            <option value="Completa" {% if f_estado == 'Completa' %}selected{% endif %}>Completa</option>
+                            <option value="Cancelada" {% if f_estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
+                            <option value="Anulada" {% if f_estado == 'Anulada' %}selected{% endif %}>Anulada</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Operación</label>
+                        <select name="tipo" class="select-filtro" onchange="this.form.submit()">
+                            <option value="">Todos</option>
+                            <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
+                            <option value="venta" {% if f_tipo == 'venta' %}selected{% endif %}>Venta</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Cliente</label>
+                        <select name="cliente" class="select-filtro">
+                            <option value="">Todos</option>
+                            {% for c in clientes %}
+                                <option value="{{ c.id }}" {% if f_cliente|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Segmentación</label>
+                        <select name="segmento" class="select-filtro">
+                            <option value="">Todos</option>
+                            {% for valor, nombre in segmentos %}
+                                <option value="{{ valor }}" {% if f_segmento == valor %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="botones-busqueda">
+                        <button type="submit" class="btn-buscar">Buscar</button>
+                        <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
+                    </div>
+                </div>
             </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
-                <select name="moneda" class="select-filtro">
-                    <option value="">Todas</option>
-                    {% for m in monedas %}
-                        <option value="{{ m.id }}" {% if f_moneda|stringformat:'s' == m.id|stringformat:'s' %}selected{% endif %}>{{ m.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Estado</label>
-                <select name="estado" class="select-filtro">
-                    <option value="">Todos</option>
-                    <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                    <option value="Confirmada" {% if f_estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
-                    <option value="Completa" {% if f_estado == 'Completa' %}selected{% endif %}>Completa</option>
-                    <option value="Cancelada" {% if f_estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
-                    <option value="Anulada" {% if f_estado == 'Anulada' %}selected{% endif %}>Anulada</option>
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Operación</label>
-                <select name="tipo" class="select-filtro" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
-                    <option value="venta" {% if f_tipo == 'venta' %}selected{% endif %}>Venta</option>
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Cliente</label>
-                <select name="cliente" class="select-filtro">
-                    <option value="">Todos</option>
-                    {% for c in clientes %}
-                        <option value="{{ c.id }}" {% if f_cliente|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-         
-             <div class="botones-busqueda">
-                 <button type="submit" class="btn-buscar">Buscar</button>
-                 <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
-             </div>
          </form>
      </div>
 
     <div class="zona-conteo">
         <div class="conteo-info">
             <h2>Total de transacciones:</h2> <span class="conteo">{{ filas|length }}</span>
-            {% if f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
+            {% if f_dia_inicio or f_mes_inicio or f_año_inicio or f_dia_fin or f_mes_fin or f_año_fin or f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente or f_segmento %}
                 <span style="margin-left: 1rem; color: #6c757d;">
                     ({{ filas|length }} resultado{{ filas|length|pluralize }})
                 </span>
@@ -211,8 +250,7 @@
 
     {% if not filas %}
     <div style="margin-top:1rem; color:#6c757d;">No se encontraron transacciones con los filtros aplicados.</div>
-    {% endif %}
-
+    {% else %}
     <!-- Resumen por moneda -->
     <div class="zona-resumen" style="margin-top:1.5rem;">
         <h2>Resumen de Ganancias por Moneda</h2>
@@ -233,14 +271,161 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
 
     <div class="zona-acciones" style="margin-top: 2rem">
         <div class="acciones-contenido">
             <a href="/" class="btn-secundario">
                 Volver al Inicio
             </a>
+            <a id="btn-download-pdf" href="#" class="btn-secundario" style="margin-left:0.5rem;">
+                Descargar PDF
+            </a>
         </div>
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Función para validar si una fecha existe
+    function validarFechaExiste(dia, mes, año) {
+        if (!dia || !mes || !año) return true; // Si está incompleta, no validar aún
+        
+        const diaNum = parseInt(dia);
+        const mesNum = parseInt(mes);
+        const añoNum = parseInt(año);
+        
+        // Crear objeto Date para verificar si la fecha existe
+        const fecha = new Date(añoNum, mesNum - 1, diaNum);
+        
+        // Verificar que la fecha creada corresponde exactamente a los valores ingresados
+        return fecha.getFullYear() === añoNum && 
+               fecha.getMonth() === (mesNum - 1) && 
+               fecha.getDate() === diaNum;
+    }
+    
+    // Función para mostrar/ocultar mensaje de error
+    function mostrarError(errorDiv, mensaje) {
+        if (mensaje) {
+            errorDiv.textContent = mensaje;
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+    }
+    
+    // Función para validar una fecha completa
+    function validarFechaCompleta(dia, mes, año, errorDiv, nombre) {
+        if (!dia || !mes || !año) {
+            mostrarError(errorDiv, '');
+            return true; // Válido si está incompleto (opcional)
+        }
+        
+        if (!validarFechaExiste(dia, mes, año)) {
+            mostrarError(errorDiv, 'Fecha inválida');
+            return false;
+        }
+        
+        mostrarError(errorDiv, '');
+        return true;
+    }
+    
+    // Obtener elementos
+    const diaInicio = document.querySelector('select[name="dia_inicio"]');
+    const mesInicio = document.querySelector('select[name="mes_inicio"]');
+    const añoInicio = document.querySelector('select[name="año_inicio"]');
+    const errorInicio = document.getElementById('error-fecha-inicio');
+    
+    const diaFin = document.querySelector('select[name="dia_fin"]');
+    const mesFin = document.querySelector('select[name="mes_fin"]');
+    const añoFin = document.querySelector('select[name="año_fin"]');
+    const errorFin = document.getElementById('error-fecha-fin');
+    
+    // Función para validar fecha de inicio
+    function validarInicio() {
+        return validarFechaCompleta(diaInicio.value, mesInicio.value, añoInicio.value, errorInicio, 'inicio');
+    }
+    
+    // Función para validar fecha final
+    function validarFinal() {
+        return validarFechaCompleta(diaFin.value, mesFin.value, añoFin.value, errorFin, 'fin');
+    }
+    
+    // Agregar event listeners a todos los selectores de fecha de inicio
+    [diaInicio, mesInicio, añoInicio].forEach(select => {
+        select.addEventListener('change', validarInicio);
+    });
+    
+    // Agregar event listeners a todos los selectores de fecha final  
+    [diaFin, mesFin, añoFin].forEach(select => {
+        select.addEventListener('change', validarFinal);
+    });
+    
+    // Validar formulario antes del envío
+    const form = document.querySelector('.busqueda-form');
+    form.addEventListener('submit', function(e) {
+        let hayErrores = false;
+        
+        // Limpiar errores previos
+        mostrarError(errorInicio, '');
+        mostrarError(errorFin, '');
+        
+        // Validar fecha de inicio
+        const inicioValida = validarInicio();
+        if (!inicioValida) {
+            hayErrores = true;
+        }
+        
+        // Validar fecha final
+        const finalValida = validarFinal();
+        if (!finalValida) {
+            hayErrores = true;
+        }
+        
+        // Validar que si hay una fecha, debe haber la otra
+        const tieneInicio = diaInicio.value && mesInicio.value && añoInicio.value;
+        const tieneFinal = diaFin.value && mesFin.value && añoFin.value;
+        
+        if ((tieneInicio && !tieneFinal)) {
+            mostrarError(errorFin, 'Debe ingresar la fecha de fin');
+            hayErrores = true;
+        }
+        
+        if ((!tieneInicio && tieneFinal)) {
+            mostrarError(errorInicio, 'Debe ingresar la fecha de inicio');
+            hayErrores = true;
+        }
+        
+        // Validar que fecha de inicio sea anterior o igual a fecha final
+        if (tieneInicio && tieneFinal && inicioValida && finalValida) {
+            const fechaInicio = new Date(parseInt(añoInicio.value), parseInt(mesInicio.value) - 1, parseInt(diaInicio.value));
+            const fechaFinal = new Date(parseInt(añoFin.value), parseInt(mesFin.value) - 1, parseInt(diaFin.value));
+            
+            if (fechaInicio > fechaFinal) {
+                mostrarError(errorFin, 'La fecha de fin debe ser posterior o igual a la fecha de inicio');
+                hayErrores = true;
+            }
+        }
+        
+        if (hayErrores) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('btn-download-pdf');
+    if(!btn) return;
+    // reconstruir querystring actual
+    const qs = window.location.search || '';
+    const base = '{% url "reportes:transacciones_pdf" %}';
+    btn.href = base + qs;
+});
+</script>
 {% endblock %}

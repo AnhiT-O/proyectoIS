@@ -1,3 +1,20 @@
+"""
+Módulo de vistas para el sistema de reportes y análisis de ganancias.
+
+Este módulo contiene las vistas necesarias para generar reportes financieros,
+analizar transacciones y mostrar dashboards de ganancias para usuarios
+con privilegios de administrador.
+
+Funcionalidades principales:
+- Generación de reportes de transacciones con filtros avanzados
+- Dashboard interactivo de ganancias con visualización temporal
+- APIs REST para datos de gráficos y análisis financiero
+- Cálculo de ganancias basado en comisiones y descuentos por segmento
+
+Autor: Sistema de Casa de Cambio
+Fecha: Noviembre 2024
+"""
+
 from django.shortcuts import render
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -5,71 +22,108 @@ from transacciones.models import Transaccion
 from monedas.models import Moneda
 from clientes.models import Cliente
 from datetime import datetime, timedelta
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Min, Max
+from django.db import models
 from collections import defaultdict
 
 
 @login_required
 def transacciones_reportes(request):
     """
-    Informe de transacciones y cálculo de ganancias usando exclusivamente las fórmulas proporcionadas.
-    Acceso reservado a usuarios con rol 'Administrador'.
-    Se aceptan filtros GET: fecha_desde (YYYY-MM-DD), fecha_hasta (YYYY-MM-DD), moneda (id), estado, cliente (id).
-    Reglas:
-    - En venta: solo comisión y ganancia de venta.
-    - En compra: solo comisión y ganancia de compra.
-    - Descuento proviene del segmento del cliente (si existe).
-    - Ganancia total se resume por moneda en resumen_por_moneda.
+    Genera un reporte completo de transacciones con análisis de ganancias.
+    
+    Esta vista proporciona un informe detallado de todas las transacciones del sistema,
+    calculando las ganancias basadas en comisiones, descuentos por segmento de cliente
+    y tipo de operación (compra/venta). Incluye múltiples opciones de filtrado y 
+    separación de datos por tipo de transacción.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con parámetros GET opcionales
+            para filtrar por fechas, monedas, estados, clientes y segmentos.
+    
+    Returns:
+        HttpResponse: Página renderizada con el reporte completo de transacciones
+        HttpResponseForbidden: Si el usuario no tiene rol de Administrador
+        
+    Filtros disponibles:
+        - dia_inicio/mes_inicio/año_inicio: Componentes de fecha de inicio
+        - dia_fin/mes_fin/año_fin: Componentes de fecha de fin
+        - moneda: ID o nombre de moneda
+        - estado: Estado de transacción
+        - cliente: ID de cliente
+        - tipo: Tipo de transacción ('compra' o 'venta')
+        - segmento: Segmento de cliente ('minorista', 'corporativo', 'vip')
+        
+    Fórmulas de cálculo:
+        - Venta: monto_origen × (comisión_venta - descuento_segmento)
+        - Compra: monto_origen × (comisión_compra - descuento_segmento)
+        - Descuentos: Minorista 0%, Corporativo 5%, VIP 10%
     """
     user = request.user
     if not user.groups.filter(name='Administrador').exists():
         return HttpResponseForbidden('Acceso denegado: requiere rol Administrador')
 
-    # Filtros
-    fecha_desde = request.GET.get('fecha_desde')
-    fecha_hasta = request.GET.get('fecha_hasta')
-    # Nuevo filtro unificado: rango de fechas en formato 'YYYY-MM-DD - YYYY-MM-DD'
-    rango_fecha = request.GET.get('rango_fecha')
+    # Parámetros de fecha por componentes separados (día, mes, año)
+    dia_inicio = request.GET.get('dia_inicio')
+    mes_inicio = request.GET.get('mes_inicio') 
+    año_inicio = request.GET.get('año_inicio')
+    dia_fin = request.GET.get('dia_fin')
+    mes_fin = request.GET.get('mes_fin')
+    año_fin = request.GET.get('año_fin')
+    
     moneda_id = request.GET.get('moneda')
     estado_filter = request.GET.get('estado')
     cliente_id = request.GET.get('cliente')
     tipo_filter = request.GET.get('tipo')
+    segmento_filter = request.GET.get('segmento')
+    
+    # Obtener rango de años disponibles para los selectores
+    años_rango = []
+    try:
+        fechas_extremas = Transaccion.objects.aggregate(
+            fecha_min=models.Min('fecha_hora'),
+            fecha_max=models.Max('fecha_hora')
+        )
+        if fechas_extremas['fecha_min'] and fechas_extremas['fecha_max']:
+            año_min = fechas_extremas['fecha_min'].year
+            año_max = fechas_extremas['fecha_max'].year
+            años_rango = list(range(año_min, año_max + 1))
+    except Exception:
+        # Fallback: últimos 5 años hasta el actual
+        año_actual = datetime.now().year
+        años_rango = list(range(año_actual - 4, año_actual + 1))
+    
+    # Generar listas para días y meses
+    dias_lista = [f"{i:02d}" for i in range(1, 32)]  # 01, 02, ..., 31
+    meses_lista = [f"{i:02d}" for i in range(1, 13)]  # 01, 02, ..., 12
 
     qs = Transaccion.objects.all().order_by('-fecha_hora')
-    # Si se proporciona rango_fecha, parsearlo y aplicar filtro, sino usar fecha_desde/fecha_hasta individuales
-    if rango_fecha:
+    
+    # Procesamiento de fechas separadas (día, mes, año)
+    fecha_construida_desde = None
+    fecha_construida_hasta = None
+    
+    if dia_inicio and mes_inicio and año_inicio:
         try:
-            parts = [p.strip() for p in rango_fecha.split('-')]
-            if len(parts) >= 2:
-                # intentar YYYY-MM-DD primero, si falla intentar DD-MM-YYYY
-                fecha1 = parts[0]
-                fecha2 = parts[1]
-                try:
-                    dt_desde = datetime.strptime(fecha1, '%Y-%m-%d')
-                    dt_hasta = datetime.strptime(fecha2, '%Y-%m-%d')
-                except Exception:
-                    dt_desde = datetime.strptime(fecha1, '%d-%m-%Y')
-                    dt_hasta = datetime.strptime(fecha2, '%d-%m-%Y')
-                qs = qs.filter(fecha_hora__gte=dt_desde, fecha_hora__lte=dt_hasta)
-        except Exception:
-            # Si falla el parseo, no aplicar filtro por rango
+            fecha_construida_desde = datetime(int(año_inicio), int(mes_inicio), int(dia_inicio))
+        except (ValueError, TypeError):
             pass
-    else:
-        if tipo_filter:
-            qs = qs.filter(tipo__iexact=tipo_filter)
-        if fecha_desde:
-            try:
-                dt_desde = datetime.strptime(fecha_desde, '%Y-%m-%d')
-                qs = qs.filter(fecha_hora__gte=dt_desde)
-            except Exception:
-                pass
-        if fecha_hasta:
-            try:
-                dt_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d')
-                qs = qs.filter(fecha_hora__lte=dt_hasta)
-            except Exception:
-                pass
-    # Si no se usó rango_fecha y se pasó tipo_filter, ya fue aplicado arriba
+    
+    if dia_fin and mes_fin and año_fin:
+        try:
+            fecha_construida_hasta = datetime(int(año_fin), int(mes_fin), int(dia_fin))
+            # Agregar 23:59:59 para incluir todo el día final
+            fecha_construida_hasta = fecha_construida_hasta.replace(hour=23, minute=59, second=59, microsecond=999999)
+        except (ValueError, TypeError):
+            pass
+    
+    # Aplicar filtros de fecha si se construyeron correctamente
+    if fecha_construida_desde and fecha_construida_hasta:
+        qs = qs.filter(fecha_hora__gte=fecha_construida_desde, fecha_hora__lte=fecha_construida_hasta)
+    
+    # Aplicar filtro de tipo si se especifica
+    if tipo_filter:
+        qs = qs.filter(tipo__iexact=tipo_filter)
     if moneda_id:
         try:
             qs = qs.filter(moneda__id=int(moneda_id))
@@ -82,6 +136,8 @@ def transacciones_reportes(request):
             qs = qs.filter(cliente__id=int(cliente_id))
         except Exception:
             pass
+    if segmento_filter:
+        qs = qs.filter(cliente__segmento__iexact=segmento_filter)
 
     filas = []
     resumen_por_moneda = {}
@@ -253,6 +309,9 @@ def transacciones_reportes(request):
     # Calcular colspan para el mensaje vacío: columnas fijas = 5 (Fecha, Cliente, Operación, Moneda, Monto, %Descuento, Estado) ajustado por cada tabla
     f_colspan = 5 + (2 if show_compra else 0) + 2  # kept fallback, template uses per-table colspan separately
 
+    # Obtener segmentos disponibles desde las opciones del modelo
+    segmentos_disponibles = Cliente.SEGMENTO_CHOICES
+
     context = {
         'filas': filas,
         'filas_compra': filas_compra,
@@ -261,13 +320,21 @@ def transacciones_reportes(request):
         'resumen_por_moneda': resumen_por_moneda,
         'monedas': Moneda.objects.all(),
         'clientes': Cliente.objects.all(),
-        'f_fecha_desde': fecha_desde,
-        'f_fecha_hasta': fecha_hasta,
-        'f_fecha_rango': rango_fecha,
+        'segmentos': segmentos_disponibles,
+        'años_rango': años_rango,
+        'dias_lista': dias_lista,
+        'meses_lista': meses_lista,
+        'f_dia_inicio': dia_inicio,
+        'f_mes_inicio': mes_inicio,
+        'f_año_inicio': año_inicio,
+        'f_dia_fin': dia_fin,
+        'f_mes_fin': mes_fin,
+        'f_año_fin': año_fin,
         'f_moneda': moneda_id,
         'f_estado': estado_filter,
         'f_tipo': tipo_filter,
         'f_cliente': cliente_id,
+        'f_segmento': segmento_filter,
         'show_compra': show_compra,
         'show_venta': show_venta,
         'f_colspan': f_colspan,
@@ -278,9 +345,29 @@ def transacciones_reportes(request):
 @login_required
 def dashboard_ganancias(request):
     """
-    Dashboard de ganancias con gráfico temporal.
-    Acceso exclusivo para Administradores.
-    Muestra por defecto las ganancias totales del último mes.
+    Renderiza el dashboard principal de análisis de ganancias.
+    
+    Proporciona una interfaz interactiva para visualizar las ganancias del sistema
+    mediante gráficos temporales y análisis por monedas. Los datos se cargan
+    de forma asíncrona mediante APIs REST para optimizar el rendimiento.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP
+    
+    Returns:
+        HttpResponse: Página del dashboard con gráficos interactivos
+        HttpResponseForbidden: Si el usuario no tiene rol de Administrador
+        
+    Características:
+        - Gráficos de líneas para evolución temporal de ganancias
+        - Gráficos de torta para distribución por monedas
+        - Filtros por período (hoy, semana, mes, 6 meses, año)
+        - Análisis por moneda específica o global
+        - Carga de datos asíncrona con Chart.js
+        
+    Note:
+        Los datos se obtienen mediante las APIs obtener_datos_ganancias
+        y obtener_desglose_ganancias para mejor rendimiento.
     """
     user = request.user
     if not user.groups.filter(name='Administrador').exists():
@@ -297,15 +384,32 @@ def dashboard_ganancias(request):
 @login_required
 def obtener_datos_ganancias(request):
     """
-    API endpoint que devuelve datos de ganancias en formato JSON para el gráfico.
-    Parámetros GET:
-    - rango: 'semana', 'mes', '6meses', 'año'
-    - moneda_id: ID de moneda específica (opcional, si no se envía devuelve total de todas)
+    API REST que proporciona datos de ganancias agregados por fecha para gráficos temporales.
     
-    Retorna JSON con:
-    - fechas: lista de fechas
-    - ganancias: lista de ganancias por fecha
-    - ganancia_total: suma total
+    Endpoint utilizado por el dashboard para generar gráficos de líneas que muestran
+    la evolución temporal de las ganancias. Los datos se agrupan por día y se pueden
+    filtrar por período temporal y moneda específica.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con parámetros GET:
+            - rango: Período a analizar ('hoy', 'semana', 'mes', '6meses', 'año')
+            - moneda_id: ID de moneda específica (opcional, incluye todas si se omite)
+    
+    Returns:
+        JsonResponse: Datos en formato JSON con estructura:
+            {
+                "fechas": ["DD/MM/YYYY", ...],        # Fechas formateadas
+                "ganancias": [123.45, ...],           # Ganancias por fecha
+                "ganancia_total": 1234.56,            # Suma total del período
+                "moneda": "Nombre de moneda"           # Moneda filtrada o "Todas"
+            }
+        JsonResponse con error 403: Si no tiene permisos de administrador
+        
+    Business Logic:
+        - Solo considera transacciones con estado 'completa' o 'confirmada'
+        - Aplica las mismas fórmulas de cálculo que transacciones_reportes
+        - Agrupa resultados por fecha y los ordena cronológicamente
+        - Formatea fechas para mejor visualización en gráficos
     """
     user = request.user
     if not user.groups.filter(name='Administrador').exists():
@@ -447,18 +551,43 @@ def obtener_datos_ganancias(request):
 @login_required
 def obtener_desglose_ganancias(request):
     """
-    API endpoint que devuelve datos de ganancias por moneda para los gráficos.
-    Parámetros GET:
-    - rango: 'hoy', 'semana', 'mes', '6meses', 'año'
-    - moneda_id: ID de moneda específica (opcional)
-    Retorna JSON con la estructura que espera el frontend:
-    {
-        "desglose": {
-            "venta": {"labels": [...], "percents": [...], "values": [...]},
-            "compra": {"labels": [...], "percents": [...], "values": [...]},
-            "total": {"labels": [...], "values": [...]}
-        }
-    }
+    API REST que proporciona análisis detallado de ganancias por moneda y tipo de operación.
+    
+    Endpoint especializado para generar gráficos de torta (pie charts) y análisis
+    comparativos entre diferentes monedas. Separa los datos por tipo de transacción
+    (compra/venta) y calcula porcentajes relativos para cada segmento.
+    
+    Args:
+        request (HttpRequest): Objeto de solicitud HTTP con parámetros GET:
+            - rango: Período temporal ('hoy', 'semana', 'mes', '6meses', 'año')
+            - moneda_id: ID de moneda específica (opcional)
+    
+    Returns:
+        JsonResponse: Datos estructurados para gráficos con formato:
+            {
+                "desglose": {
+                    "venta": {
+                        "labels": ["USD", "EUR", ...],      # Nombres de monedas
+                        "percents": [45.5, 32.1, ...],     # Porcentajes relativos
+                        "values": [1234.56, 890.12, ...]   # Valores absolutos
+                    },
+                    "compra": {
+                        "labels": [...], "percents": [...], "values": [...]
+                    },
+                    "total": {
+                        "labels": [...], "values": [...]    # Sin porcentajes
+                    }
+                },
+                "ganancia_total": 5678.90,
+                "moneda": "Todas"
+            }
+        JsonResponse con error 403: Si no tiene permisos de administrador
+        
+    Business Logic:
+        - Separa ganancias por tipo de operación (compra/venta)
+        - Calcula porcentajes relativos dentro de cada tipo
+        - Utiliza las mismas fórmulas de cálculo que otras funciones del módulo
+        - Solo considera transacciones completadas
     """
     user = request.user
     if not user.groups.filter(name='Administrador').exists():
