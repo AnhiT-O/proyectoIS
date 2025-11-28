@@ -89,7 +89,7 @@ class TestReportesViews:
         assert 'filas' in resp.context
         assert 'resumen_por_moneda' in resp.context
 
-    def test_obtener_datos_ganancias_calculo_basico(self):
+    def test_obtener_datos_ganancias_calculo(self):
         """Valida la API JSON de ganancias para una transacción de venta simple.
 
           Escenario:
