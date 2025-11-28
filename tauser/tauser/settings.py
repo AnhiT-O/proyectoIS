@@ -173,4 +173,4 @@ STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 FACTURA_SEGURA_API_URL = 'https://apitest.facturasegura.com.py'
-NUMERO_FACTURACION = 376
+NUMERO_FACTURACION = 379

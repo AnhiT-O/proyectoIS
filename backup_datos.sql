@@ -79,9 +79,9 @@ Valentina Rivas	8908908	Tigo Money	0988908908	8
 --
 
 COPY public.monedas (nombre, simbolo, activa, tasa_base, comision_compra, comision_venta, decimales, fecha_cotizacion) FROM stdin;
-Euro	EUR	t	8300	200	100	2	2025-10-28 15:40:00
-Real	BRL	t	1300	20	30	2	2025-10-28 15:41:00
-Peso argentino	ARP	t	5	1	1	0	2025-10-28 15:42:00
+Euro	EUR	t	7600	400	400	2	2025-11-27 09:16:00
+Real	BRL	t	1320	40	20	2	2025-11-21 09:37:00
+Peso argentino	ARP	t	4	1	1	0	2025-11-27 09:17:00
 \.
 
 COPY public.historial_cotizaciones (nombre_moneda, fecha, tasa_base, comision_compra, comision_venta, precio_compra, precio_venta, fecha_registro, moneda_id) FROM stdin;
@@ -99,6 +99,21 @@ Euro	2025-10-22	8500	350	50	8150	8550	2025-10-22 15:41:00	2
 Dólar estadounidense	2025-10-23	7030	30	30	7000	7060	2025-10-23 15:00:00	1
 Real	2025-10-28	1300	20	30	1280	1330	2025-10-28 13:10:00	3
 Euro	2025-10-28	8300	200	100	8150	8550	2025-10-28 13:10:00	2
+Dólar estadounidense	2025-10-28	7030	30	40	7000	7070	2025-10-28 13:10:00	1
+Euro	2025-11-01	8300	300	100	8000	8400	2025-11-01 12:30:00	2
+Real	2025-11-01	1300	30	20	1270	1320	2025-11-01 12:30:00	3
+Dólar estadounidense	2025-11-01	7030	30	50	7000	7080	2025-11-01 12:30:00	1
+Euro	2025-11-06	8100	250	200	7850	8300	2025-11-06 10:30:00	2
+Real	2025-11-06	1300	15	40	1285	1340	2025-11-06 10:30:00	3
+Dólar estadounidense	2025-11-06	7030	30	30	7000	7060	2025-11-06 10:30:00	1
+Euro	2025-11-14	7900	250	300	7650	8200	2025-11-14 11:41:00	2
+Real	2025-11-14	1320	30	30	1290	1350	2025-11-14 11:42:00	3
+Dólar estadounidense	2025-11-14	7000	60	40	6940	7040	2025-11-14 11:40:00	1
+Euro	2025-11-21	7900	500	250	7400	8150	2025-11-21 09:36:00	2
+Real	2025-11-21	1320	40	20	1280	1340	2025-11-21 09:37:00	3
+Dólar estadounidense	2025-11-21	7000	70	40	6930	7040	2025-11-21 09:35:00	1
+Euro	2025-11-27	7600	400	400	7200	8000	2025-11-27 09:16:00	2
+Peso argentino	2025-11-27	4	1	1	3	5	2025-11-27 09:17:00	4
 \.
 
 COPY public.denominaciones (valor, moneda_id) FROM stdin;
@@ -175,19 +190,11 @@ COPY public.billetes_tauser (tauser_id, denominacion_id, cantidad) FROM stdin;
 1	36	100
 \.
 
---
--- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
 COPY public.roles (group_ptr_id, descripcion) FROM stdin;
 4	Rol encargado de bloquear o desbloquear usuarios del sistema.
 5	Rol encargado de gestionar y asignar clientes a usuarios.
 \.
 
-
---
--- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
---
 
 COPY public.usuarios (password, last_login, is_superuser, username, first_name, last_name, email, telefono, numero_documento, bloqueado, is_active, date_joined, cliente_activo_id) FROM stdin;
 pbkdf2_sha256$1000000$wJrbuxT7jPkLSdYMPimfRK$tizTqXuQhLznLeqdwJdLOXMyzYnWNnBQoacwLhnT/iY=	\N	f	iris	Iris María	Mendoza Ortiz	irismendoza012@fpuna.edu.py	0984552373	6841885	f	t	2025-09-20 12:41:57.196011-03	\N
@@ -196,11 +203,6 @@ pbkdf2_sha256$1000000$qzR2qkBvl5Q7MAobJuW6Qv$rkCiLwrpvnd+xMbCm2BkoiW1y+LyIlG40Ez
 pbkdf2_sha256$1000000$7dwyrYsJpRzVekudU6YBRJ$jx0XESJXTmJKuHc1V5io4pq5mi03X9FpGNRCUl1shzw=	2025-09-20 15:02:43.434869-03	f	josias	Josias David	Espínola Nuñez	totiespinola@fpuna.edu.py	0982977328	5167191	f	t	2025-09-20 12:56:51.22464-03	1
 pbkdf2_sha256$1000000$8an91M8C8wOOfTvVxeLPkk$SqNaJcNTLiznTfzsbKi8T0KIZ7hgbO+N7Px1+xAetkA=	2025-09-20 15:04:20.553559-03	f	admin	Brandon	Rivarola	losrivarola612@fpuna.edu.py	0981458383	4808795	f	t	2025-09-20 12:11:14.859291-03	\N
 \.
-
-
---
--- Data for Name: usuarios_clientes; Type: TABLE DATA; Schema: public; Owner: postgres
---
 
 COPY public.clientes_usuarios (cliente_id, usuario_id) FROM stdin;
 4	4
@@ -216,10 +218,6 @@ COPY public.clientes_usuarios (cliente_id, usuario_id) FROM stdin;
 \.
 
 
---
--- Data for Name: usuarios_groups; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
 COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
 5	3
 3	2
@@ -227,6 +225,32 @@ COPY public.usuarios_groups (usuario_id, group_id) FROM stdin;
 1	5
 1	4
 4	1
+\.
+
+COPY public.transacciones (tipo, monto, cotizacion, precio_base, beneficio_segmento, porc_beneficio_segmento, recargo_pago, porc_recargo_pago, recargo_cobro, porc_recargo_cobro, precio_final, pagado, medio_pago, medio_cobro, fecha_hora, estado, razon, token, factura, numero_factura, cliente_id, moneda_id, usuario_id) FROM stdin;
+venta	500	6930	3465000	0	0%	35000	1.0%	0	0%	3430000	3430000	Tarjeta de Crédito (**** **** **** 4242)	Cuenta bancaria - Banco Atlas (593406)	2025-11-21 09:58:56.36467-03	Completa	\N	\N	\N	\N	1	1	4
+compra	800	7070	5656000	0	0%	0	0%	0	0%	5656000	5656000	Efectivo	Efectivo	2025-09-15 10:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+venta	650	6930	4504500	0	0%	45500	1.0%	0	0%	4459000	4459000	Tarjeta de Crédito (**** **** **** 1234)	Cuenta bancaria - Banco Familiar (39784)	2025-09-20 14:20:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	1200	8650	10380000	0	0%	155700	1.5%	0	0%	10535700	10535700	Tarjeta de Crédito (**** **** **** 5678)	Efectivo	2025-09-25 11:15:00-03	Completa	\N	\N	\N	\N	3	2	4
+venta	1000	6930	6930000	0	0%	138600	2.0%	0	0%	6791400	6791400	Billetera Electrónica - Tigo Money (0981123123)	Transferencia bancaria - Banco Atlas (593406)	2025-10-05 09:45:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	450	7070	3181500	318150	10%	0	0%	0	0%	2863350	2863350	Efectivo	Efectivo	2025-10-10 16:30:00-03	Completa	\N	\N	\N	\N	4	1	4
+venta	850	7900	6715000	671500	10%	0	0%	0	0%	6043500	6043500	Efectivo	Cuenta bancaria - Cooperativa Universitaria (32329)	2025-10-15 13:00:00-03	Completa	\N	\N	\N	\N	4	2	4
+compra	2500	1340	3350000	0	0%	33833	1.0%	0	0%	3383833	3383833	Tarjeta de Crédito (**** **** **** 9876)	Efectivo	2025-10-20 10:00:00-03	Completa	\N	\N	\N	\N	3	3	4
+venta	700	6930	4851000	0	0%	0	0%	0	0%	4851000	4851000	Transferencia bancaria - Banco Basa (426868)	Cuenta bancaria - Banco Basa (426868)	2025-10-25 15:20:00-03	Completa	\N	\N	\N	\N	3	1	4
+compra	950	8300	7885000	788500	10%	0	0%	0	0%	7096500	7096500	Efectivo	Efectivo	2025-11-01 11:30:00-03	Completa	\N	\N	\N	\N	6	2	4
+venta	1800	1280	2304000	230400	10%	0	0%	0	0%	2073600	2073600	Efectivo	Transferencia bancaria - Banco Familiar (254591)	2025-11-05 14:45:00-03	Completa	\N	\N	\N	\N	9	3	4
+compra	3500	7060	24710000	1235500	5%	0	0%	0	0%	23474500	23474500	Transferencia bancaria - ueno bank (783750)	Efectivo	2025-11-10 09:00:00-03	Completa	\N	\N	\N	\N	10	1	4
+venta	2000	6940	13880000	694000	5%	0	0%	0	0%	13186000	13186000	Efectivo	Transferencia bancaria - ueno bank (783750)	2025-11-12 16:15:00-03	Completa	\N	\N	\N	\N	10	1	4
+compra	1100	7060	7766000	0	0%	232980	3.0%	0	0%	7998980	7998980	Billetera Electrónica - Zimple (0981123123)	Efectivo	2025-11-15 10:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+venta	750	7400	5550000	555000	10%	0	0%	0	0%	4995000	4995000	Efectivo	Cuenta bancaria - Cooperativa Universitaria (32329)	2025-11-18 13:20:00-03	Completa	\N	\N	\N	\N	4	2	4
+compra	1500	1340	2010000	100500	5%	0	0%	0	0%	1909500	1909500	Efectivo	Efectivo	2025-11-20 11:00:00-03	Completa	\N	\N	\N	\N	8	3	4
+venta	900	1280	1152000	57600	5%	0	0%	0	0%	1094400	1094400	Efectivo	Transferencia bancaria - ueno bank (969643)	2025-11-22 15:45:00-03	Completa	\N	\N	\N	\N	1	3	4
+compra	550	8150	4482500	448250	10%	0	0%	0	0%	4034250	4034250	Efectivo	Efectivo	2025-11-25 10:15:00-03	Completa	\N	\N	\N	\N	6	2	4
+venta	850	6930	5890500	0	0%	88358	1.5%	0	0%	5802142	5802142	Tarjeta de Crédito (**** **** **** 4321)	Cuenta bancaria - Banco Atlas (593406)	2025-11-26 09:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	2200	7060	15532000	776600	5%	0	0%	0	0%	14755400	14755400	Transferencia bancaria - ueno bank (783750)	Efectivo	2025-11-28 08:00:00-03	Completa	\N	\N	\N	\N	10	1	4
+venta	1200	6930	8316000	0	0%	83160	1.0%	0	0%	8232840	8232840	Tarjeta de Crédito (**** **** **** 8888)	Cuenta bancaria - Banco Familiar (39784)	2025-11-28 11:30:00-03	Completa	\N	\N	\N	\N	1	1	4
+compra	700	8150	5705000	570500	10%	0	0%	0	0%	5134500	5134500	Efectivo	Efectivo	2025-11-28 14:45:00-03	Completa	\N	\N	\N	\N	4	2	4
+venta	1600	1280	2048000	102400	5%	0	0%	0	0%	1945600	1945600	Efectivo	Cuenta bancaria - Banco Basa (426868)	2025-11-28 17:20:00-03	Completa	\N	\N	\N	\N	8	3	4
 \.
 
 --

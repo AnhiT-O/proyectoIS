@@ -57,15 +57,11 @@ python manage.py makemigrations
 python manage.py migrate
 cd ..
 
-# 5. Importación de datos desde el archivo SQL (solo si se proporciona)
-if [ -n "$SQL_FILE" ]; then
-	echo "5. Importando datos desde el archivo '$SQL_FILE'..."
-	sudo cp $SQL_FILE /var/lib/postgresql/$SQL_FILE
-	sudo -i -u postgres psql -d $DB_NAME -f "$SQL_FILE"
-	echo "La base de datos ahora está limpia, con las migraciones aplicadas y los datos de '$SQL_FILE' importados."
-else
-	echo "La base de datos ahora está limpia y con las migraciones aplicadas. No se importaron datos adicionales."
-fi
+# 5. Importación de datos desde el archivo 'backup_datos.sql'
+echo "5. Importando datos desde el archivo 'backup_datos.sql'..."
+sudo cp $SQL_FILE /var/lib/postgresql/$SQL_FILE
+sudo -i -u postgres psql -d $DB_NAME -f "$SQL_FILE"
+echo "La base de datos ahora está limpia, con las migraciones aplicadas y los datos importados."
 
 echo "Proceso de reseteo completado para la base de datos '$DB_NAME'."
 

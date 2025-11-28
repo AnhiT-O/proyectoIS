@@ -1,0 +1,494 @@
+/* ==========================================
+   ESTILOS PARA DASHBOARD DE GANANCIAS - TEMA CLARO
+   ========================================== */
+
+/* Contenedor principal */
+.contenido {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* ==========================================
+   CABECERA DEL DASHBOARD
+   ========================================== */
+.dashboard-cabecera {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.cabecera-principal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.titulo-dashboard {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.botones-accion {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-regresar {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-regresar:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ==========================================
+   CONTROLES DEL DASHBOARD
+   ========================================== */
+.controles-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.selector-moneda {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.selector-moneda label {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.select-filtro {
+    background: rgba(255, 255, 255, 0.9);
+    color: #2d3748;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+}
+
+.select-filtro:hover {
+    background: white;
+}
+
+.select-filtro:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Filtros temporales */
+.filtros-temporales {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-filtro:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-filtro.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================
+   DASHBOARD PRINCIPAL
+   ========================================== */
+.dashboard-principal {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ==========================================
+   ESTADÍSTICAS PRINCIPALES
+   ========================================== */
+.estadisticas-principales {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.stat-ganancia {
+    border-left: 4px solid #10b981;
+}
+
+.stat-periodo {
+    border-left: 4px solid #667eea;
+}
+
+.stat-moneda {
+    border-left: 4px solid #8b5cf6;
+}
+
+.stat-icono {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.stat-contenido {
+    flex: 1;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-valor {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+/* ==========================================
+   SECCIÓN DEL GRÁFICO
+   ========================================== */
+.seccion-grafico {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.titulo-grafico {
+    color: #667eea;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.contenedor-grafico {
+    position: relative;
+    height: 450px;
+    width: 100%;
+}
+
+/* ==========================================
+   INFORMACIÓN ADICIONAL
+   ========================================== */
+.info-adicional {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.tarjeta-info {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.tarjeta-info h4 {
+    color: #667eea;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.tarjeta-info p {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.tarjeta-info ul {
+    color: #4b5563;
+    line-height: 1.8;
+    padding-left: 1.5rem;
+}
+
+.tarjeta-info ul li {
+    margin-bottom: 0.5rem;
+}
+
+/* ==========================================
+   ESTILOS PARA GRÁFICOS DE DESGLOSE
+   ========================================== */
+.grafico-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.grafico-card {
+    background: white !important;
+    color: #2d3748 !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e9ecef !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grafico-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+.grafico-card h3 {
+    color: #667eea !important;
+    margin: 0 0 1rem 0 !important;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+/* Contenedores de canvas */
+.contenedor-canvas {
+    height: 220px;
+    max-height: 220px;
+    position: relative;
+}
+
+.contenedor-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.contenedor-canvas-grande {
+    height: 420px;
+    max-height: 65vh;
+    position: relative;
+}
+
+.contenedor-canvas-grande canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Gráfico que ocupa toda la fila */
+.grafico-completo {
+    grid-column: 1 / -1;
+}
+
+/* Título de la sección de gráficos */
+.titulo-seccion-graficos {
+    margin-bottom: 1.5rem;
+    color: #667eea;
+    font-weight: 700;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+/* ==========================================
+   LOADING OVERLAY
+   ========================================== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(102, 126, 234, 0.3);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+@media (max-width: 1024px) {
+    .controles-dashboard {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .selector-moneda {
+        width: 100%;
+    }
+    
+    .select-filtro {
+        width: 100%;
+    }
+    
+    .filtros-temporales {
+        justify-content: center;
+    }
+    
+    .contenedor-grafico {
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .contenido {
+        padding: 1rem;
+    }
+    
+    .dashboard-cabecera {
+        padding: 1.5rem;
+    }
+    
+    .cabecera-principal {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .titulo-dashboard {
+        font-size: 2rem;
+    }
+    
+    .botones-accion {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .btn-regresar,
+    .btn-secundario {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .estadisticas-principales {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .stat-icono {
+        font-size: 2.5rem;
+    }
+    
+    .stat-valor {
+        font-size: 1.5rem;
+    }
+    
+    .filtros-temporales {
+        justify-content: center;
+    }
+    
+    .btn-filtro {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .seccion-grafico,
+    .tarjeta-info {
+        padding: 1.5rem;
+    }
+    
+    .contenedor-grafico {
+        height: 300px;
+    }
+    
+    .grafico-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .grafico-card {
+        margin-bottom: 1rem;
+    }
+    
+    .contenedor-canvas,
+    .contenedor-canvas-grande {
+        height: 250px;
+        max-height: 250px;
+    }
+}

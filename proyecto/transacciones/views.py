@@ -23,15 +23,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
-from monedas.models import Moneda, StockGuaranies
+from django.http import JsonResponse, HttpResponse
+from monedas.models import Moneda, StockGuaranies, Denominacion
 from medios_acreditacion.models import TarjetaLocal
 from .forms import SeleccionMonedaMontoForm, VariablesForm
-from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion, generar_factura_electronica, verificar_factura, descargar_factura
+from .models import Transaccion, Recargos, LimiteGlobal, Tauser, calcular_conversion, procesar_pago_stripe, procesar_transaccion, verificar_cambio_cotizacion_sesion, generar_token_transaccion, generar_factura_electronica, verificar_factura, descargar_factura, no_redondeado
 from .utils_2fa import is_2fa_enabled
 from decimal import Decimal
 from clientes.models import Cliente
-from django.contrib.auth.models import User
 import ast
 import stripe
 import logging
@@ -90,7 +89,6 @@ def compra_monto_moneda(request):
         - tipo_transaccion: Tipo de operación ('compra')
         - limites_disponibles: Información de límites del cliente
     """
-    #verificar_factura('01025957333001003000037422025103118649440309')
     transacciones_pasadas = Transaccion.objects.filter(usuario=request.user, estado='Pendiente')
     if transacciones_pasadas:
         for t in transacciones_pasadas:
@@ -452,6 +450,20 @@ def compra_confirmacion(request):
             if cambios and cambios.get('hay_cambios'):
                 transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
                 datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'compra', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
+                if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                    messages.error(request, 'El monto final no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                    transaccion.save()
+                    return redirect('transacciones:compra_monto_moneda')
+                if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
+                    messages.error(request, 'El monto ingresado no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                    transaccion.save()
+                    return redirect('transacciones:compra_monto_moneda')
                 transaccion.precio_base = datos_transaccion['precio_base']
                 transaccion.cotizacion = datos_transaccion['cotizacion']
                 transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
@@ -460,9 +472,6 @@ def compra_confirmacion(request):
                 transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
                 transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
                 transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
-                transaccion.monto_original = datos_transaccion['monto_original']
                 transaccion.monto = datos_transaccion['monto']
                 transaccion.precio_final = datos_transaccion['precio_final']
                 transaccion.save()
@@ -536,9 +545,9 @@ def compra_confirmacion(request):
         if request.session.get('transaccion_id'):
             transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
             context = {
-            'transaccion': transaccion,
-            'paso_actual': 4,
-            'titulo_paso': 'Confirmación de Compra'
+                'transaccion': transaccion,
+                'paso_actual': 4,
+                'titulo_paso': 'Confirmación de Compra'
             }
             return render(request, 'transacciones/confirmacion.html', context)
         
@@ -550,6 +559,12 @@ def compra_confirmacion(request):
             else:
                 str_medio_pago = medio_pago
             datos_transaccion = calcular_conversion(monto, moneda, 'compra', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
+            if str_medio_pago == 'Efectivo' and no_redondeado(datos_transaccion['precio_final'], list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                messages.error(request, 'El monto final no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                return redirect('transacciones:compra_monto_moneda')
+            if medio_cobro == 'Efectivo' and no_redondeado(monto, list(Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))) > 0:
+                messages.error(request, 'El monto ingresado no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                return redirect('transacciones:compra_monto_moneda')
             if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:compra_monto_moneda')
@@ -558,7 +573,6 @@ def compra_confirmacion(request):
                 tipo='compra',
                 moneda=moneda,
                 monto=datos_transaccion['monto'],
-                monto_original=datos_transaccion['monto_original'],
                 cotizacion=datos_transaccion['cotizacion'],
                 precio_base=datos_transaccion['precio_base'],
                 beneficio_segmento=datos_transaccion['beneficio_segmento'],
@@ -567,8 +581,6 @@ def compra_confirmacion(request):
                 porc_recargo_pago=datos_transaccion['porc_recargo_pago'],
                 recargo_cobro=datos_transaccion['monto_recargo_cobro'],
                 porc_recargo_cobro=datos_transaccion['porc_recargo_cobro'],
-                redondeo_efectivo_monto=datos_transaccion['redondeo_efectivo_monto'],
-                redondeo_efectivo_precio_final=datos_transaccion['redondeo_efectivo_precio_final'],
                 precio_final=datos_transaccion['precio_final'],
                 medio_pago=str_medio_pago,
                 medio_cobro=medio_cobro,
@@ -1166,6 +1178,20 @@ def venta_confirmacion(request):
             if cambios and cambios.get('hay_cambios'):
                 transaccion = Transaccion.objects.filter(id=request.session.get('transaccion_id')).first()
                 datos_transaccion = calcular_conversion(transaccion.monto, transaccion.moneda, 'venta', transaccion.medio_pago, transaccion.medio_cobro, request.user.cliente_activo.segmento)
+                if transaccion.medio_pago == 'Efectivo' and no_redondeado(transaccion.monto, list(Denominacion.objects.filter(moneda=transaccion.moneda).values_list('valor', flat=True))) > 0:
+                    messages.error(request, 'El monto ingresado no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para pago en efectivo tras cambio de cotización'
+                    transaccion.save()
+                    return redirect('transacciones:venta_monto_moneda')
+                if transaccion.medio_cobro == 'Efectivo' and no_redondeado(transaccion.precio_final, list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                    messages.error(request, 'El monto final no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                    transaccion.estado = 'Cancelada'
+                    transaccion.fecha_hora = timezone.now()
+                    transaccion.razon = 'Monto no redondeado para cobro en efectivo tras cambio de cotización'
+                    transaccion.save()
+                    return redirect('transacciones:venta_monto_moneda')
                 transaccion.precio_base = datos_transaccion['precio_base']
                 transaccion.cotizacion = datos_transaccion['cotizacion']
                 transaccion.beneficio_segmento = datos_transaccion['beneficio_segmento']
@@ -1174,9 +1200,6 @@ def venta_confirmacion(request):
                 transaccion.porc_recargo_pago = datos_transaccion['porc_recargo_pago']
                 transaccion.recargo_cobro = datos_transaccion['monto_recargo_cobro']
                 transaccion.porc_recargo_cobro = datos_transaccion['porc_recargo_cobro']
-                transaccion.redondeo_efectivo_monto = datos_transaccion['redondeo_efectivo_monto']
-                transaccion.redondeo_efectivo_precio_final = datos_transaccion['redondeo_efectivo_precio_final']
-                transaccion.monto_original = datos_transaccion['monto_original']
                 transaccion.monto = datos_transaccion['monto']
                 transaccion.precio_final = datos_transaccion['precio_final']
                 transaccion.save()
@@ -1273,6 +1296,12 @@ def venta_confirmacion(request):
                 str_medio_cobro = medio_cobro
                 
             datos_transaccion = calcular_conversion(monto, moneda, 'venta', medio_pago, medio_cobro, request.user.cliente_activo.segmento)
+            if str_medio_pago == 'Efectivo' and no_redondeado(monto, list(Denominacion.objects.filter(moneda=moneda).values_list('valor', flat=True))) > 0:
+                messages.error(request, 'El monto ingresado no está redondeado para pago en efectivo. Intente nuevamente con otro monto.')
+                return redirect('transacciones:venta_monto_moneda')
+            if str_medio_cobro == 'Efectivo' and no_redondeado(datos_transaccion['precio_final'], list(Denominacion.objects.filter(moneda=None).values_list('valor', flat=True))) > 0:
+                messages.error(request, 'El monto final no está redondeado para cobro en efectivo. Intente nuevamente con otro monto.')
+                return redirect('transacciones:venta_monto_moneda')
             if datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_diario - request.user.cliente_activo.consumo_diario) or datos_transaccion['precio_final'] > (LimiteGlobal.objects.first().limite_mensual - request.user.cliente_activo.consumo_mensual):
                 messages.warning(request, 'El monto final excede sus límites diarios o mensuales. Reinicie el proceso con un monto menor.')
                 return redirect('transacciones:venta_monto_moneda')
@@ -1285,7 +1314,6 @@ def venta_confirmacion(request):
                 tipo='venta',
                 moneda=moneda,
                 monto=datos_transaccion['monto'],
-                monto_original=datos_transaccion['monto_original'],
                 cotizacion=datos_transaccion['cotizacion'],
                 precio_base=datos_transaccion['precio_base'],
                 beneficio_segmento=datos_transaccion['beneficio_segmento'],
@@ -1294,8 +1322,6 @@ def venta_confirmacion(request):
                 porc_recargo_pago=datos_transaccion['porc_recargo_pago'],
                 recargo_cobro=datos_transaccion['monto_recargo_cobro'],
                 porc_recargo_cobro=datos_transaccion['porc_recargo_cobro'],
-                redondeo_efectivo_monto=datos_transaccion['redondeo_efectivo_monto'],
-                redondeo_efectivo_precio_final=datos_transaccion['redondeo_efectivo_precio_final'],
                 precio_final=datos_transaccion['precio_final'],
                 medio_pago=str_medio_pago,
                 medio_cobro=str_medio_cobro,
@@ -1389,8 +1415,6 @@ def venta_exito(request):
         else:
             try:
                 generar_token_transaccion(transaccion)
-                transaccion.fecha_hora = timezone.now()
-                transaccion.save()
             except Exception as e:
                 messages.error(request, 'Error al generar token de transacción. Intente nuevamente.')
                 return redirect('transacciones:venta_medio_cobro')
@@ -2098,28 +2122,20 @@ def descargar_historial_pdf(request):
         ]
         
         # Detalles específicos por tipo de transacción
-        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
         monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
-        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
         
         if transaccion.tipo == 'compra':
             details_data.extend([
-                ['Monto ingresado para compra', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
-                ['Redondeo por medio cobro Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"],
                 ['Monto a comprar', f"{monto_formateado} {transaccion.moneda.simbolo}"],
                 ['Cotización para compra', f"Gs. {transaccion.cotizacion:,.0f}"],
                 ['Precio base para compra', f"Gs. {transaccion.precio_base:,.0f}"]
             ])
         else:
             details_data.extend([
-                ['Monto ingresado para venta', f"{monto_original_formateado} {transaccion.moneda.simbolo}"],
                 ['Monto a vender', f"{monto_formateado} {transaccion.moneda.simbolo}"],
                 ['Cotización para venta', f"Gs. {transaccion.cotizacion:,.0f}"],
                 ['Precio base para venta', f"Gs. {transaccion.precio_base:,.0f}"]
             ])
-            
-            if transaccion.medio_pago == 'Efectivo':
-                details_data.append(['Redondeo por medio pago Efectivo', f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}"])
         
         # Beneficios y recargos
         if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
@@ -2131,11 +2147,6 @@ def descargar_historial_pdf(request):
         
         if transaccion.tipo == 'venta':
             details_data.append([f'Recargo por medio de cobro ({transaccion.porc_recargo_cobro})', f"Gs. {transaccion.recargo_cobro:,.0f}"])
-        
-        # Redondeo efectivo para precio final si aplica
-        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
-            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
-            details_data.append(['Redondeo efectivo precio final', f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}"])
         
         # Montos finales
         if transaccion.tipo == 'compra':
@@ -2475,24 +2486,16 @@ def descargar_historial_excel(request):
         current_row = add_detail_row("Medio de Cobro:", transaccion.medio_cobro)
         
         # Detalles específicos por tipo de transacción
-        monto_original_formateado = f"{transaccion.monto_original:.{transaccion.moneda.decimales}f}"
         monto_formateado = f"{transaccion.monto:.{transaccion.moneda.decimales}f}"
-        redondeo_monto_formateado = f"{transaccion.redondeo_efectivo_monto:.{transaccion.moneda.decimales}f}"
         
         if transaccion.tipo == 'compra':
-            current_row = add_detail_row("Monto ingresado para compra:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
-            current_row = add_detail_row("Redondeo por medio cobro Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
             current_row = add_detail_row("Monto a comprar:", f"{monto_formateado} {transaccion.moneda.simbolo}")
             current_row = add_detail_row("Cotización para compra:", f"Gs. {transaccion.cotizacion:,.0f}")
             current_row = add_detail_row("Precio base para compra:", f"Gs. {transaccion.precio_base:,.0f}")
         else:
-            current_row = add_detail_row("Monto ingresado para venta:", f"{monto_original_formateado} {transaccion.moneda.simbolo}")
             current_row = add_detail_row("Monto a vender:", f"{monto_formateado} {transaccion.moneda.simbolo}")
             current_row = add_detail_row("Cotización para venta:", f"Gs. {transaccion.cotizacion:,.0f}")
             current_row = add_detail_row("Precio base para venta:", f"Gs. {transaccion.precio_base:,.0f}")
-            
-            if transaccion.medio_pago == 'Efectivo':
-                current_row = add_detail_row("Redondeo por medio pago Efectivo:", f"{redondeo_monto_formateado} {transaccion.moneda.simbolo}")
         
         # Beneficios y recargos
         if transaccion.beneficio_segmento and transaccion.beneficio_segmento > 0:
@@ -2504,11 +2507,6 @@ def descargar_historial_excel(request):
         
         if transaccion.tipo == 'venta':
             current_row = add_detail_row(f"Recargo por medio de cobro ({transaccion.porc_recargo_cobro}):", f"Gs. {transaccion.recargo_cobro:,.0f}")
-        
-        # Redondeo efectivo para precio final si aplica
-        if ((transaccion.tipo == 'compra' and transaccion.medio_pago == 'Efectivo') or 
-            (transaccion.tipo == 'venta' and transaccion.medio_cobro == 'Efectivo')):
-            current_row = add_detail_row("Redondeo efectivo precio final:", f"Gs. {transaccion.redondeo_efectivo_precio_final:,.0f}")
         
         # Montos finales
         if transaccion.tipo == 'compra':
@@ -2564,3 +2562,75 @@ def descargar_historial_excel(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     return response
+
+@login_required
+def descargar_factura_view(request, transaccion_id):
+    """
+    Vista para descargar la factura electrónica de una transacción.
+    
+    Esta vista permite a los usuarios descargar el PDF de la factura electrónica
+    de una transacción completada. Utiliza la función descargar_factura del modelo
+    para obtener el contenido del PDF desde el servicio de facturación.
+    
+    Validaciones:
+        - La transacción debe existir
+        - El usuario debe tener permisos para acceder a la transacción
+        - La transacción debe tener una factura generada (campo factura no vacío)
+    
+    Args:
+        request (HttpRequest): Petición HTTP
+        transaccion_id (int): ID de la transacción para la cual descargar la factura
+        
+    Returns:
+        HttpResponse: Archivo PDF de la factura con content-type 'application/pdf'
+            - Nombre del archivo: 'factura_{CDC}.pdf'
+            - Headers configurados para descarga automática
+            
+    Raises:
+        HttpResponse(404): Si la transacción no existe
+        HttpResponse(403): Si el usuario no tiene permisos para acceder
+        HttpResponse(400): Si la transacción no tiene factura generada
+    """
+    try:
+        # Obtener la transacción
+        transaccion = get_object_or_404(Transaccion, id=transaccion_id)
+        
+        # Verificar permisos del usuario
+        if transaccion.cliente not in request.user.clientes_operados.all():
+            messages.error(request, "No tienes permiso para descargar la factura de esta transacción.")
+            return redirect('inicio')
+        
+        # Verificar que la transacción tenga factura generada
+        if not transaccion.factura:
+            messages.error(request, "Esta transacción no tiene una factura generada.")
+            return redirect('transacciones:historial_detalle', transaccion_id=transaccion.id)
+        
+        # Obtener el CDC de la factura
+        CDC = transaccion.factura
+        
+        # Descargar la factura usando la función del modelo
+        resultado = descargar_factura(CDC)
+        
+        if resultado['success']:
+            # Crear la respuesta HTTP con el PDF
+            response = HttpResponse(
+                resultado['content'],
+                content_type=resultado['content_type']
+            )
+            response['Content-Disposition'] = f'attachment; filename="{resultado["filename"]}"'
+            
+            logger.info(f"Factura descargada exitosamente para transacción {transaccion_id} por usuario {request.user.username}")
+            return response
+        else:
+            # Si hubo un error al descargar
+            messages.error(request, "Error al descargar la factura. Por favor, intente nuevamente.")
+            logger.error(f"Error al descargar factura para transacción {transaccion_id}: {resultado.get('error', 'Error desconocido')}")
+            return redirect('transacciones:historial_detalle', transaccion_id=transaccion.id)
+            
+    except Transaccion.DoesNotExist:
+        messages.error(request, "La transacción solicitada no existe.")
+        return redirect('inicio')
+    except Exception as e:
+        messages.error(request, f"Error inesperado al descargar la factura: {str(e)}")
+        logger.error(f"Error inesperado al descargar factura para transacción {transaccion_id}: {str(e)}")
+        return redirect('inicio')

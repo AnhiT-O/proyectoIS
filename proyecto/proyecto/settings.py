@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'monedas',
     'transacciones',
     'corsheaders',
-    'medios_acreditacion'
+    'medios_acreditacion',
+    'reportes',
 ]
 
 MIDDLEWARE = [
@@ -186,4 +187,4 @@ TWO_FACTOR_AUTH = {
 
 # Configuración de Factura Segura
 FACTURA_SEGURA_API_URL = 'https://apitest.facturasegura.com.py'
-NUMERO_FACTURACION = 376
+NUMERO_FACTURACION = 379
