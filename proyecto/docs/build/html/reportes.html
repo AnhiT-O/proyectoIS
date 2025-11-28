@@ -86,59 +86,197 @@
   <section id="reportes">
 <h1>Reportes<a class="headerlink" href="#reportes" title="Link to this heading"></a></h1>
 <p>Documentación del módulo de Reportes y Ganancias de Transacciones.</p>
-<dl class="py function" id="module-reportes.views">
+<p id="module-reportes.views">Módulo de vistas para el sistema de reportes y análisis de ganancias.</p>
+<p>Este módulo contiene las vistas necesarias para generar reportes financieros,
+analizar transacciones y mostrar dashboards de ganancias para usuarios
+con privilegios de administrador.</p>
+<p>Funcionalidades principales:
+- Generación de reportes de transacciones con filtros avanzados
+- Dashboard interactivo de ganancias con visualización temporal
+- APIs REST para datos de gráficos y análisis financiero
+- Cálculo de ganancias basado en comisiones y descuentos por segmento</p>
+<p>Autor: Sistema de Casa de Cambio
+Fecha: Noviembre 2024</p>
+<dl class="py function">
 <dt class="sig sig-object py" id="reportes.views.dashboard_ganancias">
 <span class="sig-prename descclassname"><span class="pre">reportes.views.</span></span><span class="sig-name descname"><span class="pre">dashboard_ganancias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/reportes/views.html#dashboard_ganancias"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#reportes.views.dashboard_ganancias" title="Link to this definition"></a></dt>
-<dd><p>Dashboard de ganancias con gráfico temporal.
-Acceso exclusivo para Administradores.
-Muestra por defecto las ganancias totales del último mes.</p>
+<dd><p>Renderiza el dashboard principal de análisis de ganancias.</p>
+<p>Proporciona una interfaz interactiva para visualizar las ganancias del sistema
+mediante gráficos temporales y análisis por monedas. Los datos se cargan
+de forma asíncrona mediante APIs REST para optimizar el rendimiento.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página del dashboard con gráficos interactivos
+HttpResponseForbidden: Si el usuario no tiene rol de Administrador</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Características:</dt><dd><ul class="simple">
+<li><p>Gráficos de líneas para evolución temporal de ganancias</p></li>
+<li><p>Gráficos de torta para distribución por monedas</p></li>
+<li><p>Filtros por período (hoy, semana, mes, 6 meses, año)</p></li>
+<li><p>Análisis por moneda específica o global</p></li>
+<li><p>Carga de datos asíncrona con Chart.js</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Los datos se obtienen mediante las APIs obtener_datos_ganancias
+y obtener_desglose_ganancias para mejor rendimiento.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="reportes.views.obtener_datos_ganancias">
 <span class="sig-prename descclassname"><span class="pre">reportes.views.</span></span><span class="sig-name descname"><span class="pre">obtener_datos_ganancias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/reportes/views.html#obtener_datos_ganancias"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#reportes.views.obtener_datos_ganancias" title="Link to this definition"></a></dt>
-<dd><p>API endpoint que devuelve datos de ganancias en formato JSON para el gráfico.
-Parámetros GET:
-- rango: “semana”, “mes”, “6meses”, “año”
-- moneda_id: ID de moneda específica (opcional, si no se envía devuelve total de todas)</p>
-<p>Retorna JSON con:
-- fechas: lista de fechas
-- ganancias: lista de ganancias por fecha
-- ganancia_total: suma total</p>
+<dd><p>API REST que proporciona datos de ganancias agregados por fecha para gráficos temporales.</p>
+<p>Endpoint utilizado por el dashboard para generar gráficos de líneas que muestran
+la evolución temporal de las ganancias. Los datos se agrupan por día y se pueden
+filtrar por período temporal y moneda específica.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP con parámetros GET:
+- rango: Período a analizar (“hoy”, “semana”, “mes”, “6meses”, “año”)
+- moneda_id: ID de moneda específica (opcional, incluye todas si se omite)</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Datos en formato JSON con estructura:</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>«fechas»: [«DD/MM/YYYY», …],        # Fechas formateadas
+«ganancias»: [123.45, …],           # Ganancias por fecha
+«ganancia_total»: 1234.56,            # Suma total del período
+«moneda»: «Nombre de moneda»           # Moneda filtrada o «Todas»</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>JsonResponse con error 403: Si no tiene permisos de administrador</p>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Business Logic:</dt><dd><ul class="simple">
+<li><p>Solo considera transacciones con estado “completa” o “confirmada”</p></li>
+<li><p>Aplica las mismas fórmulas de cálculo que transacciones_reportes</p></li>
+<li><p>Agrupa resultados por fecha y los ordena cronológicamente</p></li>
+<li><p>Formatea fechas para mejor visualización en gráficos</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="reportes.views.obtener_desglose_ganancias">
 <span class="sig-prename descclassname"><span class="pre">reportes.views.</span></span><span class="sig-name descname"><span class="pre">obtener_desglose_ganancias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/reportes/views.html#obtener_desglose_ganancias"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#reportes.views.obtener_desglose_ganancias" title="Link to this definition"></a></dt>
-<dd><p>API endpoint que devuelve datos de ganancias por moneda para los gráficos.
-Parámetros GET:
-- rango: “hoy”, “semana”, “mes”, “6meses”, “año”
-- moneda_id: ID de moneda específica (opcional)
-Retorna JSON con la estructura que espera el frontend:
-{</p>
+<dd><p>API REST que proporciona análisis detallado de ganancias por moneda y tipo de operación.</p>
+<p>Endpoint especializado para generar gráficos de torta (pie charts) y análisis
+comparativos entre diferentes monedas. Separa los datos por tipo de transacción
+(compra/venta) y calcula porcentajes relativos para cada segmento.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP con parámetros GET:
+- rango: Período temporal (“hoy”, “semana”, “mes”, “6meses”, “año”)
+- moneda_id: ID de moneda específica (opcional)</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>Datos estructurados para gráficos con formato:</dt><dd><dl>
+<dt>{</dt><dd><dl>
+<dt>«desglose»: {</dt><dd><dl class="simple">
+<dt>«venta»: {</dt><dd><p>«labels»: [«USD», «EUR», …],      # Nombres de monedas
+«percents»: [45.5, 32.1, …],     # Porcentajes relativos
+«values»: [1234.56, 890.12, …]   # Valores absolutos</p>
+</dd>
+</dl>
+<p>},
+«compra»: {</p>
 <blockquote>
-<div><dl class="simple">
-<dt>«desglose»: {</dt><dd><p>«venta»: {«labels»: […], «percents»: […], «values»: […]},
-«compra»: {«labels»: […], «percents»: […], «values»: […]},
-«total»: {«labels»: […], «values»: […]}</p>
+<div><p>»labels»: […], «percents»: […], «values»: […]</p>
+</div></blockquote>
+<p>},
+«total»: {</p>
+<blockquote>
+<div><p>»labels»: […], «values»: […]    # Sin porcentajes</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>},
+«ganancia_total»: 5678.90,
+«moneda»: «Todas»</p>
 </dd>
 </dl>
 <p>}</p>
-</div></blockquote>
-<p>}</p>
+</dd>
+</dl>
+<p>JsonResponse con error 403: Si no tiene permisos de administrador</p>
+</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JsonResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Business Logic:</dt><dd><ul class="simple">
+<li><p>Separa ganancias por tipo de operación (compra/venta)</p></li>
+<li><p>Calcula porcentajes relativos dentro de cada tipo</p></li>
+<li><p>Utiliza las mismas fórmulas de cálculo que otras funciones del módulo</p></li>
+<li><p>Solo considera transacciones completadas</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="reportes.views.transacciones_reportes">
 <span class="sig-prename descclassname"><span class="pre">reportes.views.</span></span><span class="sig-name descname"><span class="pre">transacciones_reportes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/reportes/views.html#transacciones_reportes"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#reportes.views.transacciones_reportes" title="Link to this definition"></a></dt>
-<dd><p>Informe de transacciones y cálculo de ganancias usando exclusivamente las fórmulas proporcionadas.
-Acceso reservado a usuarios con rol “Administrador”.
-Se aceptan filtros GET: fecha_desde (YYYY-MM-DD), fecha_hasta (YYYY-MM-DD), moneda (id), estado, cliente (id).
-Reglas:
-- En venta: solo comisión y ganancia de venta.
-- En compra: solo comisión y ganancia de compra.
-- Descuento proviene del segmento del cliente (si existe).
-- Ganancia total se resume por moneda en resumen_por_moneda.</p>
+<dd><p>Genera un reporte completo de transacciones con análisis de ganancias.</p>
+<p>Esta vista proporciona un informe detallado de todas las transacciones del sistema,
+calculando las ganancias basadas en comisiones, descuentos por segmento de cliente
+y tipo de operación (compra/venta). Incluye múltiples opciones de filtrado y
+separación de datos por tipo de transacción.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parámetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>HttpRequest</em>) – Objeto de solicitud HTTP con parámetros GET opcionales
+para filtrar por fechas, monedas, estados, clientes y segmentos.</p>
+</dd>
+<dt class="field-even">Devuelve<span class="colon">:</span></dt>
+<dd class="field-even"><p>Página renderizada con el reporte completo de transacciones
+HttpResponseForbidden: Si el usuario no tiene rol de Administrador</p>
+</dd>
+<dt class="field-odd">Tipo del valor devuelto<span class="colon">:</span></dt>
+<dd class="field-odd"><p>HttpResponse</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Filtros disponibles:</dt><dd><ul class="simple">
+<li><p>dia_inicio/mes_inicio/año_inicio: Componentes de fecha de inicio</p></li>
+<li><p>dia_fin/mes_fin/año_fin: Componentes de fecha de fin</p></li>
+<li><p>moneda: ID o nombre de moneda</p></li>
+<li><p>estado: Estado de transacción</p></li>
+<li><p>cliente: ID de cliente</p></li>
+<li><p>tipo: Tipo de transacción (“compra” o “venta”)</p></li>
+<li><p>segmento: Segmento de cliente (“minorista”, “corporativo”, “vip”)</p></li>
+</ul>
+</dd>
+<dt>Fórmulas de cálculo:</dt><dd><ul class="simple">
+<li><p>Venta: monto_origen × (comisión_venta - descuento_segmento)</p></li>
+<li><p>Compra: monto_origen × (comisión_compra - descuento_segmento)</p></li>
+<li><p>Descuentos: Minorista 0%, Corporativo 5%, VIP 10%</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
