@@ -11,13 +11,19 @@
 
 # --- Parámetros ---
 DB_NAME="bd_desarrollo"
+SQL_FILE="backup_datos.sql"
 
-if [ "$#" -gt 1 ]; then
-	echo "Uso: $0 [SQL_FILE]"
+# Git tag/branch a usar (por defecto: desarrollo)
+GIT_TAG="${1:-desarrollo}"
+
+# --- Cambio de rama/tag de Git ---
+echo "Cambiando a la rama/tag: $GIT_TAG"
+git checkout $GIT_TAG
+
+if [ $? -ne 0 ]; then
+	echo "Error: No se pudo cambiar a la rama/tag '$GIT_TAG'"
 	exit 1
 fi
-
-SQL_FILE="$1"
 
 # --- Proceso de reseteo ---
 
@@ -58,15 +64,11 @@ python manage.py makemigrations
 python manage.py migrate
 cd ..
 
-# 5. Importación de datos desde el archivo SQL (solo si se proporciona)
-if [ -n "$SQL_FILE" ]; then
-	echo "5. Importando datos desde el archivo '$SQL_FILE'..."
-	sudo cp $SQL_FILE /var/lib/postgresql/$SQL_FILE
-	sudo -i -u postgres psql -d $DB_NAME -f "$SQL_FILE"
-	echo "La base de datos ahora está limpia, con las migraciones aplicadas y los datos de '$SQL_FILE' importados."
-else
-	echo "La base de datos ahora está limpia y con las migraciones aplicadas. No se importaron datos adicionales."
-fi
+# 5. Importación de datos desde el archivo 'backup_datos.sql'
+echo "5. Importando datos desde el archivo 'backup_datos.sql'..."
+sudo cp $SQL_FILE /var/lib/postgresql/$SQL_FILE
+sudo -i -u postgres psql -d $DB_NAME -f "$SQL_FILE"
+echo "La base de datos ahora está limpia, con las migraciones aplicadas y los datos importados."
 
 echo "Proceso de reseteo completado para la base de datos '$DB_NAME'."
 echo "Iniciando el servidor de desarrollo de Django..."

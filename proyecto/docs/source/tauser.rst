@@ -24,9 +24,6 @@ Módulos de proyecto tauser
 .. automodule:: tauser.views
     :members:
 
-.. automodule:: tauser.urls
-    :members:
 
-.. automodule:: tauser.settings
-    :members:
+
 

@@ -1,0 +1,745 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>reportes.views &mdash; documentación de Global Exchange - Versión 2</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=3e28a9e4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=f85f4cfb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Global Exchange
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../clientes.html">Clientes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monedas.html">Monedas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../proyecto.html">Directorio principal del Proyecto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../transacciones.html">Transacciones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usuarios.html">Usuarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tauser.html">Tauser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reportes.html">Reportes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Global Exchange</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Código de módulo</a></li>
+      <li class="breadcrumb-item active">reportes.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Código fuente para reportes.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpResponseForbidden</span><span class="p">,</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transacciones.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transaccion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">monedas.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moneda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cliente</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sum</span><span class="p">,</span> <span class="n">Q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+
+
+<div class="viewcode-block" id="transacciones_reportes">
+<a class="viewcode-back" href="../../reportes.html#reportes.views.transacciones_reportes">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transacciones_reportes</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Informe de transacciones y cálculo de ganancias usando exclusivamente las fórmulas proporcionadas.</span>
+<span class="sd">    Acceso reservado a usuarios con rol &#39;Administrador&#39;.</span>
+<span class="sd">    Se aceptan filtros GET: fecha_desde (YYYY-MM-DD), fecha_hasta (YYYY-MM-DD), moneda (id), estado, cliente (id).</span>
+<span class="sd">    Reglas:</span>
+<span class="sd">    - En venta: solo comisión y ganancia de venta.</span>
+<span class="sd">    - En compra: solo comisión y ganancia de compra.</span>
+<span class="sd">    - Descuento proviene del segmento del cliente (si existe).</span>
+<span class="sd">    - Ganancia total se resume por moneda en resumen_por_moneda.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Administrador&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s1">&#39;Acceso denegado: requiere rol Administrador&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Filtros</span>
+    <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fecha_desde&#39;</span><span class="p">)</span>
+    <span class="n">fecha_hasta</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fecha_hasta&#39;</span><span class="p">)</span>
+    <span class="c1"># Nuevo filtro unificado: rango de fechas en formato &#39;YYYY-MM-DD - YYYY-MM-DD&#39;</span>
+    <span class="n">rango_fecha</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rango_fecha&#39;</span><span class="p">)</span>
+    <span class="n">moneda_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda&#39;</span><span class="p">)</span>
+    <span class="n">estado_filter</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;estado&#39;</span><span class="p">)</span>
+    <span class="n">cliente_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cliente&#39;</span><span class="p">)</span>
+    <span class="n">tipo_filter</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tipo&#39;</span><span class="p">)</span>
+
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-fecha_hora&#39;</span><span class="p">)</span>
+    <span class="c1"># Si se proporciona rango_fecha, parsearlo y aplicar filtro, sino usar fecha_desde/fecha_hasta individuales</span>
+    <span class="k">if</span> <span class="n">rango_fecha</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">rango_fecha</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># intentar YYYY-MM-DD primero, si falla intentar DD-MM-YYYY</span>
+                <span class="n">fecha1</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">fecha2</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">dt_desde</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha1</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">dt_hasta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha2</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">dt_desde</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha1</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%m-%Y&#39;</span><span class="p">)</span>
+                    <span class="n">dt_hasta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">-%m-%Y&#39;</span><span class="p">)</span>
+                <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">fecha_hora__gte</span><span class="o">=</span><span class="n">dt_desde</span><span class="p">,</span> <span class="n">fecha_hora__lte</span><span class="o">=</span><span class="n">dt_hasta</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># Si falla el parseo, no aplicar filtro por rango</span>
+            <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tipo_filter</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tipo__iexact</span><span class="o">=</span><span class="n">tipo_filter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fecha_desde</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dt_desde</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha_desde</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">fecha_hora__gte</span><span class="o">=</span><span class="n">dt_desde</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">fecha_hasta</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dt_hasta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">fecha_hasta</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">fecha_hora__lte</span><span class="o">=</span><span class="n">dt_hasta</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="c1"># Si no se usó rango_fecha y se pasó tipo_filter, ya fue aplicado arriba</span>
+    <span class="k">if</span> <span class="n">moneda_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda__id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">moneda_id</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda__nombre__icontains</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">estado_filter</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="n">estado_filter</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cliente_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cliente__id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">cliente_id</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">filas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">resumen_por_moneda</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">fecha</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;fecha_hora&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;fecha&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">tipo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;tipo&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">moneda_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;moneda&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">moneda_nombre</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="s1">&#39;Sin moneda&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">moneda_obj</span> <span class="k">else</span> <span class="s1">&#39;Sin moneda&#39;</span>
+        <span class="n">moneda_simbolo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;simbolo&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">moneda_obj</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto_origen&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monto_origen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">monto_destino</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto_destino&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monto_destino</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">monto_destino</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;precio_final&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># obtener comisiones desde transacción o moneda</span>
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moneda_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">comision_compra</span><span class="p">:</span>
+                <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_comp&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">comision_venta</span><span class="p">:</span>
+                <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_vta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_compra</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_venta</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># (Se usan las comisiones tal como están en el registro: número directo)</span>
+
+        <span class="c1"># descuento: prioridad segmento del cliente</span>
+        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">cliente_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;cliente&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">segmento_nombre</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">beneficio_segmento</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Si cliente tiene segmento, intentar mapear por nombre a porcentajes definidos</span>
+        <span class="k">if</span> <span class="n">cliente_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">segmento</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cliente_obj</span><span class="p">,</span> <span class="s1">&#39;segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">segmento</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># obtener nombre del segmento si viene como objeto o string</span>
+                <span class="n">seg_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="n">segmento</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># intentar obtener nombre de objeto relacionado</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">seg_obj</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Segmento</span>
+                        <span class="n">seg_obj</span> <span class="o">=</span> <span class="n">Segmento</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">segmento</span><span class="p">))</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">seg_obj</span><span class="p">:</span>
+                            <span class="n">seg_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">seg_obj</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">seg_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">seg_name</span><span class="p">:</span>
+                    <span class="n">segmento_nombre</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">seg_name</span><span class="p">)</span>
+                    <span class="n">sn</span> <span class="o">=</span> <span class="n">segmento_nombre</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="c1"># Mapear segmentos a porcentajes: minorista 0, corporativo 5, vip 10</span>
+                    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;minorista&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+                        <span class="s1">&#39;vip&#39;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+                        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span>
+                        <span class="n">beneficio_segmento</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span>
+
+        <span class="c1"># Priorizar el valor guardado en la transacción: &#39;porc_beneficio_segmento&#39; o &#39;beneficio_segmento&#39;</span>
+        <span class="n">trans_benef</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porc_beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trans_benef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trans_benef</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">beneficio_segmento</span> <span class="o">=</span> <span class="n">trans_benef</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Si aún no se definió, fallback a campos genéricos en la transacción</span>
+        <span class="k">if</span> <span class="n">porcentaje_descuento</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porcentaje_descuento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;pordes&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">porcentaje_descuento</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monto_origen</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">monto_destino</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monto_destino</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">monto_destino</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Obtener estado antes de calcular ganancias</span>
+        <span class="n">estado</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;estado&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># según tipo, calcular solo la ganancia aplicable</span>
+        <span class="n">ganancia_comp</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">ganancia_vta</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">comision_compra_val</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">comision_venta_val</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
+            <span class="c1"># usar comision_venta y monto_destino (comision como número directo)</span>
+            <span class="n">comision_venta_val</span> <span class="o">=</span> <span class="n">comision_venta</span>
+            <span class="n">ganancia_vta</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span><span class="mi">100</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+            <span class="n">comision_compra_val</span> <span class="o">=</span> <span class="n">comision_compra</span>
+            <span class="n">ganancia_comp</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+
+        <span class="c1"># Solo se consideran ganancias si la transacción está completa o confirmada</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">estado</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">estado</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;completa&#39;</span><span class="p">,</span> <span class="s1">&#39;confirmada&#39;</span><span class="p">]):</span>
+            <span class="n">ganancia_comp</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">ganancia_vta</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">ganancia_total_trans</span> <span class="o">=</span> <span class="n">ganancia_comp</span> <span class="o">+</span> <span class="n">ganancia_vta</span>
+        <span class="c1"># acumular resumen por moneda</span>
+        <span class="n">resumen_por_moneda</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">moneda_nombre</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">resumen_por_moneda</span><span class="p">[</span><span class="n">moneda_nombre</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ganancia_total_trans</span>
+
+        <span class="c1"># determinar cliente/actor</span>
+        <span class="n">cliente_nombre</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">cliente_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cliente_nombre</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cliente_obj</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">cliente_obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;usuario&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;usuario&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">usuario_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;usuario&#39;</span><span class="p">)</span>
+            <span class="n">cliente_nombre</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usuario_obj</span><span class="p">,</span> <span class="s1">&#39;nombre_completo&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usuario_obj</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">usuario_obj</span><span class="p">)</span>
+
+        <span class="n">estado</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;estado&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Mostrar descuento derivado del segmento del cliente si existe (display)</span>
+        <span class="n">porcentaje_descuento_display</span> <span class="o">=</span> <span class="n">porcentaje_descuento</span>
+
+        <span class="n">filas</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;fecha&#39;</span><span class="p">:</span> <span class="n">fecha</span><span class="p">,</span>
+            <span class="s1">&#39;tipo_transaccion&#39;</span><span class="p">:</span> <span class="n">tipo</span><span class="p">,</span>
+            <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda_nombre</span><span class="p">,</span>
+            <span class="s1">&#39;moneda_simbolo&#39;</span><span class="p">:</span> <span class="n">moneda_simbolo</span><span class="p">,</span>
+            <span class="s1">&#39;monto_origen&#39;</span><span class="p">:</span> <span class="n">monto_origen</span><span class="p">,</span>
+            <span class="s1">&#39;monto_destino&#39;</span><span class="p">:</span> <span class="n">monto_destino</span><span class="p">,</span>
+            <span class="s1">&#39;comision_compra&#39;</span><span class="p">:</span> <span class="n">comision_compra_val</span><span class="p">,</span>
+            <span class="s1">&#39;comision_venta&#39;</span><span class="p">:</span> <span class="n">comision_venta_val</span><span class="p">,</span>
+            <span class="s1">&#39;porcentaje_descuento&#39;</span><span class="p">:</span> <span class="n">porcentaje_descuento</span><span class="p">,</span>
+            <span class="s1">&#39;porcentaje_descuento_display&#39;</span><span class="p">:</span> <span class="n">porcentaje_descuento_display</span><span class="p">,</span>
+            <span class="s1">&#39;segmento&#39;</span><span class="p">:</span> <span class="n">segmento_nombre</span><span class="p">,</span>
+            <span class="s1">&#39;beneficio_segmento&#39;</span><span class="p">:</span> <span class="n">beneficio_segmento</span><span class="p">,</span>
+            <span class="s1">&#39;ganancia_comp&#39;</span><span class="p">:</span> <span class="n">ganancia_comp</span><span class="p">,</span>
+            <span class="s1">&#39;ganancia_vta&#39;</span><span class="p">:</span> <span class="n">ganancia_vta</span><span class="p">,</span>
+            <span class="s1">&#39;cliente&#39;</span><span class="p">:</span> <span class="n">cliente_nombre</span><span class="p">,</span>
+            <span class="s1">&#39;estado&#39;</span><span class="p">:</span> <span class="n">estado</span><span class="p">,</span>
+         <span class="p">})</span>
+
+    <span class="n">total_ganancia</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">resumen_por_moneda</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># Separar por tipo para renderear tablas independientes</span>
+    <span class="n">filas_compra</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filas</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;tipo_transaccion&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">]</span>
+    <span class="n">filas_venta</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filas</span> <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;tipo_transaccion&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Determinar si mostrar columnas de compra/venta en cabecera</span>
+    <span class="n">show_compra</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filas_compra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">show_venta</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filas_venta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="c1"># Calcular colspan para el mensaje vacío: columnas fijas = 5 (Fecha, Cliente, Operación, Moneda, Monto, %Descuento, Estado) ajustado por cada tabla</span>
+    <span class="n">f_colspan</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">show_compra</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>  <span class="c1"># kept fallback, template uses per-table colspan separately</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;filas&#39;</span><span class="p">:</span> <span class="n">filas</span><span class="p">,</span>
+        <span class="s1">&#39;filas_compra&#39;</span><span class="p">:</span> <span class="n">filas_compra</span><span class="p">,</span>
+        <span class="s1">&#39;filas_venta&#39;</span><span class="p">:</span> <span class="n">filas_venta</span><span class="p">,</span>
+        <span class="s1">&#39;total_ganancia&#39;</span><span class="p">:</span> <span class="n">total_ganancia</span><span class="p">,</span>
+        <span class="s1">&#39;resumen_por_moneda&#39;</span><span class="p">:</span> <span class="n">resumen_por_moneda</span><span class="p">,</span>
+        <span class="s1">&#39;monedas&#39;</span><span class="p">:</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
+        <span class="s1">&#39;clientes&#39;</span><span class="p">:</span> <span class="n">Cliente</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span>
+        <span class="s1">&#39;f_fecha_desde&#39;</span><span class="p">:</span> <span class="n">fecha_desde</span><span class="p">,</span>
+        <span class="s1">&#39;f_fecha_hasta&#39;</span><span class="p">:</span> <span class="n">fecha_hasta</span><span class="p">,</span>
+        <span class="s1">&#39;f_fecha_rango&#39;</span><span class="p">:</span> <span class="n">rango_fecha</span><span class="p">,</span>
+        <span class="s1">&#39;f_moneda&#39;</span><span class="p">:</span> <span class="n">moneda_id</span><span class="p">,</span>
+        <span class="s1">&#39;f_estado&#39;</span><span class="p">:</span> <span class="n">estado_filter</span><span class="p">,</span>
+        <span class="s1">&#39;f_tipo&#39;</span><span class="p">:</span> <span class="n">tipo_filter</span><span class="p">,</span>
+        <span class="s1">&#39;f_cliente&#39;</span><span class="p">:</span> <span class="n">cliente_id</span><span class="p">,</span>
+        <span class="s1">&#39;show_compra&#39;</span><span class="p">:</span> <span class="n">show_compra</span><span class="p">,</span>
+        <span class="s1">&#39;show_venta&#39;</span><span class="p">:</span> <span class="n">show_venta</span><span class="p">,</span>
+        <span class="s1">&#39;f_colspan&#39;</span><span class="p">:</span> <span class="n">f_colspan</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;reportes/transacciones_reportes.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="dashboard_ganancias">
+<a class="viewcode-back" href="../../reportes.html#reportes.views.dashboard_ganancias">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dashboard_ganancias</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dashboard de ganancias con gráfico temporal.</span>
+<span class="sd">    Acceso exclusivo para Administradores.</span>
+<span class="sd">    Muestra por defecto las ganancias totales del último mes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Administrador&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s1">&#39;Acceso denegado: requiere rol Administrador&#39;</span><span class="p">)</span>
+    
+    <span class="n">monedas</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;monedas&#39;</span><span class="p">:</span> <span class="n">monedas</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;reportes/dashboard_ganancias.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="obtener_datos_ganancias">
+<a class="viewcode-back" href="../../reportes.html#reportes.views.obtener_datos_ganancias">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">obtener_datos_ganancias</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    API endpoint que devuelve datos de ganancias en formato JSON para el gráfico.</span>
+<span class="sd">    Parámetros GET:</span>
+<span class="sd">    - rango: &#39;semana&#39;, &#39;mes&#39;, &#39;6meses&#39;, &#39;año&#39;</span>
+<span class="sd">    - moneda_id: ID de moneda específica (opcional, si no se envía devuelve total de todas)</span>
+<span class="sd">    </span>
+<span class="sd">    Retorna JSON con:</span>
+<span class="sd">    - fechas: lista de fechas</span>
+<span class="sd">    - ganancias: lista de ganancias por fecha</span>
+<span class="sd">    - ganancia_total: suma total</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Administrador&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Acceso denegado&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">403</span><span class="p">)</span>
+    
+    <span class="c1"># Obtener parámetros</span>
+    <span class="n">rango</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rango&#39;</span><span class="p">,</span> <span class="s1">&#39;hoy&#39;</span><span class="p">)</span>
+    <span class="n">moneda_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    
+    <span class="c1"># Calcular fecha de inicio según el rango</span>
+    <span class="n">fecha_hasta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;hoy&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;semana&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;mes&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;6meses&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;año&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    
+    <span class="c1"># Filtrar transacciones</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">fecha_hora__gte</span><span class="o">=</span><span class="n">fecha_desde</span><span class="p">,</span>
+        <span class="n">fecha_hora__lte</span><span class="o">=</span><span class="n">fecha_hasta</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">Q</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="s1">&#39;completa&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="s1">&#39;confirmada&#39;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;fecha_hora&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Filtrar por moneda si se especifica</span>
+    <span class="k">if</span> <span class="n">moneda_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda__id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">moneda_id</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+    
+    <span class="c1"># Diccionario para agrupar ganancias por fecha</span>
+    <span class="n">ganancias_por_fecha</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">fecha</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;fecha_hora&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;fecha&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fecha</span><span class="p">:</span>
+            <span class="k">continue</span>
+            
+        <span class="c1"># Agrupar por día</span>
+        <span class="n">fecha_str</span> <span class="o">=</span> <span class="n">fecha</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="n">tipo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;tipo&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">moneda_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;moneda&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        
+        <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto_origen&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monto_origen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1"># Obtener comisiones</span>
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moneda_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">comision_compra</span><span class="p">:</span>
+                <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_comp&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">comision_venta</span><span class="p">:</span>
+                <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_vta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_compra</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_venta</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="c1"># Obtener descuento</span>
+        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">cliente_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;cliente&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">cliente_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">segmento</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cliente_obj</span><span class="p">,</span> <span class="s1">&#39;segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">segmento</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seg_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="n">segmento</span>
+                
+                <span class="k">if</span> <span class="n">seg_name</span><span class="p">:</span>
+                    <span class="n">sn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">seg_name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;minorista&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+                        <span class="s1">&#39;vip&#39;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+                        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span>
+        
+        <span class="n">trans_benef</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porc_beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trans_benef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trans_benef</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+        
+        <span class="k">if</span> <span class="n">porcentaje_descuento</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porcentaje_descuento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;pordes&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monto_origen</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="c1"># Calcular ganancia según tipo</span>
+        <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
+            <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+            <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+        
+        <span class="n">ganancias_por_fecha</span><span class="p">[</span><span class="n">fecha_str</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ganancia_trans</span>
+    
+    <span class="c1"># Convertir a listas ordenadas</span>
+    <span class="n">fechas_ordenadas</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ganancias_por_fecha</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">ganancias_lista</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">ganancias_por_fecha</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fechas_ordenadas</span><span class="p">]</span>
+    <span class="n">ganancia_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ganancias_lista</span><span class="p">)</span>
+    
+    <span class="c1"># Formatear fechas para mejor visualización</span>
+    <span class="n">fechas_formateadas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fechas_ordenadas</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">fechas_formateadas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">/%m/%Y&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">fechas_formateadas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+        <span class="s1">&#39;fechas&#39;</span><span class="p">:</span> <span class="n">fechas_formateadas</span><span class="p">,</span>
+        <span class="s1">&#39;ganancias&#39;</span><span class="p">:</span> <span class="n">ganancias_lista</span><span class="p">,</span>
+        <span class="s1">&#39;ganancia_total&#39;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">ganancia_total</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="s1">&#39;Todas&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">moneda_id</span> <span class="k">else</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">nombre</span> <span class="k">if</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">moneda_id</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;Desconocida&#39;</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="obtener_desglose_ganancias">
+<a class="viewcode-back" href="../../reportes.html#reportes.views.obtener_desglose_ganancias">[documentos]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">obtener_desglose_ganancias</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    API endpoint que devuelve datos de ganancias por moneda para los gráficos.</span>
+<span class="sd">    Parámetros GET:</span>
+<span class="sd">    - rango: &#39;hoy&#39;, &#39;semana&#39;, &#39;mes&#39;, &#39;6meses&#39;, &#39;año&#39;</span>
+<span class="sd">    - moneda_id: ID de moneda específica (opcional)</span>
+<span class="sd">    Retorna JSON con la estructura que espera el frontend:</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;desglose&quot;: {</span>
+<span class="sd">            &quot;venta&quot;: {&quot;labels&quot;: [...], &quot;percents&quot;: [...], &quot;values&quot;: [...]},</span>
+<span class="sd">            &quot;compra&quot;: {&quot;labels&quot;: [...], &quot;percents&quot;: [...], &quot;values&quot;: [...]},</span>
+<span class="sd">            &quot;total&quot;: {&quot;labels&quot;: [...], &quot;values&quot;: [...]}</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Administrador&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;Acceso denegado&#39;</span><span class="p">},</span> <span class="n">status</span><span class="o">=</span><span class="mi">403</span><span class="p">)</span>
+
+    <span class="n">rango</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rango&#39;</span><span class="p">,</span> <span class="s1">&#39;hoy&#39;</span><span class="p">)</span>
+    <span class="n">moneda_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moneda_id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">fecha_hasta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;hoy&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;semana&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;mes&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;6meses&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rango</span> <span class="o">==</span> <span class="s1">&#39;año&#39;</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fecha_desde</span> <span class="o">=</span> <span class="n">fecha_hasta</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">Transaccion</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">fecha_hora__gte</span><span class="o">=</span><span class="n">fecha_desde</span><span class="p">,</span>
+        <span class="n">fecha_hora__lte</span><span class="o">=</span><span class="n">fecha_hasta</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">Q</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="s1">&#39;completa&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">estado__iexact</span><span class="o">=</span><span class="s1">&#39;confirmada&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">moneda_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">moneda__id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">moneda_id</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># Diccionarios para acumular por tipo de transacción</span>
+    <span class="n">ganancias_venta</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">ganancias_compra</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">tipo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;tipo&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">moneda_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;moneda&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moneda_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">moneda_nombre</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="s1">&#39;Desconocida&#39;</span><span class="p">)</span>
+
+        <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto_origen&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monto_origen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;monto&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">monto_origen</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">monto_origen</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Obtener comisiones</span>
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_compra&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moneda_obj</span><span class="p">,</span> <span class="s1">&#39;comision_venta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">comision_compra</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_compra</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">comision_venta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">comision_venta</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Descuento: intentar obtener desde segmento del cliente, luego campos en la transacción, luego fallback</span>
+        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">cliente_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;cliente&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cliente_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">segmento</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cliente_obj</span><span class="p">,</span> <span class="s1">&#39;segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">segmento</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seg_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">segmento</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">seg_name</span> <span class="o">=</span> <span class="n">segmento</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="kn">from</span><span class="w"> </span><span class="nn">clientes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Segmento</span>
+                        <span class="n">seg_obj</span> <span class="o">=</span> <span class="n">Segmento</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">segmento</span><span class="p">))</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">seg_obj</span><span class="p">:</span>
+                            <span class="n">seg_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">seg_obj</span><span class="p">,</span> <span class="s1">&#39;nombre&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">seg_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">seg_name</span><span class="p">:</span>
+                    <span class="n">sn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">seg_name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;minorista&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                        <span class="s1">&#39;corporativo&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+                        <span class="s1">&#39;vip&#39;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+                        <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span>
+
+        <span class="c1"># Priorizar valor guardado en la transacción si existe</span>
+        <span class="n">trans_benef</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porc_beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;beneficio_segmento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">trans_benef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trans_benef</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Fallback a campos genéricos de la transacción</span>
+        <span class="k">if</span> <span class="n">porcentaje_descuento</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">porcentaje_descuento</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;porcentaje_descuento&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">&#39;pordes&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Calcular ganancia según tipo</span>
+        <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;venta&#39;</span><span class="p">:</span>
+            <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_venta</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+            <span class="n">ganancias_venta</span><span class="p">[</span><span class="n">moneda_nombre</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ganancia_trans</span>
+        <span class="k">elif</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s1">&#39;compra&#39;</span><span class="p">:</span>
+            <span class="n">ganancia_trans</span> <span class="o">=</span> <span class="n">monto_origen</span> <span class="o">*</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">-</span> <span class="p">(</span><span class="n">comision_compra</span> <span class="o">*</span> <span class="n">porcentaje_descuento</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+            <span class="n">ganancias_compra</span><span class="p">[</span><span class="n">moneda_nombre</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ganancia_trans</span>
+
+    <span class="c1"># Total por moneda</span>
+    <span class="n">monedas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ganancias_venta</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">ganancias_compra</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">total_por_moneda</span> <span class="o">=</span> <span class="p">{</span><span class="n">m</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">ganancias_venta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">+</span><span class="n">ganancias_compra</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">monedas</span><span class="p">}</span>
+
+    <span class="c1"># Preparar listas para Chart.js</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">preparar_listas</span><span class="p">(</span><span class="n">dic</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepara listas desde un diccionario para uso en Chart.js.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dic (dict): mapa etiqueta-&gt;valor numérico.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: (labels, values, percents)</span>
+<span class="sd">                - labels: lista de keys (ordenadas según inserción en el dict)</span>
+<span class="sd">                - values: lista de values redondeados a 2 decimales</span>
+<span class="sd">                - percents: lista de porcentajes relativos (0-100) calculados sobre la suma</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dic</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">percents</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span> <span class="o">/</span> <span class="n">total</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">percents</span>
+
+    <span class="n">labels_v</span><span class="p">,</span> <span class="n">values_v</span><span class="p">,</span> <span class="n">percents_v</span> <span class="o">=</span> <span class="n">preparar_listas</span><span class="p">(</span><span class="n">ganancias_venta</span><span class="p">)</span>
+    <span class="n">labels_c</span><span class="p">,</span> <span class="n">values_c</span><span class="p">,</span> <span class="n">percents_c</span> <span class="o">=</span> <span class="n">preparar_listas</span><span class="p">(</span><span class="n">ganancias_compra</span><span class="p">)</span>
+    <span class="n">labels_t</span><span class="p">,</span> <span class="n">values_t</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">preparar_listas</span><span class="p">(</span><span class="n">total_por_moneda</span><span class="p">)</span>
+
+
+    <span class="n">total_general</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">total_por_moneda</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">moneda_actual</span> <span class="o">=</span> <span class="s1">&#39;Todas&#39;</span>
+    <span class="k">if</span> <span class="n">moneda_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">Moneda</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">moneda_id</span><span class="p">))</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="n">moneda_actual</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">nombre</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">moneda_actual</span> <span class="o">=</span> <span class="s1">&#39;Desconocida&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">moneda_actual</span> <span class="o">=</span> <span class="s1">&#39;Desconocida&#39;</span>
+
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span>
+        <span class="s1">&#39;desglose&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;venta&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">labels_v</span><span class="p">,</span> <span class="s1">&#39;percents&#39;</span><span class="p">:</span> <span class="n">percents_v</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">values_v</span><span class="p">},</span>
+            <span class="s1">&#39;compra&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">labels_c</span><span class="p">,</span> <span class="s1">&#39;percents&#39;</span><span class="p">:</span> <span class="n">percents_c</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">values_c</span><span class="p">},</span>
+            <span class="s1">&#39;total&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">labels_t</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">values_t</span><span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;ganancia_total&#39;</span><span class="p">:</span> <span class="n">total_general</span><span class="p">,</span>
+        <span class="s1">&#39;moneda&#39;</span><span class="p">:</span> <span class="n">moneda_actual</span>
+    <span class="p">})</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Derechos de autor 2025, Grupo 1.
+      <span class="lastupdated">Actualizado por última vez en True.
+      </span></p>
+  </div>
+
+  Compilado con <a href="https://www.sphinx-doc.org/">Sphinx</a> usando un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    proporcionado por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
