@@ -92,19 +92,19 @@
 
 <!-- BEGIN: contenido extra copiado desde graficos_desglose.html -->
 <div class="contenido" style="margin-top:1.5rem;">
-    <h2 style="margin-bottom:1.5rem;">Ganancias por Moneda</h2>
-    <div class="grafico-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px;">
-            <h3 id="titulo-grafico-venta" style="margin:0 0 8px 0;">Ganancia de Venta</h3>
-            <div style="height:220px; max-height:220px;"><canvas id="pieVenta" style="width:100%;height:100%;"></canvas></div>
+    <h2 class="titulo-seccion-graficos">Ganancias por Moneda</h2>
+    <div class="grafico-grid">
+        <div class="grafico-card">
+            <h3 id="titulo-grafico-venta">Ganancia de Venta</h3>
+            <div class="contenedor-canvas"><canvas id="pieVenta"></canvas></div>
         </div>
-        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px;">
-            <h3 style="margin:0 0 8px 0;">Ganancia de Compra</h3>
-            <div style="height:220px; max-height:220px;"><canvas id="pieCompra" style="width:100%;height:100%;"></canvas></div>
+        <div class="grafico-card">
+            <h3>Ganancia de Compra</h3>
+            <div class="contenedor-canvas"><canvas id="pieCompra"></canvas></div>
         </div>
-        <div class="grafico-card" style="background:#0f1630; color:#fff; padding:12px; border-radius:12px; grid-column:1 / -1;">
-            <h3 style="margin:0 0 8px 0;">Ganancia Total por Moneda</h3>
-            <div style="height:420px; max-height:65vh;"><canvas id="barTotal" style="width:100%;height:100%;"></canvas></div>
+        <div class="grafico-card grafico-completo">
+            <h3>Ganancia Total por Moneda</h3>
+            <div class="contenedor-canvas-grande"><canvas id="barTotal"></canvas></div>
         </div>
     </div>
 </div>

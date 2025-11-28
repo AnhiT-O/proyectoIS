@@ -286,6 +286,77 @@
 }
 
 /* ==========================================
+   ESTILOS PARA GRÁFICOS DE DESGLOSE
+   ========================================== */
+.grafico-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.grafico-card {
+    background: #0f1630 !important;
+    color: #fff !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid #374151 !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grafico-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+}
+
+.grafico-card h3 {
+    color: #a855f7 !important;
+    margin: 0 0 1rem 0 !important;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: 2px solid #a855f7;
+    padding-bottom: 0.5rem;
+}
+
+/* Contenedores de canvas */
+.contenedor-canvas {
+    height: 220px;
+    max-height: 220px;
+    position: relative;
+}
+
+.contenedor-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.contenedor-canvas-grande {
+    height: 420px;
+    max-height: 65vh;
+    position: relative;
+}
+
+.contenedor-canvas-grande canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Gráfico que ocupa toda la fila */
+.grafico-completo {
+    grid-column: 1 / -1;
+}
+
+/* Título de la sección de gráficos */
+.titulo-seccion-graficos {
+    margin-bottom: 1.5rem;
+    color: #a855f7;
+    font-weight: 700;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #a855f7;
+    padding-bottom: 0.5rem;
+}
+
+/* ==========================================
    LOADING OVERLAY
    ========================================== */
 .loading-overlay {
@@ -411,5 +482,20 @@
     
     .contenedor-grafico {
         height: 300px;
+    }
+    
+    .grafico-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .grafico-card {
+        margin-bottom: 1rem;
+    }
+    
+    .contenedor-canvas,
+    .contenedor-canvas-grande {
+        height: 250px;
+        max-height: 250px;
     }
 }
