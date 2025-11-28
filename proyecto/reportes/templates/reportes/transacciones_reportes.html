@@ -27,16 +27,88 @@
 .zona-busqueda .campo-filtro input, .zona-busqueda .campo-filtro select { color: inherit; }
 .zona-busqueda .campo-filtro input[type="date"],
 .zona-busqueda .campo-filtro select { font-size:12px; padding:6px 8px; border-radius:6px; min-width:130px; }
+
+/* Estilos específicos para el campo de fechas */
+.campo-fechas { 
+    min-width: 320px; 
+}
+.fechas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.fecha-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.fecha-sublabel {
+    font-size: 11px;
+    color: #777;
+    margin: 0;
+    font-weight: 500;
+}
+.selectores-fecha {
+    display: flex;
+    gap: 0.1rem;
+    align-items: center;
+}
+.selector-fecha {
+    flex: 0;
+    width: 55px;
+    min-width: 55px;
+    max-width: 55px;
+    font-size: 12px;
+    padding: 6px 3px;
+}
+.fecha-final-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.error-message-fecha {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 2px;
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
 .botones-busqueda { display:flex; gap:0.5rem; align-items:center; }
-.btn-buscar, .btn-limpiar { font-size: 12px; padding:6px 10px; }
+.btn-buscar, .btn-limpiar { font-size: 12px; padding:6px 10px; white-space: nowrap; }
+
 @media (max-width: 768px) {
     .zona-busqueda .busqueda-form { flex-direction:column; align-items:flex-start; }
     .zona-busqueda .campo-filtro { width:100%; }
     .gestion-tabla th, .gestion-tabla td { font-size: 11px; padding:6px; }
+    .fecha-final-container { flex-direction: column; align-items: flex-start; }
+    .campo-fechas { min-width: auto; width: 100%; }
+    .selectores-fecha { flex-direction: column; }
+    .selector-fecha { min-width: auto; width: 100%; }
 }
+/* Estilos para validación de fechas */
+.fecha-input.error {
+    border-color: #dc3545 !important;
+    background-color: #fff5f5 !important;
+}
+.fecha-input.success {
+    border-color: #28a745 !important;
+    background-color: #f8fff9 !important;
+}
+.error-message {
+    animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Modo oscuro: etiquetas más claras */
 @media (prefers-color-scheme: dark) {
     .zona-busqueda .campo-filtro label { color: #cbd5e1; }
+    .fecha-sublabel { color: #9ca3af; }
+    .fecha-input.error { background-color: #2d1b1b !important; }
+    .fecha-input.success { background-color: #1b2d1b !important; }
 }
 </style>
 {% endblock %}
@@ -49,9 +121,62 @@
 
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
-            <div class="campo-filtro">
+            {% csrf_token %}
+            <div class="campo-filtro campo-fechas">
                 <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
-                <input type="text" name="rango_fecha" class="select-filtro" placeholder="DD-MM-YYYY - DD-MM-YYYY" {% if f_fecha_rango %}value="{{ f_fecha_rango }}"{% endif %}>
+                <div class="fechas-container">
+                    <div class="fecha-input-group">
+                        <label class="fecha-sublabel">Fecha de inicio</label>
+                        <div class="selectores-fecha">
+                            <select name="dia_inicio" class="select-filtro selector-fecha" title="Día">
+                                <option value="">Día</option>
+                                {% for dia in dias_lista %}
+                                    <option value="{{ dia }}" {% if f_dia_inicio == dia %}selected{% endif %}>{{ dia }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="mes_inicio" class="select-filtro selector-fecha" title="Mes">
+                                <option value="">Mes</option>
+                                {% for mes in meses_lista %}
+                                    <option value="{{ mes }}" {% if f_mes_inicio == mes %}selected{% endif %}>{{ mes }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="año_inicio" class="select-filtro selector-fecha" title="Año">
+                                <option value="">Año</option>
+                                {% for año in años_rango reversed %}
+                                    <option value="{{ año }}" {% if f_año_inicio|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="error-fecha-inicio" class="error-message-fecha"></div>
+                    </div>
+                    
+                    <div class="fecha-input-group">
+                        <label class="fecha-sublabel">Fecha final</label>
+                        <div class="fecha-final-container">
+                            <div class="selectores-fecha">
+                                <select name="dia_fin" class="select-filtro selector-fecha" title="Día">
+                                    <option value="">Día</option>
+                                    {% for dia in dias_lista %}
+                                        <option value="{{ dia }}" {% if f_dia_fin == dia %}selected{% endif %}>{{ dia }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="mes_fin" class="select-filtro selector-fecha" title="Mes">
+                                    <option value="">Mes</option>
+                                    {% for mes in meses_lista %}
+                                        <option value="{{ mes }}" {% if f_mes_fin == mes %}selected{% endif %}>{{ mes }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="año_fin" class="select-filtro selector-fecha" title="Año">
+                                    <option value="">Año</option>
+                                    {% for año in años_rango reversed %}
+                                        <option value="{{ año }}" {% if f_año_fin|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div id="error-fecha-fin" class="error-message-fecha"></div>
+                    </div>
+                </div>
             </div>
             <div class="campo-filtro">
                 <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
@@ -90,18 +215,17 @@
                     {% endfor %}
                 </select>
             </div>
-         
-             <div class="botones-busqueda">
-                 <button type="submit" class="btn-buscar">Buscar</button>
-                 <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
-             </div>
+            <div class="campo-filtro botones-busqueda">
+                <button type="submit" class="btn-buscar">Buscar</button>
+                <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
+            </div>
          </form>
      </div>
 
     <div class="zona-conteo">
         <div class="conteo-info">
             <h2>Total de transacciones:</h2> <span class="conteo">{{ filas|length }}</span>
-            {% if f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
+            {% if f_dia_inicio or f_mes_inicio or f_año_inicio or f_dia_fin or f_mes_fin or f_año_fin or f_fecha_rango or f_moneda or f_estado or f_tipo or f_cliente %}
                 <span style="margin-left: 1rem; color: #6c757d;">
                     ({{ filas|length }} resultado{{ filas|length|pluralize }})
                 </span>
@@ -242,5 +366,125 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Función para validar si una fecha existe
+    function validarFechaExiste(dia, mes, año) {
+        if (!dia || !mes || !año) return true; // Si está incompleta, no validar aún
+        
+        const diaNum = parseInt(dia);
+        const mesNum = parseInt(mes);
+        const añoNum = parseInt(año);
+        
+        // Crear objeto Date para verificar si la fecha existe
+        const fecha = new Date(añoNum, mesNum - 1, diaNum);
+        
+        // Verificar que la fecha creada corresponde exactamente a los valores ingresados
+        return fecha.getFullYear() === añoNum && 
+               fecha.getMonth() === (mesNum - 1) && 
+               fecha.getDate() === diaNum;
+    }
+    
+    // Función para mostrar/ocultar mensaje de error
+    function mostrarError(errorDiv, mensaje) {
+        if (mensaje) {
+            errorDiv.textContent = mensaje;
+            errorDiv.style.display = 'block';
+        } else {
+            errorDiv.style.display = 'none';
+        }
+    }
+    
+    // Función para validar una fecha completa
+    function validarFechaCompleta(dia, mes, año, errorDiv, nombre) {
+        if (!dia || !mes || !año) {
+            mostrarError(errorDiv, '');
+            return true; // Válido si está incompleto (opcional)
+        }
+        
+        if (!validarFechaExiste(dia, mes, año)) {
+            mostrarError(errorDiv, 'Fecha inválida');
+            return false;
+        }
+        
+        mostrarError(errorDiv, '');
+        return true;
+    }
+    
+    // Obtener elementos
+    const diaInicio = document.querySelector('select[name="dia_inicio"]');
+    const mesInicio = document.querySelector('select[name="mes_inicio"]');
+    const añoInicio = document.querySelector('select[name="año_inicio"]');
+    const errorInicio = document.getElementById('error-fecha-inicio');
+    
+    const diaFin = document.querySelector('select[name="dia_fin"]');
+    const mesFin = document.querySelector('select[name="mes_fin"]');
+    const añoFin = document.querySelector('select[name="año_fin"]');
+    const errorFin = document.getElementById('error-fecha-fin');
+    
+    // Función para validar fecha de inicio
+    function validarInicio() {
+        return validarFechaCompleta(diaInicio.value, mesInicio.value, añoInicio.value, errorInicio, 'inicio');
+    }
+    
+    // Función para validar fecha final
+    function validarFinal() {
+        return validarFechaCompleta(diaFin.value, mesFin.value, añoFin.value, errorFin, 'fin');
+    }
+    
+    // Agregar event listeners a todos los selectores de fecha de inicio
+    [diaInicio, mesInicio, añoInicio].forEach(select => {
+        select.addEventListener('change', validarInicio);
+    });
+    
+    // Agregar event listeners a todos los selectores de fecha final  
+    [diaFin, mesFin, añoFin].forEach(select => {
+        select.addEventListener('change', validarFinal);
+    });
+    
+    // Validar formulario antes del envío
+    const form = document.querySelector('.busqueda-form');
+    form.addEventListener('submit', function(e) {
+        let errores = [];
+        
+        // Validar fecha de inicio
+        const inicioValida = validarInicio();
+        if (!inicioValida) {
+            errores.push('Fecha de inicio inválida');
+        }
+        
+        // Validar fecha final
+        const finalValida = validarFinal();
+        if (!finalValida) {
+            errores.push('Fecha final inválida');
+        }
+        
+        // Validar que si hay una fecha, debe haber la otra
+        const tieneInicio = diaInicio.value && mesInicio.value && añoInicio.value;
+        const tieneFinal = diaFin.value && mesFin.value && añoFin.value;
+        
+        if ((tieneInicio && !tieneFinal) || (!tieneInicio && tieneFinal)) {
+            errores.push('Debe ingresar tanto la fecha de inicio como la fecha final');
+        }
+        
+        // Validar que fecha de inicio sea anterior o igual a fecha final
+        if (tieneInicio && tieneFinal && inicioValida && finalValida) {
+            const fechaInicio = new Date(parseInt(añoInicio.value), parseInt(mesInicio.value) - 1, parseInt(diaInicio.value));
+            const fechaFinal = new Date(parseInt(añoFin.value), parseInt(mesFin.value) - 1, parseInt(diaFin.value));
+            
+            if (fechaInicio > fechaFinal) {
+                errores.push('La fecha de inicio debe ser anterior o igual a la fecha final');
+            }
+        }
+        
+        if (errores.length > 0) {
+            e.preventDefault();
+            alert('Errores encontrados:\n\n' + errores.join('\n'));
+        }
+    });
+});
+</script>
 
 {% endblock %}

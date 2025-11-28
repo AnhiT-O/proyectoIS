@@ -5,7 +5,8 @@ from transacciones.models import Transaccion
 from monedas.models import Moneda
 from clientes.models import Cliente
 from datetime import datetime, timedelta
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Min, Max
+from django.db import models
 from collections import defaultdict
 
 
@@ -25,19 +26,69 @@ def transacciones_reportes(request):
     if not user.groups.filter(name='Administrador').exists():
         return HttpResponseForbidden('Acceso denegado: requiere rol Administrador')
 
-    # Filtros
+    # Filtros - soporte para nuevos parámetros de fecha separados
     fecha_desde = request.GET.get('fecha_desde')
     fecha_hasta = request.GET.get('fecha_hasta')
     # Nuevo filtro unificado: rango de fechas en formato 'YYYY-MM-DD - YYYY-MM-DD'
     rango_fecha = request.GET.get('rango_fecha')
+    
+    # Nuevos parámetros de fecha separados (día, mes, año)
+    dia_inicio = request.GET.get('dia_inicio')
+    mes_inicio = request.GET.get('mes_inicio') 
+    año_inicio = request.GET.get('año_inicio')
+    dia_fin = request.GET.get('dia_fin')
+    mes_fin = request.GET.get('mes_fin')
+    año_fin = request.GET.get('año_fin')
+    
     moneda_id = request.GET.get('moneda')
     estado_filter = request.GET.get('estado')
     cliente_id = request.GET.get('cliente')
     tipo_filter = request.GET.get('tipo')
+    
+    # Obtener rango de años disponibles para los selectores
+    años_rango = []
+    try:
+        fechas_extremas = Transaccion.objects.aggregate(
+            fecha_min=models.Min('fecha_hora'),
+            fecha_max=models.Max('fecha_hora')
+        )
+        if fechas_extremas['fecha_min'] and fechas_extremas['fecha_max']:
+            año_min = fechas_extremas['fecha_min'].year
+            año_max = fechas_extremas['fecha_max'].year
+            años_rango = list(range(año_min, año_max + 1))
+    except Exception:
+        # Fallback: últimos 5 años hasta el actual
+        año_actual = datetime.now().year
+        años_rango = list(range(año_actual - 4, año_actual + 1))
+    
+    # Generar listas para días y meses
+    dias_lista = [f"{i:02d}" for i in range(1, 32)]  # 01, 02, ..., 31
+    meses_lista = [f"{i:02d}" for i in range(1, 13)]  # 01, 02, ..., 12
 
     qs = Transaccion.objects.all().order_by('-fecha_hora')
-    # Si se proporciona rango_fecha, parsearlo y aplicar filtro, sino usar fecha_desde/fecha_hasta individuales
-    if rango_fecha:
+    
+    # Procesamiento de fechas separadas (día, mes, año)
+    fecha_construida_desde = None
+    fecha_construida_hasta = None
+    
+    if dia_inicio and mes_inicio and año_inicio:
+        try:
+            fecha_construida_desde = datetime(int(año_inicio), int(mes_inicio), int(dia_inicio))
+        except (ValueError, TypeError):
+            pass
+    
+    if dia_fin and mes_fin and año_fin:
+        try:
+            fecha_construida_hasta = datetime(int(año_fin), int(mes_fin), int(dia_fin))
+            # Agregar 23:59:59 para incluir todo el día final
+            fecha_construida_hasta = fecha_construida_hasta.replace(hour=23, minute=59, second=59, microsecond=999999)
+        except (ValueError, TypeError):
+            pass
+    
+    # Si se construyeron fechas a partir de los selectores, usarlas con prioridad
+    if fecha_construida_desde and fecha_construida_hasta:
+        qs = qs.filter(fecha_hora__gte=fecha_construida_desde, fecha_hora__lte=fecha_construida_hasta)
+    elif rango_fecha:
         try:
             parts = [p.strip() for p in rango_fecha.split('-')]
             if len(parts) >= 2:
@@ -261,9 +312,18 @@ def transacciones_reportes(request):
         'resumen_por_moneda': resumen_por_moneda,
         'monedas': Moneda.objects.all(),
         'clientes': Cliente.objects.all(),
+        'años_rango': años_rango,
+        'dias_lista': dias_lista,
+        'meses_lista': meses_lista,
         'f_fecha_desde': fecha_desde,
         'f_fecha_hasta': fecha_hasta,
         'f_fecha_rango': rango_fecha,
+        'f_dia_inicio': dia_inicio,
+        'f_mes_inicio': mes_inicio,
+        'f_año_inicio': año_inicio,
+        'f_dia_fin': dia_fin,
+        'f_mes_fin': mes_fin,
+        'f_año_fin': año_fin,
         'f_moneda': moneda_id,
         'f_estado': estado_filter,
         'f_tipo': tipo_filter,
