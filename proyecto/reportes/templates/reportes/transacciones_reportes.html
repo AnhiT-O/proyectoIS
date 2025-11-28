@@ -103,12 +103,48 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Layout de sectores para filtros */
+.filtros-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+.sector-fechas {
+    flex: 0 0 auto;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 320px;
+}
+.sector-otros-filtros {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+@media (max-width: 768px) {
+    .filtros-layout {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .sector-fechas {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
 /* Modo oscuro: etiquetas más claras */
 @media (prefers-color-scheme: dark) {
     .zona-busqueda .campo-filtro label { color: #cbd5e1; }
     .fecha-sublabel { color: #9ca3af; }
     .fecha-input.error { background-color: #2d1b1b !important; }
     .fecha-input.success { background-color: #1b2d1b !important; }
+    .sector-fechas { 
+        background: #374151; 
+        border-color: #4b5563; 
+    }
 }
 </style>
 {% endblock %}
@@ -122,102 +158,111 @@
     <div class="zona-busqueda">
         <form method="get" class="busqueda-form">
             {% csrf_token %}
-            <div class="campo-filtro campo-fechas">
-                <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
-                <div class="fechas-container">
-                    <div class="fecha-input-group">
-                        <label class="fecha-sublabel">Fecha de inicio</label>
-                        <div class="selectores-fecha">
-                            <select name="dia_inicio" class="select-filtro selector-fecha" title="Día">
-                                <option value="">Día</option>
-                                {% for dia in dias_lista %}
-                                    <option value="{{ dia }}" {% if f_dia_inicio == dia %}selected{% endif %}>{{ dia }}</option>
-                                {% endfor %}
-                            </select>
-                            <select name="mes_inicio" class="select-filtro selector-fecha" title="Mes">
-                                <option value="">Mes</option>
-                                {% for mes in meses_lista %}
-                                    <option value="{{ mes }}" {% if f_mes_inicio == mes %}selected{% endif %}>{{ mes }}</option>
-                                {% endfor %}
-                            </select>
-                            <select name="año_inicio" class="select-filtro selector-fecha" title="Año">
-                                <option value="">Año</option>
-                                {% for año in años_rango reversed %}
-                                    <option value="{{ año }}" {% if f_año_inicio|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div id="error-fecha-inicio" class="error-message-fecha"></div>
-                    </div>
-                    
-                    <div class="fecha-input-group">
-                        <label class="fecha-sublabel">Fecha final</label>
-                        <div class="fecha-final-container">
-                            <div class="selectores-fecha">
-                                <select name="dia_fin" class="select-filtro selector-fecha" title="Día">
-                                    <option value="">Día</option>
-                                    {% for dia in dias_lista %}
-                                        <option value="{{ dia }}" {% if f_dia_fin == dia %}selected{% endif %}>{{ dia }}</option>
-                                    {% endfor %}
-                                </select>
-                                <select name="mes_fin" class="select-filtro selector-fecha" title="Mes">
-                                    <option value="">Mes</option>
-                                    {% for mes in meses_lista %}
-                                        <option value="{{ mes }}" {% if f_mes_fin == mes %}selected{% endif %}>{{ mes }}</option>
-                                    {% endfor %}
-                                </select>
-                                <select name="año_fin" class="select-filtro selector-fecha" title="Año">
-                                    <option value="">Año</option>
-                                    {% for año in años_rango reversed %}
-                                        <option value="{{ año }}" {% if f_año_fin|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
-                                    {% endfor %}
-                                </select>
+            <div class="filtros-layout">
+                <!-- Sector de fechas (izquierda) -->
+                <div class="sector-fechas">
+                    <div class="campo-filtro campo-fechas">
+                        <label style="font-weight: bold; font-size: 1.1em;">Rango de fechas</label>
+                        <div class="fechas-container">
+                            <div class="fecha-input-group">
+                                <label class="fecha-sublabel">Fecha de inicio</label>
+                                <div class="selectores-fecha">
+                                    <select name="dia_inicio" class="select-filtro selector-fecha" title="Día">
+                                        <option value="">Día</option>
+                                        {% for dia in dias_lista %}
+                                            <option value="{{ dia }}" {% if f_dia_inicio == dia %}selected{% endif %}>{{ dia }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="mes_inicio" class="select-filtro selector-fecha" title="Mes">
+                                        <option value="">Mes</option>
+                                        {% for mes in meses_lista %}
+                                            <option value="{{ mes }}" {% if f_mes_inicio == mes %}selected{% endif %}>{{ mes }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="año_inicio" class="select-filtro selector-fecha" title="Año">
+                                        <option value="">Año</option>
+                                        {% for año in años_rango reversed %}
+                                            <option value="{{ año }}" {% if f_año_inicio|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div id="error-fecha-inicio" class="error-message-fecha"></div>
+                            </div>
+                            
+                            <div class="fecha-input-group">
+                                <label class="fecha-sublabel">Fecha final</label>
+                                <div class="fecha-final-container">
+                                    <div class="selectores-fecha">
+                                        <select name="dia_fin" class="select-filtro selector-fecha" title="Día">
+                                            <option value="">Día</option>
+                                            {% for dia in dias_lista %}
+                                                <option value="{{ dia }}" {% if f_dia_fin == dia %}selected{% endif %}>{{ dia }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="mes_fin" class="select-filtro selector-fecha" title="Mes">
+                                            <option value="">Mes</option>
+                                            {% for mes in meses_lista %}
+                                                <option value="{{ mes }}" {% if f_mes_fin == mes %}selected{% endif %}>{{ mes }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="año_fin" class="select-filtro selector-fecha" title="Año">
+                                            <option value="">Año</option>
+                                            {% for año in años_rango reversed %}
+                                                <option value="{{ año }}" {% if f_año_fin|stringformat:"s" == año|stringformat:"s" %}selected{% endif %}>{{ año }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="error-fecha-fin" class="error-message-fecha"></div>
                             </div>
                         </div>
-                        <div id="error-fecha-fin" class="error-message-fecha"></div>
                     </div>
                 </div>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
-                <select name="moneda" class="select-filtro">
-                    <option value="">Todas</option>
-                    {% for m in monedas %}
-                        <option value="{{ m.id }}" {% if f_moneda|stringformat:'s' == m.id|stringformat:'s' %}selected{% endif %}>{{ m.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Estado</label>
-                <select name="estado" class="select-filtro">
-                    <option value="">Todos</option>
-                    <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                    <option value="Confirmada" {% if f_estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
-                    <option value="Completa" {% if f_estado == 'Completa' %}selected{% endif %}>Completa</option>
-                    <option value="Cancelada" {% if f_estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
-                    <option value="Anulada" {% if f_estado == 'Anulada' %}selected{% endif %}>Anulada</option>
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Operación</label>
-                <select name="tipo" class="select-filtro" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
-                    <option value="venta" {% if f_tipo == 'venta' %}selected{% endif %}>Venta</option>
-                </select>
-            </div>
-            <div class="campo-filtro">
-                <label style="font-weight: bold; font-size: 1.1em;">Cliente</label>
-                <select name="cliente" class="select-filtro">
-                    <option value="">Todos</option>
-                    {% for c in clientes %}
-                        <option value="{{ c.id }}" {% if f_cliente|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="campo-filtro botones-busqueda">
-                <button type="submit" class="btn-buscar">Buscar</button>
-                <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
+
+                <!-- Sector de otros filtros (derecha) -->
+                <div class="sector-otros-filtros">
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Moneda</label>
+                        <select name="moneda" class="select-filtro">
+                            <option value="">Todas</option>
+                            {% for m in monedas %}
+                                <option value="{{ m.id }}" {% if f_moneda|stringformat:'s' == m.id|stringformat:'s' %}selected{% endif %}>{{ m.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Estado</label>
+                        <select name="estado" class="select-filtro">
+                            <option value="">Todos</option>
+                            <option value="Pendiente" {% if f_estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="Confirmada" {% if f_estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
+                            <option value="Completa" {% if f_estado == 'Completa' %}selected{% endif %}>Completa</option>
+                            <option value="Cancelada" {% if f_estado == 'Cancelada' %}selected{% endif %}>Cancelada</option>
+                            <option value="Anulada" {% if f_estado == 'Anulada' %}selected{% endif %}>Anulada</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Operación</label>
+                        <select name="tipo" class="select-filtro" onchange="this.form.submit()">
+                            <option value="">Todos</option>
+                            <option value="compra" {% if f_tipo == 'compra' %}selected{% endif %}>Compra</option>
+                            <option value="venta" {% if f_tipo == 'venta' %}selected{% endif %}>Venta</option>
+                        </select>
+                    </div>
+                    <div class="campo-filtro">
+                        <label style="font-weight: bold; font-size: 1.1em;">Cliente</label>
+                        <select name="cliente" class="select-filtro">
+                            <option value="">Todos</option>
+                            {% for c in clientes %}
+                                <option value="{{ c.id }}" {% if f_cliente|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="botones-busqueda">
+                        <button type="submit" class="btn-buscar">Buscar</button>
+                        <a href="{% url 'reportes:transacciones' %}" class="btn-limpiar">Limpiar</a>
+                    </div>
+                </div>
             </div>
          </form>
      </div>
