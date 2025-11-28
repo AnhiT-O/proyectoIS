@@ -131,6 +131,11 @@ def view2(request):
 
 
     cell_style = ParagraphStyle(name='CellStyle', fontSize=8, leading=10)
+    cell_style_right = ParagraphStyle(name='CellStyleRight', fontSize=8, leading=10, alignment=2)
+
+    def mk_para(text, right=False):
+        txt = '' if text is None else str(text)
+        return Paragraph(txt, cell_style_right if right else cell_style)
     for t in qs:
         fecha = getattr(t, 'fecha_hora', getattr(t, 'fecha', None))
         
@@ -187,18 +192,30 @@ def view2(request):
         # Construir fila según tipo
         if tipo == 'compra':
             row = [
-                fecha_str, cliente_nombre, tipo, moneda_nombre,
-                f"{monto_origen:,.2f}", f"{monto_destino:,.2f}",
-                f"{comision_compra:,.2f}", f"{ganancia_comp:,.2f}",
-                f"{porcentaje_descuento:.2f}%", getattr(t, 'estado', '') or ''
+                fecha_str,
+                mk_para(cliente_nombre),
+                mk_para(tipo),
+                mk_para(moneda_nombre),
+                mk_para(f"{monto_origen:,.2f}", right=True),
+                mk_para(f"{monto_destino:,.2f}", right=True),
+                mk_para(f"{comision_compra:,.2f}", right=True),
+                mk_para(f"{ganancia_comp:,.2f}", right=True),
+                mk_para(f"{porcentaje_descuento:.2f}%"),
+                mk_para(getattr(t, 'estado', '') or '')
             ]
             compras_data.append(row)
         elif tipo == 'venta':
             row = [
-                fecha_str, cliente_nombre, tipo, moneda_nombre,
-                f"{monto_origen:,.2f}", f"{monto_destino:,.2f}",
-                f"{comision_venta:,.2f}", f"{ganancia_vta:,.2f}",
-                f"{porcentaje_descuento:.2f}%", getattr(t, 'estado', '') or ''
+                fecha_str,
+                mk_para(cliente_nombre),
+                mk_para(tipo),
+                mk_para(moneda_nombre),
+                mk_para(f"{monto_origen:,.2f}", right=True),
+                mk_para(f"{monto_destino:,.2f}", right=True),
+                mk_para(f"{comision_venta:,.2f}", right=True),
+                mk_para(f"{ganancia_vta:,.2f}", right=True),
+                mk_para(f"{porcentaje_descuento:.2f}%"),
+                mk_para(getattr(t, 'estado', '') or '')
             ]
             ventas_data.append(row)
 
@@ -240,7 +257,7 @@ def view2(request):
     if len(compras_data) > 1:
         elements.append(Paragraph('Compras', styles['Title']))
         elements.append(Spacer(1, 12))
-        col_widths = [70, 80, 60, 90, 70, 90, 90, 90, 55, 50]
+        col_widths = [70, 80, 60, 90, 70, 90, 90, 90, 55, 55]
         compras_table = Table(compras_data, colWidths=col_widths, repeatRows=1)
         compras_table.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f0f0f0')),
@@ -249,6 +266,7 @@ def view2(request):
             ('ALIGN', (4,1), (5,-1), 'RIGHT'),
             ('ALIGN', (6,1), (7,-1), 'RIGHT'),
             ('ALIGN', (-2,1), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
             ('FONTSIZE', (0,0), (-1,0), 9),
             ('FONTSIZE', (0,1), (-1,-1), 8),
@@ -265,7 +283,7 @@ def view2(request):
     if len(ventas_data) > 1:
         elements.append(Paragraph('Ventas', styles['Title']))
         elements.append(Spacer(1, 12))
-        col_widths = [70, 80, 60, 90, 70, 90, 90, 90, 55, 50]
+        col_widths = [70, 80, 60, 90, 70, 90, 90, 90, 55, 55]
         ventas_table = Table(ventas_data, colWidths=col_widths, repeatRows=1)
         ventas_table.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#f0f0f0')),
@@ -274,6 +292,7 @@ def view2(request):
             ('ALIGN', (4,1), (5,-1), 'RIGHT'),
             ('ALIGN', (6,1), (7,-1), 'RIGHT'),
             ('ALIGN', (-2,1), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
             ('FONTSIZE', (0,0), (-1,0), 9),
             ('FONTSIZE', (0,1), (-1,-1), 8),
