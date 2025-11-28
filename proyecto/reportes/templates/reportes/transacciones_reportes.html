@@ -51,7 +51,7 @@
                             </div>
                             
                             <div class="fecha-input-group">
-                                <label class="fecha-sublabel">Fecha final</label>
+                                <label class="fecha-sublabel">Fecha de fin</label>
                                 <div class="fecha-final-container">
                                     <div class="selectores-fecha">
                                         <select name="dia_fin" class="select-filtro selector-fecha" title="Día">
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tieneFinal = diaFin.value && mesFin.value && añoFin.value;
         
         if ((tieneInicio && !tieneFinal)) {
-            mostrarError(errorFin, 'Debe ingresar la fecha final');
+            mostrarError(errorFin, 'Debe ingresar la fecha de fin');
             hayErrores = true;
         }
         
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const fechaFinal = new Date(parseInt(añoFin.value), parseInt(mesFin.value) - 1, parseInt(diaFin.value));
             
             if (fechaInicio > fechaFinal) {
-                mostrarError(errorFin, 'La fecha final debe ser posterior o igual a la fecha de inicio');
+                mostrarError(errorFin, 'La fecha de fin debe ser posterior o igual a la fecha de inicio');
                 hayErrores = true;
             }
         }
